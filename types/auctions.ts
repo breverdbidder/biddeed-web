@@ -168,4 +168,4 @@ export interface AuctionCalendarResponse {
 
 export type SortField = 'auction_date' | 'county' | 'assessed_value' | 'property_address' | 'dor_use_code'
 export type SortDirection = 'asc' | 'desc'
-export type ViewMode = 'table' | 'map' | 'calendar' | 'spreadsheet'
+export type ViewMode = 'split' | 'table' | 'map' | 'calendar' | 'spreadsheet'
