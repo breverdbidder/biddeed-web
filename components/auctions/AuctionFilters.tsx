@@ -66,7 +66,7 @@ export default function AuctionFilters({
           off the right edge of the screen with no way to reach it (measured: 59px
           past a 288px container). Scrolling beats clipping when there's truly no room. */}
       <div className="w-full sm:w-auto sm:ml-auto flex items-center gap-0.5 bg-gray-100 dark:bg-slate-800 rounded-md p-0.5 overflow-x-auto">
-        {(['table', 'map', 'calendar', 'spreadsheet'] as const).map((mode) => (
+        {(['split', 'table', 'map', 'calendar', 'spreadsheet'] as const).map((mode) => (
           <button
             key={mode}
             onClick={() => onViewModeChange(mode)}
