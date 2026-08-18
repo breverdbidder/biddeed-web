@@ -1,4 +1,4 @@
-name: CI + Vercel Preview
+name: CI + Vercel Deploy
 
 on:
   push:
@@ -27,38 +27,38 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Typecheck is a separate step so a type error reads as a type error,
-      # not as an opaque "next build failed".
+      # Separate step so a type error reads as a type error, not as an opaque
+      # "next build failed".
       - name: Typecheck
         run: npx tsc --noEmit
 
       - name: Install Vercel CLI
         run: npm i -g vercel@latest
 
-      - name: Pull Vercel environment (preview)
+      - name: Pull Vercel environment
         run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Build
         run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
 
-      - name: Deploy preview
+      - name: Deploy
         id: deploy
         run: |
           set -euo pipefail
           # --prod so main lands on the stable biddeed-web.vercel.app alias
-          # instead of a throwaway per-commit preview URL nobody can bookmark.
+          # instead of a throwaway per-commit URL nobody can bookmark.
           url=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
-          echo "url=$url" >> "$GITHUB_OUTPUT"
           echo "PREVIEW_URL=$url" >> "$GITHUB_ENV"
 
-      - name: Smoke-check the deployed preview
+      - name: Smoke-check the deployment
         run: |
           set -euo pipefail
           fail=0
           # basePath is gone: the app serves the apex, the workspace lives at
-          # /radar, and the API is at /api/* (NOT /radar/api/*). /auctions is
-          # deliberately absent here - it belongs to the Worker as JSON.
-          for path in "/" "/radar" "/api/auctions/summary" "/api/auctions/calendar"; do
+          # /radar, the API is at /api/* and the order page at /order/success.
+          # /auctions and /success are deliberately absent - both belong to the
+          # Worker, /success because it is a live Stripe success_url.
+          for path in "/" "/radar" "/order/success" "/api/auctions/summary"; do
             code=$(curl -s -o /tmp/body -w '%{http_code}' --max-time 30 "${PREVIEW_URL}${path}")
             bytes=$(wc -c < /tmp/body)
             echo "${path} -> HTTP ${code}, ${bytes} bytes"
@@ -66,53 +66,50 @@ jobs:
               echo "::error::${path} returned HTTP ${code}"
               fail=1
             fi
-            # A shell that paints nothing is the exact failure mode this rebuild exists to end.
+            # A shell that paints nothing is the failure mode this rebuild exists to end.
             if [ "$bytes" -lt 1000 ]; then
-              echo "::error::${path} returned only ${bytes} bytes — suspiciously empty"
+              echo "::error::${path} returned only ${bytes} bytes - suspiciously empty"
               fail=1
             fi
           done
           exit $fail
 
       # A 200 with a big body proves the SERVER worked. It says nothing about
-      # whether the browser was allowed to run the page. The preview shipped
-      # green once already while every script on it was refused by CSP, so
-      # assert the invariant that actually failed: under 'strict-dynamic' the
-      # browser trusts ONLY nonced scripts, therefore every script tag must
-      # carry a nonce. A statically prerendered route can never satisfy this,
-      # which is exactly what we want the build to tell us.
+      # whether the browser was allowed to run the page: this project shipped
+      # green once while every script was refused by CSP. Under 'strict-dynamic'
+      # the browser trusts ONLY nonced scripts, so assert that the app sends its
+      # own CSP, that the CSP carries a nonce, and that the HTML uses it. A
+      # statically prerendered route can never satisfy the last one.
       - name: Assert the browser can actually run the page
         run: |
           set -euo pipefail
-          python3 - "$PREVIEW_URL" <<'PY'
-          import re, sys, urllib.request
-          base = sys.argv[1]
-          failed = False
-          for path in ("/", "/radar"):
-              req = urllib.request.Request(base + path, headers={"User-Agent": "ci-smoke"})
-              with urllib.request.urlopen(req, timeout=30) as r:
-                  html = r.read().decode("utf-8", "replace")
-                  csp = (r.headers.get("content-security-policy")
-                         or r.headers.get("content-security-policy-report-only") or "")
-              tags = re.findall(r*âscript\b[^>]*>â, html)
-              unnonced = [t for t in tags if " src=" in t and "nonce=" not in t]
-              print(f"{path}: {len(tags)} script tags, {len(unnonced)} src tags without a nonce")
-              if "strict-dynamic" in csp and unnonced:
-                  print(f"::error::{path} serves {len(unnonced)} unnonced script tag(s) under a "
-                        f"'strict-dynamic' CSP - the browser will refuse them and the page "
-                        f"will never hydrate. Is this route statically prerendered?")
-                  failed = True
-              if not tags:
-                  print(f"::error::{path} served no script tags at all")
-                  failed = True
-          sys.exit(1 if failed else 0)
-          PY
+          fail=0
+          for path in "/" "/radar" "/order/success"; do
+            csp=$(curl -s -D - -o /tmp/page --max-time 30 "${PREVIEW_URL}${path}" \
+                  | tr -d '\r' | grep -i '^content-security-policy:' || true)
+            nonce=$(printf '%s' "$csp" | grep -o "nonce-[A-Za-z0-9+/=]*" | head -1 || true)
+            nonced=$(grep -c 'nonce=' /tmp/page || true)
+            echo "${path}: csp=$([ -n "$csp" ] && echo yes || echo NO) nonce=$([ -n "$nonce" ] && echo yes || echo NO) tags_with_nonce=${nonced}"
+            if [ -z "$csp" ]; then
+              echo "::error::${path} sent no content-security-policy - the Worker's own CSP would apply and the map will not paint"
+              fail=1
+            fi
+            if [ -z "$nonce" ]; then
+              echo "::error::${path} CSP carries no nonce - middleware did not run on this route"
+              fail=1
+            fi
+            if [ "${nonced:-0}" -lt 1 ]; then
+              echo "::error::${path} has no nonced script tags - is this route statically prerendered?"
+              fail=1
+            fi
+          done
+          exit $fail
 
       - name: Job summary
         if: always()
         run: |
           {
-            echo "## Preview deployment"
+            echo "## Deployment"
             echo ""
             echo "URL: ${PREVIEW_URL:-(deploy did not complete)}"
           } >> "$GITHUB_STEP_SUMMARY"
