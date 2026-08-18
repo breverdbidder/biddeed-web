@@ -203,14 +203,14 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
   }, [isFullscreen, mapLoaded])
 
   // Initialize map
-  // In the split view the map''s height comes from a CSS grid track, which can
+  // In the split view the map's height comes from a CSS grid track, which can
   // resolve after mapbox-gl has already measured the container - and a map that
   // measured zero height keeps a zero-size canvas until something tells it to
   // look again. Defensive only: when this was added the canvas already measured
   // correctly at 834x584, so it is guarding a plausible race, not a confirmed
   // bug.
   useEffect(() => {
-    if (!mapContainer.current || typeof ResizeObserver === ''undefined'') return
+    if (!mapContainer.current || typeof ResizeObserver === 'undefined') return
     const ro = new ResizeObserver(() => {
       mapRef.current?.resize()
     })
