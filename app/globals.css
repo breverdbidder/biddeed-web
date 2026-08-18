@@ -1,0 +1,157 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Navy accent colors */
+  --navy-50: #E8F4FD;
+  --navy-100: #C5DFEF;
+  --navy-200: #9DC6E0;
+  --navy-300: #7099C0;
+  --navy-400: #4A6F9A;
+  --navy-500: #2A4F7A;
+  --navy-600: #1E3A5F;
+  --navy-700: #162D4A;
+  --navy-800: #0F2035;
+  --navy-900: #07111C;
+
+  /* Orange accent colors */
+  --orange-50: #FEF3C7;
+  --orange-100: #FDE68A;
+  --orange-200: #FCD34D;
+  --orange-300: #FBBF24;
+  --orange-400: #F59E0B;
+  --orange-500: #D97706;
+  --orange-600: #B45309;
+
+  /* Slate colors for dark theme */
+  --slate-50: #f8fafc;
+  --slate-100: #f1f5f9;
+  --slate-200: #e2e8f0;
+  --slate-300: #cbd5e1;
+  --slate-400: #94a3b8;
+  --slate-500: #64748b;
+  --slate-600: #475569;
+  --slate-700: #334155;
+  --slate-800: #1e293b;
+  --slate-900: #0f172a;
+  --slate-950: #020617;
+
+  /* shadcn semantic colors (HSL values — no hsl() wrapper) */
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 96%;
+  --card: 222.2 47.4% 11.2%;
+  --card-foreground: 210 40% 96%;
+  --popover: 222.2 47.4% 11.2%;
+  --popover-foreground: 210 40% 96%;
+  --primary: 213 54% 24%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 217.2 32.6% 17.5%;
+  --secondary-foreground: 210 40% 96%;
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+  --accent: 38 92% 50%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 210 40% 96%;
+  --border: 217.2 32.6% 17.5%;
+  --input: 217.2 32.6% 17.5%;
+  --ring: 213 54% 34%;
+  --radius: 0.5rem;
+
+  /* Chart colors */
+  --chart-1: 213 54% 24%;
+  --chart-2: 38 92% 50%;
+  --chart-3: 142 76% 36%;
+  --chart-4: 221 83% 53%;
+  --chart-5: 262 83% 58%;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+/*
+ * BidDeed semantic overlay classes.
+ * These encode auction meaning, not decoration:
+ *  - glass-diamond: the Shapira Triangle's diamond parity signal
+ *  - glass-triangle: the Shapira Triangle risk signal
+ *  - glass-sold / glass-canceled: auction lifecycle state
+ *  - grade-a/b/c: deal quality grade
+ */
+.glass-diamond {
+  background: linear-gradient(135deg, rgba(34, 211, 238, 0.18), rgba(139, 92, 246, 0.18));
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(34, 211, 238, 0.3);
+}
+
+.glass-triangle {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.18), rgba(245, 158, 11, 0.18));
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.glass-sold {
+  background: rgba(37, 99, 235, 0.18);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(37, 99, 235, 0.3);
+}
+
+.glass-canceled {
+  background: rgba(100, 116, 139, 0.18);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(100, 116, 139, 0.3);
+  opacity: 0.7;
+}
+
+.grade-a {
+  color: #22c55e;
+}
+
+.grade-b {
+  color: #f59e0b;
+}
+
+.grade-c {
+  color: #ef4444;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--slate-900);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--slate-700);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--slate-600);
+}
+
+/* Selection */
+::selection {
+  background: var(--navy-600);
+  color: white;
+}
