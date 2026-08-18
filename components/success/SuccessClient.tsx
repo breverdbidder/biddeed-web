@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 type Phase = 'confirming' | 'delivered' | 'pending' | 'unpaid' | 'error'
 
 const FILES = [
-  ['The 7-Day Auction Readiness System', 'PDF · the core system, one day per chapter'],
+  ['Clear to Bid', 'PDF · the core system, one day per chapter'],
   ['The Action Vault', 'Interactive · where you track each day as you work it'],
   ['County Selection Matrix', 'XLSX · all 67 Florida counties, scored'],
   ['Maximum Allowable Bid Worksheet', 'XLSX · the Shapira Formula, live'],
@@ -70,7 +70,7 @@ export default function SuccessClient() {
 
         {phase === 'delivered' && (
           <>
-            <h1 style={S.h1}>You&rsquo;re in.</h1>
+            <h1 style={S.h1}>You&rsquo;re clear to bid.</h1>
             <p style={S.lede}>
               Payment confirmed. Your five files are on their way to{' '}
               <strong style={S.strong}>{email ?? 'the address you used at checkout'}</strong>.
