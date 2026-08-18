@@ -11,6 +11,19 @@ const securityHeaders = [
 ]
 
 const nextConfig = {
+  // Mounted at biddeed.ai/radar/* behind the existing Cloudflare Worker, which
+  // stays the edge router for the apex. basePath makes Next emit EVERY asset,
+  // chunk and API path under /radar, so a single Worker proxy branch is enough
+  // and none of the Worker's 40+ existing routes have to move.
+  //
+  // Without basePath the HTML would reference /_next/* at the apex, the Worker
+  // would 404 those chunks, and the page would paint nothing - the same blank
+  // shell this rebuild already fixed once via the CSP nonce.
+  //
+  // This also sidesteps the /auctions collision: the Worker serves GET /auctions
+  // as a JSON API, and this app serves it as an HTML page. Under /radar they
+  // never meet.
+  basePath: '/radar',
   poweredByHeader: false,
   productionBrowserSourceMaps: false,
   async headers() {
