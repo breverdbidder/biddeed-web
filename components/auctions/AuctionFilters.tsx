@@ -71,7 +71,9 @@ export default function AuctionFilters({
             key={mode}
             onClick={() => onViewModeChange(mode)}
             // Every label is bold and full-contrast black (white in dark mode),
-            // not thin gray - these are primary navigation, not hints. Because
+            // not thin gray. This row is the view switcher for the Auctions
+            // workspace only - primary navigation is the shell's nav rail, and
+            // this control no longer stands in for it. Because
             // colour no longer distinguishes the selected tab, the active pill
             // carries the state via background + shadow, and hover moved from a
             // colour shift to a background wash.
