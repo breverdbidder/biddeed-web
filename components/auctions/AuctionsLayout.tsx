@@ -7,6 +7,7 @@ import AuctionSummaryCards from './AuctionSummaryCards'
 import AuctionFilters from './AuctionFilters'
 import AuctionTable from './AuctionTable'
 import AuctionSpreadsheet from './AuctionSpreadsheet'
+import AuctionSidebarList from './AuctionSidebarList'
 import { formatCountyLabel } from '@/lib/counties'
 import type { Auction, AuctionSummary, AuctionsResponse, ViewMode } from '@/types/auctions'
 
@@ -29,9 +30,13 @@ export default function AuctionsLayout() {
 
   const [selectedCounty, setSelectedCounty] = useState('')
   const [selectedType, setSelectedType] = useState('')
-  // Calendar is the landing view (Ariel, Aug 17 2026): discovery starts with
-  // "what is coming up and when", not with a wall of rows.
-  const [viewMode, setViewMode] = useState<ViewMode>('calendar')
+  // Split is the landing view: the sidebar answers "what is for sale" and the
+  // map answers "where", side by side, which is the whole point of AuctionRadar.
+  // The calendar stays one click away for "when".
+  const [viewMode, setViewMode] = useState<ViewMode>('split')
+  // The row the sidebar has highlighted, so the map can fly to it.
+  const [focusPoint, setFocusPoint] = useState<{ lat: number; lng: number } | null>(null)
+  const [focusId, setFocusId] = useState<number | string | null>(null)
   const [selectedAuction, setSelectedAuction] = useState<Auction | null>(null)
   const [dayFilter, setDayFilter] = useState<DayFilter | null>(null)
 
@@ -113,7 +118,16 @@ export default function AuctionsLayout() {
 
   function handleSelectDay(date: string, saleType?: string) {
     setDayFilter({ date, saleType })
-    setViewMode('table')
+    // Land on split, not table: picking a day should answer "what is selling
+    // that day, and where", not drop the user into a bare grid.
+    setViewMode('split')
+  }
+
+  function handleHighlight(auction: Auction) {
+    setFocusId(auction.id)
+    const lat = auction.latitude as number | null | undefined
+    const lng = auction.longitude as number | null | undefined
+    setFocusPoint(lat != null && lng != null ? { lat, lng } : null)
   }
 
   if (loading) {
@@ -210,6 +224,34 @@ export default function AuctionsLayout() {
           </div>
         )}
 
+        {viewMode === 'split' && (
+          <div className="grid grid-cols-1 lg:grid-cols-[380px_minmax(0,1fr)] gap-4 h-[70vh] min-h-[520px]">
+            {/* Sidebar and map are siblings in one fixed-height row so the list
+                scrolls independently and the map never gets pushed off-screen
+                by a long list. Below lg they stack - a 380px column beside a map
+                is unusable on a phone - and the map goes first, because "where"
+                is the question the phone screen can actually answer at a glance. */}
+            <div className="order-2 lg:order-1 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg overflow-hidden flex flex-col min-h-0 h-[60vh] lg:h-auto">
+              <AuctionSidebarList
+                auctions={auctions}
+                selectedId={focusId}
+                total={total}
+                onHighlight={handleHighlight}
+                onOpen={(auction) => router.push(`/auctions/${auction.id}`)}
+              />
+            </div>
+            <div className="order-1 lg:order-2 min-h-[320px] h-[45vh] lg:h-auto">
+              <AuctionMap
+                county={selectedCounty}
+                saleType={selectedType}
+                dayFilter={dayFilter}
+                onSelectAuction={setSelectedAuction}
+                focusPoint={focusPoint}
+                fillParent
+              />
+            </div>
+          </div>
+        )}
         {viewMode === 'table' && (
           <AuctionTable
             auctions={auctions}
