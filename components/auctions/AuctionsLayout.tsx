@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import AuctionSummaryCards from './AuctionSummaryCards'
 import AuctionFilters from './AuctionFilters'
@@ -21,25 +21,92 @@ interface DayFilter {
   saleType?: string
 }
 
-export default function AuctionsLayout() {
+interface Props {
+  /** View to open on, from ?view= on /radar. Defaults to split. */
+  initialView?: ViewMode
+  /** County slug from ?county= on /radar. */
+  initialCounty?: string
+  /** Sale type from ?sale_type= on /radar. */
+  initialSaleType?: string
+}
+
+export default function AuctionsLayout({ initialView, initialCounty, initialSaleType }: Props = {}) {
   const router = useRouter()
+  const pathname = usePathname()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [auctions, setAuctions] = useState<Auction[]>([])
   const [summary, setSummary] = useState<AuctionSummary | null>(null)
   const [total, setTotal] = useState(0)
 
-  const [selectedCounty, setSelectedCounty] = useState('')
-  const [selectedType, setSelectedType] = useState('')
+  // County and sale type live in the URL, not only in component state. Two
+  // reasons, both load-bearing: a filtered view is now linkable, and Deed can
+  // BOTH read what the user is looking at and act on it -- 'show me Brevard'
+  // becomes a push to /radar?county=brevard that this component picks up,
+  // rather than an agent that can only talk about filters it cannot touch.
+  const [selectedCounty, setSelectedCounty] = useState(initialCounty ?? '')
+  const [selectedType, setSelectedType] = useState(initialSaleType ?? '')
   // Split is the landing view: the sidebar answers "what is for sale" and the
   // map answers "where", side by side, which is the whole point of AuctionRadar.
   // The calendar stays one click away for "when".
-  const [viewMode, setViewMode] = useState<ViewMode>('split')
+  const [viewMode, setViewMode] = useState<ViewMode>(initialView ?? 'split')
   // The row the sidebar has highlighted, so the map can fly to it.
   const [focusPoint, setFocusPoint] = useState<{ lat: number; lng: number } | null>(null)
   const [focusId, setFocusId] = useState<number | string | null>(null)
   const [selectedAuction, setSelectedAuction] = useState<Auction | null>(null)
   const [dayFilter, setDayFilter] = useState<DayFilter | null>(null)
+
+  // The nav rail's Calendar item is /radar?view=calendar, so a click there
+  // re-renders this page with a different initialView while the component
+  // stays mounted. Without this the rail would highlight Calendar and the
+  // workspace would keep showing Split.
+  useEffect(() => {
+    if (initialView) setViewMode(initialView)
+  }, [initialView])
+
+  // Same contract for the filters: a navigation to /radar?county=brevard --
+  // from Deed, from a link, from the back button -- re-renders this page with
+  // new props while the component stays mounted, so the state has to follow.
+  useEffect(() => {
+    setSelectedCounty(initialCounty ?? '')
+  }, [initialCounty])
+
+  useEffect(() => {
+    setSelectedType(initialSaleType ?? '')
+  }, [initialSaleType])
+
+  // ...and the reverse: the in-workspace switcher writes the view back to the
+  // URL so the rail's active state, the breadcrumb and a copied link all agree.
+  // One writer for the whole query string, so view, county and sale type can
+  // never clobber each other -- which is exactly what happened when each
+  // control wrote its own URL from scratch.
+  function pushQuery(next: { view?: ViewMode; county?: string; saleType?: string }) {
+    if (pathname !== '/radar') return
+    const params = new URLSearchParams()
+    const view = next.view ?? viewMode
+    const county = next.county ?? selectedCounty
+    const saleType = next.saleType ?? selectedType
+    if (view && view !== 'split') params.set('view', view)
+    if (county) params.set('county', county)
+    if (saleType) params.set('sale_type', saleType)
+    const qs = params.toString()
+    router.replace(qs ? `/radar?${qs}` : '/radar', { scroll: false })
+  }
+
+  function changeViewMode(mode: ViewMode) {
+    setViewMode(mode)
+    pushQuery({ view: mode })
+  }
+
+  function changeCounty(county: string) {
+    setSelectedCounty(county)
+    pushQuery({ county })
+  }
+
+  function changeSaleType(saleType: string) {
+    setSelectedType(saleType)
+    pushQuery({ saleType })
+  }
 
   const counties = summary ? Object.keys(summary.by_county).sort() : []
 
@@ -121,7 +188,7 @@ export default function AuctionsLayout() {
     setDayFilter({ date, saleType })
     // Land on split, not table: picking a day should answer "what is selling
     // that day, and where", not drop the user into a bare grid.
-    setViewMode('split')
+    changeViewMode('split')
   }
 
   function handleHighlight(auction: Auction) {
@@ -133,7 +200,7 @@ export default function AuctionsLayout() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-950">
+      <div className="flex min-h-[60vh] items-center justify-center bg-gray-50 dark:bg-slate-950">
         <div className="flex flex-col items-center gap-4">
           <div className="w-10 h-10 border-2 border-bd-navy-500 border-t-transparent rounded-full animate-spin" />
           <p className="text-gray-500 dark:text-slate-400 text-sm">Loading auctions...</p>
@@ -144,7 +211,7 @@ export default function AuctionsLayout() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-950">
+      <div className="flex min-h-[60vh] items-center justify-center bg-gray-50 dark:bg-slate-950">
         <div className="flex flex-col items-center gap-4">
           <p className="text-red-500 text-sm">{error}</p>
           <button onClick={() => window.location.reload()} className="text-sm text-blue-500 underline">
@@ -160,7 +227,7 @@ export default function AuctionsLayout() {
     : null
 
   return (
-    <div className="min-h-screen overflow-y-auto bg-gray-50 dark:bg-slate-950">
+    <div className="w-full bg-gray-50 dark:bg-slate-950">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
         <div>
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">Auction Intelligence</h2>
@@ -185,9 +252,9 @@ export default function AuctionsLayout() {
           selectedCounty={selectedCounty}
           selectedType={selectedType}
           viewMode={viewMode}
-          onCountyChange={setSelectedCounty}
-          onTypeChange={setSelectedType}
-          onViewModeChange={setViewMode}
+          onCountyChange={changeCounty}
+          onTypeChange={changeSaleType}
+          onViewModeChange={changeViewMode}
         />
 
         {dayFilter && (
@@ -205,7 +272,7 @@ export default function AuctionsLayout() {
               </span>
               {viewMode !== 'map' && (
                 <button
-                  onClick={() => setViewMode('map')}
+                  onClick={() => changeViewMode('map')}
                   className="text-bd-navy-600 dark:text-bd-navy-300 underline hover:no-underline"
                 >
                   View on map
@@ -238,7 +305,7 @@ export default function AuctionsLayout() {
                 selectedId={focusId}
                 total={total}
                 onHighlight={handleHighlight}
-                onOpen={(auction) => router.push(`/auctions/${auction.id}`)}
+                onOpen={(auction) => router.push(`/radar/${auction.id}`)}
               />
             </div>
             <div className="order-1 lg:order-2 min-h-[320px] h-[45vh] lg:h-auto">
@@ -257,7 +324,7 @@ export default function AuctionsLayout() {
           <AuctionTable
             auctions={auctions}
             loading={false}
-            onSelectAuction={(auction) => router.push(`/auctions/${auction.id}`)}
+            onSelectAuction={(auction) => router.push(`/radar/${auction.id}`)}
           />
         )}
         {viewMode === 'map' && (
@@ -279,7 +346,7 @@ export default function AuctionsLayout() {
           <AuctionSpreadsheet
             auctions={auctions}
             loading={false}
-            onSelectAuction={(auction) => router.push(`/auctions/${auction.id}`)}
+            onSelectAuction={(auction) => router.push(`/radar/${auction.id}`)}
           />
         )}
 
