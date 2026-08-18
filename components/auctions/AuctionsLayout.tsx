@@ -1,19 +1,18 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import AuctionSummaryCards from './AuctionSummaryCards'
 import AuctionFilters from './AuctionFilters'
-import type { AuctionSummary, ViewMode } from '@/types/auctions'
+import AuctionTable from './AuctionTable'
+import AuctionSpreadsheet from './AuctionSpreadsheet'
+import { formatCountyLabel } from '@/lib/counties'
+import type { Auction, AuctionSummary, AuctionsResponse, ViewMode } from '@/types/auctions'
 
-// FullCalendar requires window — must not render during SSR.
+// FullCalendar and Mapbox both require window — must not render during SSR.
 const AuctionCalendar = dynamic(() => import('./AuctionCalendar'), { ssr: false })
-
-// Phase 1d ports only the calendar view (AuctionCalendar/AuctionsLayout/
-// AuctionFilters/AuctionSummaryCards). AuctionTable/AuctionMap/AuctionSpreadsheet
-// are shard E — not ported here. The view-mode tabs still render (Filters owns
-// them) so the control surface matches ZoneWise, but non-calendar tabs show a
-// placeholder instead of importing components this shard doesn't own.
+const AuctionMap = dynamic(() => import('./AuctionMap'), { ssr: false })
 
 interface DayFilter {
   date: string
@@ -21,15 +20,19 @@ interface DayFilter {
 }
 
 export default function AuctionsLayout() {
+  const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [auctions, setAuctions] = useState<Auction[]>([])
   const [summary, setSummary] = useState<AuctionSummary | null>(null)
+  const [total, setTotal] = useState(0)
 
   const [selectedCounty, setSelectedCounty] = useState('')
   const [selectedType, setSelectedType] = useState('')
   // Calendar is the landing view (Ariel, Aug 17 2026): discovery starts with
   // "what is coming up and when", not with a wall of rows.
   const [viewMode, setViewMode] = useState<ViewMode>('calendar')
+  const [selectedAuction, setSelectedAuction] = useState<Auction | null>(null)
   const [dayFilter, setDayFilter] = useState<DayFilter | null>(null)
 
   const counties = summary ? Object.keys(summary.by_county).sort() : []
@@ -39,13 +42,16 @@ export default function AuctionsLayout() {
   // numbers together: `total` from the current query and `counties.length`
   // from a PostgREST-truncated 1,000-row sample, which is where "34 Florida
   // counties" came from while 56 counties have upcoming auctions.
-  const headerTotal = summary?.total ?? 0
+  const headerTotal = summary?.total ?? total
   const headerCounties = summary?.counties ?? counties.length
 
   useEffect(() => {
     const init = async () => {
       try {
+        // The calendar and map fetch their own data (per-day counts, and
+        // filtered coordinate-only pins) and do not read these rows at all.
         await fetchSummary()
+        if (viewMode !== 'calendar' && viewMode !== 'map') await fetchAuctions()
       } catch (err) {
         console.error('Init failed:', err)
         // Surface the real failure. This page used to swallow both fetch
@@ -63,14 +69,51 @@ export default function AuctionsLayout() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  useEffect(() => {
+    if (!loading && viewMode !== 'calendar' && viewMode !== 'map') {
+      setError(null)
+      fetchAuctions().catch((err) => {
+        console.error('Failed to fetch auctions:', err)
+        setError(
+          `Could not load auctions: ${err instanceof Error ? err.message : 'unknown error'}`
+        )
+      })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCounty, selectedType, dayFilter, viewMode])
+
   async function fetchSummary() {
     const res = await fetch('/api/auctions/summary')
     if (!res.ok) throw new Error(`summary endpoint returned ${res.status}`)
     setSummary(await res.json())
   }
 
+  async function fetchAuctions() {
+    const params = new URLSearchParams({ limit: '200' })
+    if (selectedCounty) params.set('county', selectedCounty)
+    // sale_type, not type: auction_type is NULL on ~13k rows, so the old
+    // `type` filter silently hid real auctions from every filtered view.
+    if (selectedType) params.set('sale_type', selectedType)
+
+    if (dayFilter) {
+      params.set('from', dayFilter.date)
+      params.set('to', dayFilter.date)
+      if (dayFilter.saleType) params.set('sale_type', dayFilter.saleType)
+    } else {
+      // Default the browse list to what is actually coming up.
+      params.set('upcoming', 'true')
+    }
+
+    const res = await fetch(`/api/auctions?${params}`)
+    if (!res.ok) throw new Error(`auctions endpoint returned ${res.status}`)
+    const json: AuctionsResponse = await res.json()
+    setAuctions(json.data)
+    setTotal(json.total)
+  }
+
   function handleSelectDay(date: string, saleType?: string) {
     setDayFilter({ date, saleType })
+    setViewMode('table')
   }
 
   if (loading) {
@@ -96,6 +139,10 @@ export default function AuctionsLayout() {
       </div>
     )
   }
+
+  const selectedJustValue = selectedAuction
+    ? selectedAuction.market_value ?? selectedAuction.assessed_value ?? null
+    : null
 
   return (
     <div className="min-h-screen overflow-y-auto bg-gray-50 dark:bg-slate-950">
@@ -141,6 +188,14 @@ export default function AuctionsLayout() {
               <span className="font-semibold">
                 {new Date(dayFilter.date + 'T00:00:00').toLocaleDateString()}
               </span>
+              {viewMode !== 'map' && (
+                <button
+                  onClick={() => setViewMode('map')}
+                  className="text-bd-navy-600 dark:text-bd-navy-300 underline hover:no-underline"
+                >
+                  View on map
+                </button>
+              )}
               <button
                 onClick={() => setDayFilter(null)}
                 className="text-gray-400 hover:text-gray-700 dark:hover:text-slate-200 text-base leading-none"
@@ -149,9 +204,27 @@ export default function AuctionsLayout() {
                 &times;
               </button>
             </span>
+            {viewMode !== 'map' && (
+              <span className="text-gray-500 dark:text-slate-400">{total} matching</span>
+            )}
           </div>
         )}
 
+        {viewMode === 'table' && (
+          <AuctionTable
+            auctions={auctions}
+            loading={false}
+            onSelectAuction={(auction) => router.push(`/auctions/${auction.id}`)}
+          />
+        )}
+        {viewMode === 'map' && (
+          <AuctionMap
+            county={selectedCounty}
+            saleType={selectedType}
+            dayFilter={dayFilter}
+            onSelectAuction={setSelectedAuction}
+          />
+        )}
         {viewMode === 'calendar' && (
           <AuctionCalendar
             county={selectedCounty}
@@ -159,9 +232,102 @@ export default function AuctionsLayout() {
             onSelectDay={handleSelectDay}
           />
         )}
-        {viewMode !== 'calendar' && (
-          <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg p-8 text-center text-sm text-gray-500 dark:text-slate-400">
-            The {viewMode} view ships in a later phase — switch back to Calendar in the meantime.
+        {viewMode === 'spreadsheet' && (
+          <AuctionSpreadsheet
+            auctions={auctions}
+            loading={false}
+            onSelectAuction={(auction) => router.push(`/auctions/${auction.id}`)}
+          />
+        )}
+
+        {selectedAuction && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setSelectedAuction(null)}>
+            <div
+              className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl shadow-2xl max-w-lg w-full mx-4 p-6"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+                    {selectedAuction.property_address || 'No Address'}
+                  </h2>
+                  <p className="text-sm text-gray-500 dark:text-slate-400">
+                    {formatCountyLabel(selectedAuction.county)} County &middot; {selectedAuction.case_number}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setSelectedAuction(null)}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-slate-300 text-xl leading-none"
+                >
+                  &times;
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="text-gray-500 dark:text-slate-400">Type</p>
+                  <p className={`font-medium ${selectedAuction.auction_type === 'foreclosure' ? 'text-red-500' : 'text-amber-500'}`}>
+                    {selectedAuction.auction_type === 'foreclosure' ? 'Foreclosure' : 'Tax Deed'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 dark:text-slate-400">Auction Date</p>
+                  <p className="text-gray-900 dark:text-white font-medium tabular">
+                    {selectedAuction.auction_date
+                      ? new Date(selectedAuction.auction_date + 'T00:00:00').toLocaleDateString()
+                      : '—'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 dark:text-slate-400">Assessed Value</p>
+                  <p className="text-gray-900 dark:text-white font-medium tabular">
+                    {selectedJustValue
+                      ? '$' + selectedJustValue.toLocaleString('en-US', { maximumFractionDigits: 0 })
+                      : '—'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 dark:text-slate-400">Year Built</p>
+                  <p className="text-gray-900 dark:text-white font-medium tabular">{selectedAuction.year_built || '—'}</p>
+                </div>
+                <div>
+                  <p className="text-gray-500 dark:text-slate-400">Plaintiff</p>
+                  <p className="text-gray-900 dark:text-white font-medium">{selectedAuction.plaintiff || '—'}</p>
+                </div>
+                <div>
+                  <p className="text-gray-500 dark:text-slate-400">Defendant</p>
+                  <p className="text-gray-900 dark:text-white font-medium">{selectedAuction.defendant || '—'}</p>
+                </div>
+                <div>
+                  <p className="text-gray-500 dark:text-slate-400">Living Area</p>
+                  <p className="text-gray-900 dark:text-white font-medium tabular">
+                    {selectedAuction.living_area_sqft
+                      ? selectedAuction.living_area_sqft.toLocaleString() + ' sqft'
+                      : '—'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 dark:text-slate-400">Parcel ID</p>
+                  <p className="text-gray-900 dark:text-white font-mono text-xs">{selectedAuction.parcel_id || '—'}</p>
+                </div>
+              </div>
+
+              {selectedAuction.is_vacant_land && (
+                <div className="mt-4 px-3 py-2 bg-gray-100 dark:bg-slate-800 rounded-md">
+                  <p className="text-xs text-gray-500 dark:text-slate-400">
+                    This parcel is classified as <span className="font-medium text-gray-700 dark:text-slate-300">vacant land</span> with no situs address.
+                  </p>
+                </div>
+              )}
+
+              {selectedAuction.address_status && (
+                <div className="mt-3 px-3 py-2 bg-amber-50 dark:bg-amber-900/20 rounded-md">
+                  <p className="text-xs text-amber-700 dark:text-amber-400">
+                    Status: {selectedAuction.address_status.replace(/_/g, ' ')}
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>

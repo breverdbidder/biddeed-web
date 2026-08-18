@@ -15,12 +15,14 @@
     "@fullcalendar/list": "6.1.21",
     "@fullcalendar/react": "6.1.21",
     "@supabase/supabase-js": "2.95.3",
+    "mapbox-gl": "^3.0.0",
     "next": "16.1.6",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
+    "@types/mapbox-gl": "^3.0.0",
     "@types/node": "^22.7.9",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",

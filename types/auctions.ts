@@ -20,6 +20,7 @@ export interface Auction {
   defendant?: string | null
   judgment_amount?: number | null
   assessed_value: number | null
+  market_value?: number | null
   opening_bid: number | null
   parcel_id: string | null
   source_url: string | null
@@ -32,7 +33,7 @@ export interface Auction {
   longitude: number | null
   photo_url: string | null
   enriched_at: string | null
-  is_vacant_land: boolean
+  is_vacant_land: boolean | null
   address_status: string | null
   // Zoning intelligence fields
   dor_use_code: string | null
@@ -60,6 +61,11 @@ export interface AuctionDetail extends Auction {
   recommendation_color: string
   max_bid: number | null
   bid_ratio: number | null
+  // Computed server-side by app/api/auctions/[id]/route.ts (fl_parcels
+  // fallback merge) — not raw multi_county_auctions columns, so these live
+  // only on the detail shape, not the base Auction type.
+  just_value?: number | null
+  living_area?: number | null
 }
 
 export interface ZoningInfo {
@@ -160,6 +166,6 @@ export interface AuctionCalendarResponse {
   }
 }
 
-export type SortField = 'auction_date' | 'county' | 'just_value' | 'property_address' | 'zoning_category'
+export type SortField = 'auction_date' | 'county' | 'assessed_value' | 'property_address' | 'dor_use_code'
 export type SortDirection = 'asc' | 'desc'
 export type ViewMode = 'table' | 'map' | 'calendar' | 'spreadsheet'
