@@ -36,7 +36,7 @@ jobs:
         run: npm i -g vercel@latest
 
       - name: Pull Vercel environment (preview)
-        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Build
         run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
@@ -45,7 +45,9 @@ jobs:
         id: deploy
         run: |
           set -euo pipefail
-          url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
+          # --prod so main lands on the stable biddeed-web.vercel.app alias
+          # instead of a throwaway per-commit preview URL nobody can bookmark.
+          url=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
           echo "url=$url" >> "$GITHUB_OUTPUT"
           echo "PREVIEW_URL=$url" >> "$GITHUB_ENV"
 
