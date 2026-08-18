@@ -69,6 +69,40 @@ jobs:
           done
           exit $fail
 
+      # A 200 with a big body proves the SERVER worked. It says nothing about
+      # whether the browser was allowed to run the page. The preview shipped
+      # green once already while every script on it was refused by CSP, so
+      # assert the invariant that actually failed: under 'strict-dynamic' the
+      # browser trusts ONLY nonced scripts, therefore every script tag must
+      # carry a nonce. A statically prerendered route can never satisfy this,
+      # which is exactly what we want the build to tell us.
+      - name: Assert the browser can actually run the page
+        run: |
+          set -euo pipefail
+          python3 - "$PREVIEW_URL" <<'PY'
+          import re, sys, urllib.request
+          base = sys.argv[1]
+          failed = False
+          for path in ("/", "/auctions"):
+              req = urllib.request.Request(base + path, headers={"User-Agent": "ci-smoke"})
+              with urllib.request.urlopen(req, timeout=30) as r:
+                  html = r.read().decode("utf-8", "replace")
+                  csp = (r.headers.get("content-security-policy")
+                         or r.headers.get("content-security-policy-report-only") or "")
+              tags = re.findall(r"<script\b[^>]*>", html)
+              unnonced = [t for t in tags if " src=" in t and "nonce=" not in t]
+              print(f"{path}: {len(tags)} script tags, {len(unnonced)} src tags without a nonce")
+              if "strict-dynamic" in csp and unnonced:
+                  print(f"::error::{path} serves {len(unnonced)} unnonced script tag(s) under a "
+                        f"'strict-dynamic' CSP - the browser will refuse them and the page "
+                        f"will never hydrate. Is this route statically prerendered?")
+                  failed = True
+              if not tags:
+                  print(f"::error::{path} served no script tags at all")
+                  failed = True
+          sys.exit(1 if failed else 0)
+          PY
+
       - name: Job summary
         if: always()
         run: |
