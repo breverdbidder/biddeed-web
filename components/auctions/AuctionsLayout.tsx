@@ -10,6 +10,7 @@ import AuctionSpreadsheet from './AuctionSpreadsheet'
 import AuctionSidebarList from './AuctionSidebarList'
 import { formatCountyLabel } from '@/lib/counties'
 import type { Auction, AuctionSummary, AuctionsResponse, ViewMode } from '@/types/auctions'
+import { apiUrl } from '@/lib/api'
 
 // FullCalendar and Mapbox both require window — must not render during SSR.
 const AuctionCalendar = dynamic(() => import('./AuctionCalendar'), { ssr: false })
@@ -88,7 +89,7 @@ export default function AuctionsLayout() {
   }, [selectedCounty, selectedType, dayFilter, viewMode])
 
   async function fetchSummary() {
-    const res = await fetch('/api/auctions/summary')
+    const res = await fetch(apiUrl('/api/auctions/summary'))
     if (!res.ok) throw new Error(`summary endpoint returned ${res.status}`)
     setSummary(await res.json())
   }
@@ -109,7 +110,7 @@ export default function AuctionsLayout() {
       params.set('upcoming', 'true')
     }
 
-    const res = await fetch(`/api/auctions?${params}`)
+    const res = await fetch(apiUrl(`/api/auctions?${params}`))
     if (!res.ok) throw new Error(`auctions endpoint returned ${res.status}`)
     const json: AuctionsResponse = await res.json()
     setAuctions(json.data)
