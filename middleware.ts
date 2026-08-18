@@ -206,6 +206,23 @@ function rateLimitMiddleware(req: NextRequest): NextResponse | undefined {
 function buildCspHeaders(nonce: string): Record<string, string> {
   const csp = [
     `default-src 'self'`,
+    // 'strict-dynamic' means the browser ignores 'self' and every host-source
+    // and trusts only nonced scripts. That REQUIRES every page under this
+    // middleware to be rendered per-request, because a nonce is per-request by
+    // definition: statically prerendered HTML is produced at build time, when
+    // middleware never runs, so its script tags can never carry one.
+    //
+    // Measured on the deployed preview 2026-08-18: / and /auctions were static
+    // (marked as static in the build output), so of 12 script tags 0 were
+    // nonced, all 7 same-origin chunks were refused, and /auctions painted 90
+    // characters with no calendar and no map - the white-screen failure this
+    // rebuild exists to end. zonewise.ai, which runs this same policy
+    // successfully, serves those routes dynamically: 33 script tags, 29 nonced.
+    //
+    // The fix is therefore `export const dynamic = 'force-dynamic'` on the
+    // pages, NOT a weaker policy. Dropping 'strict-dynamic' was tried and only
+    // moved the failure: chunks then loaded, but Next's inline flight-data
+    // scripts were refused instead, so the page still never hydrated.
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://js.stripe.com https://*.clerk.accounts.dev https://clerk.zonewise.ai`,
     `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com`,
     `img-src 'self' data: blob: https://img.clerk.com https://images.clerk.dev https://*.clerk.accounts.dev https://clerk.zonewise.ai https://*.supabase.co https://www.bcpao.us https://gis.brevardfl.gov https://api.mapbox.com https://*.mapbox.com`,
@@ -259,6 +276,27 @@ function applySecurityHeaders(response: NextResponse, nonce: string): NextRespon
   return response
 }
 
+/**
+ * Build the request headers Next.js needs in order to nonce its own scripts.
+ *
+ * Next does NOT look at x-nonce. Confirmed in
+ * next/dist/server/app-render/app-render.js: it reads
+ * headers['content-security-policy'] (falling back to the report-only variant)
+ * off the INCOMING request and parses the nonce out of that string.
+ * applySecurityHeaders also sets x-nonce on the RESPONSE, which is useful for
+ * pages rendering their own inline <script nonce={...}>, but it never reaches
+ * the renderer - so with response-only propagation Next emitted every script
+ * tag with no nonce at all.
+ */
+function withNonceRequestHeaders(req: NextRequest, nonce: string): Headers {
+  const headers = new Headers(req.headers)
+  headers.set('x-nonce', nonce)
+  for (const [name, value] of Object.entries(buildCspHeaders(nonce))) {
+    headers.set(name, value)
+  }
+  return headers
+}
+
 function generateNonce(): string {
   const array = new Uint8Array(16)
   crypto.getRandomValues(array)
@@ -271,7 +309,9 @@ function passthroughMiddleware(req: NextRequest) {
   if (rateLimitResponse) return rateLimitResponse
 
   const nonce = generateNonce()
-  const response = NextResponse.next()
+  const response = NextResponse.next({
+    request: { headers: withNonceRequestHeaders(req, nonce) },
+  })
   return applySecurityHeaders(response, nonce)
 }
 
@@ -285,7 +325,9 @@ export default CLERK_ENABLED
       }
 
       const nonce = generateNonce()
-      const response = NextResponse.next()
+      const response = NextResponse.next({
+        request: { headers: withNonceRequestHeaders(req, nonce) },
+      })
       return applySecurityHeaders(response, nonce)
     })
   : passthroughMiddleware
