@@ -7,6 +7,7 @@ import { useTheme } from '@/lib/theme-context'
 import { getRecommendation } from '@/lib/scoring'
 import { ZONING_CATEGORY_COLORS, type ZoningCategory } from '@/lib/zoning'
 import type { Auction } from '@/types/auctions'
+import { apiUrl } from '@/lib/api'
 
 /**
  * AuctionRadar map.
@@ -155,7 +156,7 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
       params.set('upcoming', 'true')
     }
 
-    fetch(`/api/auctions/map?${params}`)
+    fetch(apiUrl(`/api/auctions/map?${params}`))
       .then((res) => {
         if (!res.ok) throw new Error(`map request failed (${res.status})`)
         return res.json()
