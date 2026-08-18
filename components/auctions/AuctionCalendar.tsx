@@ -102,11 +102,22 @@ export default function AuctionCalendar({ county, saleType, onSelectDay }: Props
   )
 
   const handleDatesSet = useCallback(
-    (arg: { startStr: string; end: Date }) => {
+    (arg: { startStr: string; endStr: string }) => {
       const from = arg.startStr.slice(0, 10)
-      // FullCalendar's range end is exclusive; step back one day.
-      const end = new Date(arg.end.getTime() - 86400000)
-      const to = end.toISOString().slice(0, 10)
+      // FullCalendar's range end is exclusive, so step back one day.
+      //
+      // Do this on the LOCAL date string, never on `arg.end` via toISOString().
+      // `arg.end` is a local-midnight Date, and in any timezone east of UTC that
+      // instant is still the PREVIOUS day in UTC - so toISOString() shifted `to`
+      // a day earlier and the last day of the visible range always reported zero
+      // auctions. Verified against the real math: TZ=Asia/Jerusalem and
+      // TZ=Australia/Sydney both yielded 2026-09-04 for a view whose last visible
+      // day is 2026-09-05, while America/New_York and UTC yielded it correctly -
+      // which is exactly why the bug survived review from a US timezone. Anchor
+      // at 12:00Z so neither a UTC offset nor a DST transition can move the date.
+      const endExclusive = new Date(`${arg.endStr.slice(0, 10)}T12:00:00Z`)
+      endExclusive.setUTCDate(endExclusive.getUTCDate() - 1)
+      const to = endExclusive.toISOString().slice(0, 10)
       rangeRef.current = { from, to }
       loadRange(from, to)
     },
