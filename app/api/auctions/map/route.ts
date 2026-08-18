@@ -54,7 +54,21 @@ interface Filters {
   from: string | null
   to: string | null
   upcoming: boolean
+  statusScope: string
 }
+
+// Raw auction_status values that public.auction_is_live() treats as live.
+// PostgREST cannot call that function in a filter, so the list is mirrored
+// here and must be kept in step with it.
+//
+// Case matters: .in. is case-sensitive. Verified against every distinct
+// auction_status on future-dated rows (2026-08-18) - the only value stored in
+// mixed case is CANCELLED, which is not live, so no live row can be missed by
+// exact-case matching. A NULL or empty status normalizes to 'upcoming', hence
+// the explicit is.null arm.
+const LIVE_STATUSES = ['upcoming', 'active', 'scheduled']
+const LIVE_STATUS_FILTER =
+  `auction_status.in.(${LIVE_STATUSES.join(',')}),auction_status.is.null`
 
 function applyFilters(query: any, f: Filters) {
   let q = query
@@ -64,6 +78,14 @@ function applyFilters(query: any, f: Filters) {
   if (f.to) q = q.lte('auction_date', f.to)
   if (f.upcoming && !f.from) {
     q = q.gte('auction_date', new Date().toISOString().slice(0, 10))
+  }
+  // Scope to auctions somebody can actually bid on, unless explicitly asked
+  // for everything. Without this the map plotted 2,369 pins for a date range
+  // holding only 1,921 live auctions - 448 pins (18.9%) were redeemed,
+  // cancelled, sold or still in preview. Clicking one opened a property that
+  // cannot be bid on, which is the same defect fixed in the /lots feed.
+  if (f.statusScope !== 'all') {
+    q = q.or(LIVE_STATUS_FILTER)
   }
   return q
 }
@@ -98,7 +120,7 @@ async function fetchMappable(supabase: ReturnType<typeof getSupabase>, filters: 
 }
 
 /**
- * GET /api/auctions/map?from=&to=&county=&sale_type=&upcoming=
+ * GET /api/auctions/map?from=&to=&county=&sale_type=&upcoming=&status_scope=
  *
  * Returns THREE numbers, not two: `returned` (rows in this response),
  * `total_mappable` (rows matching the filters that have coordinates), and
@@ -116,6 +138,7 @@ export async function GET(request: NextRequest) {
   const from = searchParams.get('from')
   const to = searchParams.get('to')
   const upcoming = searchParams.get('upcoming') === 'true'
+  const statusScope = searchParams.get('status_scope') || 'live'
 
   for (const [name, value] of [['from', from], ['to', to]] as const) {
     if (value && !ISO_DATE.test(value)) {
@@ -126,7 +149,7 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  const filters: Filters = { county, saleType, from, to, upcoming }
+  const filters: Filters = { county, saleType, from, to, upcoming, statusScope }
 
   const matchingCountQuery = applyFilters(
     supabase.from('multi_county_auctions').select('id', { count: 'exact', head: true }),
@@ -155,6 +178,7 @@ export async function GET(request: NextRequest) {
         to,
         county,
         sale_type: saleType,
+        status_scope: statusScope,
       },
       {
         headers: {
