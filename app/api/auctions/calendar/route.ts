@@ -116,7 +116,12 @@ export async function GET(request: NextRequest) {
       total_all: acc.total_all + d.total_all,
       redeemed_count: acc.redeemed_count + d.redeemed_count,
       cancelled_count: acc.cancelled_count + d.cancelled_count,
-      days_with_auctions: acc.days_with_auctions + 1,
+      // Count a day only when something is actually biddable in the current
+      // scope. auctions_calendar_counts returns a row for any day that has
+      // rows at all, including days where every auction is redeemed, cancelled
+      // or still in preview - counting those made the header claim more
+      // "auction days" than the grid shows badges for.
+      days_with_auctions: acc.days_with_auctions + (d.total > 0 ? 1 : 0),
     }),
     {
       foreclosure_count: 0,
