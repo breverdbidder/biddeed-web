@@ -50,6 +50,14 @@ interface Props {
   saleType?: string
   dayFilter?: DayFilter | null
   onSelectAuction: (auction: Auction) => void
+  /**
+   * Split view: coordinates of the row the user just picked in the sidebar.
+   * The map flies to it so the list and the map always describe the same
+   * property. Null leaves the viewport alone.
+   */
+  focusPoint?: { lat: number; lng: number } | null
+  /** Fill the parent instead of using the standalone fixed height. */
+  fillParent?: boolean
 }
 
 type ColorMode = 'type' | 'zoning'
@@ -102,7 +110,7 @@ function toAuctionShape(p: MapPoint): Auction {
 const STREETS_STYLE = 'mapbox://styles/mapbox/streets-v12'
 const SATELLITE_STYLE = 'mapbox://styles/mapbox/satellite-streets-v12'
 
-export default function AuctionMap({ county, saleType, dayFilter, onSelectAuction }: Props) {
+export default function AuctionMap({ county, saleType, dayFilter, onSelectAuction, focusPoint, fillParent }: Props) {
   const mapContainer = useRef<HTMLDivElement>(null)
   const wrapperRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<any>(null)
@@ -195,6 +203,33 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
   }, [isFullscreen, mapLoaded])
 
   // Initialize map
+  // In the split view the map''s height comes from a CSS grid track, which can
+  // resolve after mapbox-gl has already measured the container - and a map that
+  // measured zero height keeps a zero-size canvas until something tells it to
+  // look again. Defensive only: when this was added the canvas already measured
+  // correctly at 834x584, so it is guarding a plausible race, not a confirmed
+  // bug.
+  useEffect(() => {
+    if (!mapContainer.current || typeof ResizeObserver === ''undefined'') return
+    const ro = new ResizeObserver(() => {
+      mapRef.current?.resize()
+    })
+    ro.observe(mapContainer.current)
+    return () => ro.disconnect()
+  }, [mapLoaded])
+
+  // Split view: follow the row the user picked in the sidebar. Zoom is only
+  // raised, never lowered, so repeatedly clicking rows pans between properties
+  // instead of yo-yoing the whole state in and out on every click.
+  useEffect(() => {
+    if (!focusPoint || !mapRef.current || !mapLoaded) return
+    mapRef.current.flyTo({
+      center: [focusPoint.lng, focusPoint.lat],
+      zoom: Math.max(mapRef.current.getZoom?.() ?? 0, 14),
+      duration: 900,
+    })
+  }, [focusPoint, mapLoaded])
+
   useEffect(() => {
     if (!mapContainer.current || mapRef.current) return
     if (!MAPBOX_TOKEN) {
@@ -471,7 +506,7 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
   const notShown = resp ? resp.total_mappable - resp.returned : 0
 
   return (
-    <div>
+    <div className={fillParent ? 'h-full flex flex-col min-h-0' : undefined}>
       {fetchError && (
         <div
           data-testid="map-fetch-error"
@@ -508,7 +543,7 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
 
         <div
           ref={mapContainer}
-          className={isFullscreen ? 'w-full h-full' : 'w-full h-[600px]'}
+          className={isFullscreen ? 'w-full h-full' : fillParent ? 'w-full h-full' : 'w-full h-[600px]'}
         />
 
         {/* Top-left controls */}
