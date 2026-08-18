@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import listPlugin from '@fullcalendar/list'
+import { apiUrl } from '@/lib/api'
 
 /**
  * AuctionRadar calendar.
@@ -81,7 +82,7 @@ export default function AuctionCalendar({ county, saleType, onSelectDay }: Props
         if (county) params.set('county', county)
         if (saleType) params.set('sale_type', saleType)
 
-        const res = await fetch(`/api/auctions/calendar?${params}`)
+        const res = await fetch(apiUrl(`/api/auctions/calendar?${params}`))
         if (!res.ok) throw new Error(`calendar request failed (${res.status})`)
         const json = await res.json()
         // Ignore a response that a later view change has already superseded.
