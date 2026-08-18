@@ -11,21 +11,31 @@ const securityHeaders = [
 ]
 
 const nextConfig = {
-  // Mounted at biddeed.ai/radar/* behind the existing Cloudflare Worker, which
-  // stays the edge router for the apex. basePath makes Next emit EVERY asset,
-  // chunk and API path under /radar, so a single Worker proxy branch is enough
-  // and none of the Worker's 40+ existing routes have to move.
+  // The app now serves the apex. basePath is empty, so Next emits assets at
+  // /_next/* and the Worker gains explicit proxy branches for /, /_next/*,
+  // /api/*, /radar* and /success rather than one /radar branch.
   //
-  // Without basePath the HTML would reference /_next/* at the apex, the Worker
-  // would 404 those chunks, and the page would paint nothing - the same blank
-  // shell this rebuild already fixed once via the CSP nonce.
+  // NEXT_PUBLIC_BASE_PATH stays configurable so the mount can move again
+  // without a code change. lib/api.ts reads the same variable, because
+  // basePath is never applied to raw fetch() - see the comment there.
   //
-  // This also sidesteps the /auctions collision: the Worker serves GET /auctions
-  // as a JSON API, and this app serves it as an HTML page. Under /radar they
-  // never meet.
-  basePath: process.env.NEXT_PUBLIC_BASE_PATH ?? '/radar',
+  // GET /auctions is a JSON API on the Worker. With basePath gone that
+  // collision is live, so nothing in this app may claim /auctions: the
+  // auctions workspace is a real route at /radar.
+  basePath: process.env.NEXT_PUBLIC_BASE_PATH ?? '',
   poweredByHeader: false,
   productionBrowserSourceMaps: false,
+  // Legacy in-app links. While the app was mounted at basePath '/radar' the
+  // workspace lived at /radar/auctions and details at /radar/auctions/:id.
+  // Both moved up a level. These redirects are scoped under /radar on purpose:
+  // the apex /auctions must never be claimed by this app, because the Worker
+  // serves it as a JSON API.
+  async redirects() {
+    return [
+      { source: '/radar/auctions', destination: '/radar', permanent: true },
+      { source: '/radar/auctions/:id', destination: '/radar/:id', permanent: true },
+    ]
+  },
   async headers() {
     return [
       {
