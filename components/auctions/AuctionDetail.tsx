@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic'
 import { formatCountyLabel } from '@/lib/counties'
 import type { AuctionDetail as AuctionDetailType } from '@/types/auctions'
 import { parseDimensionalStandards } from '@/lib/zoning'
+import { apiUrl } from '@/lib/api'
 
 const AuctionDetailMap = dynamic(() => import('./AuctionDetailMap'), { ssr: false })
 
@@ -98,7 +99,7 @@ export default function AuctionDetail({ auctionId }: Props) {
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch(`/api/auctions/${auctionId}`)
+        const res = await fetch(apiUrl(`/api/auctions/${auctionId}`))
         if (!res.ok) {
           setError(res.status === 404 ? 'Auction not found' : 'Failed to load auction')
           return
