@@ -155,3 +155,42 @@ body {
   background: var(--navy-600);
   color: white;
 }
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Auction grade badges — ported from the BidDeed Cloudflare Worker.
+   Structure carrying information, not decoration: the grade encodes the
+   Shapira assessment and must stay visually distinct from lifecycle state.
+
+   ACCESSIBILITY FIX ON PORT: the Worker sets .grade-E/.grade-X/.grade-Z to
+   color:#cbd5e1 on background:#b8cfe0 — roughly 1.1:1 contrast, effectively
+   invisible. Corrected to #1f2937, matching the dark-on-light pattern that
+   .grade-C already uses. Do not "restore" the original.
+   ───────────────────────────────────────────────────────────────────────── */
+.grade-A { background: linear-gradient(135deg, #10b981, #059669); color: #fff; }
+.grade-B { background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; }
+.grade-C { background: linear-gradient(135deg, #eab308, #ca8a04); color: #1f2937; }
+.grade-D { background: linear-gradient(135deg, #f97316, #ea580c); color: #fff; }
+.grade-E,
+.grade-X,
+.grade-Z { background: #b8cfe0; color: #1f2937; }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Tabular figures. Every currency, bid and count column must use these.
+   Bid ladders that jitter between rows read as amateur in front of an
+   investor, and a column of proportional digits cannot be scanned.
+   ───────────────────────────────────────────────────────────────────────── */
+.tabular,
+.bid-figure,
+td[data-numeric],
+th[data-numeric] { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
+
+/* Respect reduced motion across the app shell. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
