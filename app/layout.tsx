@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
+import AppShell from '@/components/shell/AppShell'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -10,10 +11,35 @@ const inter = Inter({
   fallback: ['system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
 })
 
+// Inline SVG data URI, not a file. The Worker proxies exactly five path
+// shapes to this app -- '/', '/_next/*', three '/api/*' trees, '/radar*' and
+// '/order/success' -- so any icon served from its own URL 404s at the apex,
+// and a browser with no <link rel="icon"> probes /favicon.ico and logs a
+// console error on every page. A data URI needs no request and no proxy
+// branch.
+const ICON =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23F59E0B'/%3E%3Ctext x='16' y='23' font-family='system-ui,sans-serif' font-size='20' font-weight='800' text-anchor='middle' fill='%23020617'%3EB%3C/text%3E%3C/svg%3E"
+
 export const metadata: Metadata = {
   title: 'BidDeed.AI — Auction Intelligence',
   description: 'Auction intelligence for foreclosure and tax deed investors.',
+  icons: { icon: [{ url: ICON, type: 'image/svg+xml' }] },
 }
+
+/**
+ * Force-dynamic at the layout, not just per page.
+ *
+ * Two reasons, both load-bearing:
+ *  1. CSP. middleware mints a per-request nonce and Next reads it off the
+ *     incoming content-security-policy header. Prerendered HTML is built
+ *     before middleware runs, carries no nonce, and 'strict-dynamic' then
+ *     refuses every script on it. Marking the layout covers routes that have
+ *     no page file of their own -- /_not-found in particular.
+ *  2. Hydration. The shell's nav reads useSearchParams; with nothing
+ *     prerendered it needs no Suspense boundary, and without that boundary
+ *     the sidebar hydrates in the same pass as its provider (see AppShell).
+ */
+export const dynamic = 'force-dynamic'
 
 export const viewport: Viewport = {
   themeColor: '#020617',
@@ -24,9 +50,26 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  // `dark` is fixed on <html>. There is no theme switch: every component in
+  // this app -- the shell and the ported AuctionRadar views alike -- carries
+  // dark: variants and was designed against the #020617 / #0b1220 / #1e293b
+  // palette. Without the class, Tailwind's darkMode:['class'] leaves the
+  // workspace rendering its light fallback inside dark chrome.
   return (
-    <html lang="en" className={inter.variable} style={{ background: '#020617', color: '#e2e8f0' }}>
-      <body>{children}</body>
+    <html
+      lang="en"
+      className={`${inter.variable} dark`}
+      style={{ background: '#020617', color: '#e2e8f0' }}
+    >
+      <body>
+        {/*
+          The shell wraps every route: nav rail, topbar and the Deed panel are
+          persistent chrome, so they mount once here rather than per page.
+          Every page underneath must export `dynamic = 'force-dynamic'` — see
+          middleware.ts for why a prerendered page cannot carry a CSP nonce.
+        */}
+        <AppShell>{children}</AppShell>
+      </body>
     </html>
   )
 }
