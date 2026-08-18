@@ -55,7 +55,10 @@ jobs:
         run: |
           set -euo pipefail
           fail=0
-          for path in "/radar" "/radar/auctions" "/radar/api/auctions/summary" "/radar/api/auctions/calendar"; do
+          # basePath is gone: the app serves the apex, the workspace lives at
+          # /radar, and the API is at /api/* (NOT /radar/api/*). /auctions is
+          # deliberately absent here - it belongs to the Worker as JSON.
+          for path in "/" "/radar" "/api/auctions/summary" "/api/auctions/calendar"; do
             code=$(curl -s -o /tmp/body -w '%{http_code}' --max-time 30 "${PREVIEW_URL}${path}")
             bytes=$(wc -c < /tmp/body)
             echo "${path} -> HTTP ${code}, ${bytes} bytes"
@@ -85,13 +88,13 @@ jobs:
           import re, sys, urllib.request
           base = sys.argv[1]
           failed = False
-          for path in ("/radar", "/radar/auctions"):
+          for path in ("/", "/radar"):
               req = urllib.request.Request(base + path, headers={"User-Agent": "ci-smoke"})
               with urllib.request.urlopen(req, timeout=30) as r:
                   html = r.read().decode("utf-8", "replace")
                   csp = (r.headers.get("content-security-policy")
                          or r.headers.get("content-security-policy-report-only") or "")
-              tags = re.findall(r"<script\b[^>]*>", html)
+              tags = re.findall(r*âscript\b[^>]*>â, html)
               unnonced = [t for t in tags if " src=" in t and "nonce=" not in t]
               print(f"{path}: {len(tags)} script tags, {len(unnonced)} src tags without a nonce")
               if "strict-dynamic" in csp and unnonced:
