@@ -194,3 +194,57 @@ th[data-numeric] { font-variant-numeric: tabular-nums; font-feature-settings: "t
     scroll-behavior: auto !important;
   }
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   App-shell (sidebar) tokens.
+
+   `shadcn add sidebar` writes a light :root block and a .dark override. This
+   app has no theme switch: <html> is always the dark surface (#020617 page,
+   #0b1220 chrome, #1e293b borders), so the dark values live in :root directly
+   and .dark is kept identical for any component that opts into it.
+   ───────────────────────────────────────────────────────────────────────── */
+@layer base {
+  :root,
+  .dark {
+    --sidebar-background: 220 49% 8%;      /* #0b1220 — chrome */
+    --sidebar-foreground: 213 27% 84%;     /* slate-300 */
+    --sidebar-primary: 38 92% 50%;         /* bd-orange — active accent */
+    --sidebar-primary-foreground: 222 47% 11%;
+    --sidebar-accent: 217 33% 17%;         /* #1e293b — hover/active fill */
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217 33% 17%;         /* #1e293b */
+    --sidebar-ring: 38 92% 50%;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   FullCalendar icon font.
+
+   FullCalendar embeds its `fcicons` glyph font as a base64 data: URI inside
+   the stylesheet it injects at runtime. Our CSP is font-src 'self', so the
+   browser refuses that font and logs one console entry on the calendar view.
+   `data:` is deliberately NOT added to font-src for one decorative glyph set.
+
+   These rules make the refusal harmless: every fc-icon renders a real
+   character in the page font instead of tofu. Chromium still emits the
+   refusal (it parses the data: @font-face when the stylesheet is injected,
+   whether or not an element uses it); removing the request entirely means
+   patching the vendored FullCalendar CSS, which is a build-level change and
+   is not in this phase.
+   ───────────────────────────────────────────────────────────────────────── */
+/* FullCalendar sets font-family:fcicons!important and injects its stylesheet
+   at runtime, after this file, so the override has to be !important too. */
+.fc .fc-icon,
+.fc-icon {
+  font-family: inherit !important;
+  font-size: 1.1em;
+  line-height: 1;
+}
+
+.fc-icon-chevron-left::before { content: '\2039'; }
+.fc-icon-chevron-right::before { content: '\203A'; }
+.fc-icon-chevrons-left::before { content: '\00AB'; }
+.fc-icon-chevrons-right::before { content: '\00BB'; }
+.fc-icon-minus-square::before { content: '\2212'; }
+.fc-icon-plus-square::before { content: '\002B'; }
+.fc-icon-x::before { content: '\00D7'; }
