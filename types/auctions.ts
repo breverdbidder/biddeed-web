@@ -81,6 +81,9 @@ export interface CountyDetail {
   total: number
   upcoming: number
   next_auction_date: string | null
+  // Added with the 2026-08-18 SSOT status-scope fix: every future-dated row
+  // for the county, regardless of status, vs `upcoming` which is live-scoped.
+  upcoming_all?: number
 }
 
 export interface AuctionSummary {
@@ -101,6 +104,14 @@ export interface AuctionSummary {
   date_min?: string | null
   date_max?: string | null
   generated_at?: string | null
+  // Added 2026-08-18 with the SSOT status-scope fix. `upcoming` is now
+  // live-scoped (upcoming/active/scheduled); `upcoming_all` is every
+  // future-dated row regardless of status. Redeemed/cancelled/sold rows had
+  // been inflating `upcoming` by 18.1% before this split existed.
+  upcoming_all?: number
+  upcoming_live?: number
+  by_status?: Record<string, number>
+  status_scope?: string
 }
 
 export interface AuctionsResponse {
@@ -111,13 +122,23 @@ export interface AuctionsResponse {
   ignored_filters?: string[]
 }
 
-/** Per-day typed counts from /api/auctions/calendar. */
+/**
+ * Per-day typed counts from /api/auctions/calendar.
+ *
+ * Added 2026-08-18 with the SSOT status-scope fix: `total` is scope-aware
+ * (default 'live' — upcoming/active/scheduled), `total_all` is every
+ * future-dated row regardless of status. Always render both; a bare `total`
+ * with no scope shown next to it is how the 18.1% overstatement shipped.
+ */
 export interface AuctionCalendarDay {
   date: string
   foreclosure_count: number
   tax_deed_count: number
   other_count: number
   total: number
+  total_all: number
+  redeemed_count: number
+  cancelled_count: number
 }
 
 export interface AuctionCalendarResponse {
@@ -125,12 +146,16 @@ export interface AuctionCalendarResponse {
   to: string
   county: string | null
   sale_type: string | null
+  status_scope: string
   days: AuctionCalendarDay[]
   totals: {
     foreclosure_count: number
     tax_deed_count: number
     other_count: number
     total: number
+    total_all: number
+    redeemed_count: number
+    cancelled_count: number
     days_with_auctions: number
   }
 }
