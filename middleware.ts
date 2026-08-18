@@ -47,6 +47,10 @@ const isPublicRoute = createRouteMatcher([
   '/sign-up(.*)',
   '/report(.*)',
   '/auctions(.*)',
+  // Post-checkout confirmation. The buyer has no account at this point, so
+  // gating it behind auth would strand every purchase.
+  '/order(.*)',
+  '/radar(.*)',
   '/privacy(.*)',
   '/terms(.*)',
   '/disclaimer(.*)',
@@ -111,7 +115,7 @@ function tooManyRequests(req: NextRequest, resetAt: number): NextResponse {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="refresh" content="${retryAfter}">
-<title>One moment · ZoneWise.AI</title>
+<title>One moment · BidDeed.AI</title>
 <style>
   :root { color-scheme: dark; }
   * { box-sizing: border-box; }
@@ -121,7 +125,7 @@ function tooManyRequests(req: NextRequest, resetAt: number): NextResponse {
   .card { width:100%; max-width:440px; background:rgba(15,23,42,.6); border:1px solid #1e293b;
           border-radius:16px; padding:32px 28px; text-align:center; }
   .brand { display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:22px; }
-  .mark { width:36px; height:36px; border-radius:9px; background:#1d4ed8; color:#fff;
+  .mark { width:36px; height:36px; border-radius:9px; background:#f59e0b; color:#0b1220;
           font-weight:800; font-size:18px; display:flex; align-items:center; justify-content:center; }
   .name { font-size:17px; font-weight:700; color:#fff; }
   .name span { color:#f59e0b; }
@@ -135,11 +139,11 @@ function tooManyRequests(req: NextRequest, resetAt: number): NextResponse {
 </style></head>
 <body>
   <main class="card">
-    <div class="brand"><div class="mark">Z</div><div class="name">ZoneWise<span>.AI</span></div></div>
+    <div class="brand"><div class="mark">B</div><div class="name">BidDeed<span>.AI</span></div></div>
     <h1>One moment</h1>
     <p>We are seeing a burst of requests from your connection. This page retries
        itself in <span class="wait">${retryAfter}s</span> — no need to refresh.</p>
-    <a href="/">Back to ZoneWise.AI</a>
+    <a href="/">Back to BidDeed.AI</a>
     <div class="fine">Nothing is wrong with your account. This is a temporary rate limit.</div>
   </main>
 </body></html>`
@@ -223,7 +227,15 @@ function buildCspHeaders(nonce: string): Record<string, string> {
     // pages, NOT a weaker policy. Dropping 'strict-dynamic' was tried and only
     // moved the failure: chunks then loaded, but Next's inline flight-data
     // scripts were refused instead, so the page still never hydrated.
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://js.stripe.com https://*.clerk.accounts.dev https://clerk.zonewise.ai`,
+    // blob: is here for mapbox-gl, which compiles its renderer into a Blob and
+    // spawns it as a worker. Without it the map pane paints white on every
+    // load. ('strict-dynamic' makes the browser ignore scheme-sources for
+    // scripts, so the directive that actually unblocks the worker is
+    // worker-src below; blob: is stated in both, per spec, so the policy does
+    // not depend on a fallback chain.)
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' blob: https://js.stripe.com https://*.clerk.accounts.dev https://clerk.zonewise.ai`,
+    // Explicit rather than inheriting from script-src via child-src.
+    `worker-src 'self' blob:`,
     `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com`,
     `img-src 'self' data: blob: https://img.clerk.com https://images.clerk.dev https://*.clerk.accounts.dev https://clerk.zonewise.ai https://*.supabase.co https://www.bcpao.us https://gis.brevardfl.gov https://api.mapbox.com https://*.mapbox.com`,
     `font-src 'self' https://fonts.gstatic.com`,
@@ -332,10 +344,42 @@ export default CLERK_ENABLED
     })
   : passthroughMiddleware
 
+/**
+ * WHY THIS MATCHER LOOKS LIKE THIS — the CSP outage, root-caused.
+ *
+ * Symptom (measured 2026-08-18): `curl -sI https://biddeed-web.vercel.app/radar`
+ * returned NO content-security-policy, NO x-nonce, and none of the static
+ * headers from next.config.mjs either. The apex therefore fell through to the
+ * Worker's own SECURITY_CSP, which has no `blob:` and no api.mapbox.com — the
+ * white map pane in META_PROMPT_v7 section 0.
+ *
+ * Root cause: Next PREFIXES every middleware matcher with basePath at build
+ * time. While the app was mounted at basePath '/radar' the single matcher
+ * `/((?!_next|...).*)` compiled to `/radar/((?!_next|...).*)`, which requires
+ * a trailing slash — so the app's own home page, exactly `/radar`, matched
+ * nothing and middleware never ran on it. next.config's `headers()` source
+ * `/(.*)` is basePath-prefixed the same way, which is why those headers were
+ * missing too. Two independent symptoms, one cause. Verified by compiling both
+ * regexes against both basePaths.
+ *
+ * basePath is now '' so the old matcher would work again by accident. It is
+ * rewritten anyway, because "works by accident" is how this broke:
+ *   - '/' is listed EXPLICITLY. It is the landing page and the single most
+ *     expensive route to lose a nonce on; it does not depend on a lookahead.
+ *   - the dot is properly escaped ('\\.' -> /\./). In the previous string the
+ *     escape was swallowed by the JS string literal, so the regex carried a
+ *     bare `.` matching ANY character — '/anycss', '/apixml' and friends were
+ *     silently excluded from CSP.
+ *   - the extension list is anchored with $, so only real file extensions
+ *     bypass, not any path that happens to contain 'css'.
+ *   - _next/static and _next/image still bypass: hashed assets need no nonce
+ *     and running middleware on them is pure latency.
+ */
 export const config = {
   matcher: [
-    // EG14 P3 FIX: added txt|xml so /robots.txt and /sitemap.xml bypass middleware entirely
-    '/((?!_next|[^?]*\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest|txt|xml)).*)',
+    '/',
+    // EG14 P3: txt|xml keep /robots.txt and /sitemap.xml out of middleware.
+    '/((?!_next/static|_next/image|favicon\\.ico|.*\\.(?:html?|css|js|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest|txt|xml)$).*)',
     '/(api|trpc)(.*)',
   ],
 }
