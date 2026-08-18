@@ -23,7 +23,7 @@ const nextConfig = {
   // This also sidesteps the /auctions collision: the Worker serves GET /auctions
   // as a JSON API, and this app serves it as an HTML page. Under /radar they
   // never meet.
-  basePath: '/radar',
+  basePath: process.env.NEXT_PUBLIC_BASE_PATH ?? '/radar',
   poweredByHeader: false,
   productionBrowserSourceMaps: false,
   async headers() {
