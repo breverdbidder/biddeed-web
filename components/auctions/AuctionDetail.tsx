@@ -132,7 +132,7 @@ export default function AuctionDetail({ auctionId }: Props) {
         <div className="flex flex-col items-center gap-4">
           <p className="text-red-500 text-sm">{error || 'Auction not found'}</p>
           <button
-            onClick={() => router.push('/auctions')}
+            onClick={() => router.push('/radar')}
             className="text-sm text-bd-navy-500 hover:text-bd-navy-700 dark:text-bd-orange-400 dark:hover:text-bd-orange-300 underline"
           >
             ← Back to Auctions
@@ -159,7 +159,7 @@ export default function AuctionDetail({ auctionId }: Props) {
         {/* Back + Header */}
         <div>
           <button
-            onClick={() => router.push('/auctions')}
+            onClick={() => router.push('/radar')}
             className="text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300 mb-3 flex items-center gap-1"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
