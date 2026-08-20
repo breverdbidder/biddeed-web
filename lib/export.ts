@@ -1,8 +1,12 @@
 import type { Auction } from '@/types/auctions'
 
+// 'Defendant' was a header over a column that was blank in every row ever
+// exported: `defendant` is not a column on multi_county_auctions and
+// GET /api/auctions has never returned it. A CSV that ships an always-blank
+// column implies the data exists and is missing for these particular rows.
 const CSV_HEADERS = [
   'County', 'Case Number', 'Address', 'Auction Date', 'Type',
-  'Plaintiff', 'Defendant', 'Just Value', 'Opening Bid', 'Judgment Amount',
+  'Plaintiff', 'Just Value', 'Opening Bid', 'Judgment Amount',
   'Year Built', 'Living Area (sqft)', 'Lot Size', 'Owner',
   'Parcel ID', 'Vacant Land',
 ]
@@ -23,7 +27,6 @@ function auctionToRow(a: Auction): string[] {
     a.auction_date || '',
     a.auction_type || '',
     a.plaintiff || '',
-    a.defendant || '',
     justValue?.toString() || '',
     a.opening_bid?.toString() || '',
     a.judgment_amount?.toString() || '',
