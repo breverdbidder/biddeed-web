@@ -18,7 +18,8 @@ import { apiUrl } from '@/lib/api'
  *
  * It now owns its own data: on every view change it asks
  * /api/auctions/calendar for per-day typed COUNTS over exactly the visible
- * range, and renders them as badges (PropertyOnion-style: "23 Foreclosures"),
+ * range, and renders them as day-cell badges ("23 Foreclosures", "6 Tax
+ * Deeds"),
  * not as one event per property. Clicking a badge drills into that day's list.
  *
  * Colour is keyed on sale_type, never auction_type - auction_type is NULL on
