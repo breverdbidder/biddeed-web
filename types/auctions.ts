@@ -10,35 +10,62 @@
  * rows as of 2026-08-18).
  */
 export interface Auction {
-  id: number
+  /**
+   * uuid, NOT a number.
+   *
+   * MEASURED 2026-08-20: GET /api/auctions returns
+   * id: "72f48be9-05ee-4abd-a7bd-90fd90e5678f". This field was declared
+   * `number` and Supabase types every column as `any`, so nothing ever
+   * disagreed. It survived only because every consumer happens to either
+   * String()-coerce it or drop it into a template literal; the first piece of
+   * arithmetic or numeric sort on an auction id would have failed silently.
+   */
+  id: string
   county: string
   case_number: string
   property_address: string | null
   auction_type: string
   auction_date: string | null
   plaintiff: string | null
-  defendant?: string | null
   judgment_amount?: number | null
   assessed_value: number | null
   market_value?: number | null
   opening_bid: number | null
   parcel_id: string | null
   source_url: string | null
-  scraped_at: string | null
-  created_at: string | null
-  land_value: number | null
+  scraped_at?: string | null
+  created_at?: string | null
   year_built: number | null
   owner_name: string | null
   latitude: number | null
   longitude: number | null
   photo_url: string | null
-  enriched_at: string | null
+
+  /**
+   * Computed by the API, not columns on multi_county_auctions.
+   *
+   * `is_vacant_land` is derived from property_type by app/api/auctions/route.ts
+   * and IS present on every list row (null when property_type is null — an
+   * unknown renders as an em-dash, never as "No").
+   *
+   * Everything below it is DETAIL-ONLY: app/api/auctions/[id]/route.ts merges
+   * these from fl_parcels/zw_parcels, and GET /api/auctions does not return
+   * them at all. They are optional here for that reason — declaring them
+   * required told every list-view component they would be there, which is why
+   * AuctionSpreadsheet ships a "Zone" column (and a sort control for it) that
+   * is empty on every row, and a "Defendant" column for a field the API has
+   * never returned. Verified against the live payload on 2026-08-20; the
+   * key list is: no defendant, no dor_use_code, no zone_code, no
+   * municipality, no land_value, no enriched_at, no address_status.
+   */
   is_vacant_land: boolean | null
-  address_status: string | null
-  // Zoning intelligence fields
-  dor_use_code: string | null
-  zone_code: string | null
-  municipality: string | null
+  defendant?: string | null
+  land_value?: number | null
+  enriched_at?: string | null
+  address_status?: string | null
+  dor_use_code?: string | null
+  zone_code?: string | null
+  municipality?: string | null
 
   sale_type?: string | null
   living_area_sqft?: number | null
