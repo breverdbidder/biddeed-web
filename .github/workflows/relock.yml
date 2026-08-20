@@ -34,9 +34,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Node 22, not 20. MEASURED 2026-08-20: `npm install --package-lock-only`
+      # fails on this runner under Node 20 because .npmrc sets engine-strict=true
+      # and nanoid — pulled in transitively by @assistant-ui/react via
+      # @assistant-ui/core and assistant-stream — declares
+      # engines.node "^22 || ^24 || >=26". Node 20 satisfies none of those, so
+      # npm hard-fails before it writes a lockfile. This is NOT fixed by
+      # dropping engine-strict: that would only defer the same incompatibility
+      # to runtime. Everything else in the tree (next 16.1.6 wants >=20.9)
+      # is happy on 22.
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Regenerate the lockfile
         run: npm install --package-lock-only --no-audit --no-fund
