@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from 'next'
+import { headers } from 'next/headers'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import AppShell from '@/components/shell/AppShell'
+import ConditionalClerkProvider from '@/components/ConditionalClerkProvider'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -45,11 +47,16 @@ export const viewport: Viewport = {
   themeColor: '#020617',
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  // CSP nonce minted per-request by middleware. ClerkProvider must carry it:
+  // script-src uses 'strict-dynamic', so Clerk's injected scripts are only
+  // trusted when they inherit this nonce. The layout is already
+  // force-dynamic, so reading headers() here changes nothing about rendering.
+  const nonce = (await headers()).get('x-nonce') ?? undefined
   // `dark` is fixed on <html>. There is no theme switch: every component in
   // this app -- the shell and the ported AuctionRadar views alike -- carries
   // dark: variants and was designed against the #020617 / #0b1220 / #1e293b
@@ -68,7 +75,15 @@ export default function RootLayout({
           Every page underneath must export `dynamic = 'force-dynamic'` — see
           middleware.ts for why a prerendered page cannot carry a CSP nonce.
         */}
-        <AppShell>{children}</AppShell>
+        {/*
+          ConditionalClerkProvider no-ops (renders children directly) when
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY is absent — mirroring middleware's
+          CLERK_ENABLED pair-gate — so this wrapper is inert until the Clerk
+          env pair is configured, and the shell can use Clerk hooks once it is.
+        */}
+        <ConditionalClerkProvider nonce={nonce}>
+          <AppShell>{children}</AppShell>
+        </ConditionalClerkProvider>
       </body>
     </html>
   )
