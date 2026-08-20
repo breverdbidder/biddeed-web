@@ -25,7 +25,7 @@ function StatCard({ label, value, sub }: { label: string; value: string | number
 export default function AuctionSummaryCards({ summary, loading }: Props) {
   if (loading || !summary) {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-4">
         {[1, 2, 3, 4].map((i) => (
           <div key={i} className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg p-4 animate-pulse">
             <div className="h-3 w-16 bg-gray-200 dark:bg-slate-700 rounded mb-2" />
@@ -49,8 +49,20 @@ export default function AuctionSummaryCards({ summary, loading }: Props) {
   const upcoming = summary.upcoming ?? 0
   const upcomingCounties = summary.counties_upcoming ?? 0
 
+  // Tiles size by CONTAINER width, not viewport.
+  //
+  // Tailwind's responsive prefixes read the viewport, but these tiles live in
+  // the workspace column, whose real width is viewport minus the nav rail minus
+  // the Deed panel. Measured in production 2026-08-20 at 1280x800 with Deed
+  // open: the container was ~460px while the breakpoint still forced five
+  // columns, so the tiles were squeezed until the figures themselves clipped -
+  // the total rendered as "109,40". A truncated number on a bidding screen is a
+  // wrong number, not a cosmetic issue.
+  //
+  // auto-fit + minmax resolves against the actual container width and needs no
+  // container-query plugin, so the tiles wrap instead of shrinking.
   return (
-    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+    <div className="grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-4">
       <StatCard label="Total Auctions" value={summary.total.toLocaleString()} sub={`${countyCount} counties`} />
       <StatCard label="Foreclosures" value={fcCount.toLocaleString()} sub={`${tdCount.toLocaleString()} tax deeds`} />
       <StatCard label="With Address" value={summary.with_address.toLocaleString()} sub={addressRate} />
