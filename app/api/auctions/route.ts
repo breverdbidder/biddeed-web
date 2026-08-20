@@ -108,6 +108,14 @@ export async function GET(request: NextRequest) {
   if (to) query = query.lte('auction_date', to)
   if (upcoming && !from) {
     query = query.gte('auction_date', new Date().toISOString().slice(0, 10))
+    // Match auctions_summary_ssot()'s definition of "upcoming", not just the
+    // date. Date-only, this filter returned 2,530 rows while the header (fed
+    // by the SSOT RPC) said 1,889 -- the extra 641 were redeemed, cancelled
+    // and completed auctions rendered in the list as if still biddable
+    // (verified live 2026-08-20: upcoming 1,335 + scheduled 554 = 1,889).
+    // Two numbers for the same word on one screen is exactly the divergence
+    // the shared-RPC architecture exists to prevent.
+    query = query.in('auction_status', ['upcoming', 'scheduled'])
   }
   if (hasCoords === 'true') {
     query = query.not('latitude', 'is', null).not('longitude', 'is', null)
