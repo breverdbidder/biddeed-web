@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react'
 
+import { apiUrl } from '@/lib/api'
+
 type Phase = 'confirming' | 'delivered' | 'pending' | 'unpaid' | 'error'
 
 const FILES = [
@@ -29,7 +31,14 @@ export default function SuccessClient() {
 
     let cancelled = false
 
-    fetch(`/radar/api/checkout/confirm?session_id=${encodeURIComponent(sessionId)}`, {
+    // Through apiUrl(), never a hand-written prefix. This call was hardcoded to
+    // `/radar/api/checkout/confirm` from the era when the app was mounted at
+    // basePath '/radar'; once the app moved to the apex that path stopped
+    // resolving to anything (three segments deep under a one-segment
+    // `/radar/[id]` route), so every buyer returning from Stripe fell into the
+    // catch branch and was shown "still processing" for an order that had in
+    // fact been paid and fulfilled.
+    fetch(apiUrl(`/api/checkout/confirm?session_id=${encodeURIComponent(sessionId)}`), {
       method: 'POST',
     })
       .then((r) => r.json())
