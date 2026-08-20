@@ -22,7 +22,11 @@ import { apiUrl } from '@/lib/api'
  */
 
 interface MapPoint {
-  id: number
+  // uuid. GET /api/auctions/map returns
+  // "72f48be9-05ee-4abd-a7bd-90fd90e5678f" (verified 2026-08-20); this was
+  // declared `number` and nothing disagreed, because the value is only ever
+  // used as a Map key and a route segment.
+  id: string
   latitude: number
   longitude: number
   sale_type: string | null
@@ -120,7 +124,10 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [isSatellite, setIsSatellite] = useState(true)
   const [colorMode, setColorMode] = useState<ColorMode>('type')
-  const pointLookup = useRef<Map<number, MapPoint>>(new Map())
+  // Keyed by the auction uuid, not a numeric id. It worked at runtime only
+  // because JS Map keys are compared by value and both sides happened to be
+  // the same string; the declared key type was simply wrong.
+  const pointLookup = useRef<Map<string, MapPoint>>(new Map())
   const { theme } = useTheme()
 
   const [resp, setResp] = useState<MapResponse | null>(null)
