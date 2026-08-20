@@ -22,7 +22,11 @@ import { apiUrl } from '@/lib/api'
  */
 
 interface MapPoint {
-  id: number
+  // uuid. GET /api/auctions/map returns
+  // "72f48be9-05ee-4abd-a7bd-90fd90e5678f" (verified 2026-08-20); this was
+  // declared `number` and nothing disagreed, because the value is only ever
+  // used as a Map key and a route segment.
+  id: string
   latitude: number
   longitude: number
   sale_type: string | null
