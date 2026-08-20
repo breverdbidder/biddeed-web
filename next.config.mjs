@@ -11,6 +11,13 @@ const securityHeaders = [
 ]
 
 const nextConfig = {
+  // Inlined at build time so /api/health can report which commit is serving.
+  // GITHUB_SHA is set on the runner where `vercel build` executes; locally it
+  // is absent and the route reports 'dev'. The CI smoke check polls the
+  // production alias until this value matches the SHA it just deployed --
+  // without it, asserting the alias would happily pass against the PREVIOUS
+  // deployment and a failed promotion would look green.
+  env: { BUILD_SHA: process.env.GITHUB_SHA ?? 'dev' },
   // The app now serves the apex. basePath is empty, so Next emits assets at
   // /_next/* and the Worker gains explicit proxy branches for /, /_next/*,
   // /api/*, /radar* and /success rather than one /radar branch.
