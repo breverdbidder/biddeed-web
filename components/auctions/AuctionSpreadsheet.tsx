@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { downloadCSV } from '@/lib/export'
 import { getRecommendation } from '@/lib/scoring'
-import ZoningBadge from './ZoningBadge'
 import type { Auction } from '@/types/auctions'
 
 interface Props {
@@ -12,7 +11,16 @@ interface Props {
   onSelectAuction: (auction: Auction) => void
 }
 
-type SpreadsheetSort = 'county' | 'auction_date' | 'assessed_value' | 'property_address' | 'opening_bid' | 'dor_use_code'
+/*
+ * NOTE: a sort option for the zoning code was removed along with its column.
+ * GET /api/auctions returns 35 fields and the zoning code is not one of them
+ * - it is merged from zw_parcels by the DETAIL route only, so the column was
+ * empty on every row and the sort control sorted nothing. Offering either one
+ * tells the user the data exists and is merely missing here. Both return when
+ * the list endpoint joins zoning; see types/auctions.ts, where the
+ * detail-only fields are now optional for exactly this reason.
+ */
+type SpreadsheetSort = 'county' | 'auction_date' | 'assessed_value' | 'property_address' | 'opening_bid'
 
 function fmt(val: number | null | undefined): string {
   if (val == null) return '--'
@@ -87,17 +95,15 @@ export default function AuctionSpreadsheet({ auctions, loading, onSelectAuction 
       </div>
 
       <div className="overflow-x-auto">
-        <table className="min-w-[1200px] w-full divide-y divide-gray-200 dark:divide-slate-800 text-xs">
+        <table className="min-w-[1000px] w-full divide-y divide-gray-200 dark:divide-slate-800 text-xs">
           <thead className="bg-gray-50 dark:bg-slate-800/50">
             <tr>
               <SortTh field="county" label="County" />
               <th className="px-2 py-1.5 text-left text-[10px] font-semibold text-gray-500 dark:text-slate-400 uppercase whitespace-nowrap">Case #</th>
               <SortTh field="property_address" label="Address" />
               <th className="px-2 py-1.5 text-left text-[10px] font-semibold text-gray-500 dark:text-slate-400 uppercase whitespace-nowrap">Type</th>
-              <SortTh field="dor_use_code" label="Zone" />
               <SortTh field="auction_date" label="Date" />
               <th className="px-2 py-1.5 text-left text-[10px] font-semibold text-gray-500 dark:text-slate-400 uppercase whitespace-nowrap">Plaintiff</th>
-              <th className="px-2 py-1.5 text-left text-[10px] font-semibold text-gray-500 dark:text-slate-400 uppercase whitespace-nowrap">Defendant</th>
               <SortTh field="assessed_value" label="Just Value" />
               <SortTh field="opening_bid" label="Opening Bid" />
               <th className="px-2 py-1.5 text-left text-[10px] font-semibold text-gray-500 dark:text-slate-400 uppercase whitespace-nowrap">Yr Built</th>
@@ -123,12 +129,8 @@ export default function AuctionSpreadsheet({ auctions, loading, onSelectAuction 
                       {a.auction_type === 'foreclosure' ? 'FC' : 'TD'}
                     </span>
                   </td>
-                  <td className="px-2 py-1.5 whitespace-nowrap">
-                    <ZoningBadge dorCode={a.dor_use_code} />
-                  </td>
                   <td className="px-2 py-1.5 text-gray-600 dark:text-slate-400 whitespace-nowrap">{fmtDate(a.auction_date)}</td>
                   <td className="px-2 py-1.5 text-gray-600 dark:text-slate-400 max-w-[120px] truncate">{a.plaintiff || '--'}</td>
-                  <td className="px-2 py-1.5 text-gray-600 dark:text-slate-400 max-w-[120px] truncate">{a.defendant || '--'}</td>
                   <td className="px-2 py-1.5 text-gray-900 dark:text-slate-200 whitespace-nowrap tabular">{fmt(justValue)}</td>
                   <td className="px-2 py-1.5 text-gray-900 dark:text-slate-200 whitespace-nowrap tabular">{fmt(a.opening_bid)}</td>
                   <td className="px-2 py-1.5 text-gray-600 dark:text-slate-400 whitespace-nowrap tabular">{a.year_built || '--'}</td>
