@@ -23,6 +23,57 @@ export interface ShellCounts {
  *
  * The fetch goes through apiUrl(); basePath is not applied to raw fetch().
  */
+/**
+ * One in-flight request per page, shared by every consumer.
+ *
+ * MEASURED 2026-08-20: a single load of /radar?view=calendar issued FIVE
+ * identical GETs to /api/auctions/summary — the topbar, the sidebar badge, the
+ * summary cards and the page each mounted their own copy of this hook, and
+ * each one fired its own effect. Every one of those is a round trip to
+ * auctions_summary_ssot(), which aggregates 109k rows.
+ *
+ * The promise is memoised at module scope rather than in a context provider on
+ * purpose: consumers of this hook are scattered across the shell and the page
+ * tree with no common ancestor below the layout, and a provider would force
+ * every one of them to be a child of it. Module scope is per-document in the
+ * browser, so this is a page-lifetime cache, not a cross-user one.
+ *
+ * There is deliberately NO abort on unmount any more. Aborting a shared
+ * promise because one of five subscribers unmounted would cancel the request
+ * out from under the other four — the classic bug that turns a dedupe into a
+ * flake.
+ */
+let summaryPromise: Promise<ShellCounts> | null = null
+
+function num(v: unknown): number | null {
+  return typeof v === 'number' && Number.isFinite(v) ? v : null
+}
+
+function loadSummary(): Promise<ShellCounts> {
+  if (summaryPromise) return summaryPromise
+
+  summaryPromise = fetch(apiUrl('/api/auctions/summary'))
+    .then((res) => {
+      if (!res.ok) throw new Error(`summary endpoint returned ${res.status}`)
+      return res.json()
+    })
+    .then((json: Record<string, unknown>) => ({
+      upcoming: num(json.upcoming),
+      counties: num(json.counties_upcoming) ?? num(json.counties),
+      total: num(json.total),
+      loading: false,
+    }))
+    .catch(() => {
+      // Let the next mount retry rather than caching a failure for the life of
+      // the page: a transient 502 should not permanently em-dash the nav.
+      summaryPromise = null
+      // Every value null: the nav shows em-dashes rather than lying.
+      return { upcoming: null, counties: null, total: null, loading: false }
+    })
+
+  return summaryPromise
+}
+
 export function useAuctionCounts(): ShellCounts {
   const [counts, setCounts] = useState<ShellCounts>({
     upcoming: null,
@@ -33,32 +84,11 @@ export function useAuctionCounts(): ShellCounts {
 
   useEffect(() => {
     let cancelled = false
-    const controller = new AbortController()
-
-    fetch(apiUrl('/api/auctions/summary'), { signal: controller.signal })
-      .then((res) => {
-        if (!res.ok) throw new Error(`summary endpoint returned ${res.status}`)
-        return res.json()
-      })
-      .then((json: Record<string, unknown>) => {
-        if (cancelled) return
-        const num = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) ? v : null)
-        setCounts({
-          upcoming: num(json.upcoming),
-          counties: num(json.counties_upcoming) ?? num(json.counties),
-          total: num(json.total),
-          loading: false,
-        })
-      })
-      .catch((err) => {
-        if (cancelled || err?.name === 'AbortError') return
-        // Leave every value null: the nav shows em-dashes rather than lying.
-        setCounts({ upcoming: null, counties: null, total: null, loading: false })
-      })
-
+    loadSummary().then((next) => {
+      if (!cancelled) setCounts(next)
+    })
     return () => {
       cancelled = true
-      controller.abort()
     }
   }, [])
 
