@@ -371,9 +371,15 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
         'circle-color': [
           'step',
           ['get', 'point_count'],
-          '#22C55E',
-          10, '#F59E0B',
-          50, '#EF4444',
+          // Cluster buckets are BLUE, never the red/amber that encode sale
+          // type. Until 2026-08-20 both scales shared one palette: a red
+          // circle meant "Foreclosure" as a pin and "50+ auctions" as a
+          // cluster on the same map, and the legend documented that collision
+          // rather than resolving it. Blue is colourblind-safe against the
+          // red/amber pair and reads on the satellite basemap.
+          '#60A5FA',
+          10, '#2563EB',
+          50, '#1E40AF',
         ],
         'circle-radius': [
           'step',
@@ -399,6 +405,10 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
       },
       paint: {
         'text-color': '#ffffff',
+        // Halo keeps the count readable on the lightest bucket and over
+        // satellite imagery; white on #60A5FA alone is too low-contrast.
+        'text-halo-color': '#0B1929',
+        'text-halo-width': 1,
       },
     })
 
@@ -621,13 +631,15 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
           {colorMode === 'type' ? (
             <>
               <div className="flex items-center gap-3">
+                <span className="uppercase tracking-wide text-[10px] opacity-70 w-[68px] shrink-0">Pin type</span>
                 <span><span className="inline-block w-2 h-2 rounded-full bg-red-500 mr-1" /> Foreclosure</span>
                 <span><span className="inline-block w-2 h-2 rounded-full bg-amber-500 mr-1" /> Tax Deed</span>
               </div>
               <div className="flex items-center gap-3 mt-1 pt-1 border-t border-gray-200 dark:border-slate-700">
-                <span><span className="inline-block w-3 h-3 rounded-full bg-green-500 mr-1 text-[8px] text-white text-center leading-3">n</span> &lt;10</span>
-                <span><span className="inline-block w-3 h-3 rounded-full bg-amber-500 mr-1 text-[8px] text-white text-center leading-3">n</span> 10-49</span>
-                <span><span className="inline-block w-3 h-3 rounded-full bg-red-500 mr-1 text-[8px] text-white text-center leading-3">n</span> 50+</span>
+                <span className="uppercase tracking-wide text-[10px] opacity-70 w-[68px] shrink-0">Cluster size</span>
+                <span><span className="inline-block w-3 h-3 rounded-full bg-blue-400 mr-1 text-[8px] text-white text-center leading-3">n</span> &lt;10</span>
+                <span><span className="inline-block w-3 h-3 rounded-full bg-blue-600 mr-1 text-[8px] text-white text-center leading-3">n</span> 10-49</span>
+                <span><span className="inline-block w-3 h-3 rounded-full bg-blue-800 mr-1 text-[8px] text-white text-center leading-3">n</span> 50+</span>
               </div>
             </>
           ) : (
