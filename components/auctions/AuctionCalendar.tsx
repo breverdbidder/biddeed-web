@@ -72,6 +72,17 @@ export default function AuctionCalendar({ county, saleType, onSelectDay }: Props
   // mount before datesSet has ever populated rangeRef, and the initial fetch
   // is already handled by datesSet itself.
   const didMountRef = useRef(false)
+  // FullCalendar measures its container once and caches the result. It has no
+  // idea the Deed panel just took 480px off the right of the workspace, so it
+  // keeps rendering a table sized for the OLD width and the browser clips it.
+  // MEASURED in production 2026-08-20 at 1280x800 with Deed open: the month
+  // grid rendered 622px wide inside a 462px container and only Sun-Wed were
+  // visible - Thu, Fri and Sat were simply gone, with no scroll affordance.
+  // updateSize() is FullCalendar's own remedy; a ResizeObserver is what makes
+  // it fire for EVERY cause of a width change (panel toggle, sidebar collapse,
+  // window resize) rather than only the one we happened to think of.
+  const calendarRef = useRef<FullCalendar | null>(null)
+  const shellRef = useRef<HTMLDivElement | null>(null)
 
   const loadRange = useCallback(
     async (from: string, to: string) => {
@@ -165,8 +176,25 @@ export default function AuctionCalendar({ county, saleType, onSelectDay }: Props
       })
   })
 
+  useEffect(() => {
+    const el = shellRef.current
+    if (!el || typeof ResizeObserver === 'undefined') return
+    let frame = 0
+    const ro = new ResizeObserver(() => {
+      // Coalesce to one call per frame: a panel slide fires dozens of resize
+      // records and updateSize() is a full relayout each time.
+      cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(() => calendarRef.current?.getApi()?.updateSize())
+    })
+    ro.observe(el)
+    return () => {
+      cancelAnimationFrame(frame)
+      ro.disconnect()
+    }
+  }, [])
+
   return (
-    <div className="zw-auction-calendar bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg p-4">
+    <div ref={shellRef} className="zw-auction-calendar bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg p-4">
       {/*
         FullCalendar's day badges are click-handled in JS, not native <a> tags
         with a `url`, so FullCalendar never applies its own cursor:pointer to
@@ -268,6 +296,7 @@ export default function AuctionCalendar({ county, saleType, onSelectDay }: Props
       )}
 
       <FullCalendar
+        ref={calendarRef}
         plugins={[dayGridPlugin, listPlugin]}
         initialView="dayGridMonth"
         headerToolbar={{
