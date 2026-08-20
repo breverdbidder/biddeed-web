@@ -1,0 +1,63 @@
+'use client'
+
+import { ClerkProvider } from '@clerk/nextjs'
+
+// Ported from zonewise-web 2026-08-20 with one deliberate deviation: no
+// `@clerk/themes` import. That package is not in this repo's dependencies and
+// adding it for `baseTheme: dark` alone is not worth a new dependency — the
+// variables + elements below reproduce the dark treatment directly against
+// this app's fixed #020617 chrome.
+const CLERK_KEY = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+
+const clerkAppearance = {
+  variables: {
+    colorBackground: '#0b1220',
+    colorText: '#e2e8f0',
+    colorTextSecondary: '#94a3b8',
+    colorInputBackground: '#1e293b',
+    colorInputText: '#e2e8f0',
+    colorPrimary: '#F59E0B',
+    colorDanger: '#dc2626',
+    colorSuccess: '#16a34a',
+    colorWarning: '#F59E0B',
+    fontFamily: 'Inter, system-ui, sans-serif',
+  },
+  elements: {
+    formButtonPrimary: 'bg-[#F59E0B] hover:bg-[#fbbf24] text-[#020617] font-semibold',
+    card: 'shadow-lg border border-slate-700 bg-[#0b1220]',
+    headerTitle: 'text-white',
+    headerSubtitle: 'text-slate-400',
+    socialButtonsBlockButton: 'border-slate-600 text-slate-300 hover:bg-slate-800',
+    formFieldInput: 'bg-slate-800 border-slate-600 text-white',
+    footerActionLink: 'text-[#F59E0B] hover:text-[#fbbf24]',
+    userButtonAvatarBox: 'w-7 h-7',
+  },
+}
+
+export default function ConditionalClerkProvider({
+  children,
+  nonce,
+}: {
+  children: React.ReactNode
+  /**
+   * CSP nonce from middleware (x-nonce). REQUIRED: script-src uses
+   * 'strict-dynamic', which makes host allowlists inert — Clerk's injected
+   * scripts are only trusted if they carry the nonce. Without this the sign-in
+   * form renders but every Clerk request is blocked and Continue does nothing.
+   * (Scar carried over from zonewise-web, where this exact failure shipped.)
+   */
+  nonce?: string
+}) {
+  // No key -> render children without ClerkProvider. Keeps the app fully
+  // functional in passthrough mode and mirrors middleware.ts, where
+  // CLERK_ENABLED requires both halves of the credential pair.
+  if (!CLERK_KEY) {
+    return <>{children}</>
+  }
+
+  return (
+    <ClerkProvider appearance={clerkAppearance} nonce={nonce}>
+      {children}
+    </ClerkProvider>
+  )
+}
