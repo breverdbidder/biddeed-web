@@ -141,15 +141,27 @@ jobs:
         run: |
           set -euo pipefail
           body=$(curl -s --max-time 30 "${PROD_URL}/api/auctions/summary")
-          total=$(printf '%s' "$body" | sed -n 's/.*"total":\([0-9]*\).*/\1/p')
-          counties=$(printf '%s' "$body" | sed -n 's/.*"counties":\([0-9]*\).*/\1/p')
-          echo "summary: total=${total:-<none>} counties=${counties:-<none>}"
-          if [ -z "${total:-}" ] || [ "${total:-0}" -lt 1000 ]; then
+          # jq, not sed. "total" appears once per entry inside counties_detail,
+          # so a greedy sed capture grabs the LAST one - a single county's total,
+          # around 57 - instead of the top-level figure. That is exactly how this
+          # check failed its own first run (32397434360). The fix is an exact
+          # parse, not a lower threshold.
+          total=$(printf '%s' "$body" | jq -r '.total // empty')
+          counties=$(printf '%s' "$body" | jq -r '.counties // empty')
+          upcoming=$(printf '%s' "$body" | jq -r '.upcoming // empty')
+          echo "summary: total=${total:-<none>} counties=${counties:-<none>} upcoming=${upcoming:-<none>}"
+          if [ -z "${total:-}" ] || [ "${total}" -lt 1000 ]; then
             echo "::error::/api/auctions/summary reported total='${total:-<none>}'. The SSOT RPC is not answering."
             exit 1
           fi
           if [ "${counties:-0}" -ne 67 ]; then
-            echo "::error::/api/auctions/summary reported counties='${counties:-<none>}', expected 67."
+            echo "::error::/api/auctions/summary reported counties='${counties:-<none>}', expected 67 Florida counties."
+            exit 1
+          fi
+          # "0 upcoming auctions across Florida" is not a real state - it is what
+          # a silently broken query looks like, and it has shipped before.
+          if [ -z "${upcoming:-}" ] || [ "${upcoming}" -lt 1 ]; then
+            echo "::error::/api/auctions/summary reported upcoming='${upcoming:-<none>}'. That is a broken query, not a quiet week."
             exit 1
           fi
 
