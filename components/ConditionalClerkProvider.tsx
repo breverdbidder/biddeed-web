@@ -34,6 +34,25 @@ const clerkAppearance = {
   },
 }
 
+// The shared dev instance is named "My Application" in Clerk's dashboard, so
+// the stock <SignIn> card renders "Sign in to My Application". Renaming the
+// instance would mis-title the OTHER property (zonewise shares this pool), so
+// each site overrides the strings locally instead.
+const clerkLocalization = {
+  signIn: {
+    start: {
+      title: 'Sign in to BidDeed.AI',
+      subtitle: 'Welcome back! Please sign in to continue',
+    },
+  },
+  signUp: {
+    start: {
+      title: 'Create your BidDeed.AI account',
+      subtitle: 'One account works across BidDeed.AI and ZoneWise.AI',
+    },
+  },
+}
+
 export default function ConditionalClerkProvider({
   children,
   nonce,
@@ -56,7 +75,7 @@ export default function ConditionalClerkProvider({
   }
 
   return (
-    <ClerkProvider appearance={clerkAppearance} nonce={nonce}>
+    <ClerkProvider appearance={clerkAppearance} localization={clerkLocalization} nonce={nonce}>
       {children}
     </ClerkProvider>
   )
