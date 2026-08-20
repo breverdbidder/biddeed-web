@@ -9,30 +9,37 @@ concurrency:
   group: ci-deploy-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  # The URL real users hit. The smoke check asserts THIS, not the per-deployment
+  # URL — see the "Smoke-check" step for why, and for how it avoids the trap
+  # that makes an alias check meaningless.
+  PROD_URL: https://biddeed-web.vercel.app
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
     steps:
       - uses: actions/checkout@v4
 
-      # Node 22, not 20. MEASURED 2026-08-20: `npm install --package-lock-only`
-      # fails on this runner under Node 20 because .npmrc sets engine-strict=true
-      # and nanoid — pulled in transitively by @assistant-ui/react via
-      # @assistant-ui/core and assistant-stream — declares
-      # engines.node "^22 || ^24 || >=26". Node 20 satisfies none of those, so
-      # npm hard-fails before it writes a lockfile. This is NOT fixed by
-      # dropping engine-strict: that would only defer the same incompatibility
-      # to runtime. Everything else in the tree (next 16.1.6 wants >=20.9)
-      # is happy on 22.
+      # Node 22, not 20. MEASURED 2026-08-20: `npm ci` fails on this runner under
+      # Node 20 because .npmrc sets engine-strict=true and nanoid — pulled in
+      # transitively by @assistant-ui/react via @assistant-ui/core and
+      # assistant-stream — declares engines.node "^22 || ^24 || >=26". Node 20
+      # satisfies none of those. This is NOT fixed by dropping engine-strict:
+      # that would only defer the same incompatibility to runtime.
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: 'npm'
 
+      # npm ci, never npm install. It refuses to run when package-lock.json
+      # disagrees with package.json, which is the point: a dependency change is
+      # only half a change until the lock is regenerated. If this step fails on
+      # lockfile drift, run the "Relock" workflow — do not soften this command.
       - name: Install dependencies
         run: npm ci
 
@@ -57,31 +64,94 @@ jobs:
           # --prod so main lands on the stable biddeed-web.vercel.app alias
           # instead of a throwaway per-commit URL nobody can bookmark.
           url=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
-          echo "PREVIEW_URL=$url" >> "$GITHUB_ENV"
+          echo "DEPLOY_URL=$url" >> "$GITHUB_ENV"
 
-      - name: Smoke-check the deployment
+      # The per-deployment URL is reported, never asserted. This project has
+      # deployment protection enabled on those URLs, so an unauthenticated curl
+      # gets 401 — which is correct behaviour, not a failure. Run 32394019653
+      # (2026-08-20) died here at four seconds with a green build and a green
+      # deploy behind it. Logged explicitly rather than skipped silently.
+      - name: Report the per-deployment URL
+        run: |
+          set -euo pipefail
+          code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 "${DEPLOY_URL}/api/health" || echo 000)
+          echo "Deployment URL: ${DEPLOY_URL} -> HTTP ${code}"
+          if [ "$code" = "401" ] || [ "$code" = "403" ]; then
+            echo "::notice::Per-deployment URL is behind Vercel deployment protection (HTTP ${code}). Asserting the production alias instead."
+          fi
+
+      # Wait for the alias to actually serve THIS commit.
+      #
+      # Asserting the alias without this would be a check that cannot fail: the
+      # alias answers 200 for the previous deployment too, so a deploy that
+      # never promoted would still look green. /api/health reports the commit
+      # its bundle was built from (next.config.mjs inlines GITHUB_SHA), so the
+      # SHA comparison is what makes the assertion mean something.
+      - name: Wait for the alias to serve this commit
+        run: |
+          set -euo pipefail
+          want="${GITHUB_SHA}"
+          echo "Waiting for ${PROD_URL}/api/health to report sha=${want}"
+          for i in $(seq 1 40); do
+            got=$(curl -s --max-time 15 "${PROD_URL}/api/health" | sed -n 's/.*"sha":"\([^"]*\)".*/\1/p' || true)
+            if [ "$got" = "$want" ]; then
+              echo "Alias is serving ${want} after $((i*5))s."
+              exit 0
+            fi
+            echo "  attempt ${i}: alias reports sha='${got:-<none>}'"
+            sleep 5
+          done
+          echo "::error::${PROD_URL} never reported sha=${want}. The deploy did not promote to the production alias."
+          exit 1
+
+      - name: Smoke-check the production alias
         run: |
           set -euo pipefail
           fail=0
-          # basePath is gone: the app serves the apex, the workspace lives at
-          # /radar, the API is at /api/* and the order page at /order/success.
-          # /auctions and /success are deliberately absent - both belong to the
-          # Worker, /success because it is a live Stripe success_url.
-          for path in "/" "/radar" "/order/success" "/api/auctions/summary"; do
-            code=$(curl -s -o /tmp/body -w '%{http_code}' --max-time 30 "${PREVIEW_URL}${path}")
+          # /auctions and /success are deliberately absent from this list — both
+          # belong to the Worker, /success because it is a live Stripe
+          # success_url. /api/deed is POST-only and is exercised by its own step.
+          for path in "/" "/radar" "/radar?view=calendar" "/order/success" \
+                      "/api/health" "/api/auctions/summary" "/api/auctions/calendar" "/api/csp-report"; do
+            code=$(curl -s -o /tmp/body -w '%{http_code}' --max-time 30 "${PROD_URL}${path}")
             bytes=$(wc -c < /tmp/body)
             echo "${path} -> HTTP ${code}, ${bytes} bytes"
             if [ "$code" != "200" ]; then
               echo "::error::${path} returned HTTP ${code}"
               fail=1
             fi
-            # A shell that paints nothing is the failure mode this rebuild exists to end.
-            if [ "$bytes" -lt 1000 ]; then
-              echo "::error::${path} returned only ${bytes} bytes - suspiciously empty"
-              fail=1
-            fi
+            # A shell that paints nothing is the failure mode this rebuild exists
+            # to end. API routes are exempt from the size floor: a correct JSON
+            # response can legitimately be small.
+            case "$path" in
+              /api/*) ;;
+              *) if [ "$bytes" -lt 1000 ]; then
+                   echo "::error::${path} returned only ${bytes} bytes - suspiciously empty"
+                   fail=1
+                 fi ;;
+            esac
           done
           exit $fail
+
+      # The auction figures on screen come from auctions_summary_ssot(). If that
+      # RPC is unreachable the page still renders — em-dashes everywhere — and
+      # every check above still passes. This is the difference between "the page
+      # loaded" and "the page is telling the truth".
+      - name: Assert the data layer is actually answering
+        run: |
+          set -euo pipefail
+          body=$(curl -s --max-time 30 "${PROD_URL}/api/auctions/summary")
+          total=$(printf '%s' "$body" | sed -n 's/.*"total":\([0-9]*\).*/\1/p')
+          counties=$(printf '%s' "$body" | sed -n 's/.*"counties":\([0-9]*\).*/\1/p')
+          echo "summary: total=${total:-<none>} counties=${counties:-<none>}"
+          if [ -z "${total:-}" ] || [ "${total:-0}" -lt 1000 ]; then
+            echo "::error::/api/auctions/summary reported total='${total:-<none>}'. The SSOT RPC is not answering."
+            exit 1
+          fi
+          if [ "${counties:-0}" -ne 67 ]; then
+            echo "::error::/api/auctions/summary reported counties='${counties:-<none>}', expected 67."
+            exit 1
+          fi
 
       # A 200 with a big body proves the SERVER worked. It says nothing about
       # whether the browser was allowed to run the page: this project shipped
@@ -94,7 +164,7 @@ jobs:
           set -euo pipefail
           fail=0
           for path in "/" "/radar" "/order/success"; do
-            csp=$(curl -s -D - -o /tmp/page --max-time 30 "${PREVIEW_URL}${path}" \
+            csp=$(curl -s -D - -o /tmp/page --max-time 30 "${PROD_URL}${path}" \
                   | tr -d '\r' | grep -i '^content-security-policy:' || true)
             nonce=$(printf '%s' "$csp" | grep -o "nonce-[A-Za-z0-9+/=]*" | head -1 || true)
             nonced=$(grep -c 'nonce=' /tmp/page || true)
@@ -114,11 +184,32 @@ jobs:
           done
           exit $fail
 
+      # Two zero-tolerance greps. Both are rules the product is built on, and
+      # both are one careless edit away from coming back.
+      - name: Assert the hard rules still hold
+        run: |
+          set -euo pipefail
+          fail=0
+          if grep -rn "dangerouslySetInnerHTML" --include='*.ts' --include='*.tsx' app components lib types \
+             | grep -v '^\S*: *\*' | grep -v '//' ; then
+            echo "::error::dangerouslySetInnerHTML found. Model output is never written to the DOM as HTML."
+            fail=1
+          fi
+          if grep -rn "PropertyOnion\|propertyonion" --include='*.ts' --include='*.tsx' app components lib types ; then
+            echo "::error::Banned term found in the rendered surface."
+            fail=1
+          fi
+          exit $fail
+
       - name: Job summary
         if: always()
         run: |
           {
             echo "## Deployment"
             echo ""
-            echo "URL: ${PREVIEW_URL:-(deploy did not complete)}"
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Commit | \`${GITHUB_SHA}\` |"
+            echo "| Deployment URL | ${DEPLOY_URL:-(deploy did not complete)} |"
+            echo "| Production alias | ${PROD_URL} |"
           } >> "$GITHUB_STEP_SUMMARY"
