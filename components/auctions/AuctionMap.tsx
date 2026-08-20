@@ -550,7 +550,16 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
         className={
           isFullscreen
             ? 'fixed inset-0 z-50 bg-white dark:bg-slate-950'
-            : 'bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg overflow-hidden relative'
+            : // fillParent adds flex-1 min-h-0: this card sits inside the
+              // 'h-full flex flex-col min-h-0' outer div, and a flex child
+              // with no grow sizes to content — the canvas inside is h-full
+              // of an auto-height parent, i.e. 0. Verified live 2026-08-20:
+              // the DEFAULT /radar split view shipped with this card at 2px
+              // computed height (borders only), so the landing view's map —
+              // the right panel every user sees first — painted nothing while
+              // ?view=map (explicit h-[600px]) worked. mapbox-gl v3 observes
+              // container resize, so restoring real height also repaints.
+              `bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg overflow-hidden relative${fillParent ? ' flex-1 min-h-0' : ''}`
         }
       >
         {loading && (
