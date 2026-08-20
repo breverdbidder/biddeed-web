@@ -23,10 +23,27 @@ const isPublicRoute = createRouteMatcher([
   '/api/chat-v2(.*)',
   '/api/reports(.*)',
   '/api/csp-report(.*)',
+  // Deed's same-origin SSE proxy to the Worker's /chat/api. Public for the
+  // same reason /chat is on the Worker: the conversational surface is how a
+  // prospect evaluates the product before there is an account to protect.
+  // The route holds no credential — the Worker owns ROUTER_PROXY_KEY — and it
+  // forwards the caller's real IP so the Worker's per-IP rate limit still
+  // applies per visitor rather than per deployment.
+  '/api/deed(.*)',
   '/api/floorplan(.*)',
   '/api/massing(.*)', // public: 3D Massing Engine has no login gate, same as /massing page itself
   // Stripe webhooks MUST be public (Stripe sends without auth)
   '/api/stripe/webhook(.*)',
+  // Post-checkout fulfilment, called by /order/success. Public for the same
+  // reason '/order(.*)' below is: the buyer has no account when they return
+  // from Stripe, so auth.protect() here would strand every purchase behind a
+  // sign-in wall. This is not a widened surface — the route never trusts the
+  // session id as proof of payment; it hands it to confirm_checkout_session(),
+  // which re-reads payment_status from Stripe before writing anything, and a
+  // forged id gets `unpaid`. Omitting it while '/order(.*)' was allowlisted
+  // was an oversight: the page was public and the endpoint it depends on was
+  // not, which breaks the moment Clerk keys are configured.
+  '/api/checkout(.*)',
   // Pages — public access
   '/',
   '/chat(.*)',
@@ -195,17 +212,36 @@ function rateLimitMiddleware(req: NextRequest): NextResponse | undefined {
  * Dev mode: Content-Security-Policy-Report-Only
  * Prod mode: Content-Security-Policy (enforcing)
  *
- * script-src additions for ElevenLabs Voice Draftsman widget (Aug 2026):
- * - https://unpkg.com: hosts the @elevenlabs/convai-widget-embed bundle
- * - two sha256 hashes: the widget bootstraps by inserting two small inline
- *   <script> tags itself; strict-dynamic propagation does not cover these on
- *   all browsers, so pin the exact hashes reported by the browser's own CSP
- *   violation errors. NOTE: these hashes are tied to a specific widget
- *   bundle version — if a future ElevenLabs widget update changes its
- *   bootstrap script content, these hashes will need to be regenerated from
- *   fresh CSP violation reports (check /api/csp-report or browser console).
- * connect-src additions: the widget calls ElevenLabs' regional API (US) for
- * agent config and the realtime conversation websocket.
+ * ELEVENLABS / VOICE — READ THIS BEFORE BELIEVING THE PREVIOUS COMMENT.
+ *
+ * This block used to describe script-src additions for the ElevenLabs Voice
+ * Draftsman widget: https://unpkg.com plus two pinned sha256 hashes for the
+ * inline scripts the widget inserts into itself. Measured against the live
+ * response on 2026-08-20: NONE OF THEM ARE IN THE POLICY BELOW. connect-src
+ * does carry all four ElevenLabs origins, so the widget would be allowed to
+ * talk to ElevenLabs but its own bundle is refused before it can. The voice
+ * agent cannot load, and the comment said otherwise for two days.
+ *
+ * Two further gaps in the same policy, both UNTESTED against a real session:
+ *  - media-src is absent entirely, so it falls back to default-src 'self',
+ *    which does not permit blob:. Conversational audio playback is a blob:
+ *    path.
+ *  - frame-src carries no ElevenLabs origin. If the chosen integration
+ *    iframes, it is blocked.
+ *
+ * RECOMMENDED FIX, pending Ariel's sign-off (CSP is his lane): use the npm SDK
+ * (@elevenlabs/react) rather than the unpkg widget embed. A bundled dependency
+ * is covered by 'strict-dynamic' through our own nonced entry chunk, needs no
+ * third-party host in script-src, and needs no pinned hashes that silently rot
+ * on the vendor's next release. That reduces the whole change to one media-src
+ * line instead of a permanent third-party concession.
+ *
+ * If the widget route is chosen instead, regenerate the hashes from real
+ * violation reports — app/api/csp-report/route.ts now exists to receive them
+ * and logs the browser's script-sample, which is the value you hash. Until
+ * 2026-08-20 that endpoint was referenced by report-uri but had no handler, so
+ * every report 404'd and the instruction to "check /api/csp-report" pointed at
+ * a route that could not answer.
  */
 function buildCspHeaders(nonce: string): Record<string, string> {
   const csp = [
