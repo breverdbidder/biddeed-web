@@ -155,10 +155,30 @@ export default function AuctionsLayout({ initialView, initialCounty, initialSale
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCounty, selectedType, dayFilter, viewMode])
 
+  // Retries a transient upstream failure before surfacing an error. The summary
+  // RPC intermittently 500s on a cold start (observed live 2026-08-20); a single
+  // one dropped the whole workspace into an error state even though the very next
+  // request succeeded. Only 5xx and network faults are retried -- a 4xx is a real
+  // answer and will not fix itself by asking again.
   async function fetchSummary() {
-    const res = await fetch(apiUrl('/api/auctions/summary'))
-    if (!res.ok) throw new Error(`summary endpoint returned ${res.status}`)
-    setSummary(await res.json())
+    let lastErr: unknown = null
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const res = await fetch(apiUrl('/api/auctions/summary'))
+        if (res.ok) {
+          setSummary(await res.json())
+          return
+        }
+        const err = new Error(`summary endpoint returned ${res.status}`)
+        if (res.status < 500) throw err
+        lastErr = err
+      } catch (err) {
+        if (err instanceof Error && /returned 4\d\d$/.test(err.message)) throw err
+        lastErr = err
+      }
+      if (attempt < 2) await new Promise((r) => setTimeout(r, 400 * 2 ** attempt))
+    }
+    throw lastErr instanceof Error ? lastErr : new Error('summary endpoint unreachable')
   }
 
   async function fetchAuctions() {
