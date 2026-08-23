@@ -4,6 +4,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import AppShell from '@/components/shell/AppShell'
 import ConditionalClerkProvider from '@/components/ConditionalClerkProvider'
+import { isClerkHostAuthorized } from '@/lib/clerk-host'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -56,7 +57,26 @@ export default async function RootLayout({
   // script-src uses 'strict-dynamic', so Clerk's injected scripts are only
   // trusted when they inherit this nonce. The layout is already
   // force-dynamic, so reading headers() here changes nothing about rendering.
-  const nonce = (await headers()).get('x-nonce') ?? undefined
+  const h = await headers()
+  const nonce = h.get('x-nonce') ?? undefined
+  // Clerk activates only on hosts its production instance recognises.
+  //
+  // MEASURED 2026-08-23 on WebKit and Chromium against production: every page
+  // load on biddeed-web.vercel.app fired two /__clerk/v1/* bootstrap calls
+  // (@clerk/nextjs v6 same-origin proxying) and Clerk answered 400
+  // "host_invalid" to both - the instance is bound to biddeed.ai, and the
+  // vercel.app host is not registered to it. Two failed requests plus console
+  // errors on every visit, for every visitor, on the host we are actively
+  // auditing. The instance itself is healthy: clerk.biddeed.ai/v1/environment
+  // answers 200 directly.
+  //
+  // Host gating here (server-side, so no hydration mismatch) keeps the
+  // vercel.app surface in clean passthrough mode and lets auth switch on by
+  // itself the moment the biddeed.ai cutover points at this app. localhost
+  // stays enabled for development against a dev instance.
+  const clerkHostAuthorized = isClerkHostAuthorized(
+    h.get('x-forwarded-host') ?? h.get('host')
+  )
   // `dark` is fixed on <html>. There is no theme switch: every component in
   // this app -- the shell and the ported AuctionRadar views alike -- carries
   // dark: variants and was designed against the #020617 / #0b1220 / #1e293b
@@ -81,7 +101,7 @@ export default async function RootLayout({
           CLERK_ENABLED pair-gate — so this wrapper is inert until the Clerk
           env pair is configured, and the shell can use Clerk hooks once it is.
         */}
-        <ConditionalClerkProvider nonce={nonce}>
+        <ConditionalClerkProvider nonce={nonce} hostAuthorized={clerkHostAuthorized}>
           <AppShell>{children}</AppShell>
         </ConditionalClerkProvider>
       </body>
