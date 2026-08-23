@@ -35,7 +35,14 @@ export default async function RadarPage({
   const { view, county, sale_type: saleType } = await searchParams
   // ?view= is what the Calendar nav item points at, so the sidebar and the
   // workspace's own switcher stay in agreement.
-  const initialView = VIEWS.includes(view as ViewMode) ? (view as ViewMode) : 'split'
+  // Map is the default surface: a bidder landing on the workspace should see
+  // WHERE the inventory is before anything else.
+  //
+  // This line is the REAL default. AuctionsLayout has its own `initialView ??`
+  // fallback, but this page always passes an explicit value, so that fallback is
+  // dead code and changing it alone does nothing - verified 2026-08-20 by
+  // changing it and watching /radar still render the split view.
+  const initialView = VIEWS.includes(view as ViewMode) ? (view as ViewMode) : 'map'
 
   // ?county= and ?sale_type= make a filtered workspace linkable, and they are
   // the surface Deed acts through: its apply-county-filter tool navigates
