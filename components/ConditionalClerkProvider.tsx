@@ -56,8 +56,18 @@ const clerkLocalization = {
 export default function ConditionalClerkProvider({
   children,
   nonce,
+  hostAuthorized = false,
 }: {
   children: React.ReactNode
+  /**
+   * Whether the serving host is one the production Clerk instance recognises
+   * (biddeed.ai, *.biddeed.ai, localhost). Computed server-side in layout.tsx
+   * from x-forwarded-host so server and client render identically. On any
+   * other host Clerk's same-origin /__clerk proxy calls are answered 400
+   * host_invalid by Clerk - so the provider stands down instead of shipping
+   * two guaranteed-failed requests per page view.
+   */
+  hostAuthorized?: boolean
   /**
    * CSP nonce from middleware (x-nonce). REQUIRED: script-src uses
    * 'strict-dynamic', which makes host allowlists inert — Clerk's injected
@@ -70,7 +80,7 @@ export default function ConditionalClerkProvider({
   // No key -> render children without ClerkProvider. Keeps the app fully
   // functional in passthrough mode and mirrors middleware.ts, where
   // CLERK_ENABLED requires both halves of the credential pair.
-  if (!CLERK_KEY) {
+  if (!CLERK_KEY || !hostAuthorized) {
     return <>{children}</>
   }
 
