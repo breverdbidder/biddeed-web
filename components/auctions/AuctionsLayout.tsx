@@ -348,12 +348,24 @@ export default function AuctionsLayout({ initialView, initialCounty, initialSale
           />
         )}
         {viewMode === 'map' && (
-          <AuctionMap
-            county={selectedCounty}
-            saleType={selectedType}
-            dayFilter={dayFilter}
-            onSelectAuction={setSelectedAuction}
-          />
+          /*
+           * fillParent inside a viewport-fit box. MEASURED 2026-08-20: the
+           * standalone map's fixed h-[600px] put its bottom edge 89-91px below
+           * the fold at 1440x900 - the wrong shape for the view a bidder now
+           * lands on. The offset is 25.5rem because the stack above the card
+           * (topbar, heading, stat tiles, filter row, honesty banner, margins)
+           * measures ~391px; a first attempt with 16rem still ran 89px past
+           * the fold.
+           */
+          <div className="h-[calc(100vh-25.5rem)] min-h-[420px]">
+            <AuctionMap
+              county={selectedCounty}
+              saleType={selectedType}
+              dayFilter={dayFilter}
+              onSelectAuction={setSelectedAuction}
+              fillParent
+            />
+          </div>
         )}
         {viewMode === 'calendar' && (
           <AuctionCalendar
