@@ -342,9 +342,26 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
     }
   }
 
+  /**
+   * Id of the first basemap symbol layer, so the auction layers can be
+   * inserted BENEATH the place labels.
+   *
+   * MEASURED 2026-08-20 at 1440x900: the 115 cluster covered the "W" of "West
+   * Palm Beach" and the 57 cluster covered "Miami", rendering them as
+   * "...est Palm Beach" and "...ami". A bidder orients by city name; a pin
+   * that erases the city is worse than no pin. Resolved at runtime, never
+   * hardcoded - Mapbox renames these ids between style versions, and a stale
+   * id fails silently by putting the layer back on top.
+   */
+  function firstSymbolLayerId(map: any): string | undefined {
+    const layers = map.getStyle?.()?.layers ?? []
+    return layers.find((l: any) => l.type === 'symbol' && l.layout?.['text-field'])?.id
+  }
+
   function addClusterLayers() {
     const map = mapRef.current
     if (!map) return
+    const beforeId = firstSymbolLayerId(map)
 
     const layersToRemove = ['clusters', 'cluster-count', 'unclustered-point']
     layersToRemove.forEach((id) => {
@@ -391,7 +408,7 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
         'circle-stroke-width': 2,
         'circle-stroke-color': '#ffffff',
       },
-    })
+    }, beforeId)
 
     map.addLayer({
       id: 'cluster-count',
@@ -400,8 +417,16 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
       filter: ['has', 'point_count'],
       layout: {
         'text-field': '{point_count_abbreviated}',
-        'text-font': ['DIN Pro Medium', 'Arial Unicode MS Bold'],
-        'text-size': 12,
+        // Bold, not Medium. MEASURED 2026-08-20 on the production render:
+        // 12px Medium over a saturated fill left almost every stroke pixel as
+        // partial coverage, so the declared #ffffff sampled #FBD3D3 - pink.
+        'text-font': ['DIN Pro Bold', 'Arial Unicode MS Bold'],
+        // Scale with the circle: an 18px-radius circle carried 12px text.
+        'text-size': ['step', ['get', 'point_count'], 13, 10, 15, 50, 17],
+        // A count the collision engine drops leaves a circle with NO number
+        // on it, which is worse than a crowded map.
+        'text-allow-overlap': true,
+        'text-ignore-placement': true,
       },
       paint: {
         'text-color': '#ffffff',
@@ -410,7 +435,7 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
         'text-halo-color': '#0B1929',
         'text-halo-width': 1,
       },
-    })
+    }, beforeId)
 
     map.addLayer({
       id: 'unclustered-point',
@@ -418,7 +443,7 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
       source: 'auctions',
       filter: ['!', ['has', 'point_count']],
       paint: getUnclusteredPaint(),
-    })
+    }, beforeId)
 
     // Click cluster → zoom in
     map.on('click', 'clusters', (e: any) => {
