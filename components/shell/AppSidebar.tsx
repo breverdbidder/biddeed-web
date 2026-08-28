@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
-import { ChevronsUpDown, MessageSquare, UserRound } from 'lucide-react'
+import { ChevronsUpDown, UserRound } from 'lucide-react'
 
 import {
   Sidebar,
@@ -30,6 +30,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { ACCOUNT_LINKS, NAV_ITEMS, type NavItem } from './nav'
 import { formatCount, useAuctionCounts } from './useAuctionCounts'
+import DeedRobotMark from '@/components/deed/DeedRobotMark'
 
 interface Props {
   deedOpen: boolean
@@ -154,8 +155,10 @@ export default function AppSidebar({ deedOpen, onToggleDeed }: Props) {
                   aria-controls="deed-panel"
                   tooltip="Deed — the BidDeed agent"
                 >
-                  <MessageSquare />
-                  <span>Deed</span>
+                  <DeedRobotMark size={24} decorative={false} className="rounded-md" />
+                  <span>
+                    Deed <span className="sr-only">voice chatbot</span>
+                  </span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>

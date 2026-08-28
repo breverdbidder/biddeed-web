@@ -6,6 +6,7 @@ import remarkGfm from 'remark-gfm'
 import { AlertTriangle, MapPinned, Paperclip, SquareArrowOutUpRight } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
+import DeedRobotMark from './DeedRobotMark'
 import { countyLabel } from '@/lib/deed/context'
 import type { DeedTurn } from './useDeedChat'
 
@@ -81,7 +82,13 @@ export default function DeedThread({ turns, streaming, status, surface, onSugges
   if (turns.length === 0 && !streaming) {
     return (
       <div className="min-h-0 flex-1 overflow-y-auto px-4 py-6">
-        <h3 className="text-sm font-semibold text-white">Ask about this screen</h3>
+        <div className="mb-4 flex items-center gap-3">
+          <DeedRobotMark size={44} decorative={false} className="rounded-xl" />
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-bd-orange">Deed Voice AI</p>
+            <h3 className="text-sm font-semibold text-white">Ask about this screen</h3>
+          </div>
+        </div>
         <p className="mt-1.5 text-sm leading-relaxed text-slate-400">
           Deed is looking at the {surface}. It answers from recorded auction data and cites
           the endpoint or case number behind every figure — and it can filter or open records

@@ -1,6 +1,7 @@
 'use client'
 
 import { ClerkProvider } from '@clerk/nextjs'
+import { useTheme } from '@/lib/theme-context'
 
 // Ported from zonewise-web 2026-08-20 with one deliberate deviation: no
 // `@clerk/themes` import. That package is not in this repo's dependencies and
@@ -9,29 +10,32 @@ import { ClerkProvider } from '@clerk/nextjs'
 // this app's fixed #020617 chrome.
 const CLERK_KEY = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
 
-const clerkAppearance = {
-  variables: {
-    colorBackground: '#0b1220',
-    colorText: '#e2e8f0',
-    colorTextSecondary: '#94a3b8',
-    colorInputBackground: '#1e293b',
-    colorInputText: '#e2e8f0',
-    colorPrimary: '#F59E0B',
-    colorDanger: '#dc2626',
-    colorSuccess: '#16a34a',
-    colorWarning: '#F59E0B',
-    fontFamily: 'Inter, system-ui, sans-serif',
-  },
-  elements: {
-    formButtonPrimary: 'bg-[#F59E0B] hover:bg-[#fbbf24] text-[#020617] font-semibold',
-    card: 'shadow-lg border border-slate-700 bg-[#0b1220]',
-    headerTitle: 'text-white',
-    headerSubtitle: 'text-slate-400',
-    socialButtonsBlockButton: 'border-slate-600 text-slate-300 hover:bg-slate-800',
-    formFieldInput: 'bg-slate-800 border-slate-600 text-white',
-    footerActionLink: 'text-[#F59E0B] hover:text-[#fbbf24]',
-    userButtonAvatarBox: 'w-7 h-7',
-  },
+function clerkAppearance(theme: 'light' | 'dark') {
+  const light = theme === 'light'
+  return {
+    variables: {
+      colorBackground: light ? '#fbfaf7' : '#0b1220',
+      colorText: light ? '#1f1b16' : '#e2e8f0',
+      colorTextSecondary: light ? '#766f67' : '#94a3b8',
+      colorInputBackground: light ? '#f5f0e8' : '#1e293b',
+      colorInputText: light ? '#1f1b16' : '#e2e8f0',
+      colorPrimary: light ? '#c15f3c' : '#F59E0B',
+      colorDanger: '#dc2626',
+      colorSuccess: '#16a34a',
+      colorWarning: light ? '#c15f3c' : '#F59E0B',
+      fontFamily: 'Inter, system-ui, sans-serif',
+    },
+    elements: {
+      formButtonPrimary: light ? 'bg-[#C15F3C] hover:bg-[#A94D30] text-[#F5F0E8] font-semibold' : 'bg-[#F59E0B] hover:bg-[#fbbf24] text-[#020617] font-semibold',
+      card: light ? 'shadow-lg border border-[#DDD5C9] bg-[#FBFAF7]' : 'shadow-lg border border-slate-700 bg-[#0b1220]',
+      headerTitle: light ? 'text-[#1F1B16]' : 'text-white',
+      headerSubtitle: light ? 'text-[#766F67]' : 'text-slate-400',
+      socialButtonsBlockButton: light ? 'border-[#B5A9A0] text-[#1F1B16] hover:bg-[#EDE3D7]' : 'border-slate-600 text-slate-300 hover:bg-slate-800',
+      formFieldInput: light ? 'bg-[#F5F0E8] border-[#B5A9A0] text-[#1F1B16]' : 'bg-slate-800 border-slate-600 text-white',
+      footerActionLink: light ? 'text-[#C15F3C] hover:text-[#A94D30]' : 'text-[#F59E0B] hover:text-[#fbbf24]',
+      userButtonAvatarBox: 'w-7 h-7',
+    },
+  }
 }
 
 // The shared dev instance is named "My Application" in Clerk's dashboard, so
@@ -77,6 +81,8 @@ export default function ConditionalClerkProvider({
    */
   nonce?: string
 }) {
+  const { theme } = useTheme()
+
   // No key -> render children without ClerkProvider. Keeps the app fully
   // functional in passthrough mode and mirrors middleware.ts, where
   // CLERK_ENABLED requires both halves of the credential pair.
@@ -85,7 +91,7 @@ export default function ConditionalClerkProvider({
   }
 
   return (
-    <ClerkProvider appearance={clerkAppearance} localization={clerkLocalization} nonce={nonce}>
+    <ClerkProvider appearance={clerkAppearance(theme)} localization={clerkLocalization} nonce={nonce}>
       {children}
     </ClerkProvider>
   )

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { MessageSquare, RotateCcw, X } from 'lucide-react'
+import { RotateCcw, X } from 'lucide-react'
 
 import DeedComposer from '@/components/deed/DeedComposer'
 import DeedThread from '@/components/deed/DeedThread'
@@ -10,6 +10,7 @@ import type { SlashCommand } from '@/components/deed/SlashMenu'
 import { useDeedChat, type DeedAttachment } from '@/components/deed/useDeedChat'
 import type { DeedAction } from '@/lib/deed/protocol'
 import { cn } from '@/lib/utils'
+import DeedRobotMark from '@/components/deed/DeedRobotMark'
 
 interface Props {
   open: boolean
@@ -117,7 +118,7 @@ export default function DeedPanel({ open, onClose }: Props) {
         )}
       >
         <div className="flex h-14 shrink-0 items-center gap-2 border-b border-slate-800 px-4">
-          <MessageSquare className="size-4 text-bd-orange" aria-hidden />
+          <DeedRobotMark size={30} decorative={false} className="rounded-md" />
           <h2 className="text-sm font-semibold text-white">Deed</h2>
           <span className="truncate text-xs text-slate-500">· {context.surface}</span>
 

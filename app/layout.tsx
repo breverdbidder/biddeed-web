@@ -5,6 +5,7 @@ import './globals.css'
 import AppShell from '@/components/shell/AppShell'
 import ConditionalClerkProvider from '@/components/ConditionalClerkProvider'
 import { isClerkHostAuthorized } from '@/lib/clerk-host'
+import { ThemeProvider } from '@/lib/theme-context'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -85,8 +86,8 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} dark`}
-      style={{ background: '#020617', color: '#e2e8f0' }}
+      className={inter.variable}
+      style={{ background: 'hsl(var(--background))', color: 'hsl(var(--foreground))' }}
     >
       <body>
         {/*
@@ -101,9 +102,11 @@ export default async function RootLayout({
           CLERK_ENABLED pair-gate — so this wrapper is inert until the Clerk
           env pair is configured, and the shell can use Clerk hooks once it is.
         */}
-        <ConditionalClerkProvider nonce={nonce} hostAuthorized={clerkHostAuthorized}>
-          <AppShell>{children}</AppShell>
-        </ConditionalClerkProvider>
+          <ThemeProvider>
+            <ConditionalClerkProvider nonce={nonce} hostAuthorized={clerkHostAuthorized}>
+              <AppShell>{children}</AppShell>
+            </ConditionalClerkProvider>
+          </ThemeProvider>
       </body>
     </html>
   )
