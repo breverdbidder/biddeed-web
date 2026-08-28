@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react'
-import { CalendarDays, FileText, Gavel, Home, MapPinned } from 'lucide-react'
+import { CalendarDays, FileText, Gavel, Home, MapPinned, Search } from 'lucide-react'
 
 /**
  * Primary navigation.
@@ -42,6 +42,13 @@ export const NAV_ITEMS: NavItem[] = [
     href: '/radar?view=calendar',
     icon: CalendarDays,
     description: 'What sells, and when',
+  },
+  {
+    key: 'discover',
+    label: 'Discover',
+    href: '/discover',
+    icon: Search,
+    description: 'Search source-backed auction inventory',
   },
   {
     key: 'counties',
