@@ -67,6 +67,7 @@ const isPublicRoute = createRouteMatcher([
   '/explore(.*)',
   '/explorer(.*)',
   '/discover(.*)',
+  '/alerts(.*)',
   '/massing(.*)',
   '/floorplan(.*)',
   '/proforma(.*)',
