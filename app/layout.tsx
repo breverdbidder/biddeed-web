@@ -46,7 +46,7 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic'
 
 export const viewport: Viewport = {
-  themeColor: '#020617',
+  themeColor: '#f5f0e8',
 }
 
 export default async function RootLayout({
@@ -78,14 +78,13 @@ export default async function RootLayout({
   const clerkHostAuthorized = isClerkHostAuthorized(
     h.get('x-forwarded-host') ?? h.get('host')
   )
-  // `dark` is fixed on <html>. There is no theme switch: every component in
-  // this app -- the shell and the ported AuctionRadar views alike -- carries
-  // dark: variants and was designed against the #020617 / #0b1220 / #1e293b
-  // palette. Without the class, Tailwind's darkMode:['class'] leaves the
-  // workspace rendering its light fallback inside dark chrome.
+  // Light mode is the BidDeed house-brand default. The ThemeProvider keeps
+  // the user toggle available, while this server attribute prevents a dark
+  // first paint before hydration.
   return (
     <html
       lang="en"
+      data-theme="light"
       className={inter.variable}
       style={{ background: 'hsl(var(--background))', color: 'hsl(var(--foreground))' }}
     >
