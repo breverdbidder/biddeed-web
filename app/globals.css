@@ -248,3 +248,69 @@ th[data-numeric] { font-variant-numeric: tabular-nums; font-feature-settings: "t
 .fc-icon-minus-square::before { content: '\2212'; }
 .fc-icon-plus-square::before { content: '\002B'; }
 .fc-icon-x::before { content: '\00D7'; }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   WinnerDataAI house-brand light mode.
+   Cream canvas, black-brown ink, terracotta action color, and warm neutrals.
+   Dark mode remains the default; the ThemeProvider adds data-theme="light".
+   ───────────────────────────────────────────────────────────────────────── */
+html[data-theme='light'] {
+  --background: 39 38% 93%;          /* #f5f0e8 cream */
+  --foreground: 30 17% 10%;          /* #1f1b16 black ink */
+  --card: 45 50% 98%;                 /* #fbfaf7 */
+  --card-foreground: 30 17% 10%;
+  --popover: 45 50% 98%;
+  --popover-foreground: 30 17% 10%;
+  --primary: 15 52% 50%;              /* #c15f3c terracotta */
+  --primary-foreground: 39 38% 93%;
+  --secondary: 35 35% 89%;
+  --secondary-foreground: 30 17% 10%;
+  --muted: 35 35% 89%;
+  --muted-foreground: 28 8% 45%;      /* #766f67 */
+  --accent: 15 52% 50%;
+  --accent-foreground: 39 38% 93%;
+  --border: 33 25% 82%;               /* #ddd5c9 */
+  --input: 33 25% 82%;
+  --ring: 15 52% 50%;
+  --sidebar-background: 39 38% 93%;
+  --sidebar-foreground: 30 17% 10%;
+  --sidebar-primary: 15 52% 50%;
+  --sidebar-primary-foreground: 39 38% 93%;
+  --sidebar-accent: 35 35% 89%;
+  --sidebar-accent-foreground: 30 17% 10%;
+  --sidebar-border: 33 25% 82%;
+  --sidebar-ring: 15 52% 50%;
+}
+
+html[data-theme='light'] body {
+  background: #f5f0e8;
+  color: #1f1b16;
+}
+html[data-theme='light'] [class~='bg-[#020617]'],
+html[data-theme='light'] [class~='bg-slate-950'] { background-color: #f5f0e8 !important; }
+html[data-theme='light'] [class~='bg-[#0b1220]'],
+html[data-theme='light'] [class~='bg-slate-900'] { background-color: #fbfaf7 !important; }
+html[data-theme='light'] [class~='bg-slate-800'] { background-color: #ede3d7 !important; }
+html[data-theme='light'] [class~='text-white'],
+html[data-theme='light'] [class~='text-slate-100'],
+html[data-theme='light'] [class~='text-slate-200'] { color: #1f1b16 !important; }
+html[data-theme='light'] [class~='text-slate-300'],
+html[data-theme='light'] [class~='text-slate-400'] { color: #766f67 !important; }
+html[data-theme='light'] [class~='text-slate-500'],
+html[data-theme='light'] [class~='text-slate-600'] { color: #8f8479 !important; }
+html[data-theme='light'] [class~='border-slate-800'],
+html[data-theme='light'] [class~='border-slate-700'],
+html[data-theme='light'] [class~='border-slate-600'] { border-color: #ddd5c9 !important; }
+html[data-theme='light'] [class~='hover:bg-slate-800']:hover { background-color: #ede3d7 !important; }
+html[data-theme='light'] [class~='hover:text-white']:hover { color: #1f1b16 !important; }
+html[data-theme='light'] [class~='text-bd-orange'] { color: #c15f3c !important; }
+html[data-theme='light'] [class~='bg-bd-orange'] { background-color: #c15f3c !important; }
+html[data-theme='light'] [class~='border-bd-orange'] { border-color: #c15f3c !important; }
+html[data-theme='light'] [class~='border-bd-orange\/50'] { border-color: rgba(193,95,60,.5) !important; }
+html[data-theme='light'] [class~='bg-bd-orange\/5'],
+html[data-theme='light'] [class~='bg-bd-orange\/10'] { background-color: rgba(193,95,60,.08) !important; }
+html[data-theme='light'] [class~='bg-slate-950\/60'] { background-color: rgba(31,27,22,.28) !important; }
+html[data-theme='light'] ::selection { background: #c15f3c; color: #f5f0e8; }
+html[data-theme='light'] ::-webkit-scrollbar-track { background: #ede3d7; }
+html[data-theme='light'] ::-webkit-scrollbar-thumb { background: #b5a9a0; }
+html[data-theme='light'] ::-webkit-scrollbar-thumb:hover { background: #8f8479; }

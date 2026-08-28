@@ -8,6 +8,7 @@ import { Separator } from '@/components/ui/separator'
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar'
 import { cn } from '@/lib/utils'
 import { formatCount, useAuctionCounts } from './useAuctionCounts'
+import { useTheme } from '@/lib/theme-context'
 import DeedRobotMark from '@/components/deed/DeedRobotMark'
 
 interface Props {
@@ -50,14 +51,15 @@ export default function Topbar({ deedOpen, onToggleDeed }: Props) {
   const searchParams = useSearchParams()
   const counts = useAuctionCounts()
   const { isMobile } = useSidebar()
+  const { theme, toggleTheme } = useTheme()
 
   const label = routeLabel(pathname, searchParams.get('view'))
 
   return (
     <header
       className={cn(
-        'sticky top-0 z-20 flex h-14 shrink-0 items-center gap-2 border-b border-slate-800',
-        'bg-[#0b1220]/95 px-2 backdrop-blur supports-[backdrop-filter]:bg-[#0b1220]/80 sm:px-4'
+        'sticky top-0 z-20 flex h-14 shrink-0 items-center gap-2 border-b border-sidebar-border',
+        'bg-sidebar/95 px-2 backdrop-blur supports-[backdrop-filter]:bg-sidebar/80 sm:px-4'
       )}
     >
       {/*
@@ -65,15 +67,15 @@ export default function Topbar({ deedOpen, onToggleDeed }: Props) {
         the button primitive. On mobile it opens the Sheet; on desktop it
         collapses the rail to icons.
       */}
-      <SidebarTrigger className="text-slate-300 hover:text-white">
+      <SidebarTrigger className="text-sidebar-foreground hover:text-foreground">
         <PanelLeft aria-hidden />
       </SidebarTrigger>
 
-      <Separator orientation="vertical" className="mr-1 h-5 bg-slate-800" />
+      <Separator orientation="vertical" className="mr-1 h-5 bg-sidebar-border" />
 
       <Link
         href="/"
-        className="truncate text-sm font-semibold text-white outline-none focus-visible:ring-2 focus-visible:ring-bd-orange focus-visible:ring-offset-2 focus-visible:ring-offset-[#0b1220]"
+        className="truncate text-sm font-semibold text-foreground outline-none focus-visible:ring-2 focus-visible:ring-bd-orange focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       >
         {label}
       </Link>
@@ -81,9 +83,9 @@ export default function Topbar({ deedOpen, onToggleDeed }: Props) {
       <div className="ml-auto flex items-center gap-2 sm:gap-4">
         <dl className="hidden items-center gap-4 text-xs sm:flex">
           <div className="flex items-baseline gap-1.5">
-            <dt className="text-slate-500">Upcoming</dt>
+            <dt className="text-muted-foreground">Upcoming</dt>
             <dd
-              className="tabular font-semibold text-white"
+              className="tabular font-semibold text-foreground"
               title={
                 counts.upcoming == null
                   ? 'Upcoming auction count unavailable'
@@ -94,9 +96,9 @@ export default function Topbar({ deedOpen, onToggleDeed }: Props) {
             </dd>
           </div>
           <div className="flex items-baseline gap-1.5">
-            <dt className="text-slate-500">Counties</dt>
+            <dt className="text-muted-foreground">Counties</dt>
             <dd
-              className="tabular font-semibold text-white"
+              className="tabular font-semibold text-foreground"
               title={
                 counts.counties == null
                   ? 'County count unavailable'
@@ -107,6 +109,16 @@ export default function Topbar({ deedOpen, onToggleDeed }: Props) {
             </dd>
           </div>
         </dl>
+
+        <button
+          type="button"
+          onClick={toggleTheme}
+          aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+          className="mr-1 inline-flex min-h-9 items-center gap-1.5 rounded-md border border-border px-2.5 text-xs font-semibold text-muted-foreground outline-none transition-colors hover:border-bd-orange hover:text-foreground focus-visible:ring-2 focus-visible:ring-bd-orange"
+        >
+          <span aria-hidden>{theme === 'dark' ? '☼' : '☾'}</span>
+          <span className={isMobile ? 'sr-only' : undefined}>{theme === 'dark' ? 'Light' : 'Dark'}</span>
+        </button>
 
         <button
           type="button"
