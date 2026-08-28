@@ -2,12 +2,13 @@
 
 import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
-import { MessageSquare, PanelLeft } from 'lucide-react'
+import { PanelLeft } from 'lucide-react'
 
 import { Separator } from '@/components/ui/separator'
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar'
 import { cn } from '@/lib/utils'
 import { formatCount, useAuctionCounts } from './useAuctionCounts'
+import DeedRobotMark from '@/components/deed/DeedRobotMark'
 
 interface Props {
   deedOpen: boolean
@@ -121,8 +122,8 @@ export default function Topbar({ deedOpen, onToggleDeed }: Props) {
               : 'text-slate-300 hover:bg-slate-800 hover:text-white'
           )}
         >
-          <MessageSquare className="size-4" aria-hidden />
-          <span className={isMobile ? 'sr-only' : undefined}>Deed</span>
+          <DeedRobotMark size={24} decorative={false} className="rounded-md" />
+          <span className={isMobile ? 'sr-only' : undefined}>Deed Voice AI</span>
         </button>
       </div>
     </header>

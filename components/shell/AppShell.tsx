@@ -6,6 +6,7 @@ import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import AppSidebar from './AppSidebar'
 import DeedPanel from './DeedPanel'
 import Topbar from './Topbar'
+import StickyDeedCta from './StickyDeedCta'
 
 /**
  * The application shell: persistent nav rail + topbar wrapping every route.
@@ -37,6 +38,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         <div className="flex min-h-0 flex-1">
           <main className="min-w-0 flex-1 overflow-x-hidden">{children}</main>
           <DeedPanel open={deedOpen} onClose={() => setDeedOpen(false)} />
+          <StickyDeedCta open={deedOpen} onToggle={toggleDeed} />
         </div>
       </SidebarInset>
     </SidebarProvider>
