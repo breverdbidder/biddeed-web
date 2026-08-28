@@ -38,25 +38,25 @@
   --slate-950: #020617;
 
   /* shadcn semantic colors (HSL values — no hsl() wrapper) */
-  --background: 222.2 84% 4.9%;
-  --foreground: 210 40% 96%;
-  --card: 222.2 47.4% 11.2%;
-  --card-foreground: 210 40% 96%;
-  --popover: 222.2 47.4% 11.2%;
-  --popover-foreground: 210 40% 96%;
-  --primary: 213 54% 24%;
-  --primary-foreground: 0 0% 100%;
-  --secondary: 217.2 32.6% 17.5%;
-  --secondary-foreground: 210 40% 96%;
-  --muted: 217.2 32.6% 17.5%;
-  --muted-foreground: 215 20.2% 65.1%;
-  --accent: 38 92% 50%;
-  --accent-foreground: 0 0% 100%;
+  --background: 39 38% 93%;
+  --foreground: 30 17% 10%;
+  --card: 45 50% 98%;
+  --card-foreground: 30 17% 10%;
+  --popover: 45 50% 98%;
+  --popover-foreground: 30 17% 10%;
+  --primary: 15 52% 50%;
+  --primary-foreground: 39 38% 93%;
+  --secondary: 35 35% 89%;
+  --secondary-foreground: 30 17% 10%;
+  --muted: 35 35% 89%;
+  --muted-foreground: 28 8% 45%;
+  --accent: 15 52% 50%;
+  --accent-foreground: 39 38% 93%;
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 210 40% 96%;
-  --border: 217.2 32.6% 17.5%;
-  --input: 217.2 32.6% 17.5%;
-  --ring: 213 54% 34%;
+  --border: 33 25% 82%;
+  --input: 33 25% 82%;
+  --ring: 15 52% 50%;
   --radius: 0.5rem;
 
   /* Chart colors */
@@ -217,6 +217,29 @@ th[data-numeric] { font-variant-numeric: tabular-nums; font-feature-settings: "t
   }
 }
 
+@layer base {
+  :root {
+    --sidebar-background: 39 38% 93%;
+    --sidebar-foreground: 30 17% 10%;
+    --sidebar-primary: 15 52% 50%;
+    --sidebar-primary-foreground: 39 38% 93%;
+    --sidebar-accent: 35 35% 89%;
+    --sidebar-accent-foreground: 30 17% 10%;
+    --sidebar-border: 33 25% 82%;
+    --sidebar-ring: 15 52% 50%;
+  }
+  html.dark {
+    --sidebar-background: 220 49% 8%;
+    --sidebar-foreground: 213 27% 84%;
+    --sidebar-primary: 38 92% 50%;
+    --sidebar-primary-foreground: 222 47% 11%;
+    --sidebar-accent: 217 33% 17%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217 33% 17%;
+    --sidebar-ring: 38 92% 50%;
+  }
+}
+
 /* ─────────────────────────────────────────────────────────────────────────
    FullCalendar icon font.
 
@@ -252,7 +275,7 @@ th[data-numeric] { font-variant-numeric: tabular-nums; font-feature-settings: "t
 /* ─────────────────────────────────────────────────────────────────────────
    WinnerDataAI house-brand light mode.
    Cream canvas, black-brown ink, terracotta action color, and warm neutrals.
-   Dark mode remains the default; the ThemeProvider adds data-theme="light".
+   Light mode is the default; dark mode is explicit.
    ───────────────────────────────────────────────────────────────────────── */
 html[data-theme='light'] {
   --background: 39 38% 93%;          /* #f5f0e8 cream */

@@ -67,7 +67,7 @@ export default function Topbar({ deedOpen, onToggleDeed }: Props) {
         the button primitive. On mobile it opens the Sheet; on desktop it
         collapses the rail to icons.
       */}
-      <SidebarTrigger className="text-sidebar-foreground hover:text-foreground">
+      <SidebarTrigger aria-label="Toggle navigation sidebar" className="border border-sidebar-border bg-sidebar text-sidebar-foreground shadow-sm hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
         <PanelLeft aria-hidden />
       </SidebarTrigger>
 
@@ -128,10 +128,10 @@ export default function Topbar({ deedOpen, onToggleDeed }: Props) {
           className={cn(
             'inline-flex min-h-9 items-center gap-1.5 rounded-md px-2.5 text-sm font-medium',
             'outline-none transition-colors focus-visible:ring-2 focus-visible:ring-bd-orange',
-            'focus-visible:ring-offset-2 focus-visible:ring-offset-[#0b1220]',
+            'focus-visible:ring-offset-2 focus-visible:ring-offset-background',
             deedOpen
               ? 'bg-bd-orange text-slate-950'
-              : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+              : 'text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
           )}
         >
           <DeedRobotMark size={24} decorative={false} className="rounded-md" />

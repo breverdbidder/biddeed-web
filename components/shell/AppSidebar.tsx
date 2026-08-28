@@ -72,7 +72,7 @@ export default function AppSidebar({ deedOpen, onToggleDeed }: Props) {
   }
 
   return (
-    <Sidebar collapsible="icon" className="border-slate-800">
+    <Sidebar collapsible="icon" className="border-sidebar-border bg-sidebar text-sidebar-foreground">
       <SidebarHeader className="border-b border-sidebar-border">
         <SidebarMenu>
           <SidebarMenuItem>
@@ -80,15 +80,15 @@ export default function AppSidebar({ deedOpen, onToggleDeed }: Props) {
               <Link href="/" onClick={closeOnMobile}>
                 <span
                   aria-hidden
-                  className="flex aspect-square size-8 shrink-0 items-center justify-center rounded-md bg-bd-orange text-sm font-extrabold text-slate-950"
+                  className="flex aspect-square size-8 shrink-0 items-center justify-center rounded-md bg-bd-orange text-sm font-extrabold text-primary-foreground"
                 >
                   B
                 </span>
                 <span className="grid text-left leading-tight">
-                  <span className="truncate text-sm font-bold text-white">
+                  <span className="truncate text-sm font-bold text-sidebar-foreground">
                     Bid<span className="text-bd-orange">Deed</span>.AI
                   </span>
-                  <span className="truncate text-xs text-slate-400">Auction Intelligence</span>
+                  <span className="truncate text-xs text-muted-foreground">Auction Intelligence</span>
                 </span>
               </Link>
             </SidebarMenuButton>
@@ -133,7 +133,7 @@ export default function AppSidebar({ deedOpen, onToggleDeed }: Props) {
                     </SidebarMenuButton>
                     {count ? (
                       <SidebarMenuBadge
-                        className="tabular text-slate-400"
+                        className="tabular text-muted-foreground"
                         title={
                           counts.upcoming == null
                             ? 'Upcoming auction count unavailable'

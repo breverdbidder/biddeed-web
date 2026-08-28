@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react'
-import { CalendarDays, FileText, Gavel, Home, MapPinned, Search } from 'lucide-react'
+import { Bell, CalendarDays, FileText, Gavel, Home, MapPinned, Search } from 'lucide-react'
 
 /**
  * Primary navigation.
@@ -49,6 +49,13 @@ export const NAV_ITEMS: NavItem[] = [
     href: '/discover',
     icon: Search,
     description: 'Search source-backed auction inventory',
+  },
+  {
+    key: 'alerts',
+    label: 'Alerts',
+    href: '/alerts',
+    icon: Bell,
+    description: 'Private auction change notifications',
   },
   {
     key: 'counties',

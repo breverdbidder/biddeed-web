@@ -32,7 +32,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     <SidebarProvider>
       <AppSidebar deedOpen={deedOpen} onToggleDeed={toggleDeed} />
 
-      <SidebarInset className="min-w-0 bg-[#020617]">
+      <SidebarInset className="min-w-0 bg-background text-foreground">
         <Topbar deedOpen={deedOpen} onToggleDeed={toggleDeed} />
 
         <div className="flex min-h-0 flex-1">
