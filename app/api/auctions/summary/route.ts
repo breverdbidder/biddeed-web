@@ -30,10 +30,26 @@ function getSupabase() {
 export async function GET() {
   const supabase = getSupabase()
 
-  const { data, error } = await supabase.rpc('auctions_summary_ssot')
+  // The SSOT RPC can transiently fail during a cold start. Retry only the
+  // server-side read, with a short bounded backoff, so the client does not
+  // render a misleading empty workspace or fail after its own retries have
+  // already been exhausted. Diagnostic detail stays server-side; the public
+  // response remains generic.
+  let data: unknown = null
+  let lastError: { message?: string } | null = null
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const result = await supabase.rpc('auctions_summary_ssot')
+    data = result.data
+    lastError = result.error
+    if (!result.error) break
+    if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 250 * 2 ** attempt))
+  }
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+  if (lastError) {
+    return NextResponse.json(
+      { error: 'Auction summary temporarily unavailable. Please retry shortly.' },
+      { status: 503, headers: { 'Retry-After': '3' } }
+    )
   }
 
   const s = (data || {}) as Record<string, unknown>
