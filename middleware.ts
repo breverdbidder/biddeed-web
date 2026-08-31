@@ -149,25 +149,25 @@ function tooManyRequests(req: NextRequest, resetAt: number): NextResponse {
 <meta http-equiv="refresh" content="${retryAfter}">
 <title>One moment · BidDeed.AI</title>
 <style>
-  :root { color-scheme: dark; }
+  :root { color-scheme: light; }
   * { box-sizing: border-box; }
   body { margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
-         background:#060b16; color:#e2e8f0; padding:24px;
+         background:#f4eee5; color:#1c1917; padding:24px;
          font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
-  .card { width:100%; max-width:440px; background:rgba(15,23,42,.6); border:1px solid #1e293b;
+  .card { width:100%; max-width:440px; background:#fffaf3; border:1px solid #d8cfc2;
           border-radius:16px; padding:32px 28px; text-align:center; }
   .brand { display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:22px; }
-  .mark { width:36px; height:36px; border-radius:9px; background:#f59e0b; color:#0b1220;
+  .mark { width:36px; height:36px; border-radius:9px; background:#c96a4a; color:#fffaf3;
           font-weight:800; font-size:18px; display:flex; align-items:center; justify-content:center; }
-  .name { font-size:17px; font-weight:700; color:#fff; }
-  .name span { color:#f59e0b; }
-  h1 { font-size:20px; margin:0 0 10px; color:#fff; }
-  p { margin:0 0 22px; font-size:14px; line-height:1.6; color:#94a3b8; }
-  .wait { font-variant-numeric:tabular-nums; font-weight:700; color:#f59e0b; }
+  .name { font-size:17px; font-weight:700; color:#1c1917; }
+  .name span { color:#c96a4a; }
+  h1 { font-size:20px; margin:0 0 10px; color:#1c1917; }
+  p { margin:0 0 22px; font-size:14px; line-height:1.6; color:#6b625a; }
+  .wait { font-variant-numeric:tabular-nums; font-weight:700; color:#c96a4a; }
   a { display:inline-flex; align-items:center; justify-content:center; min-height:44px;
-      padding:0 22px; border-radius:10px; background:#f59e0b; color:#0b1220;
+      padding:0 22px; border-radius:10px; background:#c96a4a; color:#fffaf3;
       font-weight:700; font-size:14px; text-decoration:none; }
-  .fine { margin-top:18px; font-size:12px; color:#475569; }
+  .fine { margin-top:18px; font-size:12px; color:#8a8178; }
 </style></head>
 <body>
   <main class="card">
