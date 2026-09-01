@@ -37,6 +37,8 @@ const isPublicRoute = createRouteMatcher([
   '/api/reports(.*)',
   '/api/alerts(.*)', // API enforces its own Clerk account scope and JSON 401 responses
   '/api/saved-searches(.*)', // API enforces its own Clerk account scope and JSON 401 responses
+  '/api/title-search(.*)', // API enforces its own Clerk account scope and JSON 401 responses
+  '/api/skip-trace(.*)', // API enforces its own Clerk account scope and provider gate
   '/api/csp-report(.*)',
   // Deed's same-origin SSE proxy to the Worker's /chat/api. Public for the
   // same reason /chat is on the Worker: the conversational surface is how a
