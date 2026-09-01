@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import AppShell from '@/components/shell/AppShell'
 import DiscoveryPage from '@/components/discovery/DiscoveryPage'
 
 export const dynamic = 'force-dynamic'
@@ -11,8 +10,6 @@ export const metadata: Metadata = {
 
 export default function DiscoverRoute() {
   return (
-    <AppShell>
-      <DiscoveryPage />
-    </AppShell>
+    <DiscoveryPage />
   )
 }
