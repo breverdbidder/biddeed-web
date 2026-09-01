@@ -1,0 +1,24 @@
+'use client'
+
+import { FormEvent, useCallback, useEffect, useState } from 'react'
+
+type SavedSearch = { id: string; name: string; query: Record<string, unknown>; status: string; updated_at: string }
+
+function message(response: Response, fallback: string) { return response.json().then((body) => body?.error || fallback).catch(() => fallback) }
+
+export default function SavedSearchesPanel() {
+  const [items, setItems] = useState<SavedSearch[]>([])
+  const [name, setName] = useState('')
+  const [query, setQuery] = useState('{"county":""}')
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const load = useCallback(async () => { setLoading(true); setError(null); try { const response = await fetch('/api/saved-searches', { credentials: 'include' }); if (!response.ok) throw new Error(await message(response, 'Unable to load saved searches.')); const body = await response.json(); setItems(body.searches ?? []) } catch (cause) { setError(cause instanceof Error ? cause.message : 'Unable to load saved searches.') } finally { setLoading(false) } }, [])
+  useEffect(() => { void load() }, [load])
+
+  async function create(event: FormEvent) { event.preventDefault(); setSaving(true); setError(null); try { let parsed: Record<string, unknown>; try { parsed = JSON.parse(query) } catch { throw new Error('Search criteria must be valid JSON.') } const response = await fetch('/api/saved-searches', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json', 'Idempotency-Key': crypto.randomUUID() }, body: JSON.stringify({ name, query: parsed }) }); if (!response.ok) throw new Error(await message(response, 'Unable to save this search.')); const body = await response.json(); setItems((current) => [body.search, ...current.filter((item) => item.id !== body.search.id)]); setName('') } catch (cause) { setError(cause instanceof Error ? cause.message : 'Unable to save this search.') } finally { setSaving(false) } }
+  async function archive(id: string) { const response = await fetch(`/api/saved-searches/${encodeURIComponent(id)}`, { method: 'DELETE', credentials: 'include' }); if (response.ok) setItems((current) => current.filter((item) => item.id !== id)); else setError(await message(response, 'Unable to archive this search.')) }
+
+  return <section className="border border-border bg-card p-5 sm:p-6" aria-labelledby="saved-searches-title"><div className="flex items-start justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-[0.16em] text-primary">Workspace</p><h2 id="saved-searches-title" className="mt-1 text-xl font-bold text-foreground">Saved searches</h2><p className="mt-1 text-sm text-muted-foreground">Keep repeatable county and auction criteria ready for your next review.</p></div><button type="button" onClick={() => void load()} className="text-sm font-semibold text-primary underline-offset-4 hover:underline">Refresh</button></div>{error ? <p role="alert" className="mt-4 border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">{error}</p> : null}<form onSubmit={create} className="mt-5 grid gap-3 sm:grid-cols-[1fr_1.3fr_auto] sm:items-end"><label className="text-sm font-semibold text-foreground">Name<input required value={name} onChange={(event) => setName(event.target.value)} className="mt-2 min-h-11 w-full border border-input bg-background px-3 font-normal text-foreground" placeholder="Broward high-equity" /></label><label className="text-sm font-semibold text-foreground">Criteria JSON<input required value={query} onChange={(event) => setQuery(event.target.value)} className="mt-2 min-h-11 w-full border border-input bg-background px-3 font-mono text-xs font-normal text-foreground" aria-describedby="criteria-help" /></label><button disabled={saving} className="min-h-11 bg-primary px-4 text-sm font-bold text-primary-foreground disabled:opacity-50">{saving ? 'Saving…' : 'Save search'}</button></form><p id="criteria-help" className="mt-2 text-xs text-muted-foreground">Stored as private criteria; never place contact data in search JSON.</p><div className="mt-6 space-y-2">{loading ? <p className="text-sm text-muted-foreground">Loading saved searches…</p> : null}{!loading && items.length === 0 ? <p className="border border-dashed border-border p-5 text-sm text-muted-foreground">No saved searches yet.</p> : null}{items.map((item) => <div key={item.id} className="flex flex-wrap items-center justify-between gap-3 border-t border-border py-3"><div><p className="font-semibold text-foreground">{item.name}</p><p className="text-xs text-muted-foreground">Updated {new Date(item.updated_at).toLocaleDateString()}</p></div><button type="button" onClick={() => void archive(item.id)} className="text-sm font-semibold text-destructive underline-offset-4 hover:underline">Archive</button></div>)}</div></section>
+}
