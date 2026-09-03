@@ -72,10 +72,12 @@ jobs:
           test -n "$SUPABASE_SERVICE_ROLE_KEY" || { echo 'Missing SUPABASE_SERVICE_ROLE_KEY' >&2; exit 1; }
 
       - name: Build OpenNext Worker (production)
-        # package.json has no env-suffixed build script -- cf:build is
-        # environment-agnostic; --config/--env at deploy time (next step)
-        # is what makes this a production deploy, same as cf:deploy:staging.
-        run: npm run cf:build
+        # opennextjs-cloudflare build refuses to run in CI without an explicit
+        # --config when there's no bare wrangler.jsonc at the repo root (there
+        # isn't one here -- only the env-suffixed files). package.json's
+        # cf:build has no --config, so pass it directly instead of going
+        # through the npm script.
+        run: npx opennextjs-cloudflare build --config wrangler.production.jsonc
 
       - name: Deploy production Worker (workers.dev only, no zone route)
         run: npx wrangler deploy --config wrangler.production.jsonc --env production
