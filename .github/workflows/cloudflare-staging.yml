@@ -1,0 +1,80 @@
+name: Cloudflare OpenNext Staging
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [cloudflare-staging]
+    paths:
+      - 'app/**'
+      - 'components/**'
+      - 'lib/**'
+      - 'public/**'
+      - 'middleware.ts'
+      - 'next.config.mjs'
+      - 'open-next.config.ts'
+      - 'wrangler.staging.jsonc'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/cloudflare-staging.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-staging:
+    runs-on: ubuntu-latest
+    environment: cloudflare-staging
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+      CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+      CLERK_RUNTIME_ENABLED: 'true'
+      NEXT_PUBLIC_BASE_PATH: ''
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate Cloudflare credentials are present
+        shell: bash
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo 'Missing CF_API_TOKEN repository/environment secret' >&2; exit 1; }
+          test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo 'Missing CF_ACCOUNT_ID repository/environment secret' >&2; exit 1; }
+          [[ "$CLERK_SECRET_KEY" =~ ^sk_(live|test)_[A-Za-z0-9_-]+$ ]] || { echo 'CLERK_SECRET_KEY format invalid' >&2; exit 1; }
+          [[ "$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY" =~ ^pk_(live|test)_[A-Za-z0-9_-]+$ ]] || { echo 'NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY format invalid' >&2; exit 1; }
+
+      - name: Build OpenNext Worker
+        run: npm run cf:build
+
+      - name: Deploy staging Worker
+        run: npx wrangler deploy --config wrangler.staging.jsonc --env staging
+
+      - name: Print deployment URL without secrets
+        run: |
+          echo 'Cloudflare OpenNext staging deployment completed.'
+          echo 'Expected custom hostname: https://staging.biddeed.ai'
+
+      - name: Public staging smoke checks
+        shell: bash
+        run: |
+          base='https://staging.biddeed.ai'
+          for path in / /sign-in /sign-up /radar /discover /api/health /api/auctions/summary /api/auctions/calendar; do
+            code=$(curl -L -sS -o /tmp/response -w '%{http_code}' --max-time 30 "$base$path")
+            echo "$path -> $code"
+            case "$path" in
+              /api/health|/api/auctions/summary|/api/auctions/calendar)
+                [[ "$code" =~ ^2|3 ]] || { echo "Staging API check failed for $path" >&2; exit 1; } ;;
+              *)
+                [[ "$code" =~ ^2|3 ]] || { echo "Staging page check failed for $path" >&2; exit 1; } ;;
+            esac
+          done
