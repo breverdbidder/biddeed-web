@@ -19,11 +19,6 @@ export function isClerkHostAuthorized(host: string | null | undefined): boolean 
     .filter(Boolean)
 
   return hosts.some(
-    (h) =>
-      h === 'biddeed.ai' ||
-      h.endsWith('.biddeed.ai') ||
-      h === 'biddeed-web.vercel.app' ||
-      h === 'localhost' ||
-      h === '127.0.0.1'
+    (h) => h === 'biddeed.ai' || h.endsWith('.biddeed.ai') || h === 'localhost' || h === '127.0.0.1'
   )
 }
