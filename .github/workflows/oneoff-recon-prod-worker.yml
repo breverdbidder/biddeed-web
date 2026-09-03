@@ -1,4 +1,4 @@
-name: ONEOFF Recon Production Worker Routing Logic
+name: ONEOFF Recon Production Worker Routing Logic 2
 on:
   workflow_dispatch:
 permissions:
@@ -16,19 +16,9 @@ jobs:
           set -euo pipefail
           curl -sS "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/worker-damp-snowflake-cead" \
             -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" > /tmp/worker-src.txt
-          wc -l /tmp/worker-src.txt
-      - name: Grep for vercel / fallback / proxy / radar / discover / sign-in / api-auctions references
-        run: |
-          set -euo pipefail
-          echo "=== vercel mentions ==="
-          grep -n -i "vercel" /tmp/worker-src.txt || echo "(none)"
-          echo "=== /radar /discover /sign-in /sign-up mentions ==="
-          grep -n -E "/radar|/discover|sign-in|sign-up" /tmp/worker-src.txt || echo "(none)"
-          echo "=== api/auctions mentions ==="
-          grep -n -i "api/auctions\|auctions/summary\|auctions/calendar" /tmp/worker-src.txt || echo "(none)"
-          echo "=== fetch( calls (proxy/passthrough candidates) ==="
-          grep -n "fetch(" /tmp/worker-src.txt | head -60
-          echo "=== default/catch-all/404 handling ==="
-          grep -n -i "default:\|catch-all\|notFound\|404\|else {" /tmp/worker-src.txt | head -60
-          echo "=== top-level route dispatch (url.pathname ===) ==="
-          grep -n "pathname" /tmp/worker-src.txt | head -80
+      - name: Dump lines 1690-1900 (RADAR_ORIGIN proxy block)
+        run: sed -n '1690,1900p' /tmp/worker-src.txt
+      - name: Dump lines 2780-2830 (auction workspace JSON note)
+        run: sed -n '2780,2830p' /tmp/worker-src.txt
+      - name: Canonical host / clerk-host references
+        run: grep -n -i "canonical.host\|X-Biddeed-Canonical-Host\|ROUTER_PROXY_KEY" /tmp/worker-src.txt
