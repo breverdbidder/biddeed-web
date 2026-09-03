@@ -123,9 +123,8 @@ jobs:
           cat /tmp/tail.err || true
           echo "--- tail.log line count ---"
           wc -l /tmp/tail.log || true
-          echo "--- parsed logs/exceptions ---"
-          (grep '^{' /tmp/tail.log || true) | jq -r '.logs[]? | "LOG: \(.level) \(.message)"'
-          (grep '^{' /tmp/tail.log || true) | jq -r '.exceptions[]? | "EXCEPTION: \(.name): \(.message)"'
+          echo "--- raw tail.log (first 150 lines) ---"
+          head -n 150 /tmp/tail.log || true
           exit 0
 
       - name: Print deployment URL without secrets
