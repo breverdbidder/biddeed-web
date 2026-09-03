@@ -89,6 +89,15 @@ const isPublicRoute = createRouteMatcher([
   // Post-checkout confirmation. The buyer has no account at this point, so
   // gating it behind auth would strand every purchase.
   '/order(.*)',
+  // Same reasoning as /order(.*) above -- this is the /subscribe flow's
+  // post-checkout page (app/success/page.tsx). Omitted here while /order was
+  // allowlisted was the same oversight already called out for /api/checkout:
+  // it went undetected on Vercel because CLERK_RUNTIME_ENABLED has been false
+  // there since 2026-08-20, so auth.protect() never actually ran. Found live
+  // 2026-09-03 during the #19813 Cloudflare canary, where CLERK_RUNTIME_ENABLED
+  // is true: signed-out visitors got a Clerk protect-rewrite 404 on /success
+  // instead of their paid confirmation page.
+  '/success(.*)',
   '/radar(.*)',
   '/privacy(.*)',
   '/terms(.*)',
