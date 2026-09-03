@@ -51,6 +51,15 @@ jobs:
       - name: Install Vercel CLI
         run: npm i -g vercel@latest
 
+      - name: Validate Clerk production key format
+        env:
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+        run: |
+          set -euo pipefail
+          [[ "$CLERK_SECRET_KEY" =~ ^sk_live_[A-Za-z0-9_\-]+$ ]] || { echo "CLERK_SECRET_KEY is not a production sk_live_ key" >&2; exit 1; }
+          [[ "$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY" =~ ^pk_live_[A-Za-z0-9_\-]+$ ]] || { echo "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY is not a production pk_live_ key" >&2; exit 1; }
+
       - name: Link Vercel project
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
