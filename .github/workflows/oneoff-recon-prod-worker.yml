@@ -1,4 +1,4 @@
-name: ONEOFF Verify secret-binding persistence across content-only PUT
+name: ONEOFF Verify secret-binding persistence v2 (module format)
 on:
   workflow_dispatch:
 permissions:
@@ -11,48 +11,46 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
     steps:
-      - name: Deploy throwaway worker v1
+      - name: Deploy throwaway ES-module worker v1 (multipart, module format)
         run: |
           set -euo pipefail
           echo 'export default { async fetch(req){ return new Response("v1"); } };' > /tmp/t1.js
-          curl -sS -X PUT "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/oneoff-test-secret-persist" \
+          printf '%s' '{"main_module":"t1.js","compatibility_date":"2024-01-01"}' > /tmp/meta1.json
+          curl -sS -X PUT "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/oneoff-test-secret-persist2" \
             -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
-            -H "Content-Type: application/javascript" \
-            --data-binary @/tmp/t1.js | jq '{success, errors}'
+            -F "metadata=@/tmp/meta1.json;type=application/json" \
+            -F "t1.js=@/tmp/t1.js;type=application/javascript+module" | jq '{success, errors}'
       - name: Set a dummy secret
         run: |
           set -euo pipefail
           npm i -g wrangler@latest --silent
-          printf 'dummy-value-123' | npx wrangler secret put TEST_SECRET --name oneoff-test-secret-persist
-      - name: Confirm secret bound
-        run: |
-          curl -sS "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/oneoff-test-secret-persist/settings" \
-            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" | jq '.result.bindings'
-      - name: Content-only PUT with different code (no bindings manifest)
+          printf 'dummy-value-123' | npx wrangler secret put TEST_SECRET --name oneoff-test-secret-persist2
+      - name: Content-only-ish PUT with keep_bindings (different code)
         run: |
           set -euo pipefail
           echo 'export default { async fetch(req,env){ return new Response("v2:"+(env.TEST_SECRET||"MISSING")); } };' > /tmp/t2.js
-          curl -sS -X PUT "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/oneoff-test-secret-persist" \
+          printf '%s' '{"main_module":"t2.js","compatibility_date":"2024-01-01","keep_bindings":["TEST_SECRET"]}' > /tmp/meta2.json
+          curl -sS -X PUT "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/oneoff-test-secret-persist2" \
             -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
-            -H "Content-Type: application/javascript" \
-            --data-binary @/tmp/t2.js | jq '{success, errors}'
-      - name: Confirm secret STILL bound after content-only PUT (settings API)
+            -F "metadata=@/tmp/meta2.json;type=application/json" \
+            -F "t2.js=@/tmp/t2.js;type=application/javascript+module" | jq '{success, errors}'
+      - name: Confirm secret STILL bound (settings API)
         run: |
-          curl -sS "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/oneoff-test-secret-persist/settings" \
+          curl -sS "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/oneoff-test-secret-persist2/settings" \
             -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" | jq '.result.bindings'
-      - name: Actually invoke it via workers.dev subdomain to prove runtime access to the secret
+      - name: Invoke it to prove runtime access to the secret
         run: |
           set -euo pipefail
           sub=$(curl -sS "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/subdomain" -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" | jq -r '.result.subdomain')
-          echo "subdomain: $sub"
-          curl -sS -X POST "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/oneoff-test-secret-persist/subdomain" \
-            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H "Content-Type: application/json" \
-            -d '{"enabled":true}' | jq '{success}'
-          sleep 5
-          curl -sS "https://oneoff-test-secret-persist.$sub.workers.dev/"
+          curl -sS -X POST "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/oneoff-test-secret-persist2/subdomain" \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H "Content-Type: application/json" -d '{"enabled":true}' | jq '{success}'
+          sleep 6
+          echo "RESPONSE_BODY_START"
+          curl -sS "https://oneoff-test-secret-persist2.$sub.workers.dev/"
           echo
-      - name: Cleanup - delete throwaway worker
+          echo "RESPONSE_BODY_END"
+      - name: Cleanup
         if: always()
         run: |
-          curl -sS -X DELETE "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/oneoff-test-secret-persist" \
+          curl -sS -X DELETE "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/oneoff-test-secret-persist2" \
             -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" | jq '{success}'
