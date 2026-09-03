@@ -12,8 +12,13 @@
  * One definition, used by layout.tsx and both auth pages, so the provider and
  * the pages can never disagree about whether auth is live here.
  */
-export function isClerkHostAuthorized(host: string | null | undefined): boolean {
-  const hosts = (host ?? '')
+export function isClerkHostAuthorized(
+  host: string | null | undefined,
+  canonicalHost?: string | null | undefined
+): boolean {
+  const hosts = [host, canonicalHost]
+    .filter(Boolean)
+    .join(',')
     .split(',')
     .map((value) => value.trim().split(':')[0].toLowerCase())
     .filter(Boolean)
