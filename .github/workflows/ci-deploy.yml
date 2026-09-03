@@ -51,6 +51,12 @@ jobs:
       - name: Install Vercel CLI
         run: npm i -g vercel@latest
 
+      - name: Link Vercel project
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: vercel link --yes --project="$VERCEL_PROJECT_ID" --token="$VERCEL_TOKEN"
+
       # GitHub Secrets are not automatically runtime variables in Vercel. Keep the
       # Clerk pair in GitHub, but synchronize it into Vercel Production before
       # pulling/building. Values are passed over stdin and are never printed.
