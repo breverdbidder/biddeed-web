@@ -85,7 +85,10 @@ export function getCountyByName(name: string) {
 export function formatCountyLabel(raw: string | null | undefined): string {
   if (!raw) return ''
   const key = raw.trim().toLowerCase().replace(/[\s-]+/g, '_')
-  const known = FL_COUNTIES.find((c) => c.slug === key)
+  // Slugs here are hyphenated ('miami-dade', 'st-johns'); the auction tables
+  // use underscores ('miami_dade'). Compare in one form so both resolve to the
+  // proper name rather than a title-cased "Miami Dade".
+  const known = FL_COUNTIES.find((c) => c.slug.replace(/-/g, '_') === key)
   if (known) return known.name
   return key
     .split('_')

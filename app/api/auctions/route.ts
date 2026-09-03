@@ -106,8 +106,8 @@ export async function GET(request: NextRequest) {
   if (saleType) query = query.eq('sale_type', saleType)
   if (from) query = query.gte('auction_date', from)
   if (to) query = query.lte('auction_date', to)
-  if (upcoming && !from) {
-    query = query.gte('auction_date', new Date().toISOString().slice(0, 10))
+  if (upcoming) {
+    if (!from) query = query.gte('auction_date', new Date().toISOString().slice(0, 10))
     // Match auctions_summary_ssot()'s definition of "upcoming", not just the
     // date. Date-only, this filter returned 2,530 rows while the header (fed
     // by the SSOT RPC) said 1,889 -- the extra 641 were redeemed, cancelled
@@ -115,6 +115,10 @@ export async function GET(request: NextRequest) {
     // (verified live 2026-08-20: upcoming 1,335 + scheduled 554 = 1,889).
     // Two numbers for the same word on one screen is exactly the divergence
     // the shared-RPC architecture exists to prevent.
+    //
+    // The status filter applies even when the caller scopes the window with
+    // from/to (Deed's "this week in Brevard" cards): a cancelled sale inside
+    // the window is still not biddable.
     query = query.in('auction_status', ['upcoming', 'scheduled'])
   }
   if (hasCoords === 'true') {

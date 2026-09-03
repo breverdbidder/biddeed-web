@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { usePathname } from 'next/navigation'
 
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import AppSidebar from './AppSidebar'
@@ -23,6 +24,11 @@ import StickyDeedCta from './StickyDeedCta'
  * the boundary hydrates -- a guaranteed hydration mismatch at <768px
  * (measured: React #418 on every mobile route). Instead app/layout.tsx is
  * force-dynamic, so nothing prerenders and useSearchParams needs no boundary.
+ *
+ * Deed has ONE home. On '/' the page itself is the conversation, so the side
+ * panel and the floating "Talk to Deed" card are not mounted there — three
+ * doors into the same room read as clutter, and the customer already has the
+ * room. Every other route keeps the panel as a companion to the workspace.
  */
 export default function AppShell({
   children,
@@ -31,20 +37,31 @@ export default function AppShell({
   children: React.ReactNode
   authEnabled?: boolean
 }) {
+  const pathname = usePathname()
+  const isHome = pathname === '/'
   const [deedOpen, setDeedOpen] = useState(false)
   const toggleDeed = () => setDeedOpen((v) => !v)
 
   return (
     <SidebarProvider>
-      <AppSidebar deedOpen={deedOpen} onToggleDeed={toggleDeed} authEnabled={authEnabled} />
+      <AppSidebar deedOpen={deedOpen && !isHome} onToggleDeed={toggleDeed} authEnabled={authEnabled} showDeedToggle={!isHome} />
 
+      {/*
+        SidebarInset renders the <main> landmark. The content wrapper below is a
+        plain div on purpose: two nested <main> elements is an accessibility
+        error (one landmark per page), and screen readers announced both.
+      */}
       <SidebarInset className="min-w-0 bg-background text-foreground">
-        <Topbar deedOpen={deedOpen} onToggleDeed={toggleDeed} />
+        <Topbar deedOpen={deedOpen && !isHome} onToggleDeed={toggleDeed} showDeedToggle={!isHome} />
 
         <div className="flex min-h-0 flex-1">
-          <main className="min-w-0 flex-1 overflow-x-hidden">{children}</main>
-          <DeedPanel open={deedOpen} onClose={() => setDeedOpen(false)} />
-          <StickyDeedCta open={deedOpen} onToggle={toggleDeed} />
+          <div className="min-w-0 flex-1 overflow-x-hidden">{children}</div>
+          {!isHome ? (
+            <>
+              <DeedPanel open={deedOpen} onClose={() => setDeedOpen(false)} />
+              <StickyDeedCta open={deedOpen} onToggle={toggleDeed} />
+            </>
+          ) : null}
         </div>
       </SidebarInset>
     </SidebarProvider>

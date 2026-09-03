@@ -337,3 +337,48 @@ html[data-theme='light'] ::selection { background: #c15f3c; color: #f5f0e8; }
 html[data-theme='light'] ::-webkit-scrollbar-track { background: #ede3d7; }
 html[data-theme='light'] ::-webkit-scrollbar-thumb { background: #b5a9a0; }
 html[data-theme='light'] ::-webkit-scrollbar-thumb:hover { background: #8f8479; }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Dark mode — semantic tokens.
+
+   Until Sep 2026 the dark toggle only flipped the sidebar variables; every
+   shadcn semantic token (background, card, primary…) stayed on the light
+   cream values, so "dark mode" was a dark rail beside a cream page. The new
+   home surface is built entirely on semantic tokens, so both modes are
+   defined here, once, and no component carries a hard-coded palette.
+   ───────────────────────────────────────────────────────────────────────── */
+html[data-theme='dark'],
+html.dark {
+  --background: 222 40% 7%;            /* #0b0f17 */
+  --foreground: 38 25% 93%;            /* #f3efe8 warm ink on dark */
+  --card: 222 38% 11%;                 /* #111827 */
+  --card-foreground: 38 25% 93%;
+  --popover: 222 38% 11%;
+  --popover-foreground: 38 25% 93%;
+  --primary: 17 70% 60%;               /* #e07a52 — terracotta lifted for dark */
+  --primary-foreground: 222 40% 7%;
+  --secondary: 222 30% 16%;            /* #1c2434 */
+  --secondary-foreground: 38 25% 93%;
+  --muted: 222 30% 16%;
+  --muted-foreground: 30 8% 63%;       /* #a39c93 */
+  --accent: 17 70% 60%;
+  --accent-foreground: 222 40% 7%;
+  --destructive: 0 72% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 222 24% 19%;               /* #232b3a */
+  --input: 222 24% 19%;
+  --ring: 17 70% 60%;
+}
+
+html[data-theme='dark'] body,
+html.dark body {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+/* Display serif for headlines. Tailwind exposes it as `font-display`; the
+   optical-size axis is left to the browser. */
+.font-display {
+  font-family: var(--font-display), 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}

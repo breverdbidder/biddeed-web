@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react'
-import { Bell, CalendarDays, FileText, Gavel, Home, MapPinned, Search } from 'lucide-react'
+import { Bell, CalendarDays, FileText, Gavel, MapPinned, Search } from 'lucide-react'
 
 /**
  * Primary navigation.
@@ -22,19 +22,12 @@ export interface NavItem {
 
 export const NAV_ITEMS: NavItem[] = [
   {
-    key: 'home',
-    label: 'Home',
-    href: '/',
-    icon: Home,
-    description: 'Auction Intelligence overview',
-  },
-  {
     key: 'auctions',
     label: 'Auctions',
     href: '/radar',
     icon: Gavel,
     counter: 'upcoming',
-    description: 'Split, table, map and spreadsheet views',
+    description: 'Every upcoming sale — map, table, calendar and spreadsheet',
   },
   {
     key: 'calendar',
@@ -48,14 +41,14 @@ export const NAV_ITEMS: NavItem[] = [
     label: 'Discover',
     href: '/discover',
     icon: Search,
-    description: 'Search source-backed auction inventory',
+    description: 'Search auction inventory by county, case or address',
   },
   {
     key: 'alerts',
     label: 'Alerts',
     href: '/alerts',
     icon: Bell,
-    description: 'Private auction change notifications',
+    description: 'Get told when a sale you watch changes',
   },
   {
     key: 'counties',
@@ -63,7 +56,7 @@ export const NAV_ITEMS: NavItem[] = [
     href: '/counties',
     icon: MapPinned,
     external: true,
-    description: 'County coverage pages (Worker)',
+    description: 'Coverage and calendars for all 67 counties',
   },
   {
     key: 'reports',
@@ -71,7 +64,7 @@ export const NAV_ITEMS: NavItem[] = [
     href: '/buy-report',
     icon: FileText,
     external: true,
-    description: 'Clear to Bid reports (Worker)',
+    description: 'SIGNAL$ Property Reports — one property, all 18 sections',
   },
 ]
 
