@@ -10,6 +10,8 @@
     "cf:build": "opennextjs-cloudflare build --config wrangler.staging.jsonc --env staging",
     "cf:preview": "opennextjs-cloudflare build --config wrangler.staging.jsonc --env staging && opennextjs-cloudflare preview --config wrangler.staging.jsonc --env staging",
     "cf:deploy:staging": "opennextjs-cloudflare build --config wrangler.staging.jsonc --env staging && wrangler deploy --config wrangler.staging.jsonc --env staging",
+    "cf:build:production": "opennextjs-cloudflare build --config wrangler.production.jsonc --env production",
+    "cf:deploy:production": "opennextjs-cloudflare build --config wrangler.production.jsonc --env production && wrangler deploy --config wrangler.production.jsonc --env production",
     "cf:typegen": "wrangler types --config wrangler.staging.jsonc --env-interface CloudflareEnv cloudflare-env.d.ts"
   },
   "dependencies": {

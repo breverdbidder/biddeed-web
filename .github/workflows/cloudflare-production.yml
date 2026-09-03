@@ -1,0 +1,86 @@
+name: Cloudflare OpenNext Production
+
+# Dispatch-only: unlike cloudflare-staging.yml this never fires on push. The
+# biddeed-web-production Worker deployed here is deliberately NOT bound to any
+# zone route -- it is only reachable by workers.dev URL. Production traffic
+# only reaches it if/when RADAR_ORIGIN inside worker-damp-snowflake-cead (the
+# biddeed.ai router Worker, deployed separately, not from this repo) is
+# pointed at it. See docs/spec/19813.md for the full canary mechanism.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-production:
+    runs-on: ubuntu-latest
+    environment: cloudflare-staging
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+      CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      CLERK_RUNTIME_ENABLED: 'true'
+      NEXT_PUBLIC_BASE_PATH: ''
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate Cloudflare credentials are present
+        shell: bash
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo 'Missing CF_API_TOKEN' >&2; exit 1; }
+          test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo 'Missing CF_ACCOUNT_ID' >&2; exit 1; }
+          [[ "$CLERK_SECRET_KEY" =~ ^sk_(live|test)_[A-Za-z0-9_-]+$ ]] || { echo 'CLERK_SECRET_KEY format invalid' >&2; exit 1; }
+          [[ "$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY" =~ ^pk_(live|test)_[A-Za-z0-9_-]+$ ]] || { echo 'NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY format invalid' >&2; exit 1; }
+          test -n "$NEXT_PUBLIC_SUPABASE_URL" || { echo 'Missing NEXT_PUBLIC_SUPABASE_URL' >&2; exit 1; }
+          test -n "$NEXT_PUBLIC_SUPABASE_ANON_KEY" || { echo 'Missing NEXT_PUBLIC_SUPABASE_ANON_KEY' >&2; exit 1; }
+          test -n "$SUPABASE_SERVICE_ROLE_KEY" || { echo 'Missing SUPABASE_SERVICE_ROLE_KEY' >&2; exit 1; }
+
+      - name: Build OpenNext Worker (production)
+        run: npm run cf:build:production
+
+      - name: Deploy production Worker (workers.dev only, no zone route)
+        run: npx wrangler deploy --config wrangler.production.jsonc --env production
+
+      - name: Bind server-only secrets to the Worker runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf '%s' "$CLERK_SECRET_KEY" | npx wrangler secret put CLERK_SECRET_KEY --config wrangler.production.jsonc --env production
+          printf '%s' "$SUPABASE_SERVICE_ROLE_KEY" | npx wrangler secret put SUPABASE_SERVICE_ROLE_KEY --config wrangler.production.jsonc --env production
+
+      - name: Print deployment URL without secrets
+        run: |
+          echo 'Cloudflare OpenNext production Worker deployed: biddeed-web-production'
+          echo 'Reachable at its workers.dev URL only -- no zone route bound by this workflow.'
+
+      - name: Public smoke checks against the workers.dev URL
+        shell: bash
+        run: |
+          set -euo pipefail
+          sub=$(curl -sS "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/subdomain" \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" | jq -r '.result.subdomain')
+          base="https://biddeed-web-production.$sub.workers.dev"
+          echo "base=$base" >> "$GITHUB_OUTPUT"
+          curl -sS -o /dev/null --max-time 45 "$base/api/auctions/summary" || true
+          for path in / /sign-in /sign-up /radar /discover /api/health /api/auctions/summary /api/auctions/calendar; do
+            code=$(curl -L -sS -o /tmp/response -w '%{http_code}' --max-time 45 "$base$path")
+            echo "$path -> $code"
+            [[ "$code" =~ ^2|3 ]] || { echo "Production Worker check failed for $path" >&2; exit 1; }
+          done
+        id: smoke
