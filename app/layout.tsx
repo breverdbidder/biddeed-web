@@ -3,6 +3,7 @@ import { headers } from 'next/headers'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import AppShell from '@/components/shell/AppShell'
+import ChatwootWidget from '@/components/ChatwootWidget'
 import ConditionalClerkProvider from '@/components/ConditionalClerkProvider'
 import { isClerkHostAuthorized } from '@/lib/clerk-host'
 import { ThemeProvider } from '@/lib/theme-context'
@@ -106,6 +107,12 @@ export default async function RootLayout({
               <AppShell>{children}</AppShell>
             </ConditionalClerkProvider>
           </ThemeProvider>
+          {/*
+            Additive bottom-right chat bubble — coexists with the existing
+            full-page /chat (Deed) entry point, does not replace it. No-ops
+            when NEXT_PUBLIC_CHATWOOT_WEBSITE_TOKEN_BIDDEED is unset.
+          */}
+          <ChatwootWidget nonce={nonce} />
       </body>
     </html>
   )

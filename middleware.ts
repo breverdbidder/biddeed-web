@@ -289,14 +289,21 @@ function buildCspHeaders(nonce: string): Record<string, string> {
     // scripts, so the directive that actually unblocks the worker is
     // worker-src below; blob: is stated in both, per spec, so the policy does
     // not depend on a fallback chain.)
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' blob: https://js.stripe.com https://*.clerk.accounts.dev https://clerk.biddeed.ai`,
+    // app.chatwoot.com is listed here for completeness/documentation, but
+    // 'strict-dynamic' makes every host-source in this directive inert per
+    // spec — the browser trusts only nonced (or nonce-descended) scripts.
+    // ChatwootWidget.tsx therefore renders its two inline scripts with the
+    // request nonce; sdk.js itself is fetched cross-origin by those nonced
+    // scripts, which is permitted (fetching a script has no origin
+    // restriction — only the fetching script needs to be trusted).
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' blob: https://js.stripe.com https://*.clerk.accounts.dev https://clerk.biddeed.ai https://app.chatwoot.com`,
     // Explicit rather than inheriting from script-src via child-src.
     `worker-src 'self' blob:`,
     `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com`,
     `img-src 'self' data: blob: https://img.clerk.com https://images.clerk.dev https://*.clerk.accounts.dev https://clerk.biddeed.ai https://*.supabase.co https://www.bcpao.us https://gis.brevardfl.gov https://api.mapbox.com https://*.mapbox.com`,
     `font-src 'self' https://fonts.gstatic.com`,
-    `connect-src 'self' https://*.clerk.accounts.dev wss://*.clerk.accounts.dev https://clerk.biddeed.ai https://api.clerk.com https://*.supabase.co wss://*.supabase.co https://api.mapbox.com https://events.mapbox.com https://api.stripe.com https://api.us.elevenlabs.io wss://api.us.elevenlabs.io https://api.elevenlabs.io wss://api.elevenlabs.io`,
-    `frame-src 'self' https://*.clerk.accounts.dev https://clerk.biddeed.ai https://challenges.cloudflare.com https://js.stripe.com https://hooks.stripe.com`,
+    `connect-src 'self' https://*.clerk.accounts.dev wss://*.clerk.accounts.dev https://clerk.biddeed.ai https://api.clerk.com https://*.supabase.co wss://*.supabase.co https://api.mapbox.com https://events.mapbox.com https://api.stripe.com https://api.us.elevenlabs.io wss://api.us.elevenlabs.io https://api.elevenlabs.io wss://api.elevenlabs.io https://app.chatwoot.com wss://app.chatwoot.com`,
+    `frame-src 'self' https://*.clerk.accounts.dev https://clerk.biddeed.ai https://challenges.cloudflare.com https://js.stripe.com https://hooks.stripe.com https://app.chatwoot.com`,
     `object-src 'none'`,
     `base-uri 'self'`,
     `form-action 'self'`,
