@@ -1,4 +1,4 @@
-name: ONEOFF Debug deploy error (no-op redeploy of original content)
+name: ONEOFF Debug find real module name
 on:
   workflow_dispatch:
 permissions:
@@ -13,7 +13,7 @@ jobs:
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       SCRIPT_NAME: worker-damp-snowflake-cead
     steps:
-      - name: Download and extract
+      - name: Download and dump multipart part headers
         run: |
           set -euo pipefail
           curl -sS "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/$SCRIPT_NAME" \
@@ -22,25 +22,14 @@ jobs:
           data = open('/tmp/router-original.multipart','rb').read()
           boundary = data.split(b'\r\n',1)[0]
           parts = data.split(boundary)
-          for p in parts:
-              if b'name="worker.js"' in p or b'filename="worker.js"' in p:
-                  body = p.split(b'\r\n\r\n',1)[1]
-                  body = body.rsplit(b'\r\n--',1)[0].rsplit(b'\r\n',1)[0]
-                  open('/tmp/router-original.js','wb').write(body)
-                  print("extracted", len(body), "bytes")
-                  break
-          else:
-              raise SystemExit("could not find worker.js part")
+          print("num parts:", len(parts))
+          for i,p in enumerate(parts):
+              # print just the header block (up to blank line) of each part
+              head = p.split(b'\r\n\r\n',1)[0]
+              print(f"--- part {i} headers ---")
+              print(head.decode('utf-8','replace')[:500])
           PYEOF
-          node --check /tmp/router-original.js && echo OK
-      - name: Attempt deploy with full error visibility
+      - name: Try metadata endpoint variant (JSON only, may show main_module)
         run: |
-          set -euo pipefail
-          printf '%s' '{"main_module":"worker.js","compatibility_date":"2024-01-01","keep_bindings":["secret_text"]}' > /tmp/meta.json
-          cat /tmp/meta.json
-          echo
-          curl -sS -w '\nHTTP_STATUS:%{http_code}\n' -X PUT "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/$SCRIPT_NAME" \
-            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
-            -F "metadata=@/tmp/meta.json;type=application/json" \
-            -F "worker.js=@/tmp/router-original.js;type=application/javascript+module" > /tmp/deploy-out.json
-          cat /tmp/deploy-out.json
+          curl -sS "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/services/$SCRIPT_NAME" \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" | jq '.' | head -100 || true
