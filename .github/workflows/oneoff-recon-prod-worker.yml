@@ -29,7 +29,7 @@ jobs:
         run: |
           set -euo pipefail
           echo 'export default { async fetch(req,env){ return new Response("v2:"+(env.TEST_SECRET||"MISSING")); } };' > /tmp/t2.js
-          printf '%s' '{"main_module":"t2.js","compatibility_date":"2024-01-01","keep_bindings":["TEST_SECRET"]}' > /tmp/meta2.json
+          printf '%s' '{"main_module":"t2.js","compatibility_date":"2024-01-01","keep_bindings":["secret_text"]}' > /tmp/meta2.json
           curl -sS -X PUT "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/oneoff-test-secret-persist2" \
             -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
             -F "metadata=@/tmp/meta2.json;type=application/json" \
