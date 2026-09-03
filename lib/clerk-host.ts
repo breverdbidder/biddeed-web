@@ -13,6 +13,12 @@
  * the pages can never disagree about whether auth is live here.
  */
 export function isClerkHostAuthorized(host: string | null | undefined): boolean {
-  const h = (host ?? '').split(':')[0]
-  return h === 'biddeed.ai' || h.endsWith('.biddeed.ai') || h === 'localhost' || h === '127.0.0.1'
+  const hosts = (host ?? '')
+    .split(',')
+    .map((value) => value.trim().split(':')[0].toLowerCase())
+    .filter(Boolean)
+
+  return hosts.some(
+    (h) => h === 'biddeed.ai' || h.endsWith('.biddeed.ai') || h === 'localhost' || h === '127.0.0.1'
+  )
 }

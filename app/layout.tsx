@@ -77,7 +77,7 @@ export default async function RootLayout({
   // itself the moment the biddeed.ai cutover points at this app. localhost
   // stays enabled for development against a dev instance.
   const clerkHostAuthorized = isClerkHostAuthorized(
-    h.get('x-forwarded-host') ?? h.get('host')
+    [h.get('x-forwarded-host'), h.get('host')].filter(Boolean).join(',')
   )
   // Light mode is the BidDeed house-brand default. The ThemeProvider keeps
   // the user toggle available, while this server attribute prevents a dark

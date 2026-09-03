@@ -6,7 +6,9 @@ import Link from 'next/link'
 export default async function SignUpCatchAllPage() {
   const h = await headers()
   const clerkLive =
-    isClerkHostAuthorized(h.get('x-forwarded-host') ?? h.get('host')) &&
+    isClerkHostAuthorized(
+      [h.get('x-forwarded-host'), h.get('host')].filter(Boolean).join(',')
+    ) &&
     Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && process.env.CLERK_SECRET_KEY)
 
   return (
