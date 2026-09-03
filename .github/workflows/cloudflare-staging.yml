@@ -120,23 +120,8 @@ jobs:
           sleep 3
           kill $tail_pid 2>/dev/null
           wait $tail_pid 2>/dev/null
-          python3 -c "
-import json
-with open('/tmp/tail.log') as f:
-    for line in f:
-        line=line.strip()
-        if not line or not line.startswith('{'):
-            continue
-        try:
-            ev = json.loads(line)
-        except Exception:
-            continue
-        for log in ev.get('logs', []):
-            print('LOG:', log.get('level'), log.get('message'))
-        exc = ev.get('exceptions', [])
-        for e in exc:
-            print('EXCEPTION:', e.get('name'), e.get('message'))
-"
+          grep '^{' /tmp/tail.log | jq -r '.logs[]? | "LOG: \(.level) \(.message)"' 2>/dev/null
+          grep '^{' /tmp/tail.log | jq -r '.exceptions[]? | "EXCEPTION: \(.name): \(.message)"' 2>/dev/null
 
       - name: Print deployment URL without secrets
         run: |
