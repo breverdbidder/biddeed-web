@@ -15,7 +15,7 @@
     "staging": {
       "name": "biddeed-web-staging",
       "routes": [
-        { "pattern": "staging.biddeed.ai", "custom_domain": true }
+        { "pattern": "staging.biddeed.ai/*", "zone_name": "biddeed.ai" }
       ]
     }
   }
