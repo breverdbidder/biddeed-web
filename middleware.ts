@@ -14,7 +14,9 @@ import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
 // outage. Verified 2026-08-20: neither key is set on biddeed-web, so this
 // evaluates false and the site keeps serving exactly as it does today.
 const CLERK_ENABLED = Boolean(
-  process.env.CLERK_SECRET_KEY && process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+  process.env.CLERK_RUNTIME_ENABLED === 'true' &&
+  process.env.CLERK_SECRET_KEY &&
+  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
 )
 const IS_PROD = process.env.NODE_ENV === 'production'
 

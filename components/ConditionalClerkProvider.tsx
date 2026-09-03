@@ -61,6 +61,7 @@ export default function ConditionalClerkProvider({
   children,
   nonce,
   hostAuthorized = false,
+  authEnabled = false,
 }: {
   children: React.ReactNode
   /**
@@ -72,6 +73,11 @@ export default function ConditionalClerkProvider({
    * two guaranteed-failed requests per page view.
    */
   hostAuthorized?: boolean
+  /**
+   * Explicit staged activation flag. Keys may be present while the provider
+   * remains disabled until proxy and authenticated E2E checks pass.
+   */
+  authEnabled?: boolean
   /**
    * CSP nonce from middleware (x-nonce). REQUIRED: script-src uses
    * 'strict-dynamic', which makes host allowlists inert — Clerk's injected
@@ -86,7 +92,7 @@ export default function ConditionalClerkProvider({
   // No key -> render children without ClerkProvider. Keeps the app fully
   // functional in passthrough mode and mirrors middleware.ts, where
   // CLERK_ENABLED requires both halves of the credential pair.
-  if (!CLERK_KEY || !hostAuthorized) {
+  if (!CLERK_KEY || !hostAuthorized || !authEnabled) {
     return <>{children}</>
   }
 

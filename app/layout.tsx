@@ -80,6 +80,10 @@ export default async function RootLayout({
     [h.get('x-forwarded-host'), h.get('host')].filter(Boolean).join(','),
     h.get('x-biddeed-canonical-host')
   )
+  const clerkRuntimeEnabled = process.env.CLERK_RUNTIME_ENABLED === 'true'
+  const clerkAuthEnabled = clerkRuntimeEnabled &&
+    Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && process.env.CLERK_SECRET_KEY) &&
+    clerkHostAuthorized
   // Light mode is the BidDeed house-brand default. The ThemeProvider keeps
   // the user toggle available, while this server attribute prevents a dark
   // first paint before hydration.
@@ -104,9 +108,9 @@ export default async function RootLayout({
           env pair is configured, and the shell can use Clerk hooks once it is.
         */}
           <ThemeProvider>
-            <ConditionalClerkProvider nonce={nonce} hostAuthorized={clerkHostAuthorized}>
+            <ConditionalClerkProvider nonce={nonce} hostAuthorized={clerkHostAuthorized} authEnabled={clerkAuthEnabled}>
               <AppShell
-                authEnabled={Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && process.env.CLERK_SECRET_KEY) && clerkHostAuthorized}
+                authEnabled={clerkAuthEnabled}
               >
                 {children}
               </AppShell>
