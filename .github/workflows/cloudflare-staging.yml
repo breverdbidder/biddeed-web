@@ -95,6 +95,20 @@ jobs:
       - name: Deploy staging Worker
         run: npx wrangler deploy --config wrangler.staging.jsonc --env staging
 
+      - name: Bind server-only secrets to the Worker runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Next.js only inlines NEXT_PUBLIC_* vars at build time. Plain
+          # process.env lookups (lib/clerk-host.ts's clerkLive check, the
+          # Supabase service-role fallback) need an actual Wrangler-bound
+          # runtime secret on the Worker -- a GitHub Actions job env var
+          # alone never reaches process.env inside the deployed Worker.
+          # wrangler secret put reads the value from stdin only; it is
+          # never echoed, logged, or passed as a CLI argument.
+          printf '%s' "$CLERK_SECRET_KEY" | npx wrangler secret put CLERK_SECRET_KEY --config wrangler.staging.jsonc --env staging
+          printf '%s' "$SUPABASE_SERVICE_ROLE_KEY" | npx wrangler secret put SUPABASE_SERVICE_ROLE_KEY --config wrangler.staging.jsonc --env staging
+
       - name: Print deployment URL without secrets
         run: |
           echo 'Cloudflare OpenNext staging deployment completed.'
