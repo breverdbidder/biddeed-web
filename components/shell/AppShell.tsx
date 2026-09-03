@@ -24,13 +24,19 @@ import StickyDeedCta from './StickyDeedCta'
  * (measured: React #418 on every mobile route). Instead app/layout.tsx is
  * force-dynamic, so nothing prerenders and useSearchParams needs no boundary.
  */
-export default function AppShell({ children }: { children: React.ReactNode }) {
+export default function AppShell({
+  children,
+  authEnabled = false,
+}: {
+  children: React.ReactNode
+  authEnabled?: boolean
+}) {
   const [deedOpen, setDeedOpen] = useState(false)
   const toggleDeed = () => setDeedOpen((v) => !v)
 
   return (
     <SidebarProvider>
-      <AppSidebar deedOpen={deedOpen} onToggleDeed={toggleDeed} />
+      <AppSidebar deedOpen={deedOpen} onToggleDeed={toggleDeed} authEnabled={authEnabled} />
 
       <SidebarInset className="min-w-0 bg-background text-foreground">
         <Topbar deedOpen={deedOpen} onToggleDeed={toggleDeed} />

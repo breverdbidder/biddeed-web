@@ -104,7 +104,11 @@ export default async function RootLayout({
         */}
           <ThemeProvider>
             <ConditionalClerkProvider nonce={nonce} hostAuthorized={clerkHostAuthorized}>
-              <AppShell>{children}</AppShell>
+              <AppShell
+                authEnabled={Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && process.env.CLERK_SECRET_KEY) && clerkHostAuthorized}
+              >
+                {children}
+              </AppShell>
             </ConditionalClerkProvider>
           </ThemeProvider>
           {/*

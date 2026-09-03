@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { ChevronsUpDown, UserRound } from 'lucide-react'
 
@@ -35,6 +36,7 @@ import DeedRobotMark from '@/components/deed/DeedRobotMark'
 interface Props {
   deedOpen: boolean
   onToggleDeed: () => void
+  authEnabled?: boolean
 }
 
 /**
@@ -58,7 +60,7 @@ function isActiveItem(item: NavItem, pathname: string, view: string | null): boo
   }
 }
 
-export default function AppSidebar({ deedOpen, onToggleDeed }: Props) {
+export default function AppSidebar({ deedOpen, onToggleDeed, authEnabled = false }: Props) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const view = searchParams.get('view')
@@ -167,6 +169,18 @@ export default function AppSidebar({ deedOpen, onToggleDeed }: Props) {
       </SidebarContent>
 
       <SidebarFooter>
+        {authEnabled && (
+          <SignedIn>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <div className="flex items-center gap-2 px-2 py-1.5">
+                  <UserButton appearance={{ elements: { avatarBox: 'size-8' } }} />
+                  <span className="truncate text-xs text-sidebar-foreground">Signed in</span>
+                </div>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SignedIn>
+        )}
         <SidebarSeparator className="mx-0" />
         <SidebarMenu>
           <SidebarMenuItem>
@@ -181,6 +195,32 @@ export default function AppSidebar({ deedOpen, onToggleDeed }: Props) {
               <DropdownMenuContent side="top" align="start" className="w-52">
                 <DropdownMenuLabel>Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                {authEnabled ? (
+                  <>
+                    <SignedOut>
+                      <DropdownMenuItem asChild>
+                        <Link href="/sign-in" onClick={closeOnMobile}>Sign in</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/sign-up" onClick={closeOnMobile}>Create account</Link>
+                      </DropdownMenuItem>
+                    </SignedOut>
+                    <SignedIn>
+                      <DropdownMenuItem asChild>
+                        <Link href="/dashboard" onClick={closeOnMobile}>Account dashboard</Link>
+                      </DropdownMenuItem>
+                    </SignedIn>
+                  </>
+                ) : (
+                  <>
+                    <DropdownMenuItem asChild>
+                      <Link href="/sign-in" onClick={closeOnMobile}>Sign in</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/sign-up" onClick={closeOnMobile}>Create account</Link>
+                    </DropdownMenuItem>
+                  </>
+                )}
                 {ACCOUNT_LINKS.map((link) => (
                   <DropdownMenuItem key={link.href} asChild>
                     {/* Worker routes — plain anchors, deliberately. */}
