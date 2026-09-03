@@ -1,47 +1,23 @@
-name: ONEOFF Debug deploy v2 (explicit filename)
+name: ONEOFF Check bindings after real redeploy
 on:
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
-  debug:
+  check:
     runs-on: ubuntu-latest
     environment: cloudflare-staging
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
-      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-      SCRIPT_NAME: worker-damp-snowflake-cead
     steps:
-      - name: Download and extract
+      - name: Check bindings + full public route matrix
         run: |
           set -euo pipefail
-          curl -sS "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/$SCRIPT_NAME" \
-            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -o /tmp/router-original.multipart
-          python3 - <<'PYEOF'
-          data = open('/tmp/router-original.multipart','rb').read()
-          boundary = data.split(b'\r\n',1)[0]
-          parts = data.split(boundary)
-          for p in parts:
-              if b'name="worker.js"' in p or b'filename="worker.js"' in p:
-                  body = p.split(b'\r\n\r\n',1)[1]
-                  body = body.rsplit(b'\r\n--',1)[0].rsplit(b'\r\n',1)[0]
-                  open('/tmp/router-original.js','wb').write(body)
-                  print("extracted", len(body), "bytes")
-                  break
-          else:
-              raise SystemExit("could not find worker.js part")
-          PYEOF
-          node --check /tmp/router-original.js && echo OK
-      - name: Attempt deploy with explicit filename=worker.js
-        run: |
-          set -euo pipefail
-          printf '%s' '{"main_module":"worker.js","compatibility_date":"2024-01-01","keep_bindings":["secret_text"]}' > /tmp/meta.json
-          curl -sS -w '\nHTTP_STATUS:%{http_code}\n' -X PUT "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/$SCRIPT_NAME" \
-            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
-            -F "metadata=@/tmp/meta.json;type=application/json" \
-            -F "worker.js=@/tmp/router-original.js;filename=worker.js;type=application/javascript+module" > /tmp/deploy-out.json
-          cat /tmp/deploy-out.json
-      - name: Verify unaffected -- biddeed.ai still responds
-        if: always()
-        run: curl -sS -o /dev/null -w 'biddeed.ai/ -> %{http_code}\n' --max-time 20 https://biddeed.ai/
+          curl -sS "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/worker-damp-snowflake-cead/settings" \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" | jq '.result.bindings'
+          echo "=== route matrix ==="
+          for path in / /radar /discover /sign-in /sign-up /api/health /api/auctions/summary /api/auctions/calendar /chat /terms /privacy /disclaimer /security /data-retention /buy-report /counties; do
+            code=$(curl -L -sS -o /dev/null -w '%{http_code}' --max-time 30 "https://biddeed.ai$path")
+            echo "$path -> $code"
+          done
