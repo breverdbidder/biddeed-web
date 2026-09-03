@@ -112,16 +112,21 @@ jobs:
       - name: TEMP diagnose /sign-in 500
         shell: bash
         run: |
-          set +e
-          npx wrangler tail --config wrangler.staging.jsonc --env staging --format json > /tmp/tail.log 2>&1 &
+          npx wrangler tail --config wrangler.staging.jsonc --env staging --format json > /tmp/tail.log 2> /tmp/tail.err &
           tail_pid=$!
-          sleep 5
-          curl -sS -o /dev/null --max-time 20 "https://staging.biddeed.ai/sign-in"
-          sleep 3
-          kill $tail_pid 2>/dev/null
-          wait $tail_pid 2>/dev/null
-          grep '^{' /tmp/tail.log | jq -r '.logs[]? | "LOG: \(.level) \(.message)"' 2>/dev/null
-          grep '^{' /tmp/tail.log | jq -r '.exceptions[]? | "EXCEPTION: \(.name): \(.message)"' 2>/dev/null
+          sleep 6
+          curl -sS -o /dev/null --max-time 20 "https://staging.biddeed.ai/sign-in" || true
+          sleep 4
+          kill "$tail_pid" 2>/dev/null || true
+          wait "$tail_pid" 2>/dev/null || true
+          echo "--- tail.err ---"
+          cat /tmp/tail.err || true
+          echo "--- tail.log line count ---"
+          wc -l /tmp/tail.log || true
+          echo "--- parsed logs/exceptions ---"
+          (grep '^{' /tmp/tail.log || true) | jq -r '.logs[]? | "LOG: \(.level) \(.message)"'
+          (grep '^{' /tmp/tail.log || true) | jq -r '.exceptions[]? | "EXCEPTION: \(.name): \(.message)"'
+          exit 0
 
       - name: Print deployment URL without secrets
         run: |
