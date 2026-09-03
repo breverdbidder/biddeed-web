@@ -104,8 +104,13 @@ jobs:
         shell: bash
         run: |
           base='https://staging.biddeed.ai'
+          # First hit after a fresh deploy pays Worker cold-start + a cold Postgres
+          # aggregation (auctions_summary_ssot() over multi_county_auctions) in one
+          # request -- observed 17s once, then 8s/5s/3s/2s on immediate retries.
+          # A single warm-up call absorbs that before the timed checks run.
+          curl -sS -o /dev/null --max-time 45 "$base/api/auctions/summary" || true
           for path in / /sign-in /sign-up /radar /discover /api/health /api/auctions/summary /api/auctions/calendar; do
-            code=$(curl -L -sS -o /tmp/response -w '%{http_code}' --max-time 30 "$base$path")
+            code=$(curl -L -sS -o /tmp/response -w '%{http_code}' --max-time 45 "$base$path")
             echo "$path -> $code"
             case "$path" in
               /api/health|/api/auctions/summary|/api/auctions/calendar)
