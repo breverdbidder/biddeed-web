@@ -13,7 +13,10 @@
   },
   "env": {
     "staging": {
-      "name": "biddeed-web-staging"
+      "name": "biddeed-web-staging",
+      "routes": [
+        { "pattern": "staging.biddeed.ai", "custom_domain": true }
+      ]
     }
   }
 }
