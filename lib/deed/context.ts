@@ -45,10 +45,19 @@ export function useDeedContext(): DeedContext {
 
   return useMemo(() => {
     const parcelMatch = /^\/radar\/([^/]+)$/.exec(pathname)
-    let surface = 'the BidDeed.AI home page'
+    let surface = pathname === '/' ? 'BidDeed.AI home page' : 'BidDeed.AI workspace'
     if (parcelMatch) surface = `auction detail page for record #${parcelMatch[1]}`
     else if (pathname === '/radar') surface = `AuctionRadar workspace (${view || 'split'} view)`
+    else if (pathname === '/alerts') surface = 'private alerts workspace'
+    else if (pathname === '/discover') surface = 'property discovery workspace'
+    else if (pathname === '/counties') surface = 'Florida county directory'
+    else if (pathname.startsWith('/reports') || pathname.startsWith('/report/')) surface = 'auction report workspace'
+    else if (pathname === '/buy-report') surface = 'property report purchase page'
+    else if (pathname === '/calendar') surface = 'auction calendar'
     else if (pathname.startsWith('/order/success')) surface = 'order confirmation page'
+    else if (pathname.startsWith('/sign-in')) surface = 'sign-in page'
+    else if (pathname.startsWith('/sign-up')) surface = 'account creation page'
+    else if (pathname.startsWith('/privacy') || pathname.startsWith('/terms') || pathname.startsWith('/disclaimer') || pathname.startsWith('/security')) surface = 'legal and trust page'
 
     return {
       path: pathname,

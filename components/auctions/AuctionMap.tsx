@@ -133,9 +133,11 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
   const [resp, setResp] = useState<MapResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [fetchError, setFetchError] = useState<string | null>(null)
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
+  const [retryNonce, setRetryNonce] = useState(0)
   const requestId = useRef(0)
 
-  const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ''
+  const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || ''
 
   const toggleFullscreen = useCallback(() => {
     setIsFullscreen((prev) => !prev)
@@ -171,6 +173,7 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
       .then((json: MapResponse) => {
         if (id !== requestId.current) return
         setResp(json)
+        setLastUpdated(new Date())
       })
       .catch((err) => {
         if (id !== requestId.current) return
@@ -181,7 +184,7 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
       .finally(() => {
         if (id === requestId.current) setLoading(false)
       })
-  }, [county, saleType, dayFilter?.date, dayFilter?.saleType])
+  }, [county, saleType, dayFilter?.date, dayFilter?.saleType, retryNonce])
 
   // Handle Escape key to exit fullscreen
   useEffect(() => {
@@ -263,7 +266,7 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
       mapRef.current?.remove()
       mapRef.current = null
     }
-  }, [])
+  }, [MAPBOX_TOKEN, retryNonce])
 
   // Update style on toggle
   useEffect(() => {
@@ -538,8 +541,12 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
 
   if (mapError) {
     return (
-      <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg p-8 text-center">
-        <p className="text-gray-500 dark:text-slate-400">{mapError}</p>
+      <div className="flex min-h-[320px] items-center justify-center border border-border bg-card p-8 text-center" role="status">
+        <div className="max-w-md space-y-3">
+          <p className="text-sm font-bold text-foreground">Map view is temporarily unavailable</p>
+          <p className="text-sm text-muted-foreground">The auction list remains available. Refresh the map after the Mapbox configuration is restored.</p>
+          <button type="button" onClick={() => { setMapError(null); setRetryNonce((value) => value + 1) }} className="min-h-11 bg-primary px-4 text-sm font-bold text-primary-foreground">Retry map</button>
+        </div>
       </div>
     )
   }
@@ -550,14 +557,14 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
 
   return (
     <div className={fillParent ? 'h-full flex flex-col min-h-0' : undefined}>
-      {fetchError && (
-        <div
-          data-testid="map-fetch-error"
-          className="mb-3 px-3 py-2 rounded-md bg-red-50 dark:bg-red-900/20 text-xs text-red-600 dark:text-red-400"
-        >
-          {fetchError}
+          {fetchError && (
+        <div data-testid="map-fetch-error" className="mb-3 flex flex-wrap items-center justify-between gap-3 border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive" role="alert">
+          <span>{fetchError}</span>
+          <button type="button" onClick={() => setRetryNonce((value) => value + 1)} className="font-bold underline underline-offset-2">Retry</button>
         </div>
       )}
+
+      {lastUpdated ? <p className="mb-3 text-xs text-muted-foreground">Map data updated {lastUpdated.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })} · {resp?.returned.toLocaleString() ?? 0} plotted records</p> : null}
 
       {showTruncationBanner && (
         <div
@@ -588,8 +595,8 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
         }
       >
         {loading && (
-          <div className="absolute inset-0 bg-white/80 dark:bg-slate-900/80 z-10 flex items-center justify-center">
-            <div className="w-8 h-8 border-2 border-bd-navy-500 border-t-transparent rounded-full animate-spin" />
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-card/85" aria-live="polite">
+            <div className="space-y-2 text-center"><div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" /><p className="text-xs font-semibold text-muted-foreground">Loading map data…</p></div>
           </div>
         )}
 
@@ -641,8 +648,8 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
               onClick={() => setColorMode('type')}
               className={`px-3 py-1.5 text-xs font-medium transition-colors ${
                 colorMode === 'type'
-                  ? 'bg-bd-navy-500 text-white'
-                  : 'text-gray-600 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               Type
@@ -651,8 +658,8 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
               onClick={() => setColorMode('zoning')}
               className={`px-3 py-1.5 text-xs font-medium transition-colors ${
                 colorMode === 'zoning'
-                  ? 'bg-bd-navy-500 text-white'
-                  : 'text-gray-600 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               Zoning

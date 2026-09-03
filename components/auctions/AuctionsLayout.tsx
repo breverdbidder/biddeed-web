@@ -38,6 +38,7 @@ export default function AuctionsLayout({ initialView, initialCounty, initialSale
   const [auctions, setAuctions] = useState<Auction[]>([])
   const [summary, setSummary] = useState<AuctionSummary | null>(null)
   const [total, setTotal] = useState(0)
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
 
   // County and sale type live in the URL, not only in component state. Two
   // reasons, both load-bearing: a filtered view is now linkable, and Deed can
@@ -167,6 +168,7 @@ export default function AuctionsLayout({ initialView, initialCounty, initialSale
         const res = await fetch(apiUrl('/api/auctions/summary'))
         if (res.ok) {
           setSummary(await res.json())
+          setLastUpdated(new Date())
           return
         }
         const err = new Error(`summary endpoint returned ${res.status}`)
@@ -220,10 +222,20 @@ export default function AuctionsLayout({ initialView, initialCounty, initialSale
 
   if (loading) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center bg-gray-50 dark:bg-slate-950">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-2 border-bd-navy-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-gray-500 dark:text-slate-400 text-sm">Loading auctions...</p>
+      <div className="min-h-[60vh] bg-background px-4 py-8 sm:px-6" aria-busy="true" aria-live="polite">
+        <div className="mx-auto max-w-7xl space-y-6">
+          <div className="space-y-3">
+            <div className="h-7 w-56 animate-pulse bg-muted" />
+            <div className="h-4 w-80 max-w-full animate-pulse bg-muted" />
+          </div>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+            {Array.from({ length: 5 }).map((_, index) => <div key={index} className="h-24 animate-pulse border border-border bg-card" />)}
+          </div>
+          <div className="grid gap-4 lg:grid-cols-[380px_minmax(0,1fr)]">
+            <div className="h-[360px] animate-pulse border border-border bg-card" />
+            <div className="h-[360px] animate-pulse border border-border bg-card" />
+          </div>
+          <p className="text-center text-sm text-muted-foreground">Loading verified auction data…</p>
         </div>
       </div>
     )
@@ -233,9 +245,9 @@ export default function AuctionsLayout({ initialView, initialCounty, initialSale
     return (
       <div className="flex min-h-[60vh] items-center justify-center bg-gray-50 dark:bg-slate-950">
         <div className="flex flex-col items-center gap-4">
-          <p className="text-red-500 text-sm">{error}</p>
-          <button onClick={() => window.location.reload()} className="text-sm text-blue-500 underline">
-            Retry
+          <p role="alert" className="max-w-xl text-center text-sm text-destructive">{error}</p>
+          <button onClick={() => window.location.reload()} className="min-h-11 bg-primary px-4 text-sm font-bold text-primary-foreground">
+            Retry loading data
           </button>
         </div>
       </div>
@@ -253,6 +265,7 @@ export default function AuctionsLayout({ initialView, initialCounty, initialSale
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">Auction Intelligence</h2>
           <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">
             {headerTotal.toLocaleString()} auctions across {headerCounties} Florida counties
+            {lastUpdated ? <span className="ml-2 text-xs text-muted-foreground">Updated {lastUpdated.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</span> : null}
             {summary?.upcoming ? (
               <>
                 {' '}&middot;{' '}
