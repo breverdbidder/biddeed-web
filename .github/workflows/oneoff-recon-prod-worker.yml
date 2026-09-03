@@ -1,4 +1,4 @@
-name: ONEOFF Recon Production Worker Config
+name: ONEOFF Recon Production Worker Routing Logic
 on:
   workflow_dispatch:
 permissions:
@@ -11,39 +11,24 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
     steps:
-      - name: Zone lookup
-        run: |
-          set -euo pipefail
-          zone=$(curl -sS "https://api.cloudflare.com/client/v4/zones?name=biddeed.ai" \
-            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H "Content-Type: application/json")
-          echo "$zone" | jq '.result[0] | {id, name, status, plan: .plan.name}'
-          echo "ZONE_ID=$(echo "$zone" | jq -r '.result[0].id')" >> "$GITHUB_ENV"
-      - name: Workers routes on biddeed.ai zone
-        run: |
-          set -euo pipefail
-          curl -sS "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/workers/routes" \
-            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H "Content-Type: application/json" | jq '.result'
-      - name: List account worker scripts
-        run: |
-          set -euo pipefail
-          curl -sS "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts" \
-            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H "Content-Type: application/json" \
-            | jq '.result[] | {id, created_on, modified_on, usage_model, compatibility_date}'
-      - name: DNS records for biddeed.ai and www
-        run: |
-          set -euo pipefail
-          curl -sS "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records" \
-            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H "Content-Type: application/json" \
-            | jq '.result[] | {type, name, content, proxied}'
-      - name: Worker script settings for worker-damp-snowflake-cead
-        run: |
-          set -euo pipefail
-          curl -sS "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/worker-damp-snowflake-cead/settings" \
-            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H "Content-Type: application/json" | jq '.'
-      - name: Worker script content for worker-damp-snowflake-cead (source, no secrets embedded expected)
+      - name: Fetch full worker source
         run: |
           set -euo pipefail
           curl -sS "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/worker-damp-snowflake-cead" \
             -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" > /tmp/worker-src.txt
           wc -l /tmp/worker-src.txt
-          head -c 6000 /tmp/worker-src.txt
+      - name: Grep for vercel / fallback / proxy / radar / discover / sign-in / api-auctions references
+        run: |
+          set -euo pipefail
+          echo "=== vercel mentions ==="
+          grep -n -i "vercel" /tmp/worker-src.txt || echo "(none)"
+          echo "=== /radar /discover /sign-in /sign-up mentions ==="
+          grep -n -E "/radar|/discover|sign-in|sign-up" /tmp/worker-src.txt || echo "(none)"
+          echo "=== api/auctions mentions ==="
+          grep -n -i "api/auctions\|auctions/summary\|auctions/calendar" /tmp/worker-src.txt || echo "(none)"
+          echo "=== fetch( calls (proxy/passthrough candidates) ==="
+          grep -n "fetch(" /tmp/worker-src.txt | head -60
+          echo "=== default/catch-all/404 handling ==="
+          grep -n -i "default:\|catch-all\|notFound\|404\|else {" /tmp/worker-src.txt | head -60
+          echo "=== top-level route dispatch (url.pathname ===) ==="
+          grep -n "pathname" /tmp/worker-src.txt | head -80
