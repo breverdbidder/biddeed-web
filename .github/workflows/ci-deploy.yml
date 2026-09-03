@@ -67,11 +67,17 @@ jobs:
           vercel env rm NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY production --yes --token="$VERCEL_TOKEN" >/dev/null 2>&1 || true
           printf '%s' "$CLERK_SECRET_KEY" | vercel env add CLERK_SECRET_KEY production --token="$VERCEL_TOKEN" >/dev/null
           printf '%s' "$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY" | vercel env add NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY production --token="$VERCEL_TOKEN" >/dev/null
+          names=$(vercel env ls production --token="$VERCEL_TOKEN" 2>/dev/null || true)
+          grep -Eq 'CLERK_SECRET_KEY' <<< "$names" || { echo "Vercel Production is missing CLERK_SECRET_KEY after sync" >&2; exit 1; }
+          grep -Eq 'NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY' <<< "$names" || { echo "Vercel Production is missing NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY after sync" >&2; exit 1; }
 
       - name: Pull Vercel environment
         run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Build
+        env:
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
         run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy
