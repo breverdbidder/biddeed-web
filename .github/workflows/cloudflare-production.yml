@@ -72,7 +72,10 @@ jobs:
           test -n "$SUPABASE_SERVICE_ROLE_KEY" || { echo 'Missing SUPABASE_SERVICE_ROLE_KEY' >&2; exit 1; }
 
       - name: Build OpenNext Worker (production)
-        run: npm run cf:build:production
+        # package.json has no env-suffixed build script -- cf:build is
+        # environment-agnostic; --config/--env at deploy time (next step)
+        # is what makes this a production deploy, same as cf:deploy:staging.
+        run: npm run cf:build
 
       - name: Deploy production Worker (workers.dev only, no zone route)
         run: npx wrangler deploy --config wrangler.production.jsonc --env production
