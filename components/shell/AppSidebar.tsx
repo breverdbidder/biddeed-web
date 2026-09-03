@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
+import { Show, UserButton } from '@clerk/nextjs'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { ChevronsUpDown, UserRound } from 'lucide-react'
 
@@ -170,7 +170,7 @@ export default function AppSidebar({ deedOpen, onToggleDeed, authEnabled = false
 
       <SidebarFooter>
         {authEnabled && (
-          <SignedIn>
+          <Show when="signed-in">
             <SidebarMenu>
               <SidebarMenuItem>
                 <div className="flex items-center gap-2 px-2 py-1.5">
@@ -179,7 +179,7 @@ export default function AppSidebar({ deedOpen, onToggleDeed, authEnabled = false
                 </div>
               </SidebarMenuItem>
             </SidebarMenu>
-          </SignedIn>
+          </Show>
         )}
         <SidebarSeparator className="mx-0" />
         <SidebarMenu>
@@ -197,19 +197,19 @@ export default function AppSidebar({ deedOpen, onToggleDeed, authEnabled = false
                 <DropdownMenuSeparator />
                 {authEnabled ? (
                   <>
-                    <SignedOut>
+                    <Show when="signed-out">
                       <DropdownMenuItem asChild>
                         <Link href="/sign-in" onClick={closeOnMobile}>Sign in</Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
                         <Link href="/sign-up" onClick={closeOnMobile}>Create account</Link>
                       </DropdownMenuItem>
-                    </SignedOut>
-                    <SignedIn>
+                    </Show>
+                    <Show when="signed-in">
                       <DropdownMenuItem asChild>
                         <Link href="/dashboard" onClick={closeOnMobile}>Account dashboard</Link>
                       </DropdownMenuItem>
-                    </SignedIn>
+                    </Show>
                   </>
                 ) : (
                   <>

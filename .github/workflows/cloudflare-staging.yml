@@ -109,24 +109,6 @@ jobs:
           printf '%s' "$CLERK_SECRET_KEY" | npx wrangler secret put CLERK_SECRET_KEY --config wrangler.staging.jsonc --env staging
           printf '%s' "$SUPABASE_SERVICE_ROLE_KEY" | npx wrangler secret put SUPABASE_SERVICE_ROLE_KEY --config wrangler.staging.jsonc --env staging
 
-      - name: TEMP diagnose /sign-in 500
-        shell: bash
-        run: |
-          npx wrangler tail --config wrangler.staging.jsonc --env staging --format json > /tmp/tail.log 2> /tmp/tail.err &
-          tail_pid=$!
-          sleep 6
-          curl -sS -o /dev/null --max-time 20 "https://staging.biddeed.ai/sign-in" || true
-          sleep 4
-          kill "$tail_pid" 2>/dev/null || true
-          wait "$tail_pid" 2>/dev/null || true
-          echo "--- tail.err ---"
-          cat /tmp/tail.err || true
-          echo "--- tail.log line count ---"
-          wc -l /tmp/tail.log || true
-          echo "--- raw tail.log (first 150 lines) ---"
-          head -n 150 /tmp/tail.log || true
-          exit 0
-
       - name: Print deployment URL without secrets
         run: |
           echo 'Cloudflare OpenNext staging deployment completed.'
