@@ -29,6 +29,9 @@ jobs:
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
       NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
       CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       CLERK_RUNTIME_ENABLED: 'true'
       NEXT_PUBLIC_BASE_PATH: ''
       NEXT_TELEMETRY_DISABLED: '1'
@@ -52,9 +55,42 @@ jobs:
           test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo 'Missing CF_ACCOUNT_ID repository/environment secret' >&2; exit 1; }
           [[ "$CLERK_SECRET_KEY" =~ ^sk_(live|test)_[A-Za-z0-9_-]+$ ]] || { echo 'CLERK_SECRET_KEY format invalid' >&2; exit 1; }
           [[ "$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY" =~ ^pk_(live|test)_[A-Za-z0-9_-]+$ ]] || { echo 'NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY format invalid' >&2; exit 1; }
+          test -n "$NEXT_PUBLIC_SUPABASE_URL" || { echo 'Missing NEXT_PUBLIC_SUPABASE_URL environment secret' >&2; exit 1; }
+          test -n "$NEXT_PUBLIC_SUPABASE_ANON_KEY" || { echo 'Missing NEXT_PUBLIC_SUPABASE_ANON_KEY environment secret' >&2; exit 1; }
+          test -n "$SUPABASE_SERVICE_ROLE_KEY" || { echo 'Missing SUPABASE_SERVICE_ROLE_KEY environment secret' >&2; exit 1; }
 
       - name: Build OpenNext Worker
         run: npm run cf:build
+
+      - name: Free staging.biddeed.ai route from legacy worker
+        shell: bash
+        run: |
+          set -euo pipefail
+          zone_id=$(curl -sS "https://api.cloudflare.com/client/v4/zones?name=biddeed.ai" \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H "Content-Type: application/json" \
+            | jq -r '.result[0].id // empty')
+          if [ -z "$zone_id" ]; then
+            echo 'Could not resolve zone id for biddeed.ai' >&2
+            exit 1
+          fi
+          routes=$(curl -sS "https://api.cloudflare.com/client/v4/zones/$zone_id/workers/routes" \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H "Content-Type: application/json")
+          route_id=$(echo "$routes" | jq -r '.result[] | select(.pattern=="staging.biddeed.ai/*") | .id // empty')
+          route_script=$(echo "$routes" | jq -r '.result[] | select(.pattern=="staging.biddeed.ai/*") | .script // empty')
+          if [ -n "$route_id" ]; then
+            echo "Existing route staging.biddeed.ai/* -> script '$route_script' (route id $route_id)"
+            if [ "$route_script" != "biddeed-web-staging" ]; then
+              echo "Deleting route from legacy worker '$route_script' so biddeed-web-staging can claim it (production biddeed.ai/* untouched)"
+              curl -sS -X DELETE "https://api.cloudflare.com/client/v4/zones/$zone_id/workers/routes/$route_id" \
+                -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H "Content-Type: application/json" \
+                | jq -e '.success' > /dev/null
+              echo "Route freed."
+            else
+              echo "Route already assigned to biddeed-web-staging, nothing to do."
+            fi
+          else
+            echo "No existing route found for staging.biddeed.ai/*, proceeding to deploy."
+          fi
 
       - name: Deploy staging Worker
         run: npx wrangler deploy --config wrangler.staging.jsonc --env staging
