@@ -44,19 +44,19 @@
   --card-foreground: 30 17% 10%;
   --popover: 45 50% 98%;
   --popover-foreground: 30 17% 10%;
-  --primary: 15 52% 50%;
+  --primary: 15 52% 41%;
   --primary-foreground: 39 38% 93%;
   --secondary: 35 35% 89%;
   --secondary-foreground: 30 17% 10%;
   --muted: 35 35% 89%;
-  --muted-foreground: 28 8% 45%;
-  --accent: 15 52% 50%;
+  --muted-foreground: 28 8% 40%;
+  --accent: 15 52% 41%;
   --accent-foreground: 39 38% 93%;
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 210 40% 96%;
   --border: 33 25% 82%;
   --input: 33 25% 82%;
-  --ring: 15 52% 50%;
+  --ring: 15 52% 41%;
   --radius: 0.5rem;
 
   /* Chart colors */
@@ -221,12 +221,12 @@ th[data-numeric] { font-variant-numeric: tabular-nums; font-feature-settings: "t
   :root {
     --sidebar-background: 39 38% 93%;
     --sidebar-foreground: 30 17% 10%;
-    --sidebar-primary: 15 52% 50%;
+    --sidebar-primary: 15 52% 41%;
     --sidebar-primary-foreground: 39 38% 93%;
     --sidebar-accent: 35 35% 89%;
     --sidebar-accent-foreground: 30 17% 10%;
     --sidebar-border: 33 25% 82%;
-    --sidebar-ring: 15 52% 50%;
+    --sidebar-ring: 15 52% 41%;
   }
   html.dark {
     --sidebar-background: 220 49% 8%;
@@ -284,25 +284,25 @@ html[data-theme='light'] {
   --card-foreground: 30 17% 10%;
   --popover: 45 50% 98%;
   --popover-foreground: 30 17% 10%;
-  --primary: 15 52% 50%;              /* #c15f3c terracotta */
+  --primary: 15 52% 41%;              /* #9f4d32 terracotta */
   --primary-foreground: 39 38% 93%;
   --secondary: 35 35% 89%;
   --secondary-foreground: 30 17% 10%;
   --muted: 35 35% 89%;
-  --muted-foreground: 28 8% 45%;      /* #766f67 */
-  --accent: 15 52% 50%;
+  --muted-foreground: 28 8% 40%;      /* #6e655e */
+  --accent: 15 52% 41%;
   --accent-foreground: 39 38% 93%;
   --border: 33 25% 82%;               /* #ddd5c9 */
   --input: 33 25% 82%;
-  --ring: 15 52% 50%;
+  --ring: 15 52% 41%;
   --sidebar-background: 39 38% 93%;
   --sidebar-foreground: 30 17% 10%;
-  --sidebar-primary: 15 52% 50%;
+  --sidebar-primary: 15 52% 41%;
   --sidebar-primary-foreground: 39 38% 93%;
   --sidebar-accent: 35 35% 89%;
   --sidebar-accent-foreground: 30 17% 10%;
   --sidebar-border: 33 25% 82%;
-  --sidebar-ring: 15 52% 50%;
+  --sidebar-ring: 15 52% 41%;
 }
 
 html[data-theme='light'] body {
@@ -318,7 +318,7 @@ html[data-theme='light'] [class~='text-white'],
 html[data-theme='light'] [class~='text-slate-100'],
 html[data-theme='light'] [class~='text-slate-200'] { color: #1f1b16 !important; }
 html[data-theme='light'] [class~='text-slate-300'],
-html[data-theme='light'] [class~='text-slate-400'] { color: #766f67 !important; }
+html[data-theme='light'] [class~='text-slate-400'] { color: #6e655e !important; }
 html[data-theme='light'] [class~='text-slate-500'],
 html[data-theme='light'] [class~='text-slate-600'] { color: #8f8479 !important; }
 html[data-theme='light'] [class~='border-slate-800'],
@@ -326,14 +326,14 @@ html[data-theme='light'] [class~='border-slate-700'],
 html[data-theme='light'] [class~='border-slate-600'] { border-color: #ddd5c9 !important; }
 html[data-theme='light'] [class~='hover:bg-slate-800']:hover { background-color: #ede3d7 !important; }
 html[data-theme='light'] [class~='hover:text-white']:hover { color: #1f1b16 !important; }
-html[data-theme='light'] [class~='text-bd-orange'] { color: #c15f3c !important; }
-html[data-theme='light'] [class~='bg-bd-orange'] { background-color: #c15f3c !important; }
-html[data-theme='light'] [class~='border-bd-orange'] { border-color: #c15f3c !important; }
-html[data-theme='light'] [class~='border-bd-orange\/50'] { border-color: rgba(193,95,60,.5) !important; }
+html[data-theme='light'] [class~='text-bd-orange'] { color: #9f4d32 !important; }
+html[data-theme='light'] [class~='bg-bd-orange'] { background-color: #9f4d32 !important; }
+html[data-theme='light'] [class~='border-bd-orange'] { border-color: #9f4d32 !important; }
+html[data-theme='light'] [class~='border-bd-orange\/50'] { border-color: rgba(159,77,50,.5) !important; }
 html[data-theme='light'] [class~='bg-bd-orange\/5'],
-html[data-theme='light'] [class~='bg-bd-orange\/10'] { background-color: rgba(193,95,60,.08) !important; }
+html[data-theme='light'] [class~='bg-bd-orange\/10'] { background-color: rgba(159,77,50,.08) !important; }
 html[data-theme='light'] [class~='bg-slate-950\/60'] { background-color: rgba(31,27,22,.28) !important; }
-html[data-theme='light'] ::selection { background: #c15f3c; color: #f5f0e8; }
+html[data-theme='light'] ::selection { background: #9f4d32; color: #f5f0e8; }
 html[data-theme='light'] ::-webkit-scrollbar-track { background: #ede3d7; }
 html[data-theme='light'] ::-webkit-scrollbar-thumb { background: #b5a9a0; }
 html[data-theme='light'] ::-webkit-scrollbar-thumb:hover { background: #8f8479; }
