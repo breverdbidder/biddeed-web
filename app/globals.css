@@ -279,9 +279,9 @@ th[data-numeric] { font-variant-numeric: tabular-nums; font-feature-settings: "t
    Light mode is the default; dark mode is explicit.
    ───────────────────────────────────────────────────────────────────────── */
 html[data-theme='light'] {
-  --background: 39 38% 93%;          /* #f5f0e8 cream */
-  --foreground: 30 17% 10%;          /* #1f1b16 black ink */
-  --card: 45 50% 98%;                 /* #fbfaf7 */
+  --background: 22 67% 98%;          /* #fdf8f5 page (Claude reading palette) */
+  --foreground: 40 6% 10%;           /* #1c1b19 ink */
+  --card: 30 33% 95%;                 /* #f7f3ef */
   --card-foreground: 30 17% 10%;
   --popover: 45 50% 98%;
   --popover-foreground: 30 17% 10%;
@@ -290,10 +290,10 @@ html[data-theme='light'] {
   --secondary: 27 26% 93%;
   --secondary-foreground: 40 6% 10%;
   --muted: 27 26% 93%;
-  --muted-foreground: 15 16% 29%;      /* #6e655e */
+  --muted-foreground: 15 16% 29%;      /* #55433d secondary, 8.5:1 */
   --accent: 15 52% 41%;
   --accent-foreground: 22 67% 98%;
-  --border: 33 25% 82%;               /* #ddd5c9 */
+  --border: 30 14% 89%;               /* #e6e2de */
   --input: 33 25% 82%;
   --ring: 15 52% 41%;
   --sidebar-background: 39 38% 93%;
@@ -307,26 +307,26 @@ html[data-theme='light'] {
 }
 
 html[data-theme='light'] body {
-  background: #f5f0e8;
-  color: #1f1b16;
+  background: #fdf8f5;
+  color: #1c1b19;
 }
 html[data-theme='light'] [class~='bg-[#020617]'],
-html[data-theme='light'] [class~='bg-slate-950'] { background-color: #f5f0e8 !important; }
+html[data-theme='light'] [class~='bg-slate-950'] { background-color: #fdf8f5 !important; }
 html[data-theme='light'] [class~='bg-[#0b1220]'],
-html[data-theme='light'] [class~='bg-slate-900'] { background-color: #fbfaf7 !important; }
-html[data-theme='light'] [class~='bg-slate-800'] { background-color: #ede3d7 !important; }
+html[data-theme='light'] [class~='bg-slate-900'] { background-color: #f7f3ef !important; }
+html[data-theme='light'] [class~='bg-slate-800'] { background-color: #f2ede9 !important; }
 html[data-theme='light'] [class~='text-white'],
 html[data-theme='light'] [class~='text-slate-100'],
-html[data-theme='light'] [class~='text-slate-200'] { color: #1f1b16 !important; }
+html[data-theme='light'] [class~='text-slate-200'] { color: #1c1b19 !important; }
 html[data-theme='light'] [class~='text-slate-300'],
-html[data-theme='light'] [class~='text-slate-400'] { color: #6e655e !important; }
+html[data-theme='light'] [class~='text-slate-400'] { color: #55433d !important; }
 html[data-theme='light'] [class~='text-slate-500'],
 html[data-theme='light'] [class~='text-slate-600'] { color: #746b61 !important; }
 html[data-theme='light'] [class~='border-slate-800'],
 html[data-theme='light'] [class~='border-slate-700'],
-html[data-theme='light'] [class~='border-slate-600'] { border-color: #ddd5c9 !important; }
-html[data-theme='light'] [class~='hover:bg-slate-800']:hover { background-color: #ede3d7 !important; }
-html[data-theme='light'] [class~='hover:text-white']:hover { color: #1f1b16 !important; }
+html[data-theme='light'] [class~='border-slate-600'] { border-color: #e6e2de !important; }
+html[data-theme='light'] [class~='hover:bg-slate-800']:hover { background-color: #f2ede9 !important; }
+html[data-theme='light'] [class~='hover:text-white']:hover { color: #1c1b19 !important; }
 html[data-theme='light'] [class~='text-bd-orange'] { color: #9f4d32 !important; }
 html[data-theme='light'] [class~='bg-bd-orange'] { background-color: #9f4d32 !important; }
 html[data-theme='light'] [class~='border-bd-orange'] { border-color: #9f4d32 !important; }
@@ -334,8 +334,8 @@ html[data-theme='light'] [class~='border-bd-orange\/50'] { border-color: rgba(15
 html[data-theme='light'] [class~='bg-bd-orange\/5'],
 html[data-theme='light'] [class~='bg-bd-orange\/10'] { background-color: rgba(159,77,50,.08) !important; }
 html[data-theme='light'] [class~='bg-slate-950\/60'] { background-color: rgba(31,27,22,.28) !important; }
-html[data-theme='light'] ::selection { background: #9f4d32; color: #f5f0e8; }
-html[data-theme='light'] ::-webkit-scrollbar-track { background: #ede3d7; }
+html[data-theme='light'] ::selection { background: #9f4d32; color: #fdf8f5; }
+html[data-theme='light'] ::-webkit-scrollbar-track { background: #f2ede9; }
 html[data-theme='light'] ::-webkit-scrollbar-thumb { background: #b5a9a0; }
 html[data-theme='light'] ::-webkit-scrollbar-thumb:hover { background: #746b61; }
 
