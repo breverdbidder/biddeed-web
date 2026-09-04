@@ -294,7 +294,7 @@ export default function AuctionsLayout({ initialView, initialCounty, initialSale
               {viewMode !== 'map' && (
                 <button
                   onClick={() => changeViewMode('map')}
-                  className="text-bd-navy-600 dark:text-bd-navy-300 underline hover:no-underline"
+                  className="text-primary dark:text-primary underline hover:no-underline"
                 >
                   View on map
                 </button>

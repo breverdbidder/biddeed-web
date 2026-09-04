@@ -35,7 +35,7 @@ export default function AuctionFilters({
   // them the select sizes to its widest option and spills out of the filter
   // row at 320px (measured: 59px past a 288px container).
   // min-h-11 is the WCAG 2.5.8 touch size, dropped back to auto at md.
-  const selectClass = 'px-3 py-1.5 min-h-11 md:min-h-0 min-w-0 max-w-full text-sm bg-card dark:bg-card border border-border dark:border-border rounded-md text-foreground dark:text-foreground focus:outline-none focus:ring-2 focus:ring-bd-navy-500/30'
+  const selectClass = 'px-3 py-1.5 min-h-11 md:min-h-0 min-w-0 max-w-full text-sm bg-card dark:bg-card border border-border dark:border-border rounded-md text-foreground dark:text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30'
 
   return (
     <div className="flex flex-wrap items-center gap-3">

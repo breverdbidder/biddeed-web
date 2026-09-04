@@ -109,7 +109,7 @@ export default function AuctionSidebarList({
                   </span>
                   <button
                     onClick={(e) => { e.stopPropagation(); onOpen(a) }}
-                    className="text-xs font-semibold text-bd-navy-600 dark:text-bd-navy-300 underline hover:no-underline min-h-6"
+                    className="text-xs font-semibold text-primary dark:text-primary underline hover:no-underline min-h-6"
                   >
                     Full report →
                   </button>

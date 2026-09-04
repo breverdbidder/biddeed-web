@@ -133,7 +133,7 @@ export default function AuctionDetail({ auctionId }: Props) {
           <p className="text-primary text-sm">{error || 'Auction not found'}</p>
           <button
             onClick={() => router.push('/radar')}
-            className="text-sm text-primary hover:text-bd-navy-700 dark:text-bd-orange-400 dark:hover:text-bd-orange-300 underline"
+            className="text-sm text-primary hover:text-primary dark:text-bd-orange-400 dark:hover:text-bd-orange-300 underline"
           >
             ← Back to Auctions
           </button>
