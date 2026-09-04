@@ -281,8 +281,8 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
     // zoning_category on multi_county_auctions) - grey/unknown is honest,
     // inventing a category is not.
     if (colorMode === 'zoning') return '#6B7280'
-    if (point.sale_type === 'foreclosure') return '#005eb8'
-    if (point.sale_type === 'tax_deed') return '#1a1a1a'
+    if (point.sale_type === 'foreclosure') return '#0073CF'
+    if (point.sale_type === 'tax_deed') return '#222222'
     return '#6B7280'
   }
 
@@ -332,8 +332,8 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
       'circle-color': [
         'match',
         ['get', 'type_code'],
-        0, '#005eb8',
-        1, '#1a1a1a',
+        0, '#0073CF',
+        1, '#222222',
         '#6B7280',
       ],
       'circle-radius': 7,

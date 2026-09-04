@@ -15,10 +15,10 @@ function clerkAppearance(theme: 'light' | 'dark') {
   return {
     variables: {
       colorBackground: light ? '#ffffff' : '#0b1220',
-      colorText: light ? '#1a1a1a' : '#e2e8f0',
-      colorTextSecondary: light ? '#657786' : '#94a3b8',
+      colorText: light ? '#222222' : '#e2e8f0',
+      colorTextSecondary: light ? '#002A54' : '#94a3b8',
       colorInputBackground: light ? '#ffffff' : '#1e293b',
-      colorInputText: light ? '#1a1a1a' : '#e2e8f0',
+      colorInputText: light ? '#222222' : '#e2e8f0',
       colorPrimary: light ? '#c15f3c' : '#F59E0B',
       colorDanger: '#dc2626',
       colorSuccess: '#16a34a',

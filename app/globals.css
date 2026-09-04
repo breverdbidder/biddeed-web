@@ -4,60 +4,60 @@
 
 :root {
   /* Navy accent colors */
-  --navy-50: #e6f0fa;
-  --navy-100: #e6f0fa;
-  --navy-200: #d7e3f1;
-  --navy-300: #657786;
-  --navy-400: #657786;
-  --navy-500: #004a92;
-  --navy-600: #0a2540;
-  --navy-700: #0a2540;
-  --navy-800: #0a2540;
-  --navy-900: #0a2540;
+  --navy-50: #E8F4FC;
+  --navy-100: #E8F4FC;
+  --navy-200: #CCCCCC;
+  --navy-300: #002A54;
+  --navy-400: #002A54;
+  --navy-500: #005DAA;
+  --navy-600: #002A54;
+  --navy-700: #002A54;
+  --navy-800: #002A54;
+  --navy-900: #002A54;
 
   /* Orange accent colors */
-  --orange-50: #e6f0fa;
-  --orange-100: #e6f0fa;
-  --orange-200: #e6f0fa;
-  --orange-300: #005eb8;
-  --orange-400: #005eb8;
-  --orange-500: #005eb8;
-  --orange-600: #004a92;
+  --orange-50: #E8F4FC;
+  --orange-100: #E8F4FC;
+  --orange-200: #E8F4FC;
+  --orange-300: #0073CF;
+  --orange-400: #0073CF;
+  --orange-500: #0073CF;
+  --orange-600: #005DAA;
 
   /* Slate colors for dark theme */
   --slate-50: #ffffff;
-  --slate-100: #e6f0fa;
-  --slate-200: #d7e3f1;
-  --slate-300: #d7e3f1;
-  --slate-400: #657786;
-  --slate-500: #657786;
-  --slate-600: #657786;
-  --slate-700: #657786;
-  --slate-800: #0a2540;
-  --slate-900: #0a2540;
-  --slate-950: #0a2540;
+  --slate-100: #E8F4FC;
+  --slate-200: #CCCCCC;
+  --slate-300: #CCCCCC;
+  --slate-400: #002A54;
+  --slate-500: #002A54;
+  --slate-600: #002A54;
+  --slate-700: #002A54;
+  --slate-800: #002A54;
+  --slate-900: #002A54;
+  --slate-950: #002A54;
 
   /* shadcn semantic colors (HSL values — no hsl() wrapper) */
-  /* Light theme = Claude.ai reading experience (PARITY_PRD section 8; values cross-checked against the community measurement in open-claude-reference src/index.css): page #ffffff, card #ffffff, muted surface #e6f0fa, ink #1a1a1a, secondary text #657786 (8.5:1), border #d7e3f1. Accent stays our text-safe terracotta (#005eb8, 5.2:1); Claude's lighter #005eb8 is 3:1 and never used as text. */
+  /* Light theme = Claude.ai reading experience (PARITY_PRD section 8; values cross-checked against the community measurement in open-claude-reference src/index.css): page #ffffff, card #ffffff, muted surface #E8F4FC, ink #222222, secondary text #002A54 (8.5:1), border #CCCCCC. Accent stays our text-safe terracotta (#0073CF, 5.2:1); Claude's lighter #0073CF is 3:1 and never used as text. */
   --background: 0 0% 100%;
-  --foreground: 0 0% 10%;
+  --foreground: 0 0% 13%;
   --card: 0 0% 100%;
-  --card-foreground: 0 0% 10%;
+  --card-foreground: 0 0% 13%;
   --popover: 0 0% 100%;
-  --popover-foreground: 0 0% 10%;
-  --primary: 209 100% 36%;
+  --popover-foreground: 0 0% 13%;
+  --primary: 207 100% 41%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 210 67% 94%;
-  --secondary-foreground: 0 0% 10%;
-  --muted: 210 67% 94%;
-  --muted-foreground: 209 14% 46%;
-  --accent: 209 100% 36%;
+  --secondary: 204 77% 95%;
+  --secondary-foreground: 0 0% 13%;
+  --muted: 204 77% 95%;
+  --muted-foreground: 210 100% 16%;
+  --accent: 207 100% 41%;
   --accent-foreground: 0 0% 100%;
-  --destructive: 210 81% 15%;
+  --destructive: 210 100% 16%;
   --destructive-foreground: 0 0% 100%;
-  --border: 212 48% 89%;
-  --input: 212 48% 89%;
-  --ring: 209 100% 36%;
+  --border: 0 0% 80%;
+  --input: 0 0% 80%;
+  --ring: 207 100% 41%;
   --radius: 0.5rem;
 
   /* Chart colors */
@@ -121,15 +121,15 @@ body {
 }
 
 .grade-a {
-  color: #005eb8;
+  color: #0073CF;
 }
 
 .grade-b {
-  color: #005eb8;
+  color: #0073CF;
 }
 
 .grade-c {
-  color: #0a2540;
+  color: #002A54;
 }
 
 /* Custom scrollbar */
@@ -164,17 +164,17 @@ body {
    Shapira assessment and must stay visually distinct from lifecycle state.
 
    ACCESSIBILITY FIX ON PORT: the Worker sets .grade-E/.grade-X/.grade-Z to
-   color:#d7e3f1 on background:#657786 — roughly 1.1:1 contrast, effectively
-   invisible. Corrected to #0a2540, matching the dark-on-light pattern that
+   color:#CCCCCC on background:#002A54 — roughly 1.1:1 contrast, effectively
+   invisible. Corrected to #002A54, matching the dark-on-light pattern that
    .grade-C already uses. Do not "restore" the original.
    ───────────────────────────────────────────────────────────────────────── */
-.grade-A { background: linear-gradient(135deg, #005eb8, #005eb8); color: #fff; }
-.grade-B { background: linear-gradient(135deg, #005eb8, #005eb8); color: #fff; }
-.grade-C { background: linear-gradient(135deg, #005eb8, #005eb8); color: #0a2540; }
-.grade-D { background: linear-gradient(135deg, #005eb8, #005eb8); color: #fff; }
+.grade-A { background: linear-gradient(135deg, #0073CF, #0073CF); color: #fff; }
+.grade-B { background: linear-gradient(135deg, #0073CF, #0073CF); color: #fff; }
+.grade-C { background: linear-gradient(135deg, #0073CF, #0073CF); color: #002A54; }
+.grade-D { background: linear-gradient(135deg, #0073CF, #0073CF); color: #fff; }
 .grade-E,
 .grade-X,
-.grade-Z { background: #657786; color: #0a2540; }
+.grade-Z { background: #002A54; color: #002A54; }
 
 /* ─────────────────────────────────────────────────────────────────────────
    Tabular figures. Every currency, bid and count column must use these.
@@ -200,20 +200,20 @@ th[data-numeric] { font-variant-numeric: tabular-nums; font-feature-settings: "t
    App-shell (sidebar) tokens.
 
    `shadcn add sidebar` writes a light :root block and a .dark override. This
-   app has no theme switch: <html> is always the dark surface (#0a2540 page,
-   #0a2540 chrome, #0a2540 borders), so the dark values live in :root directly
+   app has no theme switch: <html> is always the dark surface (#002A54 page,
+   #002A54 chrome, #002A54 borders), so the dark values live in :root directly
    and .dark is kept identical for any component that opts into it.
    ───────────────────────────────────────────────────────────────────────── */
 @layer base {
   :root,
   .dark {
-    --sidebar-background: 220 49% 8%;      /* #0a2540 — chrome */
+    --sidebar-background: 220 49% 8%;      /* #002A54 — chrome */
     --sidebar-foreground: 213 27% 84%;     /* slate-300 */
     --sidebar-primary: 38 92% 50%;         /* bd-orange — active accent */
     --sidebar-primary-foreground: 222 47% 11%;
-    --sidebar-accent: 217 33% 17%;         /* #0a2540 — hover/active fill */
+    --sidebar-accent: 217 33% 17%;         /* #002A54 — hover/active fill */
     --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 217 33% 17%;         /* #0a2540 */
+    --sidebar-border: 217 33% 17%;         /* #002A54 */
     --sidebar-ring: 38 92% 50%;
   }
 }
@@ -221,13 +221,13 @@ th[data-numeric] { font-variant-numeric: tabular-nums; font-feature-settings: "t
 @layer base {
   :root {
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 0 0% 10%;
-    --sidebar-primary: 209 100% 36%;
+    --sidebar-foreground: 0 0% 13%;
+    --sidebar-primary: 207 100% 41%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 67% 94%;
-    --sidebar-accent-foreground: 0 0% 10%;
-    --sidebar-border: 212 48% 89%;
-    --sidebar-ring: 209 100% 36%;
+    --sidebar-accent: 204 77% 95%;
+    --sidebar-accent-foreground: 0 0% 13%;
+    --sidebar-border: 0 0% 80%;
+    --sidebar-ring: 207 100% 41%;
   }
   html.dark {
     --sidebar-background: 220 49% 8%;
@@ -280,64 +280,64 @@ th[data-numeric] { font-variant-numeric: tabular-nums; font-feature-settings: "t
    ───────────────────────────────────────────────────────────────────────── */
 html[data-theme='light'] {
   --background: 0 0% 100%;          /* #ffffff page (Claude reading palette) */
-  --foreground: 0 0% 10%;           /* #1a1a1a ink */
+  --foreground: 0 0% 13%;           /* #222222 ink */
   --card: 0 0% 100%;                 /* #ffffff */
-  --card-foreground: 0 0% 10%;
+  --card-foreground: 0 0% 13%;
   --popover: 0 0% 100%;
-  --popover-foreground: 0 0% 10%;
-  --primary: 209 100% 36%;              /* #005eb8 terracotta */
+  --popover-foreground: 0 0% 13%;
+  --primary: 207 100% 41%;              /* #0073CF terracotta */
   --primary-foreground: 0 0% 100%;
-  --secondary: 210 67% 94%;
-  --secondary-foreground: 0 0% 10%;
-  --muted: 210 67% 94%;
-  --muted-foreground: 209 14% 46%;      /* #657786 secondary, 8.5:1 */
-  --accent: 209 100% 36%;
+  --secondary: 204 77% 95%;
+  --secondary-foreground: 0 0% 13%;
+  --muted: 204 77% 95%;
+  --muted-foreground: 210 100% 16%;      /* #002A54 secondary, 8.5:1 */
+  --accent: 207 100% 41%;
   --accent-foreground: 0 0% 100%;
-  --border: 212 48% 89%;               /* #d7e3f1 */
-  --input: 212 48% 89%;
-  --ring: 209 100% 36%;
+  --border: 0 0% 80%;               /* #CCCCCC */
+  --input: 0 0% 80%;
+  --ring: 207 100% 41%;
   --sidebar-background: 0 0% 100%;
-  --sidebar-foreground: 0 0% 10%;
-  --sidebar-primary: 209 100% 36%;
+  --sidebar-foreground: 0 0% 13%;
+  --sidebar-primary: 207 100% 41%;
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 210 67% 94%;
-  --sidebar-accent-foreground: 0 0% 10%;
-  --sidebar-border: 212 48% 89%;
-  --sidebar-ring: 209 100% 36%;
+  --sidebar-accent: 204 77% 95%;
+  --sidebar-accent-foreground: 0 0% 13%;
+  --sidebar-border: 0 0% 80%;
+  --sidebar-ring: 207 100% 41%;
 }
 
 html[data-theme='light'] body {
   background: #ffffff;
-  color: #1a1a1a;
+  color: #222222;
 }
-html[data-theme='light'] [class~='bg-[#0a2540]'],
+html[data-theme='light'] [class~='bg-[#002A54]'],
 html[data-theme='light'] [class~='bg-slate-950'] { background-color: #ffffff !important; }
-html[data-theme='light'] [class~='bg-[#0a2540]'],
+html[data-theme='light'] [class~='bg-[#002A54]'],
 html[data-theme='light'] [class~='bg-slate-900'] { background-color: #ffffff !important; }
-html[data-theme='light'] [class~='bg-slate-800'] { background-color: #e6f0fa !important; }
+html[data-theme='light'] [class~='bg-slate-800'] { background-color: #E8F4FC !important; }
 html[data-theme='light'] [class~='text-white'],
 html[data-theme='light'] [class~='text-slate-100'],
-html[data-theme='light'] [class~='text-slate-200'] { color: #1a1a1a !important; }
+html[data-theme='light'] [class~='text-slate-200'] { color: #222222 !important; }
 html[data-theme='light'] [class~='text-slate-300'],
-html[data-theme='light'] [class~='text-slate-400'] { color: #657786 !important; }
+html[data-theme='light'] [class~='text-slate-400'] { color: #002A54 !important; }
 html[data-theme='light'] [class~='text-slate-500'],
-html[data-theme='light'] [class~='text-slate-600'] { color: #657786 !important; }
+html[data-theme='light'] [class~='text-slate-600'] { color: #002A54 !important; }
 html[data-theme='light'] [class~='border-slate-800'],
 html[data-theme='light'] [class~='border-slate-700'],
-html[data-theme='light'] [class~='border-slate-600'] { border-color: #d7e3f1 !important; }
-html[data-theme='light'] [class~='hover:bg-slate-800']:hover { background-color: #e6f0fa !important; }
-html[data-theme='light'] [class~='hover:text-white']:hover { color: #1a1a1a !important; }
-html[data-theme='light'] [class~='text-bd-orange'] { color: #005eb8 !important; }
-html[data-theme='light'] [class~='bg-bd-orange'] { background-color: #005eb8 !important; }
-html[data-theme='light'] [class~='border-bd-orange'] { border-color: #005eb8 !important; }
+html[data-theme='light'] [class~='border-slate-600'] { border-color: #CCCCCC !important; }
+html[data-theme='light'] [class~='hover:bg-slate-800']:hover { background-color: #E8F4FC !important; }
+html[data-theme='light'] [class~='hover:text-white']:hover { color: #222222 !important; }
+html[data-theme='light'] [class~='text-bd-orange'] { color: #0073CF !important; }
+html[data-theme='light'] [class~='bg-bd-orange'] { background-color: #0073CF !important; }
+html[data-theme='light'] [class~='border-bd-orange'] { border-color: #0073CF !important; }
 html[data-theme='light'] [class~='border-bd-orange\/50'] { border-color: rgba(159,77,50,.5) !important; }
 html[data-theme='light'] [class~='bg-bd-orange\/5'],
 html[data-theme='light'] [class~='bg-bd-orange\/10'] { background-color: rgba(159,77,50,.08) !important; }
 html[data-theme='light'] [class~='bg-slate-950\/60'] { background-color: rgba(31,27,22,.28) !important; }
-html[data-theme='light'] ::selection { background: #005eb8; color: #ffffff; }
-html[data-theme='light'] ::-webkit-scrollbar-track { background: #e6f0fa; }
-html[data-theme='light'] ::-webkit-scrollbar-thumb { background: #d7e3f1; }
-html[data-theme='light'] ::-webkit-scrollbar-thumb:hover { background: #657786; }
+html[data-theme='light'] ::selection { background: #0073CF; color: #ffffff; }
+html[data-theme='light'] ::-webkit-scrollbar-track { background: #E8F4FC; }
+html[data-theme='light'] ::-webkit-scrollbar-thumb { background: #CCCCCC; }
+html[data-theme='light'] ::-webkit-scrollbar-thumb:hover { background: #002A54; }
 
 /* ─────────────────────────────────────────────────────────────────────────
    Dark mode — semantic tokens.
@@ -350,23 +350,23 @@ html[data-theme='light'] ::-webkit-scrollbar-thumb:hover { background: #657786; 
    ───────────────────────────────────────────────────────────────────────── */
 html[data-theme='dark'],
 html.dark {
-  --background: 222 40% 7%;            /* #0a2540 */
+  --background: 222 40% 7%;            /* #002A54 */
   --foreground: 38 25% 93%;            /* #ffffff warm ink on dark */
-  --card: 222 38% 11%;                 /* #0a2540 */
+  --card: 222 38% 11%;                 /* #002A54 */
   --card-foreground: 38 25% 93%;
   --popover: 222 38% 11%;
   --popover-foreground: 38 25% 93%;
-  --primary: 17 70% 60%;               /* #005eb8 — terracotta lifted for dark */
+  --primary: 17 70% 60%;               /* #0073CF — terracotta lifted for dark */
   --primary-foreground: 222 40% 7%;
-  --secondary: 222 30% 16%;            /* #0a2540 */
+  --secondary: 222 30% 16%;            /* #002A54 */
   --secondary-foreground: 38 25% 93%;
   --muted: 222 30% 16%;
-  --muted-foreground: 30 8% 63%;       /* #657786 */
+  --muted-foreground: 30 8% 63%;       /* #002A54 */
   --accent: 17 70% 60%;
   --accent-foreground: 222 40% 7%;
   --destructive: 0 72% 60%;
   --destructive-foreground: 0 0% 100%;
-  --border: 222 24% 19%;               /* #0a2540 */
+  --border: 222 24% 19%;               /* #002A54 */
   --input: 222 24% 19%;
   --ring: 17 70% 60%;
 }
@@ -386,4 +386,4 @@ html.dark body {
 
 
 /* Sky theme (Ariel, 2026-09-04): white backgrounds, blue accent, navy headings - light mode only */
-html[data-theme='light'] h1, html[data-theme='light'] h2, html[data-theme='light'] h3, :root:not([data-theme='dark']) h1, :root:not([data-theme='dark']) h2, :root:not([data-theme='dark']) h3 { color: #0a2540; }
+html[data-theme='light'] h1, html[data-theme='light'] h2, html[data-theme='light'] h3, :root:not([data-theme='dark']) h1, :root:not([data-theme='dark']) h2, :root:not([data-theme='dark']) h3 { color: #002A54; }
