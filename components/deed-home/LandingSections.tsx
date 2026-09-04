@@ -92,20 +92,20 @@ export function Proof() {
             </a>
           </div>
         </div>
-        <dl className="grid grid-cols-3 gap-3 sm:gap-4">
-          <div className="rounded-2xl border border-border bg-background p-4">
+        <dl className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
+          <div className="flex items-baseline justify-between gap-3 rounded-2xl border border-border bg-background p-4 sm:block">
             <dt className="text-[11px] uppercase tracking-wide text-muted-foreground">Max bid published</dt>
-            <dd className="tabular mt-1 text-xl font-semibold text-foreground sm:text-2xl">$82,000</dd>
+            <dd className="tabular whitespace-nowrap text-lg font-semibold text-foreground sm:mt-1 sm:text-2xl">$82,000</dd>
           </div>
-          <div className="rounded-2xl border border-border bg-background p-4">
+          <div className="flex items-baseline justify-between gap-3 rounded-2xl border border-border bg-background p-4 sm:block">
             <dt className="text-[11px] uppercase tracking-wide text-muted-foreground">Sale closed at</dt>
-            <dd className="tabular mt-1 text-xl font-semibold text-primary sm:text-2xl">$73,501</dd>
+            <dd className="tabular whitespace-nowrap text-lg font-semibold text-primary sm:mt-1 sm:text-2xl">$73,501</dd>
           </div>
-          <div className="rounded-2xl border border-border bg-background p-4">
+          <div className="flex items-baseline justify-between gap-3 rounded-2xl border border-border bg-background p-4 sm:block">
             <dt className="text-[11px] uppercase tracking-wide text-muted-foreground">Outcome</dt>
-            <dd className="mt-1 text-xl font-semibold text-foreground sm:text-2xl">Held</dd>
+            <dd className="whitespace-nowrap text-lg font-semibold text-foreground sm:mt-1 sm:text-2xl">Held</dd>
           </div>
-          <p className="col-span-3 text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground sm:col-span-3">
             Marion County foreclosure, July 2026. Figures from the published report and the clerk&rsquo;s recorded sale.
           </p>
         </dl>
