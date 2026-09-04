@@ -16,7 +16,7 @@ import DeedHome from '@/components/deed-home/DeedHome'
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: 'BidDeed.AI — Know your number before the gavel',
+  title: 'BidDeed.AI — Every Foreclosure. Every Tax Deed. Yours To Win.',
   description:
     'AI-powered foreclosure and tax deed auction intelligence for all 67 Florida counties. Ask Deed what is coming to auction, what to bid, and what the zoning allows — before you bid.',
 }

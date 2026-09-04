@@ -92,12 +92,14 @@ export default function DeedHome() {
             <span className="text-sm font-medium text-muted-foreground">Deed · the BidDeed.AI agent</span>
           </div>
 
-          <h1 className="font-display mx-auto mt-6 max-w-2xl text-[2.35rem] font-medium leading-[1.08] tracking-tight text-foreground sm:text-5xl lg:text-[3.4rem]">
-            Know your number before the gavel.
+          <h1 className="font-display mx-auto mt-6 max-w-2xl text-[2.1rem] font-medium leading-[1.12] tracking-tight text-foreground sm:text-[2.75rem] lg:text-[3.1rem]">
+            THE BEST PRICES IN US REAL ESTATE ARE SET AT FORECLOSURE AND TAX DEED AUCTIONS.
           </h1>
           <p className="mx-auto mt-5 max-w-xl text-base leading-7 text-muted-foreground sm:text-[17px]">
-            Ask about any Florida foreclosure or tax deed sale. Deed reads the county calendar and the parcel record,
-            then hands you a maximum bid you can defend — with the zoning read on every property.
+            Our data is your unfair advantage at every US county auction.
+          </p>
+          <p className="mx-auto mt-2 max-w-xl text-base leading-7 text-muted-foreground sm:text-[17px]">
+            We fought in the trenches for over two decades so you don&rsquo;t have to.
           </p>
 
           <div className="mt-8 text-left">

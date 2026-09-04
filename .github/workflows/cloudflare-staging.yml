@@ -54,7 +54,10 @@ jobs:
           [[ "$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY" =~ ^pk_(live|test)_[A-Za-z0-9_-]+$ ]] || { echo 'NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY format invalid' >&2; exit 1; }
 
       - name: Build OpenNext Worker
-        run: npm run cf:build
+        # Same fix as cloudflare-production.yml (#19820): no bare
+        # wrangler.jsonc exists at the repo root, so opennextjs-cloudflare
+        # build refuses to run non-interactively without an explicit --config.
+        run: npx opennextjs-cloudflare build --config wrangler.staging.jsonc
 
       - name: Deploy staging Worker
         run: npx wrangler deploy --config wrangler.staging.jsonc --env staging
