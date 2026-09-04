@@ -193,6 +193,76 @@ function tooManyRequests(req: NextRequest, resetAt: number): NextResponse {
   })
 }
 
+/**
+ * Issue #19846 (B3, sub-task of #19830): /counties/:slug and
+ * /counties/:slug/:saleType are backed entirely by auctions_calendar_counts()
+ * (lib/countyAuctionData.ts). That call currently fails OPEN on any RPC
+ * error -- it catches the error and returns an all-zero result, so the page
+ * renders "0 upcoming auctions" with a 200 instead of surfacing the outage.
+ * A crawler or a buyer reads that as "this county has no auctions", which is
+ * wrong and un-debuggable from the outside.
+ *
+ * This gate makes the RPC failure visible at the edge, before the page
+ * renders: same RPC, minimal p_from/p_to window (today only) so the health
+ * check itself is cheap, matching the /answers/:slug pattern already shipped
+ * in cli-anything-biddeed's Worker (get_published_content: non-2xx/throw ->
+ * 503 + Retry-After, cached copy served if one exists; 404 stays reserved
+ * for a request that reached the RPC successfully and it had nothing to
+ * return -- an unknown county slug there, since a real county with zero
+ * upcoming auctions is a legitimate 200, not a 404).
+ *
+ * Known gap, not fixed here: this only reads caches.default -- nothing in
+ * this app's request lifecycle currently WRITES a successful county-page
+ * render into that cache (Next.js middleware runs before the route handler,
+ * with no supported hook to capture the final rendered HTML afterward), so
+ * the "serve edge-cached copy" fallback is live-wired but will stay a no-op
+ * (falls through to 503) until a write path exists. Flagged in
+ * docs/spec/19846.md (cli-anything-biddeed) rather than silently claimed as
+ * complete.
+ */
+const COUNTY_PAGE_PATH = /^\/counties\/([^/]+)(?:\/[^/]+)?\/?$/
+
+async function checkCountyRpcHealthy(slug: string): Promise<boolean> {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (!url || !key) return true // no creds to check with -- don't block the page on a config gap
+  const today = new Date().toISOString().slice(0, 10)
+  try {
+    const res = await fetch(`${url}/rest/v1/rpc/auctions_calendar_counts`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', apikey: key, Authorization: `Bearer ${key}` },
+      body: JSON.stringify({ p_from: today, p_to: today, p_county: slug, p_sale_type: null, p_status_scope: 'live' }),
+      cache: 'no-store',
+    })
+    return res.ok
+  } catch {
+    return false
+  }
+}
+
+async function countyRpcUnavailable(req: NextRequest): Promise<NextResponse> {
+  const headers: Record<string, string> = { 'Retry-After': '30', 'Cache-Control': 'no-store' }
+  try {
+    const cache = (globalThis as unknown as { caches?: { default?: Cache } }).caches?.default
+    if (cache) {
+      const cached = await cache.match(req.url)
+      if (cached) return new NextResponse(cached.body, { status: cached.status, headers: cached.headers })
+    }
+  } catch {
+    // caches.default isn't available in every runtime this middleware might execute
+    // under (e.g. local `next dev`, non-Cloudflare preview) -- fall through to 503.
+  }
+  return new NextResponse('Temporarily unavailable', { status: 503, headers })
+}
+
+async function countyRouteMiddleware(req: NextRequest): Promise<NextResponse | undefined> {
+  const match = COUNTY_PAGE_PATH.exec(req.nextUrl.pathname)
+  if (!match) return undefined
+  const healthy = await checkCountyRpcHealthy(match[1])
+  if (!healthy) return countyRpcUnavailable(req)
+  return undefined
+}
+
 function rateLimitMiddleware(req: NextRequest): NextResponse | undefined {
   const pathname = req.nextUrl.pathname
   const clientIp = getClientIp(req)
@@ -381,9 +451,12 @@ function generateNonce(): string {
 }
 
 // When Clerk is not configured, use a passthrough middleware with rate limiting + CSP
-function passthroughMiddleware(req: NextRequest) {
+async function passthroughMiddleware(req: NextRequest) {
   const rateLimitResponse = rateLimitMiddleware(req)
   if (rateLimitResponse) return rateLimitResponse
+
+  const countyRpcResponse = await countyRouteMiddleware(req)
+  if (countyRpcResponse) return countyRpcResponse
 
   const nonce = generateNonce()
   const response = NextResponse.next({
@@ -396,6 +469,9 @@ export default CLERK_ENABLED
   ? clerkMiddleware(async (auth, req) => {
       const rateLimitResponse = rateLimitMiddleware(req)
       if (rateLimitResponse) return rateLimitResponse
+
+      const countyRpcResponse = await countyRouteMiddleware(req)
+      if (countyRpcResponse) return countyRpcResponse
 
       if (!isPublicRoute(req)) {
         await auth.protect()
