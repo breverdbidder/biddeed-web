@@ -21,15 +21,15 @@ export default async function SignUpCatchAllPage() {
             <div style={{ width: '40px', height: '40px', backgroundColor: '#c15f3c', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <span style={{ color: '#fffaf3', fontWeight: 'bold', fontSize: '20px' }}>B</span>
             </div>
-            <span style={{ fontSize: '24px', fontWeight: 'bold', color: '#1a1a1a' }}>BidDeed<span style={{ color: '#c15f3c' }}>.AI</span></span>
+            <span style={{ fontSize: '24px', fontWeight: 'bold', color: '#222222' }}>BidDeed<span style={{ color: '#c15f3c' }}>.AI</span></span>
           </Link>
         </div>
         {clerkLive ? (
           <SignUp fallbackRedirectUrl="/radar" signInUrl="/sign-in" />
         ) : (
-          <div style={{ backgroundColor: '#ffffff', border: '1px solid #d8cfc2', borderRadius: '12px', padding: '28px', textAlign: 'center', color: '#1a1a1a' }}>
+          <div style={{ backgroundColor: '#ffffff', border: '1px solid #d8cfc2', borderRadius: '12px', padding: '28px', textAlign: 'center', color: '#222222' }}>
             <p style={{ margin: 0, fontWeight: 600 }}>Account creation is not configured on this deployment</p>
-            <p style={{ margin: '10px 0 0', fontSize: '14px', color: '#657786' }}>
+            <p style={{ margin: '10px 0 0', fontSize: '14px', color: '#002A54' }}>
               Configure the Clerk production key pair for <a href="https://biddeed.ai" style={{ color: '#c15f3c' }}>biddeed.ai</a> to activate accounts.
             </p>
           </div>
