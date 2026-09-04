@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import DeedRobotMark from '@/components/deed/DeedRobotMark'
 import { cn } from '@/lib/utils'
 import Composer from './Composer'
-import { Footer, HowItWorks, Pricing, Proof, TrustStrip } from './LandingSections'
+import { Footer, Founder, HowItWorks, Pricing, Proof, TrustStrip } from './LandingSections'
 import PromptStarters from './PromptStarters'
 import ThreadView from './ThreadView'
 import { useDeedThread } from './useDeedThread'
@@ -124,6 +124,7 @@ export default function DeedHome() {
       {/* ── Evidence ──────────────────────────────────────────────────── */}
       <div className="space-y-20 pb-20 pt-4 sm:space-y-28">
         <Proof />
+        <Founder />
         <HowItWorks />
         <Pricing onPrompt={(p) => onSend(p)} />
       </div>
