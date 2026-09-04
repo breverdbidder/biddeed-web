@@ -220,11 +220,11 @@ export default function AuctionsLayout({ initialView, initialCounty, initialSale
 
   if (loading) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center bg-gray-50 dark:bg-slate-950">
+      <div className="flex min-h-[60vh] items-center justify-center bg-muted dark:bg-background">
         <div className="flex flex-col items-center gap-4">
           <h1 className="sr-only">Auction Intelligence</h1>
-          <div className="w-10 h-10 border-2 border-bd-navy-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-gray-500 dark:text-slate-400 text-sm">Loading auctions...</p>
+          <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-muted-foreground dark:text-muted-foreground text-sm">Loading auctions...</p>
         </div>
       </div>
     )
@@ -232,9 +232,9 @@ export default function AuctionsLayout({ initialView, initialCounty, initialSale
 
   if (error) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center bg-gray-50 dark:bg-slate-950">
+      <div className="flex min-h-[60vh] items-center justify-center bg-muted dark:bg-background">
         <div className="flex flex-col items-center gap-4">
-          <p className="text-red-500 text-sm">{error}</p>
+          <p className="text-primary text-sm">{error}</p>
           <button onClick={() => window.location.reload()} className="text-sm text-blue-500 underline">
             Retry
           </button>
@@ -248,16 +248,16 @@ export default function AuctionsLayout({ initialView, initialCounty, initialSale
     : null
 
   return (
-    <div className="w-full bg-gray-50 dark:bg-slate-950">
+    <div className="w-full bg-muted dark:bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
         <div>
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">Auction Intelligence</h1>
-          <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">
+          <h1 className="text-xl font-bold text-foreground dark:text-white">Auction Intelligence</h1>
+          <p className="text-sm text-muted-foreground dark:text-muted-foreground mt-1">
             {headerTotal.toLocaleString()} auctions across {headerCounties} Florida counties
             {summary?.upcoming ? (
               <>
                 {' '}&middot;{' '}
-                <span className="text-gray-700 dark:text-slate-300 font-medium">
+                <span className="text-foreground dark:text-muted-foreground font-medium">
                   {summary.upcoming.toLocaleString()} upcoming
                 </span>
                 {summary.counties_upcoming ? ` in ${summary.counties_upcoming} counties` : ''}
@@ -280,7 +280,7 @@ export default function AuctionsLayout({ initialView, initialCounty, initialSale
 
         {dayFilter && (
           <div className="flex items-center gap-2 text-sm">
-            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-bd-navy-500/10 text-gray-800 dark:text-slate-200 border border-gray-200 dark:border-slate-700">
+            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-foreground dark:text-foreground border border-border dark:border-border">
               Showing{' '}
               {dayFilter.saleType === 'tax_deed'
                 ? 'tax deed'
@@ -301,14 +301,14 @@ export default function AuctionsLayout({ initialView, initialCounty, initialSale
               )}
               <button
                 onClick={() => setDayFilter(null)}
-                className="text-gray-400 hover:text-gray-700 dark:hover:text-slate-200 text-base leading-none"
+                className="text-muted-foreground hover:text-foreground dark:hover:text-foreground text-base leading-none"
                 aria-label="Clear day filter"
               >
                 &times;
               </button>
             </span>
             {viewMode !== 'map' && (
-              <span className="text-gray-500 dark:text-slate-400">{total} matching</span>
+              <span className="text-muted-foreground dark:text-muted-foreground">{total} matching</span>
             )}
           </div>
         )}
@@ -320,7 +320,7 @@ export default function AuctionsLayout({ initialView, initialCounty, initialSale
                 by a long list. Below lg they stack - a 380px column beside a map
                 is unusable on a phone - and the map goes first, because "where"
                 is the question the phone screen can actually answer at a glance. */}
-            <div className="order-2 lg:order-1 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg overflow-hidden flex flex-col min-h-0 h-[60vh] lg:h-auto">
+            <div className="order-2 lg:order-1 bg-card dark:bg-card border border-border dark:border-border rounded-lg overflow-hidden flex flex-col min-h-0 h-[60vh] lg:h-auto">
               <AuctionSidebarList
                 auctions={auctions}
                 selectedId={focusId}
@@ -386,21 +386,21 @@ export default function AuctionsLayout({ initialView, initialCounty, initialSale
         {selectedAuction && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setSelectedAuction(null)}>
             <div
-              className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl shadow-2xl max-w-lg w-full mx-4 p-6"
+              className="bg-card dark:bg-card border border-border dark:border-border rounded-xl shadow-2xl max-w-lg w-full mx-4 p-6"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+                  <h2 className="text-lg font-bold text-foreground dark:text-white">
                     {selectedAuction.property_address || 'No Address'}
                   </h2>
-                  <p className="text-sm text-gray-500 dark:text-slate-400">
+                  <p className="text-sm text-muted-foreground dark:text-muted-foreground">
                     {formatCountyLabel(selectedAuction.county)} County &middot; {selectedAuction.case_number}
                   </p>
                 </div>
                 <button
                   onClick={() => setSelectedAuction(null)}
-                  className="text-gray-400 hover:text-gray-600 dark:hover:text-slate-300 text-xl leading-none"
+                  className="text-muted-foreground hover:text-muted-foreground dark:hover:text-muted-foreground text-xl leading-none"
                 >
                   &times;
                 </button>
@@ -408,64 +408,64 @@ export default function AuctionsLayout({ initialView, initialCounty, initialSale
 
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <p className="text-gray-500 dark:text-slate-400">Type</p>
-                  <p className={`font-medium ${selectedAuction.auction_type === 'foreclosure' ? 'text-red-500' : 'text-amber-500'}`}>
+                  <p className="text-muted-foreground dark:text-muted-foreground">Type</p>
+                  <p className={`font-medium ${selectedAuction.auction_type === 'foreclosure' ? 'text-primary' : 'text-foreground'}`}>
                     {selectedAuction.auction_type === 'foreclosure' ? 'Foreclosure' : 'Tax Deed'}
                   </p>
                 </div>
                 <div>
-                  <p className="text-gray-500 dark:text-slate-400">Auction Date</p>
-                  <p className="text-gray-900 dark:text-white font-medium tabular">
+                  <p className="text-muted-foreground dark:text-muted-foreground">Auction Date</p>
+                  <p className="text-foreground dark:text-white font-medium tabular">
                     {selectedAuction.auction_date
                       ? new Date(selectedAuction.auction_date + 'T00:00:00').toLocaleDateString()
                       : '—'}
                   </p>
                 </div>
                 <div>
-                  <p className="text-gray-500 dark:text-slate-400">Assessed Value</p>
-                  <p className="text-gray-900 dark:text-white font-medium tabular">
+                  <p className="text-muted-foreground dark:text-muted-foreground">Assessed Value</p>
+                  <p className="text-foreground dark:text-white font-medium tabular">
                     {selectedJustValue
                       ? '$' + selectedJustValue.toLocaleString('en-US', { maximumFractionDigits: 0 })
                       : '—'}
                   </p>
                 </div>
                 <div>
-                  <p className="text-gray-500 dark:text-slate-400">Year Built</p>
-                  <p className="text-gray-900 dark:text-white font-medium tabular">{selectedAuction.year_built || '—'}</p>
+                  <p className="text-muted-foreground dark:text-muted-foreground">Year Built</p>
+                  <p className="text-foreground dark:text-white font-medium tabular">{selectedAuction.year_built || '—'}</p>
                 </div>
                 <div>
-                  <p className="text-gray-500 dark:text-slate-400">Plaintiff</p>
-                  <p className="text-gray-900 dark:text-white font-medium">{selectedAuction.plaintiff || '—'}</p>
+                  <p className="text-muted-foreground dark:text-muted-foreground">Plaintiff</p>
+                  <p className="text-foreground dark:text-white font-medium">{selectedAuction.plaintiff || '—'}</p>
                 </div>
                 <div>
-                  <p className="text-gray-500 dark:text-slate-400">Defendant</p>
-                  <p className="text-gray-900 dark:text-white font-medium">{selectedAuction.defendant || '—'}</p>
+                  <p className="text-muted-foreground dark:text-muted-foreground">Defendant</p>
+                  <p className="text-foreground dark:text-white font-medium">{selectedAuction.defendant || '—'}</p>
                 </div>
                 <div>
-                  <p className="text-gray-500 dark:text-slate-400">Living Area</p>
-                  <p className="text-gray-900 dark:text-white font-medium tabular">
+                  <p className="text-muted-foreground dark:text-muted-foreground">Living Area</p>
+                  <p className="text-foreground dark:text-white font-medium tabular">
                     {selectedAuction.living_area_sqft
                       ? selectedAuction.living_area_sqft.toLocaleString() + ' sqft'
                       : '—'}
                   </p>
                 </div>
                 <div>
-                  <p className="text-gray-500 dark:text-slate-400">Parcel ID</p>
-                  <p className="text-gray-900 dark:text-white font-mono text-xs">{selectedAuction.parcel_id || '—'}</p>
+                  <p className="text-muted-foreground dark:text-muted-foreground">Parcel ID</p>
+                  <p className="text-foreground dark:text-white font-mono text-xs">{selectedAuction.parcel_id || '—'}</p>
                 </div>
               </div>
 
               {selectedAuction.is_vacant_land && (
-                <div className="mt-4 px-3 py-2 bg-gray-100 dark:bg-slate-800 rounded-md">
-                  <p className="text-xs text-gray-500 dark:text-slate-400">
-                    This parcel is classified as <span className="font-medium text-gray-700 dark:text-slate-300">vacant land</span> with no situs address.
+                <div className="mt-4 px-3 py-2 bg-muted dark:bg-card rounded-md">
+                  <p className="text-xs text-muted-foreground dark:text-muted-foreground">
+                    This parcel is classified as <span className="font-medium text-foreground dark:text-muted-foreground">vacant land</span> with no situs address.
                   </p>
                 </div>
               )}
 
               {selectedAuction.address_status && (
-                <div className="mt-3 px-3 py-2 bg-amber-50 dark:bg-amber-900/20 rounded-md">
-                  <p className="text-xs text-amber-700 dark:text-amber-400">
+                <div className="mt-3 px-3 py-2 bg-foreground/10 dark:bg-foreground/15/20 rounded-md">
+                  <p className="text-xs text-foreground dark:text-foreground">
                     Status: {selectedAuction.address_status.replace(/_/g, ' ')}
                   </p>
                 </div>

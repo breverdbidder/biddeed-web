@@ -39,8 +39,8 @@ function shortDate(d: string | null | undefined): string {
 }
 
 const TYPE_BADGE: Record<string, string> = {
-  foreclosure: 'bg-red-500/15 text-red-700 dark:text-red-300 border-red-500/30',
-  tax_deed: 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30',
+  foreclosure: 'bg-primary/15 text-primary dark:text-primary border-primary/30',
+  tax_deed: 'bg-foreground/15 text-foreground dark:text-foreground border-foreground/30',
 }
 
 export default function AuctionSidebarList({
@@ -48,7 +48,7 @@ export default function AuctionSidebarList({
 }: Props) {
   if (!auctions.length) {
     return (
-      <div className="p-4 text-sm text-gray-500 dark:text-slate-400">
+      <div className="p-4 text-sm text-muted-foreground dark:text-muted-foreground">
         No auctions match these filters.
       </div>
     )
@@ -56,8 +56,8 @@ export default function AuctionSidebarList({
 
   return (
     <div className="flex flex-col h-full min-h-0">
-      <div className="px-3 py-2 border-b border-gray-200 dark:border-slate-800 text-xs text-gray-600 dark:text-slate-400 shrink-0">
-        Showing <span className="font-semibold text-gray-900 dark:text-white">
+      <div className="px-3 py-2 border-b border-border dark:border-border text-xs text-muted-foreground dark:text-muted-foreground shrink-0">
+        Showing <span className="font-semibold text-foreground dark:text-white">
           {auctions.length.toLocaleString()}
         </span>
         {total > auctions.length && <> of {total.toLocaleString()}</>} auctions
@@ -82,29 +82,29 @@ export default function AuctionSidebarList({
                 }}
                 className={`w-full text-left px-3 py-3 cursor-pointer transition-colors ${
                   isSelected
-                    ? 'bg-bd-navy-500/10 dark:bg-bd-navy-500/20'
-                    : 'hover:bg-gray-50 dark:hover:bg-slate-800/60'
+                    ? 'bg-primary/10 dark:bg-primary/20'
+                    : 'hover:bg-muted dark:hover:bg-card/60'
                 }`}
               >
                 <div className="flex items-start justify-between gap-2">
-                  <p className="text-sm font-semibold text-gray-900 dark:text-white leading-snug">
+                  <p className="text-sm font-semibold text-foreground dark:text-white leading-snug">
                     {a.property_address || 'Address not published'}
                   </p>
                   {type && (
                     <span className={`shrink-0 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide border ${
-                      TYPE_BADGE[type] || 'bg-slate-500/15 text-slate-600 dark:text-slate-300 border-slate-500/30'
+                      TYPE_BADGE[type] || 'bg-muted0/15 text-muted-foreground dark:text-muted-foreground border-border/30'
                     }`}>
                       {type === 'tax_deed' ? 'Tax Deed' : type === 'foreclosure' ? 'Foreclosure' : type}
                     </span>
                   )}
                 </div>
 
-                <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
+                <p className="text-xs text-muted-foreground dark:text-muted-foreground mt-1">
                   {formatCountyLabel(a.county)} County &middot; {shortDate(a.auction_date)}
                 </p>
 
                 <div className="flex items-center justify-between mt-2 gap-2">
-                  <span className="text-xs text-gray-600 dark:text-slate-300">
+                  <span className="text-xs text-muted-foreground dark:text-muted-foreground">
                     Opening <span className="font-semibold tabular">{money(a.opening_bid)}</span>
                   </span>
                   <button

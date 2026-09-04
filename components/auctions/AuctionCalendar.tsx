@@ -49,8 +49,8 @@ interface Props {
 }
 
 const TYPE_STYLE: Record<string, { bg: string; border: string; label: string }> = {
-  foreclosure: { bg: '#EF4444', border: '#DC2626', label: 'Foreclosures' },
-  tax_deed: { bg: '#F59E0B', border: '#D97706', label: 'Tax Deeds' },
+  foreclosure: { bg: '#9f4d32', border: '#DC2626', label: 'Foreclosures' },
+  tax_deed: { bg: '#1f1b16', border: '#D97706', label: 'Tax Deeds' },
   other: { bg: '#3B82F6', border: '#2563EB', label: 'Other' },
 }
 
@@ -194,7 +194,7 @@ export default function AuctionCalendar({ county, saleType, onSelectDay }: Props
   }, [])
 
   return (
-    <div ref={shellRef} className="zw-auction-calendar bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg p-4">
+    <div ref={shellRef} className="zw-auction-calendar bg-card dark:bg-card border border-border dark:border-border rounded-lg p-4">
       {/*
         FullCalendar's day badges are click-handled in JS, not native <a> tags
         with a `url`, so FullCalendar never applies its own cursor:pointer to
@@ -252,28 +252,28 @@ export default function AuctionCalendar({ county, saleType, onSelectDay }: Props
       `}</style>
       <div className="flex flex-wrap items-center gap-4 mb-4">
         <div className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded-full bg-red-500" />
-          <span className="text-xs text-gray-500 dark:text-slate-400">Foreclosure</span>
+          <span className="w-3 h-3 rounded-full bg-primary" />
+          <span className="text-xs text-muted-foreground dark:text-muted-foreground">Foreclosure</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded-full bg-amber-500" />
-          <span className="text-xs text-gray-500 dark:text-slate-400">Tax Deed</span>
+          <span className="w-3 h-3 rounded-full bg-foreground" />
+          <span className="text-xs text-muted-foreground dark:text-muted-foreground">Tax Deed</span>
         </div>
 
         <div className="ml-auto flex items-center gap-3 text-xs">
           {loading && (
-            <span className="flex items-center gap-2 text-gray-500 dark:text-slate-400">
-              <span className="w-3 h-3 border-2 border-bd-navy-500 border-t-transparent rounded-full animate-spin" />
+            <span className="flex items-center gap-2 text-muted-foreground dark:text-muted-foreground">
+              <span className="w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin" />
               Loading counts...
             </span>
           )}
           {!loading && totals && (
-            <span className="text-gray-600 dark:text-slate-300">
-              <span className="font-semibold text-gray-900 dark:text-white">
+            <span className="text-muted-foreground dark:text-muted-foreground">
+              <span className="font-semibold text-foreground dark:text-white">
                 {totals.total.toLocaleString()}
               </span>{' '}
               {totals.total === 1 ? 'property' : 'properties'} across{' '}
-              <span className="font-semibold text-gray-900 dark:text-white">
+              <span className="font-semibold text-foreground dark:text-white">
                 {totals.days_with_auctions}
               </span>{' '}
               {totals.days_with_auctions === 1 ? 'auction day' : 'auction days'} in view
@@ -283,13 +283,13 @@ export default function AuctionCalendar({ county, saleType, onSelectDay }: Props
       </div>
 
       {error && (
-        <div className="mb-4 px-3 py-2 rounded-md bg-red-50 dark:bg-red-900/20 text-xs text-red-600 dark:text-red-400">
+        <div className="mb-4 px-3 py-2 rounded-md bg-primary/10 dark:bg-primary/15/20 text-xs text-primary dark:text-primary">
           {error}
         </div>
       )}
 
       {!loading && !error && totals?.total === 0 && (
-        <div className="mb-4 px-3 py-2 rounded-md bg-gray-50 dark:bg-slate-800 text-xs text-gray-500 dark:text-slate-400">
+        <div className="mb-4 px-3 py-2 rounded-md bg-muted dark:bg-card text-xs text-muted-foreground dark:text-muted-foreground">
           No auctions scheduled in this range
           {county ? ` for ${county}` : ''}. Try another month or clear the filters.
         </div>
