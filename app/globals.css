@@ -4,41 +4,41 @@
 
 :root {
   /* Navy accent colors */
-  --navy-50: #E8F4FD;
-  --navy-100: #C5DFEF;
-  --navy-200: #9DC6E0;
-  --navy-300: #7099C0;
-  --navy-400: #4A6F9A;
-  --navy-500: #2A4F7A;
-  --navy-600: #1E3A5F;
-  --navy-700: #162D4A;
-  --navy-800: #0F2035;
-  --navy-900: #07111C;
+  --navy-50: #e6f0fa;
+  --navy-100: #e6f0fa;
+  --navy-200: #d7e3f1;
+  --navy-300: #657786;
+  --navy-400: #657786;
+  --navy-500: #004a92;
+  --navy-600: #0a2540;
+  --navy-700: #0a2540;
+  --navy-800: #0a2540;
+  --navy-900: #0a2540;
 
   /* Orange accent colors */
-  --orange-50: #FEF3C7;
-  --orange-100: #FDE68A;
-  --orange-200: #FCD34D;
-  --orange-300: #FBBF24;
-  --orange-400: #F59E0B;
-  --orange-500: #D97706;
-  --orange-600: #B45309;
+  --orange-50: #e6f0fa;
+  --orange-100: #e6f0fa;
+  --orange-200: #e6f0fa;
+  --orange-300: #005eb8;
+  --orange-400: #005eb8;
+  --orange-500: #005eb8;
+  --orange-600: #004a92;
 
   /* Slate colors for dark theme */
-  --slate-50: #f8fafc;
-  --slate-100: #f1f5f9;
-  --slate-200: #e2e8f0;
-  --slate-300: #cbd5e1;
-  --slate-400: #94a3b8;
-  --slate-500: #64748b;
-  --slate-600: #475569;
-  --slate-700: #334155;
-  --slate-800: #1e293b;
-  --slate-900: #0f172a;
-  --slate-950: #020617;
+  --slate-50: #ffffff;
+  --slate-100: #e6f0fa;
+  --slate-200: #d7e3f1;
+  --slate-300: #d7e3f1;
+  --slate-400: #657786;
+  --slate-500: #657786;
+  --slate-600: #657786;
+  --slate-700: #657786;
+  --slate-800: #0a2540;
+  --slate-900: #0a2540;
+  --slate-950: #0a2540;
 
   /* shadcn semantic colors (HSL values — no hsl() wrapper) */
-  /* Light theme = Claude.ai reading experience (PARITY_PRD section 8; values cross-checked against the community measurement in open-claude-reference src/index.css): page #ffffff, card #ffffff, muted surface #e6f0fa, ink #1a1a1a, secondary text #657786 (8.5:1), border #d7e3f1. Accent stays our text-safe terracotta (#005eb8, 5.2:1); Claude's lighter #d97757 is 3:1 and never used as text. */
+  /* Light theme = Claude.ai reading experience (PARITY_PRD section 8; values cross-checked against the community measurement in open-claude-reference src/index.css): page #ffffff, card #ffffff, muted surface #e6f0fa, ink #1a1a1a, secondary text #657786 (8.5:1), border #d7e3f1. Accent stays our text-safe terracotta (#005eb8, 5.2:1); Claude's lighter #005eb8 is 3:1 and never used as text. */
   --background: 0 0% 100%;
   --foreground: 0 0% 10%;
   --card: 0 0% 100%;
@@ -53,10 +53,10 @@
   --muted-foreground: 209 14% 46%;
   --accent: 209 100% 36%;
   --accent-foreground: 0 0% 100%;
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 210 40% 96%;
-  --border: 33 25% 82%;
-  --input: 33 25% 82%;
+  --destructive: 210 81% 15%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 212 48% 89%;
+  --input: 212 48% 89%;
   --ring: 209 100% 36%;
   --radius: 0.5rem;
 
@@ -121,15 +121,15 @@ body {
 }
 
 .grade-a {
-  color: #22c55e;
+  color: #005eb8;
 }
 
 .grade-b {
-  color: #f59e0b;
+  color: #005eb8;
 }
 
 .grade-c {
-  color: #ef4444;
+  color: #0a2540;
 }
 
 /* Custom scrollbar */
@@ -164,17 +164,17 @@ body {
    Shapira assessment and must stay visually distinct from lifecycle state.
 
    ACCESSIBILITY FIX ON PORT: the Worker sets .grade-E/.grade-X/.grade-Z to
-   color:#cbd5e1 on background:#b8cfe0 — roughly 1.1:1 contrast, effectively
-   invisible. Corrected to #1f2937, matching the dark-on-light pattern that
+   color:#d7e3f1 on background:#657786 — roughly 1.1:1 contrast, effectively
+   invisible. Corrected to #0a2540, matching the dark-on-light pattern that
    .grade-C already uses. Do not "restore" the original.
    ───────────────────────────────────────────────────────────────────────── */
-.grade-A { background: linear-gradient(135deg, #10b981, #059669); color: #fff; }
-.grade-B { background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; }
-.grade-C { background: linear-gradient(135deg, #eab308, #ca8a04); color: #1f2937; }
-.grade-D { background: linear-gradient(135deg, #f97316, #ea580c); color: #fff; }
+.grade-A { background: linear-gradient(135deg, #005eb8, #005eb8); color: #fff; }
+.grade-B { background: linear-gradient(135deg, #005eb8, #005eb8); color: #fff; }
+.grade-C { background: linear-gradient(135deg, #005eb8, #005eb8); color: #0a2540; }
+.grade-D { background: linear-gradient(135deg, #005eb8, #005eb8); color: #fff; }
 .grade-E,
 .grade-X,
-.grade-Z { background: #b8cfe0; color: #1f2937; }
+.grade-Z { background: #657786; color: #0a2540; }
 
 /* ─────────────────────────────────────────────────────────────────────────
    Tabular figures. Every currency, bid and count column must use these.
@@ -200,34 +200,34 @@ th[data-numeric] { font-variant-numeric: tabular-nums; font-feature-settings: "t
    App-shell (sidebar) tokens.
 
    `shadcn add sidebar` writes a light :root block and a .dark override. This
-   app has no theme switch: <html> is always the dark surface (#020617 page,
-   #0b1220 chrome, #1e293b borders), so the dark values live in :root directly
+   app has no theme switch: <html> is always the dark surface (#0a2540 page,
+   #0a2540 chrome, #0a2540 borders), so the dark values live in :root directly
    and .dark is kept identical for any component that opts into it.
    ───────────────────────────────────────────────────────────────────────── */
 @layer base {
   :root,
   .dark {
-    --sidebar-background: 220 49% 8%;      /* #0b1220 — chrome */
+    --sidebar-background: 220 49% 8%;      /* #0a2540 — chrome */
     --sidebar-foreground: 213 27% 84%;     /* slate-300 */
     --sidebar-primary: 38 92% 50%;         /* bd-orange — active accent */
     --sidebar-primary-foreground: 222 47% 11%;
-    --sidebar-accent: 217 33% 17%;         /* #1e293b — hover/active fill */
+    --sidebar-accent: 217 33% 17%;         /* #0a2540 — hover/active fill */
     --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 217 33% 17%;         /* #1e293b */
+    --sidebar-border: 217 33% 17%;         /* #0a2540 */
     --sidebar-ring: 38 92% 50%;
   }
 }
 
 @layer base {
   :root {
-    --sidebar-background: 39 38% 93%;
-    --sidebar-foreground: 30 17% 10%;
-    --sidebar-primary: 15 52% 41%;
-    --sidebar-primary-foreground: 39 38% 93%;
-    --sidebar-accent: 35 35% 89%;
-    --sidebar-accent-foreground: 30 17% 10%;
-    --sidebar-border: 33 25% 82%;
-    --sidebar-ring: 15 52% 41%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 0 0% 10%;
+    --sidebar-primary: 209 100% 36%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 67% 94%;
+    --sidebar-accent-foreground: 0 0% 10%;
+    --sidebar-border: 212 48% 89%;
+    --sidebar-ring: 209 100% 36%;
   }
   html.dark {
     --sidebar-background: 220 49% 8%;
@@ -282,9 +282,9 @@ html[data-theme='light'] {
   --background: 0 0% 100%;          /* #ffffff page (Claude reading palette) */
   --foreground: 0 0% 10%;           /* #1a1a1a ink */
   --card: 0 0% 100%;                 /* #ffffff */
-  --card-foreground: 30 17% 10%;
-  --popover: 45 50% 98%;
-  --popover-foreground: 30 17% 10%;
+  --card-foreground: 0 0% 10%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 10%;
   --primary: 209 100% 36%;              /* #005eb8 terracotta */
   --primary-foreground: 0 0% 100%;
   --secondary: 210 67% 94%;
@@ -294,25 +294,25 @@ html[data-theme='light'] {
   --accent: 209 100% 36%;
   --accent-foreground: 0 0% 100%;
   --border: 212 48% 89%;               /* #d7e3f1 */
-  --input: 33 25% 82%;
+  --input: 212 48% 89%;
   --ring: 209 100% 36%;
-  --sidebar-background: 39 38% 93%;
-  --sidebar-foreground: 30 17% 10%;
-  --sidebar-primary: 15 52% 41%;
-  --sidebar-primary-foreground: 39 38% 93%;
-  --sidebar-accent: 35 35% 89%;
-  --sidebar-accent-foreground: 30 17% 10%;
-  --sidebar-border: 33 25% 82%;
-  --sidebar-ring: 15 52% 41%;
+  --sidebar-background: 0 0% 100%;
+  --sidebar-foreground: 0 0% 10%;
+  --sidebar-primary: 209 100% 36%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 210 67% 94%;
+  --sidebar-accent-foreground: 0 0% 10%;
+  --sidebar-border: 212 48% 89%;
+  --sidebar-ring: 209 100% 36%;
 }
 
 html[data-theme='light'] body {
   background: #ffffff;
   color: #1a1a1a;
 }
-html[data-theme='light'] [class~='bg-[#020617]'],
+html[data-theme='light'] [class~='bg-[#0a2540]'],
 html[data-theme='light'] [class~='bg-slate-950'] { background-color: #ffffff !important; }
-html[data-theme='light'] [class~='bg-[#0b1220]'],
+html[data-theme='light'] [class~='bg-[#0a2540]'],
 html[data-theme='light'] [class~='bg-slate-900'] { background-color: #ffffff !important; }
 html[data-theme='light'] [class~='bg-slate-800'] { background-color: #e6f0fa !important; }
 html[data-theme='light'] [class~='text-white'],
@@ -321,7 +321,7 @@ html[data-theme='light'] [class~='text-slate-200'] { color: #1a1a1a !important; 
 html[data-theme='light'] [class~='text-slate-300'],
 html[data-theme='light'] [class~='text-slate-400'] { color: #657786 !important; }
 html[data-theme='light'] [class~='text-slate-500'],
-html[data-theme='light'] [class~='text-slate-600'] { color: #746b61 !important; }
+html[data-theme='light'] [class~='text-slate-600'] { color: #657786 !important; }
 html[data-theme='light'] [class~='border-slate-800'],
 html[data-theme='light'] [class~='border-slate-700'],
 html[data-theme='light'] [class~='border-slate-600'] { border-color: #d7e3f1 !important; }
@@ -336,8 +336,8 @@ html[data-theme='light'] [class~='bg-bd-orange\/10'] { background-color: rgba(15
 html[data-theme='light'] [class~='bg-slate-950\/60'] { background-color: rgba(31,27,22,.28) !important; }
 html[data-theme='light'] ::selection { background: #005eb8; color: #ffffff; }
 html[data-theme='light'] ::-webkit-scrollbar-track { background: #e6f0fa; }
-html[data-theme='light'] ::-webkit-scrollbar-thumb { background: #b5a9a0; }
-html[data-theme='light'] ::-webkit-scrollbar-thumb:hover { background: #746b61; }
+html[data-theme='light'] ::-webkit-scrollbar-thumb { background: #d7e3f1; }
+html[data-theme='light'] ::-webkit-scrollbar-thumb:hover { background: #657786; }
 
 /* ─────────────────────────────────────────────────────────────────────────
    Dark mode — semantic tokens.
@@ -350,23 +350,23 @@ html[data-theme='light'] ::-webkit-scrollbar-thumb:hover { background: #746b61; 
    ───────────────────────────────────────────────────────────────────────── */
 html[data-theme='dark'],
 html.dark {
-  --background: 222 40% 7%;            /* #0b0f17 */
-  --foreground: 38 25% 93%;            /* #f3efe8 warm ink on dark */
-  --card: 222 38% 11%;                 /* #111827 */
+  --background: 222 40% 7%;            /* #0a2540 */
+  --foreground: 38 25% 93%;            /* #ffffff warm ink on dark */
+  --card: 222 38% 11%;                 /* #0a2540 */
   --card-foreground: 38 25% 93%;
   --popover: 222 38% 11%;
   --popover-foreground: 38 25% 93%;
-  --primary: 17 70% 60%;               /* #e07a52 — terracotta lifted for dark */
+  --primary: 17 70% 60%;               /* #005eb8 — terracotta lifted for dark */
   --primary-foreground: 222 40% 7%;
-  --secondary: 222 30% 16%;            /* #1c2434 */
+  --secondary: 222 30% 16%;            /* #0a2540 */
   --secondary-foreground: 38 25% 93%;
   --muted: 222 30% 16%;
-  --muted-foreground: 30 8% 63%;       /* #a39c93 */
+  --muted-foreground: 30 8% 63%;       /* #657786 */
   --accent: 17 70% 60%;
   --accent-foreground: 222 40% 7%;
   --destructive: 0 72% 60%;
   --destructive-foreground: 0 0% 100%;
-  --border: 222 24% 19%;               /* #232b3a */
+  --border: 222 24% 19%;               /* #0a2540 */
   --input: 222 24% 19%;
   --ring: 17 70% 60%;
 }
