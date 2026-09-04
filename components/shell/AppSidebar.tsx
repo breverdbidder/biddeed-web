@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Show, UserButton } from '@clerk/nextjs'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { ChevronsUpDown, FolderKanban, MessageSquarePlus, MessagesSquare, Sparkles, Trash2, UserRound } from 'lucide-react'
+import { ChevronsUpDown, MessageSquarePlus, MessagesSquare, Trash2, UserRound } from 'lucide-react'
 
 import {
   Sidebar,
