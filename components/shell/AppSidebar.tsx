@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Show, UserButton } from '@clerk/nextjs'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { ChevronsUpDown, MessageSquarePlus, MessagesSquare, Trash2, UserRound } from 'lucide-react'
+import { ChevronsUpDown, FolderKanban, MessageSquarePlus, MessagesSquare, Sparkles, Trash2, UserRound } from 'lucide-react'
 
 import {
   Sidebar,
@@ -136,6 +136,38 @@ export default function AppSidebar({ deedOpen, onToggleDeed, authEnabled = false
                     <MessageSquarePlus />
                     <span>New chat</span>
                   </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/*
+          Projects and Skills — Claude.ai sidebar parity (issue #19934). Both
+          are real surfaces on the Worker's own /chat page today (Projects:
+          issue #19847 C3) or not yet built at all (Skills: P3, "Not started"
+          per docs/spec/19829.md's phase table) — there is no dedicated Next
+          page for either yet, so both are honest external links into /chat
+          rather than a Next route that would 404, per the issue's own
+          "until the Next pages exist" scope note.
+        */}
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="Projects — group chats, files, and reports around one property">
+                  <a href="/chat" onClick={closeOnMobile}>
+                    <FolderKanban />
+                    <span>Projects</span>
+                  </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="Skills — coming soon; opens Deed chat for now">
+                  <a href="/chat" onClick={closeOnMobile}>
+                    <Sparkles />
+                    <span>Skills</span>
+                  </a>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>

@@ -59,6 +59,8 @@ export interface ThreadTurn {
   error?: string
   /** Set while the Worker is still answering this turn. */
   pending?: boolean
+  /** Name of the file attached to this (user) turn, if any — display only. */
+  attachmentLabel?: string
 }
 
 export interface Thread {
@@ -67,6 +69,16 @@ export interface Thread {
   createdAt: number
   updatedAt: number
   turns: ThreadTurn[]
+  /**
+   * The Worker's own `biddeed_chat_conversations.id` for this thread, once an
+   * identified user's turn has returned one (issue #19829 P1). Reused on the
+   * next turn so persistence/search on the Worker side lands in one
+   * conversation instead of a new orphan row per message. Absent for
+   * anonymous visitors — that is expected, not an error.
+   */
+  workerConversationId?: string
+  /** The project this thread is scoped to (issue #19847 C3), if any. */
+  projectId?: string | null
 }
 
 const KEY = 'biddeed.deed.threads.v1'

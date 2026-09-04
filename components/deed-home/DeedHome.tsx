@@ -9,7 +9,7 @@ import Composer from './Composer'
 import { Footer, Founder, HowItWorks, Pricing, Proof, TrustStrip } from './LandingSections'
 import PromptStarters from './PromptStarters'
 import ThreadView from './ThreadView'
-import { useDeedThread } from './useDeedThread'
+import { useDeedThread, type DeedSendOptions } from './useDeedThread'
 
 /**
  * The home page is a conversation.
@@ -40,8 +40,8 @@ export default function DeedHome() {
   }, [thread, threadId, router])
 
   const onSend = useCallback(
-    (text: string) => {
-      send(text)
+    (text: string, opts?: DeedSendOptions) => {
+      send(text, opts)
       // A prompt-starter click on the marketing sections below the fold sends
       // from far down the page; bring the thread into view.
       if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -68,6 +68,7 @@ export default function DeedHome() {
               seed={seed}
               onSeedConsumed={() => setSeed(null)}
               autoFocus
+              projectId={thread?.projectId ?? null}
             />
           </div>
         </div>
