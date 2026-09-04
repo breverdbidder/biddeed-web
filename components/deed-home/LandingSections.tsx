@@ -129,19 +129,18 @@ export function Founder() {
         </div>
         <div className="space-y-4 text-base leading-7 text-muted-foreground">
           <p>
-            I have bought tax deeds I could not sell for two years &mdash; the title was not marketable until a
-            quiet-title action cleared it. That is one of the traps in this business, and every one of them cost
-            real money before it taught me anything.
+            Rainsville started as a $5,330 tax deed. After a ground-up build it closed at $398,600 &mdash; both
+            figures on the clerk&rsquo;s record. Lakewood sold at $320,000 with our own financing behind it. Twenty-plus
+            years of results like these at foreclosure and tax deed auctions across Florida, courthouse and online.
           </p>
           <p>
-            Twenty-plus years buying distressed Florida assets at foreclosure and tax deed auctions, courthouse and
-            online, then building and managing what I bought. One of them started as a $5,330 tax deed and closed,
-            after a ground-up build, at $398,600 &mdash; both on the clerk&rsquo;s record.
+            I earned them in the trenches, in the courthouses and on the job sites &mdash; buying, building and
+            managing every property myself. Every one of those lessons is now in the software.
           </p>
           <p className="text-foreground">
-            Bidding off a spreadsheet made sense when that was all there was. It cost me enough that I wrote the
-            software for my own bids first. Now it&rsquo;s yours: what&rsquo;s coming to auction, what to bid, and
-            what the zoning allows &mdash; before you raise your hand.
+            So you can simply talk to Deed. Ask in your own language, and what&rsquo;s coming to auction, what to
+            bid, and what the zoning allows become crystal clear &mdash; before you raise your hand. For everyone,
+            everywhere, on data that is ours alone.
           </p>
           <p className="text-xs text-muted-foreground">
             Figures from the publicly recorded closings at{' '}
