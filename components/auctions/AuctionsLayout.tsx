@@ -470,6 +470,15 @@ export default function AuctionsLayout({ initialView, initialCounty, initialSale
                   </p>
                 </div>
               )}
+
+              {/* S2 hook (issue #19847 Pass 3) — same /chat?new_project_county=
+                  mechanism every other hook point across the product uses. */}
+              <a
+                href={`/chat?new_project_county=${encodeURIComponent(selectedAuction.county || '')}&case=${encodeURIComponent(selectedAuction.case_number || '')}&source=radar_modal`}
+                className="mt-4 block text-center text-sm font-semibold text-primary dark:text-primary underline hover:no-underline"
+              >
+                📁 New project from this
+              </a>
             </div>
           </div>
         )}

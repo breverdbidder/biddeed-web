@@ -107,12 +107,26 @@ export default function AuctionSidebarList({
                   <span className="text-xs text-muted-foreground dark:text-muted-foreground">
                     Opening <span className="font-semibold tabular">{money(a.opening_bid)}</span>
                   </span>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); onOpen(a) }}
-                    className="text-xs font-semibold text-primary dark:text-primary underline hover:no-underline min-h-6"
-                  >
-                    Full report →
-                  </button>
+                  <div className="flex items-center gap-3">
+                    {/* S2 hook (issue #19847 Pass 3) — same /chat?new_project_county=
+                        mechanism every other hook point across the product uses.
+                        Plain <a>, not router.push: /chat is served by the
+                        Cloudflare Worker at this same apex domain, not by this
+                        Next app, so a client-side route transition doesn't apply. */}
+                    <a
+                      href={`/chat?new_project_county=${encodeURIComponent(a.county || '')}&case=${encodeURIComponent(a.case_number || '')}&source=radar_calendar`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="text-xs font-semibold text-foreground dark:text-white underline hover:no-underline min-h-6"
+                    >
+                      📁 Add to project
+                    </a>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onOpen(a) }}
+                      className="text-xs font-semibold text-primary dark:text-primary underline hover:no-underline min-h-6"
+                    >
+                      Full report →
+                    </button>
+                  </div>
                 </div>
               </div>
             </li>
