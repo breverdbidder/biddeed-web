@@ -14,9 +14,9 @@ interface Props {
 
 function typeColor(type: string): string {
   switch (type) {
-    case 'foreclosure': return 'text-red-500 dark:text-red-400'
-    case 'tax_deed': return 'text-amber-600 dark:text-amber-400'
-    default: return 'text-gray-500 dark:text-slate-400'
+    case 'foreclosure': return 'text-primary dark:text-primary'
+    case 'tax_deed': return 'text-foreground dark:text-foreground'
+    default: return 'text-muted-foreground dark:text-muted-foreground'
   }
 }
 
@@ -67,7 +67,7 @@ export default function AuctionTable({ auctions, loading, onSelectAuction }: Pro
   const SortHeader = ({ field, label }: { field: SortField; label: string }) => (
     <th
       onClick={() => handleSort(field)}
-      className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider cursor-pointer hover:text-gray-700 dark:hover:text-slate-300 select-none"
+      className="px-3 py-2 text-left text-xs font-medium text-muted-foreground dark:text-muted-foreground uppercase tracking-wider cursor-pointer hover:text-foreground dark:hover:text-muted-foreground select-none"
     >
       {label}
       {sortField === field && (
@@ -78,9 +78,9 @@ export default function AuctionTable({ auctions, loading, onSelectAuction }: Pro
 
   if (loading) {
     return (
-      <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg overflow-hidden">
+      <div className="bg-card dark:bg-card border border-border dark:border-border rounded-lg overflow-hidden">
         <div className="p-8 flex items-center justify-center">
-          <div className="w-8 h-8 border-2 border-bd-navy-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
         </div>
       </div>
     )
@@ -88,27 +88,27 @@ export default function AuctionTable({ auctions, loading, onSelectAuction }: Pro
 
   if (auctions.length === 0) {
     return (
-      <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg p-8 text-center">
-        <p className="text-gray-500 dark:text-slate-400">No auctions found matching your filters.</p>
+      <div className="bg-card dark:bg-card border border-border dark:border-border rounded-lg p-8 text-center">
+        <p className="text-muted-foreground dark:text-muted-foreground">No auctions found matching your filters.</p>
       </div>
     )
   }
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg overflow-hidden">
+    <div className="bg-card dark:bg-card border border-border dark:border-border rounded-lg overflow-hidden">
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200 dark:divide-slate-800">
-          <thead className="bg-gray-50 dark:bg-slate-800/50">
+          <thead className="bg-muted dark:bg-card/50">
             <tr>
               <SortHeader field="county" label="County" />
-              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">Case #</th>
+              <th className="px-3 py-2 text-left text-xs font-medium text-muted-foreground dark:text-muted-foreground uppercase tracking-wider">Case #</th>
               <SortHeader field="property_address" label="Address" />
-              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">Type</th>
+              <th className="px-3 py-2 text-left text-xs font-medium text-muted-foreground dark:text-muted-foreground uppercase tracking-wider">Type</th>
               <SortHeader field="dor_use_code" label="Zone" />
-              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">Plaintiff</th>
+              <th className="px-3 py-2 text-left text-xs font-medium text-muted-foreground dark:text-muted-foreground uppercase tracking-wider">Plaintiff</th>
               <SortHeader field="assessed_value" label="Just Value" />
               <SortHeader field="auction_date" label="Date" />
-              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">Score</th>
+              <th className="px-3 py-2 text-left text-xs font-medium text-muted-foreground dark:text-muted-foreground uppercase tracking-wider">Score</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-slate-800/50">
@@ -119,13 +119,13 @@ export default function AuctionTable({ auctions, loading, onSelectAuction }: Pro
                 <tr
                   key={auction.id}
                   onClick={() => onSelectAuction(auction)}
-                  className="hover:bg-gray-50 dark:hover:bg-slate-800/30 cursor-pointer transition-colors"
+                  className="hover:bg-muted dark:hover:bg-card/30 cursor-pointer transition-colors"
                 >
-                  <td className="px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 whitespace-nowrap">{formatCountyLabel(auction.county)}</td>
-                  <td className="px-3 py-2.5 text-sm text-gray-600 dark:text-slate-400 font-mono whitespace-nowrap">{auction.case_number}</td>
-                  <td className="px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 max-w-xs truncate">
+                  <td className="px-3 py-2.5 text-sm text-foreground dark:text-foreground whitespace-nowrap">{formatCountyLabel(auction.county)}</td>
+                  <td className="px-3 py-2.5 text-sm text-muted-foreground dark:text-muted-foreground font-mono whitespace-nowrap">{auction.case_number}</td>
+                  <td className="px-3 py-2.5 text-sm text-foreground dark:text-foreground max-w-xs truncate">
                     {auction.property_address || (
-                      <span className="text-gray-400 dark:text-slate-600 italic">
+                      <span className="text-muted-foreground dark:text-muted-foreground italic">
                         {auction.is_vacant_land ? 'Vacant land' : 'No address'}
                       </span>
                     )}
@@ -138,9 +138,9 @@ export default function AuctionTable({ auctions, loading, onSelectAuction }: Pro
                   <td className="px-3 py-2.5 whitespace-nowrap">
                     <ZoningBadge dorCode={auction.dor_use_code} />
                   </td>
-                  <td className="px-3 py-2.5 text-sm text-gray-600 dark:text-slate-400 max-w-[160px] truncate">{auction.plaintiff || '—'}</td>
-                  <td className="px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 whitespace-nowrap tabular">{formatCurrency(justValue)}</td>
-                  <td className="px-3 py-2.5 text-sm text-gray-600 dark:text-slate-400 whitespace-nowrap">{formatDate(auction.auction_date)}</td>
+                  <td className="px-3 py-2.5 text-sm text-muted-foreground dark:text-muted-foreground max-w-[160px] truncate">{auction.plaintiff || '—'}</td>
+                  <td className="px-3 py-2.5 text-sm text-foreground dark:text-foreground whitespace-nowrap tabular">{formatCurrency(justValue)}</td>
+                  <td className="px-3 py-2.5 text-sm text-muted-foreground dark:text-muted-foreground whitespace-nowrap">{formatDate(auction.auction_date)}</td>
                   <td className="px-3 py-2.5 whitespace-nowrap">
                     {score.recommendation !== 'UNKNOWN' && (
                       <span

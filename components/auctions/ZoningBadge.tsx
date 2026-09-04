@@ -15,7 +15,7 @@ interface Props {
  */
 export default function ZoningBadge({ dorCode, category, size = 'sm' }: Props) {
   const cat = category || getZoningCategory(dorCode)
-  if (!cat) return <span className="text-gray-400 dark:text-slate-600 text-xs">—</span>
+  if (!cat) return <span className="text-muted-foreground dark:text-muted-foreground text-xs">—</span>
 
   const colors = ZONING_CATEGORY_COLORS[cat]
   const label = ZONING_CATEGORY_LABELS[cat]

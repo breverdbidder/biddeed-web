@@ -281,8 +281,8 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
     // zoning_category on multi_county_auctions) - grey/unknown is honest,
     // inventing a category is not.
     if (colorMode === 'zoning') return '#6B7280'
-    if (point.sale_type === 'foreclosure') return '#EF4444'
-    if (point.sale_type === 'tax_deed') return '#F59E0B'
+    if (point.sale_type === 'foreclosure') return '#9f4d32'
+    if (point.sale_type === 'tax_deed') return '#1f1b16'
     return '#6B7280'
   }
 
@@ -332,8 +332,8 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
       'circle-color': [
         'match',
         ['get', 'type_code'],
-        0, '#EF4444',
-        1, '#F59E0B',
+        0, '#9f4d32',
+        1, '#1f1b16',
         '#6B7280',
       ],
       'circle-radius': 7,
@@ -538,8 +538,8 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
 
   if (mapError) {
     return (
-      <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg p-8 text-center">
-        <p className="text-gray-500 dark:text-slate-400">{mapError}</p>
+      <div className="bg-card dark:bg-card border border-border dark:border-border rounded-lg p-8 text-center">
+        <p className="text-muted-foreground dark:text-muted-foreground">{mapError}</p>
       </div>
     )
   }
@@ -553,7 +553,7 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
       {fetchError && (
         <div
           data-testid="map-fetch-error"
-          className="mb-3 px-3 py-2 rounded-md bg-red-50 dark:bg-red-900/20 text-xs text-red-600 dark:text-red-400"
+          className="mb-3 px-3 py-2 rounded-md bg-primary/10 dark:bg-primary/15/20 text-xs text-primary dark:text-primary"
         >
           {fetchError}
         </div>
@@ -562,7 +562,7 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
       {showTruncationBanner && (
         <div
           data-testid="map-truncation-banner"
-          className="mb-3 px-3 py-2 rounded-md bg-amber-50 dark:bg-amber-900/20 text-xs text-amber-700 dark:text-amber-400"
+          className="mb-3 px-3 py-2 rounded-md bg-foreground/10 dark:bg-foreground/15/20 text-xs text-foreground dark:text-foreground"
         >
           Showing {resp!.returned.toLocaleString()} of {resp!.total_matching.toLocaleString()} matching auctions on the map.
           {noCoords > 0 && ` ${noCoords.toLocaleString()} have no coordinates and cannot be plotted.`}
@@ -574,7 +574,7 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
         ref={wrapperRef}
         className={
           isFullscreen
-            ? 'fixed inset-0 z-50 bg-white dark:bg-slate-950'
+            ? 'fixed inset-0 z-50 bg-card dark:bg-background'
             : // fillParent adds flex-1 min-h-0: this card sits inside the
               // 'h-full flex flex-col min-h-0' outer div, and a flex child
               // with no grow sizes to content — the canvas inside is h-full
@@ -584,12 +584,12 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
               // the right panel every user sees first — painted nothing while
               // ?view=map (explicit h-[600px]) worked. mapbox-gl v3 observes
               // container resize, so restoring real height also repaints.
-              `bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg overflow-hidden relative${fillParent ? ' flex-1 min-h-0' : ''}`
+              `bg-card dark:bg-card border border-border dark:border-border rounded-lg overflow-hidden relative${fillParent ? ' flex-1 min-h-0' : ''}`
         }
       >
         {loading && (
-          <div className="absolute inset-0 bg-white/80 dark:bg-slate-900/80 z-10 flex items-center justify-center">
-            <div className="w-8 h-8 border-2 border-bd-navy-500 border-t-transparent rounded-full animate-spin" />
+          <div className="absolute inset-0 bg-card/80 dark:bg-card/80 z-10 flex items-center justify-center">
+            <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
           </div>
         )}
 
@@ -603,7 +603,7 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
           {/* Fullscreen toggle */}
           <button
             onClick={toggleFullscreen}
-            className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm border border-gray-200 dark:border-slate-700 rounded-md px-3 py-2 text-xs font-medium text-gray-700 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 transition-colors shadow-sm flex items-center gap-1.5"
+            className="bg-card/90 dark:bg-card/90 backdrop-blur-sm border border-border dark:border-border rounded-md px-3 py-2 text-xs font-medium text-foreground dark:text-muted-foreground hover:bg-card dark:hover:bg-card transition-colors shadow-sm flex items-center gap-1.5"
             title={isFullscreen ? 'Exit fullscreen (Esc)' : 'Fullscreen map'}
           >
             {isFullscreen ? (
@@ -626,7 +626,7 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
           {/* Satellite/Streets toggle */}
           <button
             onClick={toggleStyle}
-            className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm border border-gray-200 dark:border-slate-700 rounded-md px-3 py-2 text-xs font-medium text-gray-700 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 transition-colors shadow-sm flex items-center gap-1.5"
+            className="bg-card/90 dark:bg-card/90 backdrop-blur-sm border border-border dark:border-border rounded-md px-3 py-2 text-xs font-medium text-foreground dark:text-muted-foreground hover:bg-card dark:hover:bg-card transition-colors shadow-sm flex items-center gap-1.5"
             title={isSatellite ? 'Switch to streets' : 'Switch to satellite'}
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -636,13 +636,13 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
           </button>
 
           {/* Color mode toggle */}
-          <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm border border-gray-200 dark:border-slate-700 rounded-md overflow-hidden shadow-sm">
+          <div className="bg-card/90 dark:bg-card/90 backdrop-blur-sm border border-border dark:border-border rounded-md overflow-hidden shadow-sm">
             <button
               onClick={() => setColorMode('type')}
               className={`px-3 py-1.5 text-xs font-medium transition-colors ${
                 colorMode === 'type'
-                  ? 'bg-bd-navy-500 text-white'
-                  : 'text-gray-600 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200'
+                  ? 'bg-primary text-white'
+                  : 'text-muted-foreground dark:text-muted-foreground hover:text-foreground dark:hover:text-foreground'
               }`}
             >
               Type
@@ -651,8 +651,8 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
               onClick={() => setColorMode('zoning')}
               className={`px-3 py-1.5 text-xs font-medium transition-colors ${
                 colorMode === 'zoning'
-                  ? 'bg-bd-navy-500 text-white'
-                  : 'text-gray-600 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200'
+                  ? 'bg-primary text-white'
+                  : 'text-muted-foreground dark:text-muted-foreground hover:text-foreground dark:hover:text-foreground'
               }`}
             >
               Zoning
@@ -661,15 +661,15 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
         </div>
 
         {/* Legend */}
-        <div className={`absolute ${isFullscreen ? 'bottom-6 left-6' : 'bottom-3 left-3'} bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm rounded-md px-3 py-2 text-xs text-gray-600 dark:text-slate-400 border border-gray-200 dark:border-slate-700 z-20`}>
+        <div className={`absolute ${isFullscreen ? 'bottom-6 left-6' : 'bottom-3 left-3'} bg-card/90 dark:bg-card/90 backdrop-blur-sm rounded-md px-3 py-2 text-xs text-muted-foreground dark:text-muted-foreground border border-border dark:border-border z-20`}>
           {colorMode === 'type' ? (
             <>
               <div className="flex items-center gap-3">
                 <span className="uppercase tracking-wide text-[10px] opacity-70 w-[68px] shrink-0">Pin type</span>
-                <span><span className="inline-block w-2 h-2 rounded-full bg-red-500 mr-1" /> Foreclosure</span>
-                <span><span className="inline-block w-2 h-2 rounded-full bg-amber-500 mr-1" /> Tax Deed</span>
+                <span><span className="inline-block w-2 h-2 rounded-full bg-primary mr-1" /> Foreclosure</span>
+                <span><span className="inline-block w-2 h-2 rounded-full bg-foreground mr-1" /> Tax Deed</span>
               </div>
-              <div className="flex items-center gap-3 mt-1 pt-1 border-t border-gray-200 dark:border-slate-700">
+              <div className="flex items-center gap-3 mt-1 pt-1 border-t border-border dark:border-border">
                 <span className="uppercase tracking-wide text-[10px] opacity-70 w-[68px] shrink-0">Cluster size</span>
                 <span><span className="inline-block w-3 h-3 rounded-full bg-blue-400 mr-1 text-[8px] text-white text-center leading-3">n</span> &lt;10</span>
                 <span><span className="inline-block w-3 h-3 rounded-full bg-blue-600 mr-1 text-[8px] text-white text-center leading-3">n</span> 10-49</span>
@@ -691,7 +691,7 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
         {/* Fullscreen: Esc hint */}
         {isFullscreen && (
           <div className="absolute top-3 right-16 z-20 bg-black/60 backdrop-blur-sm rounded-md px-2.5 py-1.5 text-xs text-white/70">
-            Press <kbd className="bg-white/20 px-1 py-0.5 rounded text-white font-mono">Esc</kbd> to exit
+            Press <kbd className="bg-card/20 px-1 py-0.5 rounded text-white font-mono">Esc</kbd> to exit
           </div>
         )}
       </div>

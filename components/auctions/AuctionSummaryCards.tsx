@@ -14,10 +14,10 @@ interface Props {
 
 function StatCard({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
   return (
-    <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg p-4">
-      <p className="text-xs text-gray-500 dark:text-slate-400 uppercase tracking-wide">{label}</p>
-      <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{value}</p>
-      {sub && <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">{sub}</p>}
+    <div className="bg-card dark:bg-card border border-border dark:border-border rounded-lg p-4">
+      <p className="text-xs text-muted-foreground dark:text-muted-foreground uppercase tracking-wide">{label}</p>
+      <p className="text-2xl font-bold text-foreground dark:text-white mt-1">{value}</p>
+      {sub && <p className="text-xs text-muted-foreground dark:text-muted-foreground mt-1">{sub}</p>}
     </div>
   )
 }
@@ -27,9 +27,9 @@ export default function AuctionSummaryCards({ summary, loading }: Props) {
     return (
       <div className="grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-4">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg p-4 animate-pulse">
-            <div className="h-3 w-16 bg-gray-200 dark:bg-slate-700 rounded mb-2" />
-            <div className="h-8 w-12 bg-gray-200 dark:bg-slate-700 rounded" />
+          <div key={i} className="bg-card dark:bg-card border border-border dark:border-border rounded-lg p-4 animate-pulse">
+            <div className="h-3 w-16 bg-muted dark:bg-muted rounded mb-2" />
+            <div className="h-8 w-12 bg-muted dark:bg-muted rounded" />
           </div>
         ))}
       </div>
