@@ -21,6 +21,60 @@ export const metadata: Metadata = {
     'AI-powered foreclosure and tax deed auction intelligence for all 67 Florida counties. Ask Deed what is coming to auction, what to bid, and what the zoning allows — before you bid.',
 }
 
+// Organization + WebSite + Person JSON-LD (SPR-06, issue #19826, CONTENT_SOP.md
+// C0/SS5.7): `/` carried no schema at all before this. type="application/ld+json"
+// is inert data, not executable script -- CSP script-src (see middleware.ts,
+// 'strict-dynamic' + per-request nonce) does not apply to it, so no nonce is
+// needed here. M7 founder carve-out: Ariel Shapira's own name/roles are the
+// one person allowed in public assets.
+const ORG_JSON_LD = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'BidDeed.AI',
+  url: 'https://biddeed.ai',
+  sameAs: [
+    'https://www.youtube.com/@biddeedai',
+    'https://everestcapitalusa.com',
+    'https://zonewise.ai',
+  ],
+}
+
+const WEBSITE_JSON_LD = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'BidDeed.AI',
+  url: 'https://biddeed.ai',
+}
+
+const PERSON_JSON_LD = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: 'Ariel Shapira',
+  jobTitle: 'Founder',
+  url: 'https://biddeed.ai',
+  sameAs: [
+    'https://www.youtube.com/@biddeedai',
+    'https://everestcapitalusa.com',
+    'https://zonewise.ai',
+  ],
+}
+
 export default function Home() {
-  return <DeedHome />
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(ORG_JSON_LD) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(WEBSITE_JSON_LD) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(PERSON_JSON_LD) }}
+      />
+      <DeedHome />
+    </>
+  )
 }
