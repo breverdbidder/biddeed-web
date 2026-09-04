@@ -1,0 +1,53 @@
+name: Authenticated Clerk RLS E2E
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: 'Staging base URL'
+        required: false
+        default: 'https://staging.biddeed.ai'
+        type: string
+
+jobs:
+  rls-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      E2E_BASE_URL: ${{ inputs.base_url || 'https://staging.biddeed.ai' }}
+      E2E_USER_A_EMAIL: ${{ secrets.E2E_USER_A_EMAIL }}
+      E2E_USER_A_PASSWORD: ${{ secrets.E2E_USER_A_PASSWORD }}
+      E2E_USER_B_EMAIL: ${{ secrets.E2E_USER_B_EMAIL }}
+      E2E_USER_B_PASSWORD: ${{ secrets.E2E_USER_B_PASSWORD }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Validate dedicated test identities
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$E2E_USER_A_EMAIL" || { echo 'Missing E2E_USER_A_EMAIL repository/environment secret' >&2; exit 1; }
+          test -n "$E2E_USER_A_PASSWORD" || { echo 'Missing E2E_USER_A_PASSWORD repository/environment secret' >&2; exit 1; }
+          test -n "$E2E_USER_B_EMAIL" || { echo 'Missing E2E_USER_B_EMAIL repository/environment secret' >&2; exit 1; }
+          test -n "$E2E_USER_B_PASSWORD" || { echo 'Missing E2E_USER_B_PASSWORD repository/environment secret' >&2; exit 1; }
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run authenticated RLS suite
+        run: npm run test:e2e:rls
+      - name: Upload Playwright evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: biddeed-clerk-rls-playwright-${{ github.run_id }}
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 14

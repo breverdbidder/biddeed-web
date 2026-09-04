@@ -74,7 +74,10 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
           NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
-          CLERK_RUNTIME_ENABLED: 'false'
+          # Auth keys are validated above and synchronized from GitHub Secrets. Keep
+          # the runtime enabled so any Vercel-backed origin cannot silently render
+          # the signed-out fallback while Cloudflare cutover is being certified.
+          CLERK_RUNTIME_ENABLED: 'true'
         run: |
           set -euo pipefail
           test -n "$CLERK_SECRET_KEY" || { echo "Missing GitHub Secret: CLERK_SECRET_KEY" >&2; exit 1; }
