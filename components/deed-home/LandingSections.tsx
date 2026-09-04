@@ -118,7 +118,7 @@ export function Proof() {
 
 export function Founder() {
   return (
-    <section className="mx-auto max-w-5xl px-4 sm:px-6" aria-labelledby="founder-heading">
+    <section className="mx-auto max-w-5xl px-4 sm:px-6">
       <div className="grid gap-8 rounded-3xl border border-border bg-card p-6 sm:p-10 lg:grid-cols-[1fr_1.1fr] lg:items-start">
         <div>
           <Eyebrow>Why we built it</Eyebrow>
