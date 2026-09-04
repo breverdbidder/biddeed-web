@@ -38,26 +38,26 @@
   --slate-950: #020617;
 
   /* shadcn semantic colors (HSL values — no hsl() wrapper) */
-  /* Light theme = Claude.ai reading experience (PARITY_PRD section 8; values cross-checked against the community measurement in open-claude-reference src/index.css): page #fdf8f5, card #f7f3ef, muted surface #f2ede9, ink #1c1b19, secondary text #55433d (8.5:1), border #e6e2de. Accent stays our text-safe terracotta (#9f4d32, 5.2:1); Claude's lighter #d97757 is 3:1 and never used as text. */
-  --background: 22 67% 98%;
-  --foreground: 40 6% 10%;
-  --card: 30 33% 95%;
-  --card-foreground: 40 6% 10%;
-  --popover: 30 33% 95%;
-  --popover-foreground: 40 6% 10%;
-  --primary: 15 52% 41%;
-  --primary-foreground: 22 67% 98%;
-  --secondary: 27 26% 93%;
-  --secondary-foreground: 40 6% 10%;
-  --muted: 27 26% 93%;
-  --muted-foreground: 15 16% 29%;
-  --accent: 15 52% 41%;
-  --accent-foreground: 22 67% 98%;
+  /* Light theme = Claude.ai reading experience (PARITY_PRD section 8; values cross-checked against the community measurement in open-claude-reference src/index.css): page #ffffff, card #ffffff, muted surface #e6f0fa, ink #1a1a1a, secondary text #657786 (8.5:1), border #d7e3f1. Accent stays our text-safe terracotta (#005eb8, 5.2:1); Claude's lighter #d97757 is 3:1 and never used as text. */
+  --background: 0 0% 100%;
+  --foreground: 0 0% 10%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 10%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 10%;
+  --primary: 209 100% 36%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 210 67% 94%;
+  --secondary-foreground: 0 0% 10%;
+  --muted: 210 67% 94%;
+  --muted-foreground: 209 14% 46%;
+  --accent: 209 100% 36%;
+  --accent-foreground: 0 0% 100%;
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 210 40% 96%;
   --border: 33 25% 82%;
   --input: 33 25% 82%;
-  --ring: 15 52% 41%;
+  --ring: 209 100% 36%;
   --radius: 0.5rem;
 
   /* Chart colors */
@@ -279,23 +279,23 @@ th[data-numeric] { font-variant-numeric: tabular-nums; font-feature-settings: "t
    Light mode is the default; dark mode is explicit.
    ───────────────────────────────────────────────────────────────────────── */
 html[data-theme='light'] {
-  --background: 22 67% 98%;          /* #fdf8f5 page (Claude reading palette) */
-  --foreground: 40 6% 10%;           /* #1c1b19 ink */
-  --card: 30 33% 95%;                 /* #f7f3ef */
+  --background: 0 0% 100%;          /* #ffffff page (Claude reading palette) */
+  --foreground: 0 0% 10%;           /* #1a1a1a ink */
+  --card: 0 0% 100%;                 /* #ffffff */
   --card-foreground: 30 17% 10%;
   --popover: 45 50% 98%;
   --popover-foreground: 30 17% 10%;
-  --primary: 15 52% 41%;              /* #9f4d32 terracotta */
-  --primary-foreground: 22 67% 98%;
-  --secondary: 27 26% 93%;
-  --secondary-foreground: 40 6% 10%;
-  --muted: 27 26% 93%;
-  --muted-foreground: 15 16% 29%;      /* #55433d secondary, 8.5:1 */
-  --accent: 15 52% 41%;
-  --accent-foreground: 22 67% 98%;
-  --border: 30 14% 89%;               /* #e6e2de */
+  --primary: 209 100% 36%;              /* #005eb8 terracotta */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 210 67% 94%;
+  --secondary-foreground: 0 0% 10%;
+  --muted: 210 67% 94%;
+  --muted-foreground: 209 14% 46%;      /* #657786 secondary, 8.5:1 */
+  --accent: 209 100% 36%;
+  --accent-foreground: 0 0% 100%;
+  --border: 212 48% 89%;               /* #d7e3f1 */
   --input: 33 25% 82%;
-  --ring: 15 52% 41%;
+  --ring: 209 100% 36%;
   --sidebar-background: 39 38% 93%;
   --sidebar-foreground: 30 17% 10%;
   --sidebar-primary: 15 52% 41%;
@@ -307,35 +307,35 @@ html[data-theme='light'] {
 }
 
 html[data-theme='light'] body {
-  background: #fdf8f5;
-  color: #1c1b19;
+  background: #ffffff;
+  color: #1a1a1a;
 }
 html[data-theme='light'] [class~='bg-[#020617]'],
-html[data-theme='light'] [class~='bg-slate-950'] { background-color: #fdf8f5 !important; }
+html[data-theme='light'] [class~='bg-slate-950'] { background-color: #ffffff !important; }
 html[data-theme='light'] [class~='bg-[#0b1220]'],
-html[data-theme='light'] [class~='bg-slate-900'] { background-color: #f7f3ef !important; }
-html[data-theme='light'] [class~='bg-slate-800'] { background-color: #f2ede9 !important; }
+html[data-theme='light'] [class~='bg-slate-900'] { background-color: #ffffff !important; }
+html[data-theme='light'] [class~='bg-slate-800'] { background-color: #e6f0fa !important; }
 html[data-theme='light'] [class~='text-white'],
 html[data-theme='light'] [class~='text-slate-100'],
-html[data-theme='light'] [class~='text-slate-200'] { color: #1c1b19 !important; }
+html[data-theme='light'] [class~='text-slate-200'] { color: #1a1a1a !important; }
 html[data-theme='light'] [class~='text-slate-300'],
-html[data-theme='light'] [class~='text-slate-400'] { color: #55433d !important; }
+html[data-theme='light'] [class~='text-slate-400'] { color: #657786 !important; }
 html[data-theme='light'] [class~='text-slate-500'],
 html[data-theme='light'] [class~='text-slate-600'] { color: #746b61 !important; }
 html[data-theme='light'] [class~='border-slate-800'],
 html[data-theme='light'] [class~='border-slate-700'],
-html[data-theme='light'] [class~='border-slate-600'] { border-color: #e6e2de !important; }
-html[data-theme='light'] [class~='hover:bg-slate-800']:hover { background-color: #f2ede9 !important; }
-html[data-theme='light'] [class~='hover:text-white']:hover { color: #1c1b19 !important; }
-html[data-theme='light'] [class~='text-bd-orange'] { color: #9f4d32 !important; }
-html[data-theme='light'] [class~='bg-bd-orange'] { background-color: #9f4d32 !important; }
-html[data-theme='light'] [class~='border-bd-orange'] { border-color: #9f4d32 !important; }
+html[data-theme='light'] [class~='border-slate-600'] { border-color: #d7e3f1 !important; }
+html[data-theme='light'] [class~='hover:bg-slate-800']:hover { background-color: #e6f0fa !important; }
+html[data-theme='light'] [class~='hover:text-white']:hover { color: #1a1a1a !important; }
+html[data-theme='light'] [class~='text-bd-orange'] { color: #005eb8 !important; }
+html[data-theme='light'] [class~='bg-bd-orange'] { background-color: #005eb8 !important; }
+html[data-theme='light'] [class~='border-bd-orange'] { border-color: #005eb8 !important; }
 html[data-theme='light'] [class~='border-bd-orange\/50'] { border-color: rgba(159,77,50,.5) !important; }
 html[data-theme='light'] [class~='bg-bd-orange\/5'],
 html[data-theme='light'] [class~='bg-bd-orange\/10'] { background-color: rgba(159,77,50,.08) !important; }
 html[data-theme='light'] [class~='bg-slate-950\/60'] { background-color: rgba(31,27,22,.28) !important; }
-html[data-theme='light'] ::selection { background: #9f4d32; color: #fdf8f5; }
-html[data-theme='light'] ::-webkit-scrollbar-track { background: #f2ede9; }
+html[data-theme='light'] ::selection { background: #005eb8; color: #ffffff; }
+html[data-theme='light'] ::-webkit-scrollbar-track { background: #e6f0fa; }
 html[data-theme='light'] ::-webkit-scrollbar-thumb { background: #b5a9a0; }
 html[data-theme='light'] ::-webkit-scrollbar-thumb:hover { background: #746b61; }
 
@@ -383,3 +383,7 @@ html.dark body {
   font-family: var(--font-display), 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
   font-feature-settings: 'kern' 1, 'liga' 1;
 }
+
+
+/* Sky theme (Ariel, 2026-09-04): white backgrounds, blue accent, navy headings - light mode only */
+html[data-theme='light'] h1, html[data-theme='light'] h2, html[data-theme='light'] h3, :root:not([data-theme='dark']) h1, :root:not([data-theme='dark']) h2, :root:not([data-theme='dark']) h3 { color: #0a2540; }
