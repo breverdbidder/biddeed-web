@@ -38,20 +38,21 @@
   --slate-950: #020617;
 
   /* shadcn semantic colors (HSL values — no hsl() wrapper) */
-  --background: 39 38% 93%;
-  --foreground: 30 17% 10%;
-  --card: 45 50% 98%;
-  --card-foreground: 30 17% 10%;
-  --popover: 45 50% 98%;
-  --popover-foreground: 30 17% 10%;
+  /* Light theme = Claude.ai reading experience (PARITY_PRD section 8; values cross-checked against the community measurement in open-claude-reference src/index.css): page #fdf8f5, card #f7f3ef, muted surface #f2ede9, ink #1c1b19, secondary text #55433d (8.5:1), border #e6e2de. Accent stays our text-safe terracotta (#9f4d32, 5.2:1); Claude's lighter #d97757 is 3:1 and never used as text. */
+  --background: 22 67% 98%;
+  --foreground: 40 6% 10%;
+  --card: 30 33% 95%;
+  --card-foreground: 40 6% 10%;
+  --popover: 30 33% 95%;
+  --popover-foreground: 40 6% 10%;
   --primary: 15 52% 41%;
-  --primary-foreground: 39 38% 93%;
-  --secondary: 35 35% 89%;
-  --secondary-foreground: 30 17% 10%;
-  --muted: 35 35% 89%;
-  --muted-foreground: 28 8% 40%;
+  --primary-foreground: 22 67% 98%;
+  --secondary: 27 26% 93%;
+  --secondary-foreground: 40 6% 10%;
+  --muted: 27 26% 93%;
+  --muted-foreground: 15 16% 29%;
   --accent: 15 52% 41%;
-  --accent-foreground: 39 38% 93%;
+  --accent-foreground: 22 67% 98%;
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 210 40% 96%;
   --border: 33 25% 82%;
@@ -285,13 +286,13 @@ html[data-theme='light'] {
   --popover: 45 50% 98%;
   --popover-foreground: 30 17% 10%;
   --primary: 15 52% 41%;              /* #9f4d32 terracotta */
-  --primary-foreground: 39 38% 93%;
-  --secondary: 35 35% 89%;
-  --secondary-foreground: 30 17% 10%;
-  --muted: 35 35% 89%;
-  --muted-foreground: 28 8% 40%;      /* #6e655e */
+  --primary-foreground: 22 67% 98%;
+  --secondary: 27 26% 93%;
+  --secondary-foreground: 40 6% 10%;
+  --muted: 27 26% 93%;
+  --muted-foreground: 15 16% 29%;      /* #6e655e */
   --accent: 15 52% 41%;
-  --accent-foreground: 39 38% 93%;
+  --accent-foreground: 22 67% 98%;
   --border: 33 25% 82%;               /* #ddd5c9 */
   --input: 33 25% 82%;
   --ring: 15 52% 41%;

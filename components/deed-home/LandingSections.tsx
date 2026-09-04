@@ -81,7 +81,7 @@ export function Proof() {
         <div>
           <Eyebrow>Published before the sale. Checked after it.</Eyebrow>
           <H2>Every US auction. One number. Zero guesswork.</H2>
-          <p className="mt-4 max-w-lg text-[15px] leading-7 text-muted-foreground">
+          <p className="mt-4 max-w-lg text-base leading-7 text-muted-foreground">
             For a Marion County foreclosure on 20 July 2026, BidDeed.AI published a maximum bid of $82,000
             before the sale. The property sold for $73,501. A bidder who held to the ceiling won the lot with
             room to spare — and the report re-issued itself with the outcome the same day.
@@ -127,7 +127,7 @@ export function Founder() {
             Ariel Shapira · Founder · Developer · Builder · Property Manager · Inventor of ZoneWise.AI · The Real Estate AI Oracle&trade;
           </p>
         </div>
-        <div className="space-y-4 text-[15px] leading-7 text-muted-foreground">
+        <div className="space-y-4 text-base leading-7 text-muted-foreground">
           <p>
             I have bought tax deeds I could not sell for two years &mdash; the title was not marketable until a
             quiet-title action cleared it. That is one of the traps in this business, and every one of them cost
@@ -178,10 +178,10 @@ export function HowItWorks() {
     <section className="mx-auto max-w-5xl px-4 sm:px-6">
       <div className="max-w-2xl">
         <Eyebrow>How it works</Eyebrow>
-        <H2>What&rsquo;s coming to auction, what to bid, and what the zoning allows.</H2>
-        <p className="mt-4 text-[15px] leading-7 text-muted-foreground">
-          BidDeed.AI is the only place that answers all three before you bid — across every one of Florida&rsquo;s 67
-          counties, for foreclosure and tax deed sales alike.
+        <H2>OUTBID THE GUESSWORK.</H2>
+        <p className="mt-4 text-base leading-7 text-muted-foreground">
+          What&rsquo;s coming to auction, what to bid, and what the zoning allows &mdash; answered before you bid, in
+          every Florida county, for foreclosure and tax deed sales alike.
         </p>
       </div>
       <ol className="mt-10 grid gap-4 sm:grid-cols-3">
@@ -225,7 +225,7 @@ const PLANS: Plan[] = [
     per: 'forever',
     blurb: 'See what is coming to auction in every county. No card required.',
     features: [
-      '30-day snapshot for all 67 counties',
+      '30-day snapshot, every county',
       '3 property previews per county',
       'Max-bid range on every preview',
       'Daily email digest',
@@ -284,7 +284,7 @@ export function Pricing({ onPrompt }: { onPrompt: (p: string) => void }) {
       <div className="max-w-2xl">
         <Eyebrow>Plans</Eyebrow>
         <H2>Cheaper than one bad bid.</H2>
-        <p className="mt-4 text-[15px] leading-7 text-muted-foreground">
+        <p className="mt-4 text-base leading-7 text-muted-foreground">
           Start free with every county visible. Upgrade when you want the exact ceiling. Or buy one report for one
           property, one time.
         </p>
@@ -378,7 +378,7 @@ export function Pricing({ onPrompt }: { onPrompt: (p: string) => void }) {
 
 export function Footer() {
   const links = [
-    { label: 'All 67 counties', href: W.counties },
+    { label: 'All counties', href: W.counties },
     { label: 'Blog', href: W.blog },
     { label: 'Pioneers', href: W.pioneers },
     { label: 'Terms', href: W.terms },
