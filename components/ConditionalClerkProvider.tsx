@@ -14,11 +14,11 @@ function clerkAppearance(theme: 'light' | 'dark') {
   const light = theme === 'light'
   return {
     variables: {
-      colorBackground: light ? '#fbfaf7' : '#0b1220',
-      colorText: light ? '#1f1b16' : '#e2e8f0',
-      colorTextSecondary: light ? '#766f67' : '#94a3b8',
-      colorInputBackground: light ? '#f5f0e8' : '#1e293b',
-      colorInputText: light ? '#1f1b16' : '#e2e8f0',
+      colorBackground: light ? '#ffffff' : '#0b1220',
+      colorText: light ? '#1a1a1a' : '#e2e8f0',
+      colorTextSecondary: light ? '#657786' : '#94a3b8',
+      colorInputBackground: light ? '#ffffff' : '#1e293b',
+      colorInputText: light ? '#1a1a1a' : '#e2e8f0',
       colorPrimary: light ? '#c15f3c' : '#F59E0B',
       colorDanger: '#dc2626',
       colorSuccess: '#16a34a',
