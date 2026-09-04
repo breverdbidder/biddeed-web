@@ -1,6 +1,6 @@
 'use client'
 
-import { formatCountyLabel } from '@/lib/counties'
+import { formatCountyLabel, biddeedChatProjectUrl } from '@/lib/counties'
 import type { Auction } from '@/types/auctions'
 
 /**
@@ -107,12 +107,23 @@ export default function AuctionSidebarList({
                   <span className="text-xs text-muted-foreground dark:text-muted-foreground">
                     Opening <span className="font-semibold tabular">{money(a.opening_bid)}</span>
                   </span>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); onOpen(a) }}
-                    className="text-xs font-semibold text-primary dark:text-primary underline hover:no-underline min-h-6"
-                  >
-                    Full report →
-                  </button>
+                  <div className="flex items-center gap-3">
+                    <a
+                      href={biddeedChatProjectUrl(a.county, a.case_number, 'radar_calendar')}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="text-xs font-semibold text-primary dark:text-bd-orange-400 underline hover:no-underline min-h-6"
+                    >
+                      📁 Project
+                    </a>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onOpen(a) }}
+                      className="text-xs font-semibold text-primary dark:text-primary underline hover:no-underline min-h-6"
+                    >
+                      Full report →
+                    </button>
+                  </div>
                 </div>
               </div>
             </li>

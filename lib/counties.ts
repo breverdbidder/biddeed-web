@@ -96,3 +96,20 @@ export function formatCountyLabel(raw: string | null | undefined): string {
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
     .join(' ')
 }
+
+// S2 hook (biddeed-ai/cli-anything-biddeed issue #19847 Pass 3) -- links out
+// to the Worker's unified project-creation entry point
+// (/chat?new_project_county=&case=&source=), the same mechanism the Worker's
+// own county and deal pages use. county isn't guaranteed to already be in
+// that underscore-slug form (it may be a display name like "Brevard" or a
+// hyphenated slug), so normalize the same way formatCountyLabel does.
+export function biddeedChatProjectUrl(
+  county: string | null | undefined,
+  caseNumber: string | null | undefined,
+  source: string,
+): string {
+  const slug = String(county || '').trim().toLowerCase().replace(/[\s-]+/g, '_')
+  const params = new URLSearchParams({ new_project_county: slug, source })
+  if (caseNumber) params.set('case', String(caseNumber))
+  return `https://biddeed.ai/chat?${params.toString()}`
+}

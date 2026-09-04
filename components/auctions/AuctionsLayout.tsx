@@ -8,7 +8,7 @@ import AuctionFilters from './AuctionFilters'
 import AuctionTable from './AuctionTable'
 import AuctionSpreadsheet from './AuctionSpreadsheet'
 import AuctionSidebarList from './AuctionSidebarList'
-import { formatCountyLabel } from '@/lib/counties'
+import { formatCountyLabel, biddeedChatProjectUrl } from '@/lib/counties'
 import type { Auction, AuctionSummary, AuctionsResponse, ViewMode } from '@/types/auctions'
 import { apiUrl } from '@/lib/api'
 
@@ -470,6 +470,17 @@ export default function AuctionsLayout({ initialView, initialCounty, initialSale
                   </p>
                 </div>
               )}
+
+              <div className="mt-4 pt-4 border-t border-border dark:border-border">
+                <a
+                  href={biddeedChatProjectUrl(selectedAuction.county, selectedAuction.case_number, 'radar_modal')}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block text-sm font-semibold text-primary dark:text-bd-orange-400 hover:underline"
+                >
+                  📁 New project from this ↗
+                </a>
+              </div>
             </div>
           </div>
         )}
