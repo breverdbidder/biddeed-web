@@ -222,6 +222,7 @@ export default function AuctionsLayout({ initialView, initialCounty, initialSale
     return (
       <div className="flex min-h-[60vh] items-center justify-center bg-gray-50 dark:bg-slate-950">
         <div className="flex flex-col items-center gap-4">
+          <h1 className="sr-only">Auction Intelligence</h1>
           <div className="w-10 h-10 border-2 border-bd-navy-500 border-t-transparent rounded-full animate-spin" />
           <p className="text-gray-500 dark:text-slate-400 text-sm">Loading auctions...</p>
         </div>
