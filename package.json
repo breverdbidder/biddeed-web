@@ -7,10 +7,13 @@
     "build": "next build --webpack",
     "start": "next start",
     "lint": "next lint",
-    "cf:build": "opennextjs-cloudflare build",
-    "cf:preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "cf:deploy:staging": "opennextjs-cloudflare build && wrangler deploy --config wrangler.staging.jsonc --env staging",
-    "cf:typegen": "wrangler types --config wrangler.staging.jsonc --env-interface CloudflareEnv cloudflare-env.d.ts"
+    "cf:build": "opennextjs-cloudflare build --config wrangler.staging.jsonc --env staging",
+    "cf:preview": "opennextjs-cloudflare build --config wrangler.staging.jsonc --env staging && opennextjs-cloudflare preview --config wrangler.staging.jsonc --env staging",
+    "cf:deploy:staging": "opennextjs-cloudflare build --config wrangler.staging.jsonc --env staging && wrangler deploy --config wrangler.staging.jsonc --env staging",
+    "cf:build:production": "opennextjs-cloudflare build --config wrangler.production.jsonc --env production",
+    "cf:deploy:production": "opennextjs-cloudflare build --config wrangler.production.jsonc --env production && wrangler deploy --config wrangler.production.jsonc --env production",
+    "cf:typegen": "wrangler types --config wrangler.staging.jsonc --env-interface CloudflareEnv cloudflare-env.d.ts",
+    "test:e2e:rls": "playwright test tests/e2e/rls-isolation.spec.ts"
   },
   "dependencies": {
     "@assistant-ui/react": "0.15.15",
@@ -41,6 +44,7 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
+    "@playwright/test": "1.62.1",
     "@types/mapbox-gl": "^3.0.0",
     "@types/node": "^22.7.9",
     "@types/react": "^18.3.12",

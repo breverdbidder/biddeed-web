@@ -13,7 +13,10 @@
   },
   "env": {
     "production": {
-      "name": "biddeed-web-production"
+      "name": "biddeed-web-production",
+      "vars": {
+        "CLERK_RUNTIME_ENABLED": "true"
+      }
     }
   }
 }

@@ -13,7 +13,13 @@
   },
   "env": {
     "staging": {
-      "name": "biddeed-web-staging"
+      "name": "biddeed-web-staging",
+      "routes": [
+        { "pattern": "staging.biddeed.ai/*", "zone_name": "biddeed.ai" }
+      ],
+      "vars": {
+        "CLERK_RUNTIME_ENABLED": "true"
+      }
     }
   }
 }
