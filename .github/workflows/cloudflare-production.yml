@@ -32,6 +32,11 @@ on:
 permissions:
   contents: read
 
+# One production deploy at a time: on 2026-09-04 runs #9 and #10 raced and the older commit won.
+concurrency:
+  group: cloudflare-production
+  cancel-in-progress: false
+
 jobs:
   deploy-production:
     runs-on: ubuntu-latest
