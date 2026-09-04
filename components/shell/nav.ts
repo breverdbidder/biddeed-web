@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react'
-import { Bell, CalendarDays, FileText, Gavel, MapPinned, Search } from 'lucide-react'
+import { Bell, CalendarDays, FileText, FolderKanban, Gavel, MapPinned, Search } from 'lucide-react'
 
 /**
  * Primary navigation.
@@ -21,6 +21,16 @@ export interface NavItem {
 }
 
 export const NAV_ITEMS: NavItem[] = [
+  {
+    // Claude.ai Projects parity (C3): one project per property you intend to win.
+    // The panel lives in the Worker /chat drawer; the hash opens it.
+    key: 'projects',
+    label: 'Projects',
+    href: '/chat#projects',
+    icon: FolderKanban,
+    external: true,
+    description: 'One project per property - files, notes and a chat that remembers',
+  },
   {
     key: 'auctions',
     label: 'Auctions',
@@ -56,7 +66,7 @@ export const NAV_ITEMS: NavItem[] = [
     href: '/counties',
     icon: MapPinned,
     external: true,
-    description: 'Coverage and calendars for all 67 counties',
+    description: 'Coverage and calendars for every Florida county',
   },
   {
     key: 'reports',
