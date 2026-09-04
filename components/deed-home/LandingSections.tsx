@@ -80,7 +80,7 @@ export function Proof() {
       <div className="grid gap-8 rounded-3xl border border-border bg-card p-6 sm:p-10 lg:grid-cols-[1.1fr_1fr] lg:items-center">
         <div>
           <Eyebrow>Published before the sale. Checked after it.</Eyebrow>
-          <H2>The number was on the record before the gavel.</H2>
+          <H2>Every US auction. One number. Zero guesswork.</H2>
           <p className="mt-4 max-w-lg text-[15px] leading-7 text-muted-foreground">
             For a Marion County foreclosure on 20 July 2026, BidDeed.AI published a maximum bid of $82,000
             before the sale. The property sold for $73,501. A bidder who held to the ceiling won the lot with
@@ -106,9 +106,48 @@ export function Proof() {
             <dd className="mt-1 text-xl font-semibold text-foreground sm:text-2xl">Held</dd>
           </div>
           <p className="col-span-3 text-xs text-muted-foreground">
-            Marion County, case 422021CA000414CAAXXX. Figures from the published report and the clerk&rsquo;s recorded sale.
+            Marion County foreclosure, July 2026. Figures from the published report and the clerk&rsquo;s recorded sale.
           </p>
         </dl>
+      </div>
+    </section>
+  )
+}
+
+/* ── Founder (CONTENT_SOP §5.9 N1–N7 · Problem-founder archetype) ─────────── */
+
+export function Founder() {
+  return (
+    <section className="mx-auto max-w-5xl px-4 sm:px-6" aria-labelledby="founder-heading">
+      <div className="grid gap-8 rounded-3xl border border-border bg-card p-6 sm:p-10 lg:grid-cols-[1fr_1.1fr] lg:items-start">
+        <div>
+          <Eyebrow>Why we built it</Eyebrow>
+          <H2>I bid with my own money first.</H2>
+          <p className="mt-4 text-sm text-muted-foreground">
+            Ariel Shapira · Founder · Developer · Builder · Property Manager · Inventor of ZoneWise.AI · The Real Estate AI Oracle&trade;
+          </p>
+        </div>
+        <div className="space-y-4 text-[15px] leading-7 text-muted-foreground">
+          <p>
+            I have bought tax deeds I could not sell for two years &mdash; the title was not marketable until a
+            quiet-title action cleared it. That is one of the traps in this business, and every one of them cost
+            real money before it taught me anything.
+          </p>
+          <p>
+            Twenty-plus years buying distressed Florida assets at foreclosure and tax deed auctions, courthouse and
+            online, then building and managing what I bought. One of them started as a $5,330 tax deed and closed,
+            after a ground-up build, at $398,600 &mdash; both on the clerk&rsquo;s record.
+          </p>
+          <p className="text-foreground">
+            Bidding off a spreadsheet made sense when that was all there was. It cost me enough that I wrote the
+            software for my own bids first. Now it&rsquo;s yours: what&rsquo;s coming to auction, what to bid, and
+            what the zoning allows &mdash; before you raise your hand.
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Figures from the publicly recorded closings at{' '}
+            <a href="https://everestcapitalusa.com" className="underline decoration-border underline-offset-4 hover:text-foreground" rel="noopener">everestcapitalusa.com</a>.
+          </p>
+        </div>
       </div>
     </section>
   )
