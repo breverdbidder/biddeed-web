@@ -112,7 +112,7 @@ export default function DeedThread({ turns, streaming, status, surface, onSugges
           ))}
         </ul>
         <p className="mt-5 text-xs leading-relaxed text-slate-500">
-          Deed is not legal, title or financial advice. A Clear to Bid report remains the
+          Deed is not legal, title or financial advice. A SIGNAL$ Property Report remains the
           document to rely on before bidding.
         </p>
       </div>

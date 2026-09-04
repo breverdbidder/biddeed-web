@@ -13,8 +13,8 @@ interface Props {
 
 function pinColor(type: string): string {
   switch (type) {
-    case 'foreclosure': return '#EF4444'
-    case 'tax_deed': return '#F59E0B'
+    case 'foreclosure': return '#9f4d32'
+    case 'tax_deed': return '#1f1b16'
     default: return '#6B7280'
   }
 }
@@ -65,8 +65,8 @@ export default function AuctionDetailMap({ lat, lng, label, type }: Props) {
 
   if (!MAPBOX_TOKEN) {
     return (
-      <div className="h-64 flex items-center justify-center bg-gray-100 dark:bg-slate-800">
-        <p className="text-xs text-gray-400">Map unavailable</p>
+      <div className="h-64 flex items-center justify-center bg-muted dark:bg-card">
+        <p className="text-xs text-muted-foreground">Map unavailable</p>
       </div>
     )
   }

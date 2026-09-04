@@ -39,13 +39,13 @@ function typeBadge(type: string): string {
   switch (type) {
     case 'foreclosure':
     case 'active':
-      return 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
+      return 'bg-primary/10 dark:bg-primary/15/30 text-primary dark:text-primary'
     case 'tax_deed':
-      return 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'
+      return 'bg-foreground/10 dark:bg-foreground/15/30 text-foreground dark:text-foreground'
     case 'cancelled':
-      return 'bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-500'
+      return 'bg-muted dark:bg-card text-muted-foreground dark:text-muted-foreground'
     default:
-      return 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400'
+      return 'bg-muted dark:bg-card text-muted-foreground dark:text-muted-foreground'
   }
 }
 
@@ -61,15 +61,15 @@ const CONSTRUCTION_LABELS: Record<string, string> = {
 function InfoRow({ label, value, mono, link }: { label: string; value: string | number | null | undefined; mono?: boolean; link?: string }) {
   const display = value == null || value === '' ? '—' : String(value)
   return (
-    <div className="flex items-start justify-between py-2.5 border-b border-gray-100 dark:border-slate-800 last:border-0">
-      <span className="text-sm text-gray-500 dark:text-slate-400 shrink-0 w-36">{label}</span>
+    <div className="flex items-start justify-between py-2.5 border-b border-border dark:border-border last:border-0">
+      <span className="text-sm text-muted-foreground dark:text-muted-foreground shrink-0 w-36">{label}</span>
       {link && display !== '—' ? (
         <a href={link} target="_blank" rel="noopener noreferrer"
-          className={`text-sm text-bd-navy-500 dark:text-bd-orange-400 hover:underline text-right ${mono ? 'font-mono text-xs' : ''}`}>
+          className={`text-sm text-primary dark:text-bd-orange-400 hover:underline text-right ${mono ? 'font-mono text-xs' : ''}`}>
           {display} ↗
         </a>
       ) : (
-        <span className={`text-sm text-gray-900 dark:text-white text-right ${mono ? 'font-mono text-xs' : ''}`}>
+        <span className={`text-sm text-foreground dark:text-white text-right ${mono ? 'font-mono text-xs' : ''}`}>
           {display}
         </span>
       )}
@@ -79,8 +79,8 @@ function InfoRow({ label, value, mono, link }: { label: string; value: string | 
 
 function SectionCard({ title, children, icon }: { title: string; children: React.ReactNode; icon?: string }) {
   return (
-    <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg p-5">
-      <h2 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wide mb-3 flex items-center gap-2">
+    <div className="bg-card dark:bg-card border border-border dark:border-border rounded-lg p-5">
+      <h2 className="text-sm font-semibold text-foreground dark:text-white uppercase tracking-wide mb-3 flex items-center gap-2">
         {icon && <span>{icon}</span>}
         {title}
       </h2>
@@ -117,10 +117,10 @@ export default function AuctionDetail({ auctionId }: Props) {
 
   if (loading) {
     return (
-      <div className="h-full flex items-center justify-center bg-gray-50 dark:bg-slate-950">
+      <div className="h-full flex items-center justify-center bg-muted dark:bg-background">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-2 border-bd-navy-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-gray-500 dark:text-slate-400 text-sm">Loading auction...</p>
+          <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-muted-foreground dark:text-muted-foreground text-sm">Loading auction...</p>
         </div>
       </div>
     )
@@ -128,12 +128,12 @@ export default function AuctionDetail({ auctionId }: Props) {
 
   if (error || !auction) {
     return (
-      <div className="h-full flex items-center justify-center bg-gray-50 dark:bg-slate-950">
+      <div className="h-full flex items-center justify-center bg-muted dark:bg-background">
         <div className="flex flex-col items-center gap-4">
-          <p className="text-red-500 text-sm">{error || 'Auction not found'}</p>
+          <p className="text-primary text-sm">{error || 'Auction not found'}</p>
           <button
             onClick={() => router.push('/radar')}
-            className="text-sm text-bd-navy-500 hover:text-bd-navy-700 dark:text-bd-orange-400 dark:hover:text-bd-orange-300 underline"
+            className="text-sm text-primary hover:text-primary dark:text-bd-orange-400 dark:hover:text-bd-orange-300 underline"
           >
             ← Back to Auctions
           </button>
@@ -153,14 +153,14 @@ export default function AuctionDetail({ auctionId }: Props) {
     : null
 
   return (
-    <div className="h-full overflow-y-auto bg-gray-50 dark:bg-slate-950">
+    <div className="h-full overflow-y-auto bg-muted dark:bg-background">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 space-y-6">
 
         {/* Back + Header */}
         <div>
           <button
             onClick={() => router.push('/radar')}
-            className="text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300 mb-3 flex items-center gap-1"
+            className="text-sm text-muted-foreground dark:text-muted-foreground hover:text-foreground dark:hover:text-muted-foreground mb-3 flex items-center gap-1"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -170,10 +170,10 @@ export default function AuctionDetail({ auctionId }: Props) {
 
           <div className="flex flex-wrap items-start gap-3">
             <div className="flex-1 min-w-0">
-              <h1 className="text-xl font-bold text-gray-900 dark:text-white truncate">
+              <h1 className="text-xl font-bold text-foreground dark:text-white truncate">
                 {auction.property_address || 'No Address'}
               </h1>
-              <p className="text-sm text-gray-500 dark:text-slate-400 mt-0.5">
+              <p className="text-sm text-muted-foreground dark:text-muted-foreground mt-0.5">
                 {formatCountyLabel(auction.county)} County &middot; {auction.case_number}
               </p>
             </div>
@@ -207,7 +207,7 @@ export default function AuctionDetail({ auctionId }: Props) {
 
             {/* Photo */}
             {auction.photo_url && !photoError && (
-              <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg overflow-hidden">
+              <div className="bg-card dark:bg-card border border-border dark:border-border rounded-lg overflow-hidden">
                 <img
                   src={auction.photo_url}
                   alt={auction.property_address || 'Property photo'}
@@ -215,7 +215,7 @@ export default function AuctionDetail({ auctionId }: Props) {
                   onError={() => setPhotoError(true)}
                 />
                 {auction.county === 'Brevard' && (
-                  <p className="text-xs text-gray-400 dark:text-slate-600 px-3 py-1.5">
+                  <p className="text-xs text-muted-foreground dark:text-muted-foreground px-3 py-1.5">
                     Photo: Brevard County Property Appraiser
                   </p>
                 )}
@@ -273,10 +273,10 @@ export default function AuctionDetail({ auctionId }: Props) {
                 </>
               ) : (
                 <div className="py-4 text-center">
-                  <p className="text-sm text-gray-400 dark:text-slate-500">
+                  <p className="text-sm text-muted-foreground dark:text-muted-foreground">
                     Zoning data not yet available for {auction.county} County
                   </p>
-                  <p className="text-xs text-gray-300 dark:text-slate-600 mt-1">
+                  <p className="text-xs text-muted-foreground dark:text-muted-foreground mt-1">
                     Parcel enrichment in progress — check back soon
                   </p>
                 </div>
@@ -293,7 +293,7 @@ export default function AuctionDetail({ auctionId }: Props) {
                   <InfoRow label="Max Height" value={dims.maxHeight} />
                   <InfoRow label="Setbacks" value={dims.setbacks} />
                   <InfoRow label="Density" value={dims.density} />
-                  <p className="text-[10px] text-gray-400 dark:text-slate-600 mt-2">
+                  <p className="text-[10px] text-muted-foreground dark:text-muted-foreground mt-2">
                     Estimates based on zone code pattern. Verify with local municipality.
                   </p>
                 </SectionCard>
@@ -306,32 +306,32 @@ export default function AuctionDetail({ auctionId }: Props) {
 
             {/* Quick Stats */}
             <div className="grid grid-cols-2 gap-3">
-              <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg p-4 text-center">
-                <p className="text-xs text-gray-500 dark:text-slate-400 uppercase">Just Value</p>
-                <p className="text-lg font-bold text-gray-900 dark:text-white mt-1">
+              <div className="bg-card dark:bg-card border border-border dark:border-border rounded-lg p-4 text-center">
+                <p className="text-xs text-muted-foreground dark:text-muted-foreground uppercase">Just Value</p>
+                <p className="text-lg font-bold text-foreground dark:text-white mt-1">
                   {formatCurrency(auction.just_value)}
                 </p>
               </div>
-              <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg p-4 text-center">
-                <p className="text-xs text-gray-500 dark:text-slate-400 uppercase">Land Value</p>
-                <p className="text-lg font-bold text-gray-900 dark:text-white mt-1">
+              <div className="bg-card dark:bg-card border border-border dark:border-border rounded-lg p-4 text-center">
+                <p className="text-xs text-muted-foreground dark:text-muted-foreground uppercase">Land Value</p>
+                <p className="text-lg font-bold text-foreground dark:text-white mt-1">
                   {formatCurrency(auction.land_value)}
                 </p>
               </div>
               {auction.opening_bid != null && auction.opening_bid > 0 && (
-                <div className="col-span-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg p-4 text-center">
-                  <p className="text-xs text-gray-500 dark:text-slate-400 uppercase">Opening Bid</p>
+                <div className="col-span-2 bg-card dark:bg-card border border-border dark:border-border rounded-lg p-4 text-center">
+                  <p className="text-xs text-muted-foreground dark:text-muted-foreground uppercase">Opening Bid</p>
                   <p className="text-lg font-bold text-green-600 dark:text-green-400 mt-1">
                     {formatCurrency(auction.opening_bid)}
                   </p>
                 </div>
               )}
               {auction.just_value && auction.just_value > 0 && auction.land_value != null && (
-                <div className="col-span-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg p-4 text-center">
-                  <p className="text-xs text-gray-500 dark:text-slate-400 uppercase">Improvement Ratio</p>
-                  <p className="text-lg font-bold text-gray-900 dark:text-white mt-1">
+                <div className="col-span-2 bg-card dark:bg-card border border-border dark:border-border rounded-lg p-4 text-center">
+                  <p className="text-xs text-muted-foreground dark:text-muted-foreground uppercase">Improvement Ratio</p>
+                  <p className="text-lg font-bold text-foreground dark:text-white mt-1">
                     {(((auction.just_value - auction.land_value) / auction.just_value) * 100).toFixed(0)}%
-                    <span className="text-xs font-normal text-gray-400 ml-1">improvements</span>
+                    <span className="text-xs font-normal text-muted-foreground ml-1">improvements</span>
                   </p>
                 </div>
               )}
@@ -339,8 +339,8 @@ export default function AuctionDetail({ auctionId }: Props) {
 
             {/* Shapira Formula Scoring */}
             {auction.recommendation && auction.recommendation !== 'UNKNOWN' && (
-              <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg p-4">
-                <p className="text-xs text-gray-500 dark:text-slate-400 uppercase mb-3">Investment Score</p>
+              <div className="bg-card dark:bg-card border border-border dark:border-border rounded-lg p-4">
+                <p className="text-xs text-muted-foreground dark:text-muted-foreground uppercase mb-3">Investment Score</p>
                 <div className="text-center mb-3">
                   <span
                     className="inline-block px-4 py-2 rounded-lg text-xl font-bold text-white"
@@ -351,19 +351,19 @@ export default function AuctionDetail({ auctionId }: Props) {
                 </div>
                 {auction.max_bid != null && (
                   <div className="text-center mb-2">
-                    <p className="text-xs text-gray-500 dark:text-slate-400">Max Bid</p>
-                    <p className="text-lg font-bold text-gray-900 dark:text-white">
+                    <p className="text-xs text-muted-foreground dark:text-muted-foreground">Max Bid</p>
+                    <p className="text-lg font-bold text-foreground dark:text-white">
                       {formatCurrency(auction.max_bid)}
                     </p>
                   </div>
                 )}
                 {auction.bid_ratio != null && (
                   <div className="text-center mb-3">
-                    <p className="text-xs text-gray-500 dark:text-slate-400">Bid-to-Value Ratio</p>
-                    <p className="text-lg font-bold text-gray-900 dark:text-white">{auction.bid_ratio}%</p>
+                    <p className="text-xs text-muted-foreground dark:text-muted-foreground">Bid-to-Value Ratio</p>
+                    <p className="text-lg font-bold text-foreground dark:text-white">{auction.bid_ratio}%</p>
                   </div>
                 )}
-                <p className="text-[10px] text-gray-400 dark:text-slate-600 text-center mt-2">
+                <p className="text-[10px] text-muted-foreground dark:text-muted-foreground text-center mt-2">
                   Shapira Formula&trade; &middot; (ARV &times; 70%) - Repairs - $10K - MIN($25K, 15% ARV)
                 </p>
               </div>
@@ -371,7 +371,7 @@ export default function AuctionDetail({ auctionId }: Props) {
 
             {/* Mini Map */}
             {hasCoords && (
-              <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg overflow-hidden">
+              <div className="bg-card dark:bg-card border border-border dark:border-border rounded-lg overflow-hidden">
                 <AuctionDetailMap
                   lat={auction.latitude!}
                   lng={auction.longitude!}
@@ -383,16 +383,16 @@ export default function AuctionDetail({ auctionId }: Props) {
 
             {/* Coordinates */}
             {hasCoords && (
-              <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg p-4">
-                <p className="text-xs text-gray-500 dark:text-slate-400 uppercase mb-2">Coordinates</p>
-                <p className="text-xs font-mono text-gray-700 dark:text-slate-300">
+              <div className="bg-card dark:bg-card border border-border dark:border-border rounded-lg p-4">
+                <p className="text-xs text-muted-foreground dark:text-muted-foreground uppercase mb-2">Coordinates</p>
+                <p className="text-xs font-mono text-foreground dark:text-muted-foreground">
                   {auction.latitude!.toFixed(6)}, {auction.longitude!.toFixed(6)}
                 </p>
                 <a
                   href={`https://www.google.com/maps?q=${auction.latitude},${auction.longitude}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs text-bd-navy-500 dark:text-bd-orange-400 hover:underline mt-1 inline-block"
+                  className="text-xs text-primary dark:text-bd-orange-400 hover:underline mt-1 inline-block"
                 >
                   Open in Google Maps ↗
                 </a>
@@ -401,33 +401,33 @@ export default function AuctionDetail({ auctionId }: Props) {
 
             {/* Address Status */}
             {auction.address_status && (
-              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/30 rounded-lg p-4">
-                <p className="text-xs font-medium text-amber-800 dark:text-amber-400 uppercase mb-1">Address Status</p>
-                <p className="text-sm text-amber-700 dark:text-amber-300">
+              <div className="bg-foreground/10 dark:bg-foreground/15/20 border border-border dark:border-border/30 rounded-lg p-4">
+                <p className="text-xs font-medium text-foreground dark:text-foreground uppercase mb-1">Address Status</p>
+                <p className="text-sm text-foreground dark:text-foreground">
                   {auction.address_status.replace(/_/g, ' ')}
                 </p>
               </div>
             )}
 
             {/* External Links */}
-            <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg p-4 space-y-2">
-              <p className="text-xs text-gray-500 dark:text-slate-400 uppercase mb-2">External Links</p>
+            <div className="bg-card dark:bg-card border border-border dark:border-border rounded-lg p-4 space-y-2">
+              <p className="text-xs text-muted-foreground dark:text-muted-foreground uppercase mb-2">External Links</p>
               {bcpaoLink && (
                 <a href={bcpaoLink} target="_blank" rel="noopener noreferrer"
-                  className="block text-sm text-bd-navy-500 dark:text-bd-orange-400 hover:underline">
+                  className="block text-sm text-primary dark:text-bd-orange-400 hover:underline">
                   BCPAO Property Page ↗
                 </a>
               )}
               {auction.source_url && (
                 <a href={auction.source_url} target="_blank" rel="noopener noreferrer"
-                  className="block text-sm text-bd-navy-500 dark:text-bd-orange-400 hover:underline">
+                  className="block text-sm text-primary dark:text-bd-orange-400 hover:underline">
                   Auction Source ↗
                 </a>
               )}
               {hasCoords && (
                 <a href={`https://www.google.com/maps/@${auction.latitude},${auction.longitude},17z/data=!3m1!1e3`}
                   target="_blank" rel="noopener noreferrer"
-                  className="block text-sm text-bd-navy-500 dark:text-bd-orange-400 hover:underline">
+                  className="block text-sm text-primary dark:text-bd-orange-400 hover:underline">
                   Google Maps Satellite ↗
                 </a>
               )}
@@ -435,7 +435,7 @@ export default function AuctionDetail({ auctionId }: Props) {
 
             {/* Data Freshness */}
             {auction.enriched_at && (
-              <p className="text-xs text-gray-400 dark:text-slate-600 text-center">
+              <p className="text-xs text-muted-foreground dark:text-muted-foreground text-center">
                 Enriched: {new Date(auction.enriched_at).toLocaleDateString()} &middot;
                 Scraped: {auction.scraped_at ? new Date(auction.scraped_at).toLocaleDateString() : '—'}
               </p>

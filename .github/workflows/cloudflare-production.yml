@@ -1,16 +1,41 @@
 name: Cloudflare OpenNext Production
 
-# Dispatch-only: unlike cloudflare-staging.yml this never fires on push. The
-# biddeed-web-production Worker deployed here is deliberately NOT bound to any
-# zone route -- it is only reachable by workers.dev URL. Production traffic
-# only reaches it if/when RADAR_ORIGIN inside worker-damp-snowflake-cead (the
-# biddeed.ai router Worker, deployed separately, not from this repo) is
-# pointed at it. See docs/spec/19813.md for the full canary mechanism.
+# Fires on push to main (#19820): RADAR_ORIGIN in worker-damp-snowflake-cead
+# (the biddeed.ai router, deployed from cli-anything-biddeed) is now committed
+# to source pointing at biddeed-web-production's workers.dev URL, so this repo
+# is the origin biddeed.ai actually serves. A push to main that doesn't also
+# redeploy this Worker would leave biddeed.ai on stale code with no CI signal.
+# The Worker deployed here is still NOT bound to any zone route -- it is only
+# reachable by workers.dev URL; production traffic only reaches it via the
+# router's RADAR_ORIGIN. See docs/spec/19813.md and docs/spec/19820.md.
+#
+# environment: cloudflare-staging (not cloudflare-production) is intentional
+# for now -- see docs/spec/19820.md "cloudflare-production environment" for
+# why and what Ariel needs to do to finish the split.
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'app/**'
+      - 'components/**'
+      - 'lib/**'
+      - 'public/**'
+      - 'middleware.ts'
+      - 'next.config.mjs'
+      - 'open-next.config.ts'
+      - 'wrangler.production.jsonc'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/cloudflare-production.yml'
 
 permissions:
   contents: read
+
+# One production deploy at a time: on 2026-09-04 runs #9 and #10 raced and the older commit won.
+concurrency:
+  group: cloudflare-production
+  cancel-in-progress: false
 
 jobs:
   deploy-production:
@@ -23,6 +48,7 @@ jobs:
       CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      NEXT_PUBLIC_MAPBOX_TOKEN: ${{ secrets.NEXT_PUBLIC_MAPBOX_TOKEN }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       CLERK_RUNTIME_ENABLED: 'true'
       NEXT_PUBLIC_BASE_PATH: ''
@@ -52,7 +78,12 @@ jobs:
           test -n "$SUPABASE_SERVICE_ROLE_KEY" || { echo 'Missing SUPABASE_SERVICE_ROLE_KEY' >&2; exit 1; }
 
       - name: Build OpenNext Worker (production)
-        run: npm run cf:build:production
+        # opennextjs-cloudflare build refuses to run in CI without an explicit
+        # --config when there's no bare wrangler.jsonc at the repo root (there
+        # isn't one here -- only the env-suffixed files). package.json's
+        # cf:build has no --config, so pass it directly instead of going
+        # through the npm script.
+        run: npx opennextjs-cloudflare build --config wrangler.production.jsonc
 
       - name: Deploy production Worker (workers.dev only, no zone route)
         run: npx wrangler deploy --config wrangler.production.jsonc --env production

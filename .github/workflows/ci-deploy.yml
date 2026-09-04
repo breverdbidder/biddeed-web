@@ -1,5 +1,15 @@
 name: CI + Vercel Deploy
 
+# Vercel deploy is OFF by default as of #19820: biddeed.ai's router
+# (cli-anything-biddeed/src/worker.js RADAR_ORIGIN) now points at
+# biddeed-web-production (Cloudflare, see cloudflare-production.yml), not at
+# PROD_URL below. Vercel is kept as a manual rollback target only -- deploying
+# it on every push would let it silently drift from what's actually live,
+# which is the exact failure mode #19820 exists to close.
+#
+# To re-enable (manual rollback): set repo/org variable DEPLOY_TO_VERCEL=true,
+# or run this workflow via workflow_dispatch, which always runs regardless of
+# the variable. See docs/spec/19820.md.
 on:
   push:
     branches: [main]
@@ -17,6 +27,7 @@ env:
 
 jobs:
   build-and-deploy:
+    if: ${{ github.event_name == 'workflow_dispatch' || vars.DEPLOY_TO_VERCEL == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:

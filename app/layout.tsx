@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { headers } from 'next/headers'
-import { Inter } from 'next/font/google'
+import { Inter, Source_Serif_4 } from 'next/font/google'
 import './globals.css'
 import AppShell from '@/components/shell/AppShell'
 import ChatwootWidget from '@/components/ChatwootWidget'
@@ -16,6 +16,20 @@ const inter = Inter({
   fallback: ['system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
 })
 
+// Display serif for headlines only. Self-hosted by next/font, so it ships from
+// /_next/static under the existing font-src 'self' policy — no CSP change.
+// Source Serif 4: the display serif the Claude.ai reference implementations use
+// (open-claude-reference src/index.css) - the closest open-licensed match to the
+// Claude reading experience (PARITY_PRD section 8). Replaces Newsreader, 2026-09-04.
+const sourceSerif = Source_Serif_4({
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  style: ['normal', 'italic'],
+  display: 'swap',
+  variable: '--font-display',
+  fallback: ['Iowan Old Style', 'Palatino Linotype', 'Georgia', 'serif'],
+})
+
 // Inline SVG data URI, not a file. The Worker proxies exactly five path
 // shapes to this app -- '/', '/_next/*', three '/api/*' trees, '/radar*' and
 // '/order/success' -- so any icon served from its own URL 404s at the apex,
@@ -27,7 +41,8 @@ const ICON =
 
 export const metadata: Metadata = {
   title: 'BidDeed.AI — Auction Intelligence',
-  description: 'Auction intelligence for foreclosure and tax deed investors.',
+  description:
+    'AI-powered foreclosure and tax deed auction intelligence for Florida — with zoning analysis on every property.',
   icons: { icon: [{ url: ICON, type: 'image/svg+xml' }] },
 }
 
@@ -91,7 +106,7 @@ export default async function RootLayout({
     <html
       lang="en"
       data-theme="light"
-      className={inter.variable}
+      className={`${inter.variable} ${sourceSerif.variable}`}
       style={{ background: 'hsl(var(--background))', color: 'hsl(var(--foreground))' }}
     >
       <body>

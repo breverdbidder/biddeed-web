@@ -38,25 +38,26 @@
   --slate-950: #020617;
 
   /* shadcn semantic colors (HSL values — no hsl() wrapper) */
-  --background: 39 38% 93%;
-  --foreground: 30 17% 10%;
-  --card: 45 50% 98%;
-  --card-foreground: 30 17% 10%;
-  --popover: 45 50% 98%;
-  --popover-foreground: 30 17% 10%;
-  --primary: 15 52% 50%;
-  --primary-foreground: 39 38% 93%;
-  --secondary: 35 35% 89%;
-  --secondary-foreground: 30 17% 10%;
-  --muted: 35 35% 89%;
-  --muted-foreground: 28 8% 45%;
-  --accent: 15 52% 50%;
-  --accent-foreground: 39 38% 93%;
+  /* Light theme = Claude.ai reading experience (PARITY_PRD section 8; values cross-checked against the community measurement in open-claude-reference src/index.css): page #fdf8f5, card #f7f3ef, muted surface #f2ede9, ink #1c1b19, secondary text #55433d (8.5:1), border #e6e2de. Accent stays our text-safe terracotta (#9f4d32, 5.2:1); Claude's lighter #d97757 is 3:1 and never used as text. */
+  --background: 22 67% 98%;
+  --foreground: 40 6% 10%;
+  --card: 30 33% 95%;
+  --card-foreground: 40 6% 10%;
+  --popover: 30 33% 95%;
+  --popover-foreground: 40 6% 10%;
+  --primary: 15 52% 41%;
+  --primary-foreground: 22 67% 98%;
+  --secondary: 27 26% 93%;
+  --secondary-foreground: 40 6% 10%;
+  --muted: 27 26% 93%;
+  --muted-foreground: 15 16% 29%;
+  --accent: 15 52% 41%;
+  --accent-foreground: 22 67% 98%;
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 210 40% 96%;
   --border: 33 25% 82%;
   --input: 33 25% 82%;
-  --ring: 15 52% 50%;
+  --ring: 15 52% 41%;
   --radius: 0.5rem;
 
   /* Chart colors */
@@ -221,12 +222,12 @@ th[data-numeric] { font-variant-numeric: tabular-nums; font-feature-settings: "t
   :root {
     --sidebar-background: 39 38% 93%;
     --sidebar-foreground: 30 17% 10%;
-    --sidebar-primary: 15 52% 50%;
+    --sidebar-primary: 15 52% 41%;
     --sidebar-primary-foreground: 39 38% 93%;
     --sidebar-accent: 35 35% 89%;
     --sidebar-accent-foreground: 30 17% 10%;
     --sidebar-border: 33 25% 82%;
-    --sidebar-ring: 15 52% 50%;
+    --sidebar-ring: 15 52% 41%;
   }
   html.dark {
     --sidebar-background: 220 49% 8%;
@@ -278,62 +279,107 @@ th[data-numeric] { font-variant-numeric: tabular-nums; font-feature-settings: "t
    Light mode is the default; dark mode is explicit.
    ───────────────────────────────────────────────────────────────────────── */
 html[data-theme='light'] {
-  --background: 39 38% 93%;          /* #f5f0e8 cream */
-  --foreground: 30 17% 10%;          /* #1f1b16 black ink */
-  --card: 45 50% 98%;                 /* #fbfaf7 */
+  --background: 22 67% 98%;          /* #fdf8f5 page (Claude reading palette) */
+  --foreground: 40 6% 10%;           /* #1c1b19 ink */
+  --card: 30 33% 95%;                 /* #f7f3ef */
   --card-foreground: 30 17% 10%;
   --popover: 45 50% 98%;
   --popover-foreground: 30 17% 10%;
-  --primary: 15 52% 50%;              /* #c15f3c terracotta */
-  --primary-foreground: 39 38% 93%;
-  --secondary: 35 35% 89%;
-  --secondary-foreground: 30 17% 10%;
-  --muted: 35 35% 89%;
-  --muted-foreground: 28 8% 45%;      /* #766f67 */
-  --accent: 15 52% 50%;
-  --accent-foreground: 39 38% 93%;
-  --border: 33 25% 82%;               /* #ddd5c9 */
+  --primary: 15 52% 41%;              /* #9f4d32 terracotta */
+  --primary-foreground: 22 67% 98%;
+  --secondary: 27 26% 93%;
+  --secondary-foreground: 40 6% 10%;
+  --muted: 27 26% 93%;
+  --muted-foreground: 15 16% 29%;      /* #55433d secondary, 8.5:1 */
+  --accent: 15 52% 41%;
+  --accent-foreground: 22 67% 98%;
+  --border: 30 14% 89%;               /* #e6e2de */
   --input: 33 25% 82%;
-  --ring: 15 52% 50%;
+  --ring: 15 52% 41%;
   --sidebar-background: 39 38% 93%;
   --sidebar-foreground: 30 17% 10%;
-  --sidebar-primary: 15 52% 50%;
+  --sidebar-primary: 15 52% 41%;
   --sidebar-primary-foreground: 39 38% 93%;
   --sidebar-accent: 35 35% 89%;
   --sidebar-accent-foreground: 30 17% 10%;
   --sidebar-border: 33 25% 82%;
-  --sidebar-ring: 15 52% 50%;
+  --sidebar-ring: 15 52% 41%;
 }
 
 html[data-theme='light'] body {
-  background: #f5f0e8;
-  color: #1f1b16;
+  background: #fdf8f5;
+  color: #1c1b19;
 }
 html[data-theme='light'] [class~='bg-[#020617]'],
-html[data-theme='light'] [class~='bg-slate-950'] { background-color: #f5f0e8 !important; }
+html[data-theme='light'] [class~='bg-slate-950'] { background-color: #fdf8f5 !important; }
 html[data-theme='light'] [class~='bg-[#0b1220]'],
-html[data-theme='light'] [class~='bg-slate-900'] { background-color: #fbfaf7 !important; }
-html[data-theme='light'] [class~='bg-slate-800'] { background-color: #ede3d7 !important; }
+html[data-theme='light'] [class~='bg-slate-900'] { background-color: #f7f3ef !important; }
+html[data-theme='light'] [class~='bg-slate-800'] { background-color: #f2ede9 !important; }
 html[data-theme='light'] [class~='text-white'],
 html[data-theme='light'] [class~='text-slate-100'],
-html[data-theme='light'] [class~='text-slate-200'] { color: #1f1b16 !important; }
+html[data-theme='light'] [class~='text-slate-200'] { color: #1c1b19 !important; }
 html[data-theme='light'] [class~='text-slate-300'],
-html[data-theme='light'] [class~='text-slate-400'] { color: #766f67 !important; }
+html[data-theme='light'] [class~='text-slate-400'] { color: #55433d !important; }
 html[data-theme='light'] [class~='text-slate-500'],
-html[data-theme='light'] [class~='text-slate-600'] { color: #8f8479 !important; }
+html[data-theme='light'] [class~='text-slate-600'] { color: #746b61 !important; }
 html[data-theme='light'] [class~='border-slate-800'],
 html[data-theme='light'] [class~='border-slate-700'],
-html[data-theme='light'] [class~='border-slate-600'] { border-color: #ddd5c9 !important; }
-html[data-theme='light'] [class~='hover:bg-slate-800']:hover { background-color: #ede3d7 !important; }
-html[data-theme='light'] [class~='hover:text-white']:hover { color: #1f1b16 !important; }
-html[data-theme='light'] [class~='text-bd-orange'] { color: #c15f3c !important; }
-html[data-theme='light'] [class~='bg-bd-orange'] { background-color: #c15f3c !important; }
-html[data-theme='light'] [class~='border-bd-orange'] { border-color: #c15f3c !important; }
-html[data-theme='light'] [class~='border-bd-orange\/50'] { border-color: rgba(193,95,60,.5) !important; }
+html[data-theme='light'] [class~='border-slate-600'] { border-color: #e6e2de !important; }
+html[data-theme='light'] [class~='hover:bg-slate-800']:hover { background-color: #f2ede9 !important; }
+html[data-theme='light'] [class~='hover:text-white']:hover { color: #1c1b19 !important; }
+html[data-theme='light'] [class~='text-bd-orange'] { color: #9f4d32 !important; }
+html[data-theme='light'] [class~='bg-bd-orange'] { background-color: #9f4d32 !important; }
+html[data-theme='light'] [class~='border-bd-orange'] { border-color: #9f4d32 !important; }
+html[data-theme='light'] [class~='border-bd-orange\/50'] { border-color: rgba(159,77,50,.5) !important; }
 html[data-theme='light'] [class~='bg-bd-orange\/5'],
-html[data-theme='light'] [class~='bg-bd-orange\/10'] { background-color: rgba(193,95,60,.08) !important; }
+html[data-theme='light'] [class~='bg-bd-orange\/10'] { background-color: rgba(159,77,50,.08) !important; }
 html[data-theme='light'] [class~='bg-slate-950\/60'] { background-color: rgba(31,27,22,.28) !important; }
-html[data-theme='light'] ::selection { background: #c15f3c; color: #f5f0e8; }
-html[data-theme='light'] ::-webkit-scrollbar-track { background: #ede3d7; }
+html[data-theme='light'] ::selection { background: #9f4d32; color: #fdf8f5; }
+html[data-theme='light'] ::-webkit-scrollbar-track { background: #f2ede9; }
 html[data-theme='light'] ::-webkit-scrollbar-thumb { background: #b5a9a0; }
-html[data-theme='light'] ::-webkit-scrollbar-thumb:hover { background: #8f8479; }
+html[data-theme='light'] ::-webkit-scrollbar-thumb:hover { background: #746b61; }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Dark mode — semantic tokens.
+
+   Until Sep 2026 the dark toggle only flipped the sidebar variables; every
+   shadcn semantic token (background, card, primary…) stayed on the light
+   cream values, so "dark mode" was a dark rail beside a cream page. The new
+   home surface is built entirely on semantic tokens, so both modes are
+   defined here, once, and no component carries a hard-coded palette.
+   ───────────────────────────────────────────────────────────────────────── */
+html[data-theme='dark'],
+html.dark {
+  --background: 222 40% 7%;            /* #0b0f17 */
+  --foreground: 38 25% 93%;            /* #f3efe8 warm ink on dark */
+  --card: 222 38% 11%;                 /* #111827 */
+  --card-foreground: 38 25% 93%;
+  --popover: 222 38% 11%;
+  --popover-foreground: 38 25% 93%;
+  --primary: 17 70% 60%;               /* #e07a52 — terracotta lifted for dark */
+  --primary-foreground: 222 40% 7%;
+  --secondary: 222 30% 16%;            /* #1c2434 */
+  --secondary-foreground: 38 25% 93%;
+  --muted: 222 30% 16%;
+  --muted-foreground: 30 8% 63%;       /* #a39c93 */
+  --accent: 17 70% 60%;
+  --accent-foreground: 222 40% 7%;
+  --destructive: 0 72% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 222 24% 19%;               /* #232b3a */
+  --input: 222 24% 19%;
+  --ring: 17 70% 60%;
+}
+
+html[data-theme='dark'] body,
+html.dark body {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+/* Display serif for headlines. Tailwind exposes it as `font-display`; the
+   optical-size axis is left to the browser. */
+.font-display {
+  font-family: var(--font-display), 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
