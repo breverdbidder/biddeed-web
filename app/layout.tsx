@@ -62,7 +62,7 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic'
 
 export const viewport: Viewport = {
-  themeColor: '#f5f0e8',
+  themeColor: '#ffffff',
 }
 
 export default async function RootLayout({

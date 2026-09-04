@@ -185,7 +185,7 @@ const S: Record<string, React.CSSProperties> = {
   itemNote: { fontSize: 13, color: '#64748b' },
   next: { fontSize: 14.5, lineHeight: 1.6, margin: 0, color: '#94a3b8' },
   nextLabel: { color: '#38bdf8', fontWeight: 600 },
-  detail: { fontSize: 12.5, color: '#475569', marginTop: 18, marginBottom: 0 },
+  detail: { fontSize: 12.5, color: '#657786', marginTop: 18, marginBottom: 0 },
   footer: { display: 'flex', gap: 20, marginTop: 30, paddingTop: 20, borderTop: '1px solid #1e293b' },
   link: { fontSize: 13.5, color: '#38bdf8', textDecoration: 'none', fontWeight: 500 },
 }
