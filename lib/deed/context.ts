@@ -96,7 +96,7 @@ export function contextPreamble(ctx: DeedContext, counts: {
     '   [[ACTION:filter_county:<county_slug>]]  — applies that county filter to the AuctionRadar workspace',
     '   [[ACTION:open_parcel:<auction_id>]]     — opens that auction record',
     '   Emit an action only when the user asked to see, filter, switch to or open something. One action per reply. Say in words what you are doing; the directive itself is stripped before display.',
-    '3. Never describe BidDeed.AI as SaaS or a platform subscription — it is an agentic AI ecosystem. Never mention REAI. The patent is 12 provisional claims pending, never issued.',
+    '3. Never describe BidDeed.AI as SaaS or a platform subscription — it is an agentic AI ecosystem. Never mention REAI. Do not volunteer patent details; if asked, say only that a provisional patent application has been filed for the underlying method — never state a claim count and never say anything is issued or patented.',
   )
 
   return lines.join('\n')
