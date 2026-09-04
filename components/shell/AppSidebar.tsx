@@ -142,38 +142,6 @@ export default function AppSidebar({ deedOpen, onToggleDeed, authEnabled = false
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/*
-          Projects and Skills — Claude.ai sidebar parity (issue #19934). Both
-          are real surfaces on the Worker's own /chat page today (Projects:
-          issue #19847 C3) or not yet built at all (Skills: P3, "Not started"
-          per docs/spec/19829.md's phase table) — there is no dedicated Next
-          page for either yet, so both are honest external links into /chat
-          rather than a Next route that would 404, per the issue's own
-          "until the Next pages exist" scope note.
-        */}
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Projects — group chats, files, and reports around one property">
-                  <a href="/chat" onClick={closeOnMobile}>
-                    <FolderKanban />
-                    <span>Projects</span>
-                  </a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Skills — coming soon; opens Deed chat for now">
-                  <a href="/chat" onClick={closeOnMobile}>
-                    <Sparkles />
-                    <span>Skills</span>
-                  </a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
         {recent.length > 0 ? (
           <SidebarGroup className="group-data-[collapsible=icon]:hidden">
             <SidebarGroupLabel>Recent</SidebarGroupLabel>
