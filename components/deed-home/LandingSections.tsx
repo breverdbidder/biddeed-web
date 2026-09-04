@@ -130,8 +130,9 @@ export function Founder() {
         <div className="space-y-4 text-base leading-7 text-muted-foreground">
           <p>
             Rainsville started as a $5,330 tax deed. After a ground-up build it closed at $398,600 &mdash; both
-            figures on the clerk&rsquo;s record. Lakewood sold at $320,000 with our own financing behind it. Twenty-plus
-            years of results like these at foreclosure and tax deed auctions across Florida, courthouse and online.
+            figures on the clerk&rsquo;s record. Lakewood was a $28,100 tax deed; it sold at $320,000 with our own
+            financing behind it &mdash; deed and closing both recorded. Twenty-plus years of results like these at
+            foreclosure and tax deed auctions across Florida, courthouse and online.
           </p>
           <p>
             I earned them in the trenches, in the courthouses and on the job sites &mdash; buying, building and
