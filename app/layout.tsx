@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { headers } from 'next/headers'
-import { Inter, Newsreader } from 'next/font/google'
+import { Inter, Source_Serif_4 } from 'next/font/google'
 import './globals.css'
 import AppShell from '@/components/shell/AppShell'
 import ChatwootWidget from '@/components/ChatwootWidget'
@@ -18,7 +18,10 @@ const inter = Inter({
 
 // Display serif for headlines only. Self-hosted by next/font, so it ships from
 // /_next/static under the existing font-src 'self' policy — no CSP change.
-const newsreader = Newsreader({
+// Source Serif 4: the display serif the Claude.ai reference implementations use
+// (open-claude-reference src/index.css) - the closest open-licensed match to the
+// Claude reading experience (PARITY_PRD section 8). Replaces Newsreader, 2026-09-04.
+const sourceSerif = Source_Serif_4({
   subsets: ['latin'],
   weight: ['400', '500', '600'],
   style: ['normal', 'italic'],
@@ -103,7 +106,7 @@ export default async function RootLayout({
     <html
       lang="en"
       data-theme="light"
-      className={`${inter.variable} ${newsreader.variable}`}
+      className={`${inter.variable} ${sourceSerif.variable}`}
       style={{ background: 'hsl(var(--background))', color: 'hsl(var(--foreground))' }}
     >
       <body>
