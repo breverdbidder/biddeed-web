@@ -29,6 +29,9 @@ jobs:
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
       NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
       CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       CLERK_RUNTIME_ENABLED: 'true'
       NEXT_PUBLIC_BASE_PATH: ''
       NEXT_TELEMETRY_DISABLED: '1'
@@ -52,6 +55,9 @@ jobs:
           test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo 'Missing CF_ACCOUNT_ID repository/environment secret' >&2; exit 1; }
           [[ "$CLERK_SECRET_KEY" =~ ^sk_(live|test)_[A-Za-z0-9_-]+$ ]] || { echo 'CLERK_SECRET_KEY format invalid' >&2; exit 1; }
           [[ "$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY" =~ ^pk_(live|test)_[A-Za-z0-9_-]+$ ]] || { echo 'NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY format invalid' >&2; exit 1; }
+          test -n "$NEXT_PUBLIC_SUPABASE_URL" || { echo 'Missing NEXT_PUBLIC_SUPABASE_URL' >&2; exit 1; }
+          test -n "$NEXT_PUBLIC_SUPABASE_ANON_KEY" || { echo 'Missing NEXT_PUBLIC_SUPABASE_ANON_KEY' >&2; exit 1; }
+          test -n "$SUPABASE_SERVICE_ROLE_KEY" || { echo 'Missing SUPABASE_SERVICE_ROLE_KEY' >&2; exit 1; }
 
       - name: Build OpenNext Worker
         # Same fix as cloudflare-production.yml (#19820): no bare
@@ -61,6 +67,18 @@ jobs:
 
       - name: Deploy staging Worker
         run: npx wrangler deploy --config wrangler.staging.jsonc --env staging
+
+      - name: Bind server-only secrets to the Worker runtime
+        # Same pattern as cloudflare-production.yml: env vars above only
+        # reach the build (NEXT_PUBLIC_* inlining) and the wrangler CLI
+        # invocation -- they are not automatically available to the deployed
+        # Worker at request time. Without this step /api/auctions/summary
+        # and any Clerk-secret-key path 500 on staging.
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf '%s' "$CLERK_SECRET_KEY" | npx wrangler secret put CLERK_SECRET_KEY --config wrangler.staging.jsonc --env staging
+          printf '%s' "$SUPABASE_SERVICE_ROLE_KEY" | npx wrangler secret put SUPABASE_SERVICE_ROLE_KEY --config wrangler.staging.jsonc --env staging
 
       - name: Print deployment URL without secrets
         run: |

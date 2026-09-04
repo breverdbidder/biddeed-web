@@ -14,6 +14,8 @@ import DeedRobotMark from '@/components/deed/DeedRobotMark'
 interface Props {
   deedOpen: boolean
   onToggleDeed: () => void
+  /** false on '/', where the page itself is the conversation. */
+  showDeedToggle?: boolean
 }
 
 /**
@@ -39,14 +41,16 @@ interface Props {
  */
 
 function routeLabel(pathname: string, view: string | null): string {
-  if (pathname === '/') return 'Overview'
+  if (pathname === '/') return 'Deed'
   if (pathname === '/radar') return view === 'calendar' ? 'Auction calendar' : 'AuctionRadar'
   if (pathname.startsWith('/radar/')) return 'Auction detail'
   if (pathname.startsWith('/order')) return 'Order'
+  if (pathname === '/discover') return 'Discover'
+  if (pathname === '/alerts') return 'Alerts'
   return 'BidDeed.AI'
 }
 
-export default function Topbar({ deedOpen, onToggleDeed }: Props) {
+export default function Topbar({ deedOpen, onToggleDeed, showDeedToggle = true }: Props) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const counts = useAuctionCounts()
@@ -75,7 +79,7 @@ export default function Topbar({ deedOpen, onToggleDeed }: Props) {
 
       <Link
         href="/"
-        className="truncate text-sm font-semibold text-foreground outline-none focus-visible:ring-2 focus-visible:ring-bd-orange focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        className="truncate text-sm font-semibold text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       >
         {label}
       </Link>
@@ -114,29 +118,31 @@ export default function Topbar({ deedOpen, onToggleDeed }: Props) {
           type="button"
           onClick={toggleTheme}
           aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-          className="mr-1 inline-flex min-h-9 items-center gap-1.5 rounded-md border border-border px-2.5 text-xs font-semibold text-muted-foreground outline-none transition-colors hover:border-bd-orange hover:text-foreground focus-visible:ring-2 focus-visible:ring-bd-orange"
+          className="mr-1 inline-flex min-h-9 items-center gap-1.5 rounded-md border border-border px-2.5 text-xs font-semibold text-muted-foreground outline-none transition-colors hover:border-primary hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
         >
           <span aria-hidden>{theme === 'dark' ? '☼' : '☾'}</span>
           <span className={isMobile ? 'sr-only' : undefined}>{theme === 'dark' ? 'Light' : 'Dark'}</span>
         </button>
 
-        <button
-          type="button"
-          onClick={onToggleDeed}
-          aria-expanded={deedOpen}
-          aria-controls="deed-panel"
-          className={cn(
-            'inline-flex min-h-9 items-center gap-1.5 rounded-md px-2.5 text-sm font-medium',
-            'outline-none transition-colors focus-visible:ring-2 focus-visible:ring-bd-orange',
-            'focus-visible:ring-offset-2 focus-visible:ring-offset-background',
-            deedOpen
-              ? 'bg-bd-orange text-slate-950'
-              : 'text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
-          )}
-        >
-          <DeedRobotMark size={24} decorative={false} className="rounded-md" />
-          <span className={isMobile ? 'sr-only' : undefined}>Deed Voice AI</span>
-        </button>
+        {showDeedToggle ? (
+          <button
+            type="button"
+            onClick={onToggleDeed}
+            aria-expanded={deedOpen}
+            aria-controls="deed-panel"
+            className={cn(
+              'inline-flex min-h-9 items-center gap-1.5 rounded-md px-2.5 text-sm font-medium',
+              'outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring',
+              'focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+              deedOpen
+                ? 'bg-primary text-primary-foreground'
+                : 'text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+            )}
+          >
+            <DeedRobotMark size={24} decorative={false} className="rounded-md" />
+            <span className={isMobile ? 'sr-only' : undefined}>Ask Deed</span>
+          </button>
+        ) : null}
       </div>
     </header>
   )

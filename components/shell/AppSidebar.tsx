@@ -1,9 +1,10 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
-import { usePathname, useSearchParams } from 'next/navigation'
-import { ChevronsUpDown, UserRound } from 'lucide-react'
+import { Show, UserButton } from '@clerk/nextjs'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { ChevronsUpDown, MessageSquarePlus, MessagesSquare, Trash2, UserRound } from 'lucide-react'
 
 import {
   Sidebar,
@@ -14,6 +15,7 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuAction,
   SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -32,11 +34,14 @@ import {
 import { ACCOUNT_LINKS, NAV_ITEMS, type NavItem } from './nav'
 import { formatCount, useAuctionCounts } from './useAuctionCounts'
 import DeedRobotMark from '@/components/deed/DeedRobotMark'
+import { deleteThread, loadThreads, subscribeThreads, type Thread } from '@/lib/deed/threads'
 
 interface Props {
   deedOpen: boolean
   onToggleDeed: () => void
   authEnabled?: boolean
+  /** false on '/', where the page itself is the conversation. */
+  showDeedToggle?: boolean
 }
 
 /**
@@ -49,8 +54,6 @@ interface Props {
 function isActiveItem(item: NavItem, pathname: string, view: string | null): boolean {
   if (item.external) return false
   switch (item.key) {
-    case 'home':
-      return pathname === '/'
     case 'auctions':
       return pathname.startsWith('/radar') && view !== 'calendar'
     case 'calendar':
@@ -60,18 +63,38 @@ function isActiveItem(item: NavItem, pathname: string, view: string | null): boo
   }
 }
 
-export default function AppSidebar({ deedOpen, onToggleDeed, authEnabled = false }: Props) {
+/**
+ * Recent conversations, read from the browser. Empty until the first message
+ * is sent on this device; that is the intended first-run state, so the group
+ * simply does not render rather than showing an empty list.
+ */
+function useRecentThreads(): Thread[] {
+  const [threads, setThreads] = useState<Thread[]>([])
+  useEffect(() => {
+    const refresh = () => setThreads(loadThreads().slice(0, 8))
+    refresh()
+    return subscribeThreads(refresh)
+  }, [])
+  return threads
+}
+
+export default function AppSidebar({ deedOpen, onToggleDeed, authEnabled = false, showDeedToggle = true }: Props) {
   const pathname = usePathname()
+  const router = useRouter()
   const searchParams = useSearchParams()
   const view = searchParams.get('view')
+  const activeThread = pathname === '/' ? searchParams.get('c') : null
   const counts = useAuctionCounts()
   const { isMobile, setOpenMobile } = useSidebar()
+  const recent = useRecentThreads()
 
   // On mobile the nav lives in a Sheet; tapping a link has to close it, or the
   // user lands on the new page with the overlay still covering it.
   const closeOnMobile = () => {
     if (isMobile) setOpenMobile(false)
   }
+
+  const newChatActive = pathname === '/' && !activeThread
 
   return (
     <Sidebar collapsible="icon" className="border-sidebar-border bg-sidebar text-sidebar-foreground">
@@ -82,13 +105,13 @@ export default function AppSidebar({ deedOpen, onToggleDeed, authEnabled = false
               <Link href="/" onClick={closeOnMobile}>
                 <span
                   aria-hidden
-                  className="flex aspect-square size-8 shrink-0 items-center justify-center rounded-md bg-bd-orange text-sm font-extrabold text-primary-foreground"
+                  className="flex aspect-square size-8 shrink-0 items-center justify-center rounded-md bg-primary text-sm font-extrabold text-primary-foreground"
                 >
                   B
                 </span>
                 <span className="grid text-left leading-tight">
                   <span className="truncate text-sm font-bold text-sidebar-foreground">
-                    Bid<span className="text-bd-orange">Deed</span>.AI
+                    Bid<span className="text-primary">Deed</span>.AI
                   </span>
                   <span className="truncate text-xs text-muted-foreground">Auction Intelligence</span>
                 </span>
@@ -99,6 +122,63 @@ export default function AppSidebar({ deedOpen, onToggleDeed, authEnabled = false
       </SidebarHeader>
 
       <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={newChatActive}
+                  tooltip="New chat — ask Deed"
+                  className="font-medium"
+                >
+                  <Link href="/" aria-current={newChatActive ? 'page' : undefined} onClick={closeOnMobile}>
+                    <MessageSquarePlus />
+                    <span>New chat</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {recent.length > 0 ? (
+          <SidebarGroup className="group-data-[collapsible=icon]:hidden">
+            <SidebarGroupLabel>Recent</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {recent.map((t) => {
+                  const active = activeThread === t.id
+                  return (
+                    <SidebarMenuItem key={t.id}>
+                      <SidebarMenuButton asChild isActive={active} tooltip={t.title}>
+                        <Link
+                          href={`/?c=${encodeURIComponent(t.id)}`}
+                          aria-current={active ? 'page' : undefined}
+                          onClick={closeOnMobile}
+                        >
+                          <MessagesSquare />
+                          <span>{t.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                      <SidebarMenuAction
+                        showOnHover
+                        aria-label={`Delete conversation “${t.title}”`}
+                        onClick={() => {
+                          deleteThread(t.id)
+                          if (active) router.push('/')
+                        }}
+                      >
+                        <Trash2 />
+                      </SidebarMenuAction>
+                    </SidebarMenuItem>
+                  )
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ) : null}
+
         <SidebarGroup>
           <SidebarGroupLabel>Workspace</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -149,20 +229,20 @@ export default function AppSidebar({ deedOpen, onToggleDeed, authEnabled = false
                 )
               })}
 
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  onClick={onToggleDeed}
-                  isActive={deedOpen}
-                  aria-expanded={deedOpen}
-                  aria-controls="deed-panel"
-                  tooltip="Deed — the BidDeed agent"
-                >
-                  <DeedRobotMark size={24} decorative={false} className="rounded-md" />
-                  <span>
-                    Deed <span className="sr-only">voice chatbot</span>
-                  </span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              {showDeedToggle ? (
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    onClick={onToggleDeed}
+                    isActive={deedOpen}
+                    aria-expanded={deedOpen}
+                    aria-controls="deed-panel"
+                    tooltip="Deed — ask about this screen"
+                  >
+                    <DeedRobotMark size={24} decorative={false} className="rounded-md" />
+                    <span>Ask Deed here</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ) : null}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -170,7 +250,7 @@ export default function AppSidebar({ deedOpen, onToggleDeed, authEnabled = false
 
       <SidebarFooter>
         {authEnabled && (
-          <SignedIn>
+          <Show when="signed-in">
             <SidebarMenu>
               <SidebarMenuItem>
                 <div className="flex items-center gap-2 px-2 py-1.5">
@@ -179,7 +259,7 @@ export default function AppSidebar({ deedOpen, onToggleDeed, authEnabled = false
                 </div>
               </SidebarMenuItem>
             </SidebarMenu>
-          </SignedIn>
+          </Show>
         )}
         <SidebarSeparator className="mx-0" />
         <SidebarMenu>
@@ -197,19 +277,19 @@ export default function AppSidebar({ deedOpen, onToggleDeed, authEnabled = false
                 <DropdownMenuSeparator />
                 {authEnabled ? (
                   <>
-                    <SignedOut>
+                    <Show when="signed-out">
                       <DropdownMenuItem asChild>
                         <Link href="/sign-in" onClick={closeOnMobile}>Sign in</Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
                         <Link href="/sign-up" onClick={closeOnMobile}>Create account</Link>
                       </DropdownMenuItem>
-                    </SignedOut>
-                    <SignedIn>
+                    </Show>
+                    <Show when="signed-in">
                       <DropdownMenuItem asChild>
                         <Link href="/dashboard" onClick={closeOnMobile}>Account dashboard</Link>
                       </DropdownMenuItem>
-                    </SignedIn>
+                    </Show>
                   </>
                 ) : (
                   <>

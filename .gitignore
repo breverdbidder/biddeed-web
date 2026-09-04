@@ -33,3 +33,7 @@ npm-debug.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# OpenNext / Cloudflare build output
+.open-next/
+cloudflare-env.d.ts
