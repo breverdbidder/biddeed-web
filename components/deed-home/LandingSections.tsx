@@ -77,7 +77,7 @@ export function TrustStrip() {
 export function Proof() {
   return (
     <section className="mx-auto max-w-5xl px-4 sm:px-6">
-      <div className="grid gap-8 rounded-3xl border border-border bg-card p-6 sm:p-10 lg:grid-cols-[1.1fr_1fr] lg:items-center">
+      <div className="grid gap-8 rounded-3xl border border-border bg-card p-6 sm:p-10 lg:grid-cols-2 lg:items-center">
         <div>
           <Eyebrow>Published before the sale. Checked after it.</Eyebrow>
           <H2>Every US auction. One number. Zero guesswork.</H2>
@@ -93,17 +93,17 @@ export function Proof() {
           </div>
         </div>
         <dl className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
-          <div className="flex items-baseline justify-between gap-3 rounded-2xl border border-border bg-background p-4 sm:block">
-            <dt className="text-[11px] uppercase tracking-wide text-muted-foreground">Max bid published</dt>
-            <dd className="tabular whitespace-nowrap text-lg font-semibold text-foreground sm:mt-1 sm:text-2xl">$82,000</dd>
+          <div className="flex items-baseline justify-between gap-3 rounded-2xl border border-border bg-background p-4 sm:flex sm:min-h-[128px] sm:flex-col sm:items-center sm:justify-center sm:text-center">
+            <dt className="text-[11px] uppercase leading-snug tracking-wide text-muted-foreground">Max bid published</dt>
+            <dd className="tabular whitespace-nowrap text-lg font-semibold text-foreground sm:mt-2 sm:text-2xl">$82,000</dd>
           </div>
-          <div className="flex items-baseline justify-between gap-3 rounded-2xl border border-border bg-background p-4 sm:block">
-            <dt className="text-[11px] uppercase tracking-wide text-muted-foreground">Sale closed at</dt>
-            <dd className="tabular whitespace-nowrap text-lg font-semibold text-primary sm:mt-1 sm:text-2xl">$73,501</dd>
+          <div className="flex items-baseline justify-between gap-3 rounded-2xl border border-border bg-background p-4 sm:flex sm:min-h-[128px] sm:flex-col sm:items-center sm:justify-center sm:text-center">
+            <dt className="text-[11px] uppercase leading-snug tracking-wide text-muted-foreground">Sale closed at</dt>
+            <dd className="tabular whitespace-nowrap text-lg font-semibold text-primary sm:mt-2 sm:text-2xl">$73,501</dd>
           </div>
-          <div className="flex items-baseline justify-between gap-3 rounded-2xl border border-border bg-background p-4 sm:block">
-            <dt className="text-[11px] uppercase tracking-wide text-muted-foreground">Outcome</dt>
-            <dd className="whitespace-nowrap text-lg font-semibold text-foreground sm:mt-1 sm:text-2xl">Held</dd>
+          <div className="flex items-baseline justify-between gap-3 rounded-2xl border border-border bg-background p-4 sm:flex sm:min-h-[128px] sm:flex-col sm:items-center sm:justify-center sm:text-center">
+            <dt className="text-[11px] uppercase leading-snug tracking-wide text-muted-foreground">Outcome</dt>
+            <dd className="whitespace-nowrap text-lg font-semibold text-foreground sm:mt-2 sm:text-2xl">Held</dd>
           </div>
           <p className="text-xs text-muted-foreground sm:col-span-3">
             Marion County foreclosure, July 2026. Figures from the published report and the clerk&rsquo;s recorded sale.
