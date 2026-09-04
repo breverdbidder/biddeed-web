@@ -250,7 +250,7 @@ export default function AuctionsLayout({ initialView, initialCounty, initialSale
     <div className="w-full bg-gray-50 dark:bg-slate-950">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
         <div>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Auction Intelligence</h2>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white">Auction Intelligence</h1>
           <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">
             {headerTotal.toLocaleString()} auctions across {headerCounties} Florida counties
             {summary?.upcoming ? (

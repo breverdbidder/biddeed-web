@@ -5,6 +5,14 @@ import { ArrowUp, Mic, Square } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 
+// The live ElevenLabs voice session (WebSocket + audio worklet, ~400 lines)
+// is only implemented in the Cloudflare Worker's vanilla-JS /chat page
+// (src/worker.js) -- porting that real-time audio pipeline into this React
+// composer is a separate, substantial piece of work (see issue #19828 spec).
+// Until it's ported, this button takes the visitor to where voice already
+// works end-to-end, rather than shipping a dead disabled control.
+const VOICE_HREF = '/chat'
+
 interface Props {
   onSend: (text: string) => void
   onStop: () => void
@@ -113,15 +121,14 @@ export default function Composer({
       />
 
       <div className={cn('flex items-center gap-1', hero ? 'px-3 pb-3' : 'px-2 pb-2')}>
-        <button
-          type="button"
-          disabled
-          title="Voice is coming — it is not connected on this page yet."
-          className="inline-flex size-11 cursor-not-allowed items-center justify-center rounded-xl text-muted-foreground/50"
+        <a
+          href={VOICE_HREF}
+          title="Talk to Deed · Voice AI · 70+ languages"
+          className="inline-flex size-11 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
         >
           <Mic className="size-[18px]" aria-hidden />
-          <span className="sr-only">Voice input — not available yet</span>
-        </button>
+          <span className="sr-only">Talk to Deed — voice AI in 70+ languages</span>
+        </a>
 
         <span className="ml-1 hidden text-xs text-muted-foreground sm:inline">
           {hero ? 'Deed reads the live county calendars · answers cite the record' : 'Enter to send · Shift+Enter for a new line'}
