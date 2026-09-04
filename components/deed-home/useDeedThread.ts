@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { apiUrl } from '@/lib/api'
+import { getChatIdentity } from '@/lib/deed/chatIdentity'
 import { contextPreamble, type DeedContext } from '@/lib/deed/context'
 import { intentToQuery, parseAuctionIntent, type AuctionIntent } from '@/lib/deed/intent'
 import {
@@ -24,6 +25,17 @@ import {
 import { useAuctionCounts } from '@/components/shell/useAuctionCounts'
 
 export type ThreadStatus = 'idle' | 'streaming' | 'error'
+
+export interface DeedSendOptions {
+  /** id returned by POST /api/deed/upload — cited by Deed if extraction succeeded. */
+  uploadId?: string
+  /** Filename shown as a chip under the user's turn — display only. */
+  uploadLabel?: string
+  /** "Public-records search" toggle from the composer's "+" menu. */
+  publicRecords?: boolean
+  /** Scopes this message (and the rest of the thread) to a Project (#19847 C3). */
+  projectId?: string | null
+}
 
 const HOME_CONTEXT: DeedContext = {
   path: '/',
@@ -166,19 +178,29 @@ export function useDeedThread(initialId: string | null) {
   }, [])
 
   const send = useCallback(
-    (text: string) => {
+    (text: string, opts: DeedSendOptions = {}) => {
       const trimmed = text.trim()
-      if (!trimmed || status === 'streaming') return
+      if ((!trimmed && !opts.uploadId) || status === 'streaming') return
 
       const now = Date.now()
       const base: Thread = thread ?? {
         id: newId(),
-        title: titleFrom(trimmed),
+        title: titleFrom(trimmed || opts.uploadLabel || 'New conversation'),
         createdAt: now,
         updatedAt: now,
         turns: [],
       }
-      const userTurn: ThreadTurn = { id: newId(), role: 'user', content: trimmed, createdAt: now }
+      // A project, once picked, scopes the rest of this thread — not just the
+      // message that picked it — mirroring the Worker's own chatState.projectId
+      // persistence in src/worker.js.
+      const projectId = opts.projectId !== undefined ? opts.projectId : base.projectId
+      const userTurn: ThreadTurn = {
+        id: newId(),
+        role: 'user',
+        content: trimmed,
+        createdAt: now,
+        attachmentLabel: opts.uploadLabel,
+      }
       const intent = parseAuctionIntent(trimmed)
       const cards: CardSet | undefined = intent
         ? { intent, rows: [], total: null, loading: true }
@@ -200,6 +222,7 @@ export function useDeedThread(initialId: string | null) {
         ...base,
         updatedAt: now,
         turns: [...base.turns, userTurn, assistantTurn],
+        projectId,
       }
       setThread(next)
 
@@ -215,18 +238,29 @@ export function useDeedThread(initialId: string | null) {
               ? `The page is ALREADY showing the customer a card grid of ${intent.label.toLowerCase()} from /api/auctions. Do not retype those rows as a table; add what the cards cannot: what to check before bidding, how the Shapira Max Bid is reached, and what a SIGNAL$ Property Report adds. Keep it under 180 words.`
               : 'Keep the answer under 220 words, in plain language for a property investor. No developer or database terminology.',
             '',
-            trimmed,
+            trimmed || '(no message text — see the attached file)',
           ].join('\n'),
         },
       ])
 
-      void run(next.id, assistantTurn.id, wire, intent)
+      void run(next.id, assistantTurn.id, wire, intent, next, opts)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [thread, status, counts]
   )
 
-  async function run(threadId: string, turnId: string, wire: DeedMessage[], intent: AuctionIntent | null) {
+  const patchThreadMeta = useCallback((threadId: string, patch: Partial<Thread>) => {
+    setThread((prev) => (prev && prev.id === threadId ? { ...prev, ...patch } : prev))
+  }, [])
+
+  async function run(
+    threadId: string,
+    turnId: string,
+    wire: DeedMessage[],
+    intent: AuctionIntent | null,
+    threadSnapshot: Thread,
+    opts: DeedSendOptions
+  ) {
     setStatus('streaming')
     setStreaming('')
     const controller = new AbortController()
@@ -234,10 +268,21 @@ export function useDeedThread(initialId: string | null) {
     let acc = ''
 
     try {
+      const identity = getChatIdentity()
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+      if (identity) headers['X-Chat-Token'] = identity.token
       const res = await fetch(apiUrl('/api/deed'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: wire, county: intent?.county ?? null, hook: 'home' }),
+        headers,
+        body: JSON.stringify({
+          messages: wire,
+          county: intent?.county ?? null,
+          hook: 'home',
+          conversation_id: threadSnapshot.workerConversationId,
+          upload_id: opts.uploadId,
+          public_records: opts.publicRecords || undefined,
+          project_id: threadSnapshot.projectId ?? undefined,
+        }),
         signal: controller.signal,
       })
       if (!res.ok || !res.body) {
@@ -247,11 +292,17 @@ export function useDeedThread(initialId: string | null) {
           .catch(() => null)
         throw new Error(detail || `Deed returned ${res.status}`)
       }
-      await readDeedStream(res.body, (delta) => {
-        acc += delta
-        const cut = acc.indexOf('[[ACTION')
-        setStreaming(cut === -1 ? acc : acc.slice(0, cut))
-      })
+      await readDeedStream(
+        res.body,
+        (delta) => {
+          acc += delta
+          const cut = acc.indexOf('[[ACTION')
+          setStreaming(cut === -1 ? acc : acc.slice(0, cut))
+        },
+        (meta) => {
+          if (meta.conversationId) patchThreadMeta(threadId, { workerConversationId: meta.conversationId })
+        }
+      )
       const { action, display } = extractAction(acc)
       finish(threadId, turnId, { content: display, action: action ?? null, pending: false })
     } catch (err) {

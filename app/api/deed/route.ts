@@ -62,7 +62,15 @@ function bad(status: number, error: string) {
 }
 
 export async function POST(req: NextRequest) {
-  let body: { messages?: unknown; county?: unknown; hook?: unknown }
+  let body: {
+    messages?: unknown
+    county?: unknown
+    hook?: unknown
+    conversation_id?: unknown
+    upload_id?: unknown
+    public_records?: unknown
+    project_id?: unknown
+  }
   try {
     body = await req.json()
   } catch {
@@ -97,6 +105,11 @@ export async function POST(req: NextRequest) {
   }
   // NEVER set CF-Connecting-IP here — see the note above; the edge 403s it.
   if (ip) headers['X-Deed-Client-IP'] = ip
+  // Chat identity (issue #19829 P1) — passed straight through so the Worker
+  // can attribute this turn, reuse/create the right conversation, and see
+  // upload_id/project_id ownership. Anonymous chat (no token) is unaffected.
+  const chatToken = req.headers.get('x-chat-token')
+  if (chatToken) headers['X-Chat-Token'] = chatToken
 
   let upstream: Response
   try {
@@ -107,6 +120,10 @@ export async function POST(req: NextRequest) {
         messages: clean,
         county: typeof body.county === 'string' ? body.county : null,
         hook: typeof body.hook === 'string' ? body.hook : 'radar',
+        conversation_id: typeof body.conversation_id === 'string' ? body.conversation_id : undefined,
+        upload_id: typeof body.upload_id === 'string' ? body.upload_id : undefined,
+        public_records: body.public_records === true ? true : undefined,
+        project_id: typeof body.project_id === 'string' ? body.project_id : undefined,
       }),
       // The Worker heartbeats every 5s, so a stall longer than this is a real
       // failure rather than a slow model.

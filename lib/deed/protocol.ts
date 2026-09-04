@@ -110,7 +110,8 @@ export function extractAction(text: string): { action: DeedAction | null; displa
  */
 export async function readDeedStream(
   body: ReadableStream<Uint8Array>,
-  onDelta: (text: string) => void
+  onDelta: (text: string) => void,
+  onMeta?: (meta: { conversationId?: string }) => void
 ): Promise<void> {
   const reader = body.getReader()
   const decoder = new TextDecoder()
@@ -141,6 +142,22 @@ export async function readDeedStream(
         // thread already shows the same records, from the same RPCs, and a
         // second copy could disagree with it. Swallowed on purpose.
         pendingEvent = null
+        continue
+      }
+      if (pendingEvent === 'meta') {
+        // Carries the Worker-side conversation_id once an identified user's
+        // turn has been persisted (issue #19829 P1). Reusing it on the next
+        // turn is what stops every message from spawning its own orphan
+        // conversation row server-side.
+        pendingEvent = null
+        try {
+          const evt = JSON.parse(data) as { conversation_id?: unknown }
+          if (typeof evt.conversation_id === 'string' && evt.conversation_id) {
+            onMeta?.({ conversationId: evt.conversation_id })
+          }
+        } catch {
+          /* malformed meta frame — ignore, never surfaced as an answer */
+        }
         continue
       }
       try {
