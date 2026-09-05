@@ -116,7 +116,8 @@ const isPublicRoute = createRouteMatcher([
 // Rate limit presets per endpoint category (D4 requirements)
 const CHECKOUT_LIMIT = { limit: 5, windowSeconds: 60 }
 const CSP_REPORT_LIMIT = { limit: 10, windowSeconds: 60 }
-const API_LIMIT = { limit: 60, windowSeconds: 60 }
+// LAUNCH-A (#20035): 60 -> 120/60s per-IP for the generic /api/* catch-all.
+const API_LIMIT = { limit: 120, windowSeconds: 60 }
 
 function getClientIp(req: NextRequest): string {
   const forwarded = req.headers.get('x-forwarded-for')
@@ -202,7 +203,7 @@ function tooManyRequests(req: NextRequest, resetAt: number): NextResponse {
   })
 }
 
-function rateLimitMiddleware(req: NextRequest): NextResponse | undefined {
+async function rateLimitMiddleware(req: NextRequest): Promise<NextResponse | undefined> {
   const pathname = req.nextUrl.pathname
   const clientIp = getClientIp(req)
 
@@ -215,23 +216,23 @@ function rateLimitMiddleware(req: NextRequest): NextResponse | undefined {
     !isRscPrefetch &&
     (pathname.startsWith('/sign-in') || pathname.startsWith('/sign-up') || pathname.startsWith('/api/auth'))
   ) {
-    const result = checkRateLimit(`auth:${clientIp}`, RATE_LIMITS.auth)
+    const result = await checkRateLimit(`auth:${clientIp}`, RATE_LIMITS.auth)
     if (!result.allowed) {
       return tooManyRequests(req, result.resetAt)
     }
   } else if (pathname.startsWith('/api/stripe/checkout')) {
-    const result = checkRateLimit(`checkout:${clientIp}`, CHECKOUT_LIMIT)
+    const result = await checkRateLimit(`checkout:${clientIp}`, CHECKOUT_LIMIT)
     if (!result.allowed) {
       return tooManyRequests(req, result.resetAt)
     }
   } else if (pathname.startsWith('/api/csp-report')) {
     // CSP reports: silently drop over limit (no 429 to avoid noise)
-    const result = checkRateLimit(`csp:${clientIp}`, CSP_REPORT_LIMIT)
+    const result = await checkRateLimit(`csp:${clientIp}`, CSP_REPORT_LIMIT)
     if (!result.allowed) {
       return new NextResponse(null, { status: 204 })
     }
   } else if (pathname.startsWith('/api/')) {
-    const result = checkRateLimit(`api:${clientIp}`, API_LIMIT)
+    const result = await checkRateLimit(`api:${clientIp}`, API_LIMIT)
     if (!result.allowed) {
       return tooManyRequests(req, result.resetAt)
     }
@@ -390,8 +391,8 @@ function generateNonce(): string {
 }
 
 // When Clerk is not configured, use a passthrough middleware with rate limiting + CSP
-function passthroughMiddleware(req: NextRequest) {
-  const rateLimitResponse = rateLimitMiddleware(req)
+async function passthroughMiddleware(req: NextRequest) {
+  const rateLimitResponse = await rateLimitMiddleware(req)
   if (rateLimitResponse) return rateLimitResponse
 
   const nonce = generateNonce()
@@ -403,7 +404,7 @@ function passthroughMiddleware(req: NextRequest) {
 
 export default CLERK_ENABLED
   ? clerkMiddleware(async (auth, req) => {
-      const rateLimitResponse = rateLimitMiddleware(req)
+      const rateLimitResponse = await rateLimitMiddleware(req)
       if (rateLimitResponse) return rateLimitResponse
 
       if (!isPublicRoute(req)) {
