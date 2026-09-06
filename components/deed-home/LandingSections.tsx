@@ -36,7 +36,7 @@ export const BTN_PRIMARY = cn(BTN, 'bg-primary text-primary-foreground hover:bg-
 export const BTN_QUIET = cn(BTN, 'border border-border bg-card text-foreground hover:border-primary/60 hover:text-primary')
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
-  return <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">{children}</p>
+  return <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">{children}</p>
 }
 
 function H2({ children, className }: { children: React.ReactNode; className?: string }) {
@@ -92,17 +92,25 @@ export function Proof() {
             </a>
           </div>
         </div>
+        {/*
+          Three tiles, one baseline. "Max bid published" wraps to two lines at
+          the 3-column width while the other labels stay on one, and a tile
+          that centres its own contents then drops its value ~14 px below its
+          neighbours (Ariel, 2026-09-06 15:04 ET: "$82,000 not centered"). The
+          label row is a fixed sm:h-9 box with the text bottom-aligned, so every
+          value starts at the same y whether its label wrapped or not.
+        */}
         <dl className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
           <div className="flex items-baseline justify-between gap-3 rounded-2xl border border-border bg-background p-4 sm:flex sm:min-h-[128px] sm:flex-col sm:items-center sm:justify-center sm:text-center">
-            <dt className="text-[11px] uppercase leading-snug tracking-wide text-muted-foreground">Max bid published</dt>
+            <dt className="text-xs uppercase leading-snug tracking-wide text-muted-foreground sm:flex sm:h-9 sm:items-end sm:justify-center">Max bid published</dt>
             <dd className="tabular whitespace-nowrap text-lg font-semibold text-foreground sm:mt-2 sm:text-2xl">$82,000</dd>
           </div>
           <div className="flex items-baseline justify-between gap-3 rounded-2xl border border-border bg-background p-4 sm:flex sm:min-h-[128px] sm:flex-col sm:items-center sm:justify-center sm:text-center">
-            <dt className="text-[11px] uppercase leading-snug tracking-wide text-muted-foreground">Sale closed at</dt>
+            <dt className="text-xs uppercase leading-snug tracking-wide text-muted-foreground sm:flex sm:h-9 sm:items-end sm:justify-center">Sale closed at</dt>
             <dd className="tabular whitespace-nowrap text-lg font-semibold text-primary sm:mt-2 sm:text-2xl">$73,501</dd>
           </div>
           <div className="flex items-baseline justify-between gap-3 rounded-2xl border border-border bg-background p-4 sm:flex sm:min-h-[128px] sm:flex-col sm:items-center sm:justify-center sm:text-center">
-            <dt className="text-[11px] uppercase leading-snug tracking-wide text-muted-foreground">Outcome</dt>
+            <dt className="text-xs uppercase leading-snug tracking-wide text-muted-foreground sm:flex sm:h-9 sm:items-end sm:justify-center">Outcome</dt>
             <dd className="whitespace-nowrap text-lg font-semibold text-foreground sm:mt-2 sm:text-2xl">Held</dd>
           </div>
           <p className="text-xs text-muted-foreground sm:col-span-3">
@@ -304,7 +312,7 @@ export function Pricing({ onPrompt }: { onPrompt: (p: string) => void }) {
             <div className="flex items-center justify-between gap-2">
               <h3 className="text-base font-semibold text-foreground">{p.name}</h3>
               {p.featured ? (
-                <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-semibold text-primary">Most chosen</span>
+                <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">Most chosen</span>
               ) : null}
             </div>
             <p className="mt-3 flex items-baseline gap-1">
@@ -323,7 +331,7 @@ export function Pricing({ onPrompt }: { onPrompt: (p: string) => void }) {
                 <li key={f} className="flex items-start gap-2 text-sm leading-5 text-muted-foreground">
                   <span className="mt-1 inline-block size-2.5 shrink-0 rounded-full border border-border" aria-hidden />
                   <span>
-                    {f} <span className="text-[11px] font-semibold uppercase tracking-wide text-primary">soon</span>
+                    {f} <span className="text-xs font-semibold uppercase tracking-wide text-primary">soon</span>
                   </span>
                 </li>
               ))}
