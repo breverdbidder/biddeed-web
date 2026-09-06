@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Show, UserButton } from '@clerk/nextjs'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { ChevronsUpDown, MessageSquarePlus, MessagesSquare, Trash2, UserRound } from 'lucide-react'
+import { ChevronsUpDown, LifeBuoy, MessageSquarePlus, MessagesSquare, Trash2, UserRound } from 'lucide-react'
 
 import {
   Sidebar,
@@ -243,6 +243,25 @@ export default function AppSidebar({ deedOpen, onToggleDeed, authEnabled = false
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ) : null}
+
+              {/*
+                Support tickets (Ariel, 2026-09-06): always visible, directly
+                under "Ask Deed here" — Deed is the first stop, a ticket is the
+                fallback. App route, reached on biddeed.ai through the Worker
+                proxy; <Link> is correct here.
+              */}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === '/support'}
+                  tooltip="Support — open a ticket or check one"
+                >
+                  <Link href="/support" aria-current={pathname === '/support' ? 'page' : undefined} onClick={closeOnMobile}>
+                    <LifeBuoy />
+                    <span>Support</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

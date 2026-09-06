@@ -82,6 +82,7 @@ export const NAV_ITEMS: NavItem[] = [
 export const ACCOUNT_LINKS: { label: string; href: string }[] = [
   { label: 'Plans & pricing', href: '/subscribe' },
   { label: 'Buy a report', href: '/buy-report' },
+  { label: 'Support', href: '/support' },
   { label: 'Terms', href: '/terms' },
   { label: 'Privacy', href: '/privacy' },
 ]
