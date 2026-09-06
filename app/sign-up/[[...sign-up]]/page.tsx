@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { SignUp } from '@clerk/nextjs'
 import { headers } from 'next/headers'
 import { isClerkHostAuthorized } from '@/lib/clerk-host'
@@ -30,7 +31,7 @@ export default async function SignUpCatchAllPage() {
         ) : (
           <div style={{ backgroundColor: C.background, border: `1px solid ${C.border}`, borderRadius: '12px', padding: '28px', textAlign: 'center', color: C.ink }}>
             <p style={{ margin: 0, fontWeight: 600 }}>Account creation is not configured on this deployment</p>
-            <p style={{ margin: '10px 0 0', fontSize: '14px', color: C.navy }}>
+            <p style={{ margin: '10px 0 0', fontSize: '16px', lineHeight: 1.5, color: C.navy }}>
               Configure the Clerk production key pair for <a href="https://biddeed.ai" style={{ color: C.brand }}>biddeed.ai</a> to activate accounts.
             </p>
           </div>
@@ -41,4 +42,8 @@ export default async function SignUpCatchAllPage() {
 }
 
 export const dynamic = 'force-dynamic'
-export const metadata = { title: 'Create account · BidDeed.AI' }
+export const metadata: Metadata = {
+  title: 'Create account · BidDeed.AI',
+  description: 'Create a BidDeed.AI account to save searches, receive alerts, and access source-backed auction reports.',
+  alternates: { canonical: 'https://biddeed.ai/sign-up' },
+}
