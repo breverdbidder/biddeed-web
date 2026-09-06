@@ -66,6 +66,23 @@ const isPublicRoute = createRouteMatcher([
   '/api/checkout(.*)',
   // Pages — public access
   '/',
+  // M9 (Ariel, 2026-09-06): the reel funnel is the lead magnet and MUST be
+  // reachable signed-out. Deal pages, the /r/<code> short-link redirect, the
+  // /reels/<code> interstitial, the /subscribe capture flow and the support
+  // pages were never on this list; it went unnoticed on Vercel where
+  // CLERK_RUNTIME_ENABLED was false, and surfaced live on Cloudflare
+  // (CLERK_RUNTIME_ENABLED=true) as protect-rewrite 404s on every deal page
+  // at ~13:55 UTC 2026-09-06. See #20053.
+  '/deal(.*)',
+  '/reels(.*)',
+  '/r/(.*)',
+  '/subscribe(.*)',
+  '/support(.*)',
+  '/contact(.*)',
+  '/api/capture(.*)',
+  '/api/subscribe(.*)',
+  '/api/reels(.*)',
+  '/api/r/(.*)',
   '/chat(.*)',
   '/dashboard(.*)',
   '/pricing(.*)',
@@ -108,18 +125,6 @@ const isPublicRoute = createRouteMatcher([
   '/parcel(.*)',
   '/property(.*)',
     '/card(.*)',
-  // #20053 — reel funnel: end card / QR / biddeed.ai/r/<code> must land a
-  // signed-out visitor on the public deal page. These paths are normally
-  // served by the legacy router Worker (src/worker.js in cli-anything-biddeed),
-  // never routed to this app — allowlisted here anyway so a future proxy or
-  // zone-route change fails open to public instead of a Clerk protect-rewrite.
-  '/deal(.*)',
-  '/r(.*)',
-  '/reels(.*)',
-  '/subscribe(.*)',
-  '/support(.*)',
-  '/contact(.*)',
-  '/api/capture(.*)',
   // SEO files — belt & suspenders (matcher also excludes txt|xml below)
   '/robots.txt',
   '/sitemap.xml',
