@@ -77,10 +77,10 @@ export default function AuctionFilters({
             // colour no longer distinguishes the selected tab, the active pill
             // carries the state via background + shadow, and hover moved from a
             // colour shift to a background wash.
-            className={`px-2.5 sm:px-3.5 py-1.5 text-sm font-bold rounded transition-colors whitespace-nowrap shrink-0 ${
+            className={`min-h-11 px-3 sm:px-3.5 py-2 text-sm font-bold rounded transition-colors whitespace-nowrap shrink-0 ${
               viewMode === mode
-                ? 'bg-card dark:bg-muted text-foreground dark:text-white shadow-sm'
-                : 'text-foreground dark:text-white hover:bg-card/60 dark:hover:bg-muted/60'
+                ? 'bg-card dark:bg-muted text-foreground dark:text-foreground shadow-sm'
+                : 'text-foreground dark:text-foreground hover:bg-card/60 dark:hover:bg-muted/60'
             }`}
           >
             {mode.charAt(0).toUpperCase() + mode.slice(1)}

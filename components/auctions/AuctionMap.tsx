@@ -604,7 +604,7 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
           {/* Fullscreen toggle */}
           <button
             onClick={toggleFullscreen}
-            className="bg-card/90 dark:bg-card/90 backdrop-blur-sm border border-border dark:border-border rounded-md px-3 py-2 text-xs font-medium text-foreground dark:text-muted-foreground hover:bg-card dark:hover:bg-card transition-colors shadow-sm flex items-center gap-1.5"
+            className="min-h-11 bg-card/90 dark:bg-card/90 backdrop-blur-sm border border-border dark:border-border rounded-md px-3 py-2 text-sm font-medium text-foreground dark:text-foreground hover:bg-card dark:hover:bg-card transition-colors shadow-sm flex items-center gap-1.5"
             title={isFullscreen ? 'Exit fullscreen (Esc)' : 'Fullscreen map'}
           >
             {isFullscreen ? (
@@ -627,7 +627,7 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
           {/* Satellite/Streets toggle */}
           <button
             onClick={toggleStyle}
-            className="bg-card/90 dark:bg-card/90 backdrop-blur-sm border border-border dark:border-border rounded-md px-3 py-2 text-xs font-medium text-foreground dark:text-muted-foreground hover:bg-card dark:hover:bg-card transition-colors shadow-sm flex items-center gap-1.5"
+            className="min-h-11 bg-card/90 dark:bg-card/90 backdrop-blur-sm border border-border dark:border-border rounded-md px-3 py-2 text-sm font-medium text-foreground dark:text-foreground hover:bg-card dark:hover:bg-card transition-colors shadow-sm flex items-center gap-1.5"
             title={isSatellite ? 'Switch to streets' : 'Switch to satellite'}
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -640,9 +640,9 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
           <div className="bg-card/90 dark:bg-card/90 backdrop-blur-sm border border-border dark:border-border rounded-md overflow-hidden shadow-sm">
             <button
               onClick={() => setColorMode('type')}
-              className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+              className={`min-h-11 px-3 py-2 text-sm font-medium transition-colors ${
                 colorMode === 'type'
-                  ? 'bg-primary text-white'
+                  ? 'bg-primary text-primary-foreground'
                   : 'text-muted-foreground dark:text-muted-foreground hover:text-foreground dark:hover:text-foreground'
               }`}
             >
@@ -650,9 +650,9 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
             </button>
             <button
               onClick={() => setColorMode('zoning')}
-              className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+              className={`min-h-11 px-3 py-2 text-sm font-medium transition-colors ${
                 colorMode === 'zoning'
-                  ? 'bg-primary text-white'
+                  ? 'bg-primary text-primary-foreground'
                   : 'text-muted-foreground dark:text-muted-foreground hover:text-foreground dark:hover:text-foreground'
               }`}
             >
@@ -662,19 +662,19 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
         </div>
 
         {/* Legend */}
-        <div className={`absolute ${isFullscreen ? 'bottom-6 left-6' : 'bottom-3 left-3'} bg-card/90 dark:bg-card/90 backdrop-blur-sm rounded-md px-3 py-2 text-xs text-muted-foreground dark:text-muted-foreground border border-border dark:border-border z-20`}>
+        <div className={`absolute ${isFullscreen ? 'bottom-6 left-6' : 'bottom-3 left-3'} max-w-[calc(100%-1.5rem)] bg-card/90 dark:bg-card/90 backdrop-blur-sm rounded-md px-3 py-2 text-xs text-muted-foreground dark:text-muted-foreground border border-border dark:border-border z-20`}>
           {colorMode === 'type' ? (
             <>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                 <span className="uppercase tracking-wide text-[10px] opacity-70 w-[68px] shrink-0">Pin type</span>
                 <span><span className="inline-block w-2 h-2 rounded-full bg-primary mr-1" /> Foreclosure</span>
                 <span><span className="inline-block w-2 h-2 rounded-full bg-foreground mr-1" /> Tax Deed</span>
               </div>
-              <div className="flex items-center gap-3 mt-1 pt-1 border-t border-border dark:border-border">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 pt-1 border-t border-border dark:border-border">
                 <span className="uppercase tracking-wide text-[10px] opacity-70 w-[68px] shrink-0">Cluster size</span>
-                <span><span className="inline-block w-3 h-3 rounded-full bg-primary mr-1 text-[8px] text-white text-center leading-3">n</span> &lt;10</span>
-                <span><span className="inline-block w-3 h-3 rounded-full bg-bd-orange-600 mr-1 text-[8px] text-white text-center leading-3">n</span> 10-49</span>
-                <span><span className="inline-block w-3 h-3 rounded-full bg-muted-foreground mr-1 text-[8px] text-white text-center leading-3">n</span> 50+</span>
+                <span><span className="inline-block w-3 h-3 rounded-full bg-primary mr-1 text-xs text-primary-foreground text-center leading-3">n</span> &lt;10</span>
+                <span><span className="inline-block w-3 h-3 rounded-full bg-primary-hover mr-1 text-xs text-primary-foreground text-center leading-3">n</span> 10-49</span>
+                <span><span className="inline-block w-3 h-3 rounded-full bg-muted-foreground mr-1 text-xs text-primary-foreground text-center leading-3">n</span> 50+</span>
               </div>
             </>
           ) : (
@@ -691,8 +691,8 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
 
         {/* Fullscreen: Esc hint */}
         {isFullscreen && (
-          <div className="absolute top-3 right-16 z-20 bg-black/60 backdrop-blur-sm rounded-md px-2.5 py-1.5 text-xs text-white/70">
-            Press <kbd className="bg-card/20 px-1 py-0.5 rounded text-white font-mono">Esc</kbd> to exit
+          <div className="absolute top-3 right-16 z-20 bg-foreground/90 backdrop-blur-sm rounded-md px-3 py-2 text-sm text-background">
+            Press <kbd className="bg-card/20 px-1 py-0.5 rounded text-background font-mono">Esc</kbd> to exit
           </div>
         )}
       </div>

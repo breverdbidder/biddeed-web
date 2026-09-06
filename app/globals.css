@@ -207,6 +207,18 @@ th[data-numeric] { font-variant-numeric: tabular-nums; font-feature-settings: "t
    2026-09-04 palette, dark = the same family lifted; lib/design-tokens.ts).
    ───────────────────────────────────────────────────────────────────────── */
 
+/* Mapbox injects its own Helvetica/tiny control stylesheet. Keep those external
+   controls inside the BidDeed design system and the 44px touch target baseline. */
+.mapboxgl-ctrl,
+.mapboxgl-ctrl button {
+  font-family: Inter, system-ui, sans-serif;
+}
+.mapboxgl-ctrl-group button,
+.mapboxgl-ctrl button {
+  min-width: 44px;
+  min-height: 44px;
+}
+
 @layer base {
   :root {
     --sidebar-background: 0 0% 100%;

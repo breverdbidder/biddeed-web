@@ -112,7 +112,7 @@ export default function DiscoveryPage() {
                 <option value="tax_deed">Tax deed</option>
               </select>
             </label>
-            <button type="submit" disabled={loading} className="bg-primary px-6 py-3 font-bold text-primary-foreground hover:bg-bd-orange-600 disabled:opacity-60">{loading ? 'Searching…' : 'Search'}</button>
+            <button type="submit" disabled={loading} className="bg-primary px-6 py-3 font-bold text-primary-foreground hover:bg-primary-hover disabled:opacity-60">{loading ? 'Searching…' : 'Search'}</button>
           </div>
           <p className="mt-3 text-sm text-muted-foreground" role="status">{message}</p>
         </form>
