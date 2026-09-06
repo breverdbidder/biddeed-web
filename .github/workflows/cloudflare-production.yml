@@ -77,6 +77,13 @@ jobs:
           test -n "$NEXT_PUBLIC_SUPABASE_ANON_KEY" || { echo 'Missing NEXT_PUBLIC_SUPABASE_ANON_KEY' >&2; exit 1; }
           test -n "$SUPABASE_SERVICE_ROLE_KEY" || { echo 'Missing SUPABASE_SERVICE_ROLE_KEY' >&2; exit 1; }
 
+      # Palette gate before anything is built: 124ffc1 (2026-09-06 19:23 UTC) pushed
+      # the retired cream/terracotta palette straight to main and a deploy started
+      # within seconds. The PR gate never ran because there was no PR. This step
+      # makes the canon a precondition of deploying, not of reviewing.
+      - name: Palette gate (canon values only, no literals outside the token files)
+        run: node scripts/palette-gate.mjs
+
       - name: Build OpenNext Worker (production)
         # opennextjs-cloudflare build refuses to run in CI without an explicit
         # --config when there's no bare wrangler.jsonc at the repo root (there
