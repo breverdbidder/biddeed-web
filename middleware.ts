@@ -85,6 +85,8 @@ const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
   '/sign-up(.*)',
   '/report(.*)',
+  '/buy-report(.*)', // paid-report preview/checkout entry must be reachable before sign-in
+  '/free-report(.*)', // lead-capture report entry is also public before entitlement
   '/auctions(.*)',
   // Post-checkout confirmation. The buyer has no account at this point, so
   // gating it behind auth would strand every purchase.
