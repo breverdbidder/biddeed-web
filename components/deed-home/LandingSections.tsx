@@ -26,6 +26,7 @@ export const W = {
   privacy: '/privacy',
   security: '/security',
   disclaimer: '/disclaimer',
+  support: '/support',
   // Published by the Worker as a public sample. Not a customer credential.
   sampleReport: '/report/cad5d07a-b9c7-433d-b365-3165637b7cbe?key=bd_live_S9KLXyeH9fV1epdliLz731n1',
 }
@@ -395,6 +396,7 @@ export function Footer() {
     { label: 'Privacy', href: W.privacy },
     { label: 'Security', href: W.security },
     { label: 'Disclaimer', href: W.disclaimer },
+    { label: 'Support', href: W.support },
   ]
   return (
     <footer className="mx-auto max-w-6xl border-t border-border px-4 py-10 sm:px-6">

@@ -79,6 +79,14 @@ const isPublicRoute = createRouteMatcher([
   '/subscribe(.*)',
   '/support(.*)',
   '/contact(.*)',
+  // Support tickets (2026-09-06): the ticket API is anonymous by design (a
+  // prospect with no account must be able to reach us); it attaches the Clerk
+  // user id itself when a session exists. The admin API is public here for the
+  // same reason /api/alerts is — it enforces its own auth and returns JSON
+  // 401/403 rather than a Clerk redirect. The /admin/support PAGE is NOT
+  // listed, so it stays behind auth.protect().
+  '/api/support-ticket(.*)',
+  '/api/support-tickets-admin(.*)',
   '/api/capture(.*)',
   '/api/subscribe(.*)',
   '/api/reels(.*)',
