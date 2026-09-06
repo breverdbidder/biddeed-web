@@ -119,7 +119,7 @@ export default function DeedPanel({ open, onClose }: Props) {
           'lg:static lg:top-auto lg:bottom-auto lg:z-auto lg:h-auto lg:max-w-none lg:transition-[width] lg:duration-200',
           open
             ? 'translate-x-0 lg:w-[26rem] xl:w-[30rem]'
-            : 'pointer-events-none translate-x-full lg:w-0 lg:overflow-hidden lg:border-l-0'
+            : 'hidden pointer-events-none translate-x-full lg:flex lg:w-0 lg:overflow-hidden lg:border-l-0'
         )}
       >
         <div className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-4">
@@ -135,7 +135,7 @@ export default function DeedPanel({ open, onClose }: Props) {
             className={cn(
               'ml-auto inline-flex size-9 items-center justify-center rounded-md text-muted-foreground',
               'outline-none transition-colors hover:bg-secondary hover:text-foreground',
-              'focus-visible:ring-2 focus-visible:ring-bd-orange disabled:opacity-40'
+              'focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40'
             )}
           >
             <RotateCcw className="size-4" aria-hidden />
@@ -149,7 +149,7 @@ export default function DeedPanel({ open, onClose }: Props) {
             className={cn(
               'inline-flex size-9 items-center justify-center rounded-md text-muted-foreground',
               'outline-none transition-colors hover:bg-secondary hover:text-foreground',
-              'focus-visible:ring-2 focus-visible:ring-bd-orange'
+              'focus-visible:ring-2 focus-visible:ring-ring'
             )}
           >
             <X className="size-4" aria-hidden />
