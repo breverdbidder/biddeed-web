@@ -111,7 +111,7 @@ export default function SlashMenu({ query, activeIndex, onHover, onPick }: Props
               active ? 'bg-secondary text-foreground' : 'text-muted-foreground'
             )}
           >
-            <Icon className="mt-0.5 size-4 shrink-0 text-bd-orange" aria-hidden />
+            <Icon className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
             <span className="min-w-0">
               <span className="font-medium">{c.label}</span>
               <span className="block truncate text-xs text-muted-foreground">{c.hint}</span>

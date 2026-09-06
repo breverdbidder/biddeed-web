@@ -223,7 +223,7 @@ export default function DeedComposer({
                 <button
                   type="button"
                   onClick={() => removeFile(f.id)}
-                  className="inline-flex size-6 shrink-0 items-center justify-center rounded text-muted-foreground outline-none hover:bg-secondary hover:text-foreground focus-visible:ring-2 focus-visible:ring-bd-orange"
+                  className="inline-flex size-6 shrink-0 items-center justify-center rounded text-muted-foreground outline-none hover:bg-secondary hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   <X className="size-3.5" aria-hidden />
                   <span className="sr-only">Remove {f.name}</span>
@@ -241,7 +241,7 @@ export default function DeedComposer({
       <div
         className={cn(
           'relative rounded-xl border bg-secondary transition-colors',
-          dragging ? 'border-bd-orange' : 'border-border'
+          dragging ? 'border-primary' : 'border-border'
         )}
       >
         {slashOpen ? (
@@ -285,7 +285,7 @@ export default function DeedComposer({
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className="inline-flex size-9 items-center justify-center rounded-lg text-muted-foreground outline-none transition-colors hover:bg-secondary hover:text-foreground focus-visible:ring-2 focus-visible:ring-bd-orange"
+                className="inline-flex size-9 items-center justify-center rounded-lg text-muted-foreground outline-none transition-colors hover:bg-secondary hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <Plus className="size-4" aria-hidden />
                 <span className="sr-only">Add an attachment</span>
@@ -372,10 +372,10 @@ export default function DeedComposer({
             disabled={!streaming && !value.trim() && files.length === 0}
             className={cn(
               'ml-auto inline-flex size-9 items-center justify-center rounded-lg outline-none',
-              'transition-colors focus-visible:ring-2 focus-visible:ring-bd-orange',
+              'transition-colors focus-visible:ring-2 focus-visible:ring-ring',
               streaming
                 ? 'bg-muted-foreground text-primary-foreground hover:bg-foreground'
-                : 'bg-primary text-primary-foreground hover:bg-bd-orange-600 disabled:bg-muted disabled:text-muted-foreground'
+                : 'bg-primary text-primary-foreground hover:bg-primary disabled:bg-muted disabled:text-muted-foreground'
             )}
           >
             {streaming ? (

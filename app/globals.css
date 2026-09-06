@@ -57,7 +57,7 @@
   --border: 36 23% 83%;
   --input: 36 23% 83%;
   --ring: 14 54% 49%;
-  --primary-hover: 14 56% 43%;
+  --primary-hover: 14 56% 36%;
   --radius: 0.5rem;
 
   /* Chart colors */
@@ -290,7 +290,7 @@ html[data-theme='light'] {
   --secondary: 36 23% 83%;
   --secondary-foreground: 30 17% 10%;
   --muted: 36 23% 83%;
-  --muted-foreground: 30 9% 39%;      /* #6A625B contrast-safe warm secondary */
+  --muted-foreground: 30 10% 32%;      /* deeper warm secondary for WCAG AA on tint */
   --accent: 14 54% 49%;
   --accent-foreground: 40 33% 98%;
   --border: 36 23% 83%;               /* #DDD5C9 */
