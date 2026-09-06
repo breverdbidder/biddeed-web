@@ -41,4 +41,8 @@ export default async function SignUpCatchAllPage() {
 }
 
 export const dynamic = 'force-dynamic'
-export const metadata = { title: 'Create account · BidDeed.AI' }
+export const metadata = {
+  title: 'Create account · BidDeed.AI',
+  alternates: { canonical: '/sign-up' },
+  robots: { index: false, follow: false },
+}

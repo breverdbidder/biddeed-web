@@ -17,10 +17,14 @@ import type { ViewMode } from '@/types/auctions'
  */
 export const dynamic = 'force-dynamic'
 
+// alternates.canonical is static, so it applies to every ?view=/?county=/
+// ?sale_type= query variant of this route alike — they are the same surface,
+// not distinct pages, and must not fragment into separate canonical URLs.
 export const metadata: Metadata = {
   title: 'AuctionRadar — BidDeed.AI',
   description:
     'Live Florida foreclosure and tax deed auctions: map, calendar, table and spreadsheet views across 67 counties.',
+  alternates: { canonical: '/radar' },
 }
 
 const VIEWS: ViewMode[] = ['split', 'table', 'map', 'calendar', 'spreadsheet']

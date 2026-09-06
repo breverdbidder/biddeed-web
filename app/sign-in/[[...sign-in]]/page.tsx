@@ -41,4 +41,8 @@ export default async function SignInCatchAllPage() {
 }
 
 export const dynamic = 'force-dynamic'
-export const metadata = { title: 'Sign in · BidDeed.AI' }
+export const metadata = {
+  title: 'Sign in · BidDeed.AI',
+  alternates: { canonical: '/sign-in' },
+  robots: { index: false, follow: false },
+}
