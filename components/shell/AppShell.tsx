@@ -39,6 +39,13 @@ export default function AppShell({
 }) {
   const pathname = usePathname()
   const isHome = pathname === '/'
+  // #20060 (390x844, live): the fixed "Talk to Deed" card sat on screen
+  // whenever Deed was open or a Clerk auth form was on screen, and measured
+  // as covering the composer Send button and the sign-in/sign-up Continue
+  // button/link. There is always another way to close Deed (the panel's own
+  // X) or to reach it (the Topbar toggle) once one of those is true, so the
+  // floating card is redundant there, not load-bearing.
+  const isAuthRoute = pathname.startsWith('/sign-in') || pathname.startsWith('/sign-up')
   const [deedOpen, setDeedOpen] = useState(false)
   const toggleDeed = () => setDeedOpen((v) => !v)
 
@@ -59,7 +66,7 @@ export default function AppShell({
           {!isHome ? (
             <>
               <DeedPanel open={deedOpen} onClose={() => setDeedOpen(false)} />
-              <StickyDeedCta open={deedOpen} onToggle={toggleDeed} />
+              {!deedOpen && !isAuthRoute ? <StickyDeedCta open={deedOpen} onToggle={toggleDeed} /> : null}
             </>
           ) : null}
         </div>

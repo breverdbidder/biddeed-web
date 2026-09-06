@@ -17,16 +17,16 @@ export default function DeedRobotMark({ size = 32, className, decorative = true 
       role={decorative ? undefined : 'img'}
       aria-label={label}
       aria-hidden={decorative ? true : undefined}
-      className={cn('shrink-0', className)}
+      className={cn('shrink-0 [&_.deed-accent]:fill-sidebar-primary [&_.deed-accent]:stroke-sidebar-primary [&_.deed-shell]:fill-sidebar [&_.deed-shell]:stroke-sidebar-primary [&_.deed-face]:fill-sidebar-accent', className)}
     >
-      <circle cx="48" cy="10" r="6" fill="#f59e0b" />
-      <path d="M48 16v8" stroke="#f59e0b" strokeWidth="5" strokeLinecap="round" />
-      <rect x="14" y="22" width="68" height="52" rx="18" fill="#020617" stroke="#f59e0b" strokeWidth="4" />
-      <rect x="23" y="31" width="50" height="34" rx="12" fill="#111b35" />
-      <circle cx="36" cy="45" r="6" fill="#f59e0b" />
-      <circle cx="60" cy="45" r="6" fill="#f59e0b" />
-      <path d="M37 56h22M42 56v5m12-5v5" stroke="#f59e0b" strokeWidth="3" strokeLinecap="round" />
-      <path d="M48 74v8M34 86h28" stroke="#f59e0b" strokeWidth="4" strokeLinecap="round" />
+      <circle className="deed-accent" cx="48" cy="10" r="6" />
+      <path className="deed-accent" d="M48 16v8" strokeWidth="5" strokeLinecap="round" />
+      <rect className="deed-shell" x="14" y="22" width="68" height="52" rx="18" strokeWidth="4" />
+      <rect className="deed-face" x="23" y="31" width="50" height="34" rx="12" />
+      <circle className="deed-accent" cx="36" cy="45" r="6" />
+      <circle className="deed-accent" cx="60" cy="45" r="6" />
+      <path className="deed-accent" d="M37 56h22M42 56v5m12-5v5" strokeWidth="3" strokeLinecap="round" />
+      <path className="deed-accent" d="M48 74v8M34 86h28" strokeWidth="4" strokeLinecap="round" />
     </svg>
   )
 }

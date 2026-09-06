@@ -10,29 +10,34 @@ import { useTheme } from '@/lib/theme-context'
 // this app's fixed #020617 chrome.
 const CLERK_KEY = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
 
+// Light-theme values are the #20060 canon seven (memo default, see
+// docs/design/PARITY_PRD.md s8): accent #005eb8, ink #1a1a1a, secondary navy
+// #0a2540/#004a92, border/tint #d7e3f1/#e6f0fa, muted text #657786. Dark-theme
+// values are untouched — they already match the house brand (navy chrome,
+// #F59E0B accent, #020617 ground) and were never flagged as off-palette.
 function clerkAppearance(theme: 'light' | 'dark') {
   const light = theme === 'light'
   return {
     variables: {
       colorBackground: light ? '#ffffff' : '#0b1220',
-      colorText: light ? '#222222' : '#e2e8f0',
-      colorTextSecondary: light ? '#002A54' : '#94a3b8',
+      colorText: light ? '#1a1a1a' : '#e2e8f0',
+      colorTextSecondary: light ? '#0a2540' : '#94a3b8',
       colorInputBackground: light ? '#ffffff' : '#1e293b',
-      colorInputText: light ? '#222222' : '#e2e8f0',
-      colorPrimary: light ? '#c15f3c' : '#F59E0B',
+      colorInputText: light ? '#1a1a1a' : '#e2e8f0',
+      colorPrimary: light ? '#005eb8' : '#F59E0B',
       colorDanger: '#dc2626',
       colorSuccess: '#16a34a',
-      colorWarning: light ? '#c15f3c' : '#F59E0B',
+      colorWarning: light ? '#005eb8' : '#F59E0B',
       fontFamily: 'Inter, system-ui, sans-serif',
     },
     elements: {
-      formButtonPrimary: light ? 'bg-[#C15F3C] hover:bg-[#A94D30] text-[#F5F0E8] font-semibold' : 'bg-[#F59E0B] hover:bg-[#fbbf24] text-[#020617] font-semibold',
-      card: light ? 'shadow-lg border border-[#DDD5C9] bg-[#FBFAF7]' : 'shadow-lg border border-slate-700 bg-[#0b1220]',
-      headerTitle: light ? 'text-[#1F1B16]' : 'text-white',
-      headerSubtitle: light ? 'text-[#766F67]' : 'text-slate-400',
-      socialButtonsBlockButton: light ? 'border-[#B5A9A0] text-[#1F1B16] hover:bg-[#EDE3D7]' : 'border-slate-600 text-slate-300 hover:bg-slate-800',
-      formFieldInput: light ? 'bg-[#F5F0E8] border-[#B5A9A0] text-[#1F1B16]' : 'bg-slate-800 border-slate-600 text-white',
-      footerActionLink: light ? 'text-[#C15F3C] hover:text-[#A94D30]' : 'text-[#F59E0B] hover:text-[#fbbf24]',
+      formButtonPrimary: light ? 'bg-[#005EB8] hover:bg-[#004A92] text-white font-semibold' : 'bg-[#F59E0B] hover:bg-[#fbbf24] text-[#020617] font-semibold',
+      card: light ? 'shadow-lg border border-[#D7E3F1] bg-white' : 'shadow-lg border border-slate-700 bg-[#0b1220]',
+      headerTitle: light ? 'text-[#1A1A1A]' : 'text-white',
+      headerSubtitle: light ? 'text-[#657786]' : 'text-slate-400',
+      socialButtonsBlockButton: light ? 'border-[#D7E3F1] text-[#1A1A1A] hover:bg-[#E6F0FA]' : 'border-slate-600 text-slate-300 hover:bg-slate-800',
+      formFieldInput: light ? 'bg-white border-[#D7E3F1] text-[#1A1A1A]' : 'bg-slate-800 border-slate-600 text-white',
+      footerActionLink: light ? 'text-[#005EB8] hover:text-[#004A92]' : 'text-[#F59E0B] hover:text-[#fbbf24]',
       userButtonAvatarBox: 'w-7 h-7',
     },
   }

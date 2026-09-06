@@ -78,8 +78,8 @@ export default function DeedPanel({ open, onClose }: Props) {
         [
           `Critique the ${context.surface} as a design reviewer.`,
           '',
-          'Judge it against the BidDeed design system: #020617 ground, #0b1220 chrome,',
-          'slate-800 borders, amber (#F59E0B) as the only accent, tabular figures on every',
+          'Judge it against the BidDeed design system: #ffffff ground, #005EB8 accent,',
+          '#0A2540 ink/secondary text, #D7E3F1 borders, tabular figures on every',
           'currency column, WCAG 2.2 AA tap targets, and a 320px floor.',
           '',
           'Be specific about hierarchy, density and what a bidder looks at first.',
@@ -98,7 +98,11 @@ export default function DeedPanel({ open, onClose }: Props) {
     <>
       {open ? (
         <div
-          className="fixed inset-0 z-30 bg-slate-950/60 lg:hidden"
+          // top-14 (not inset-0): the app's h-14 sticky Topbar -- including
+          // the sidebar toggle -- must stay reachable while Deed is open on
+          // mobile (#20060: a full-height backdrop/panel here sat at z-30/40
+          // above the topbar's z-20 and ate every click on it).
+          className="fixed inset-x-0 top-14 bottom-0 z-30 bg-slate-950/60 lg:hidden"
           aria-hidden
           onClick={onClose}
         />
@@ -109,18 +113,18 @@ export default function DeedPanel({ open, onClose }: Props) {
         aria-label="Deed — BidDeed agent"
         aria-hidden={!open}
         className={cn(
-          'fixed inset-y-0 right-0 z-40 flex w-full max-w-md flex-col border-l border-slate-800',
-          'bg-[#0b1220] transition-transform duration-200 motion-reduce:transition-none',
-          'lg:static lg:z-auto lg:h-auto lg:max-w-none lg:transition-[width] lg:duration-200',
+          'fixed top-14 bottom-0 right-0 z-40 flex w-full max-w-md flex-col border-l border-sidebar-border',
+          'bg-sidebar transition-transform duration-200 motion-reduce:transition-none',
+          'lg:static lg:top-auto lg:bottom-auto lg:z-auto lg:h-auto lg:max-w-none lg:transition-[width] lg:duration-200',
           open
             ? 'translate-x-0 lg:w-[26rem] xl:w-[30rem]'
             : 'pointer-events-none translate-x-full lg:w-0 lg:overflow-hidden lg:border-l-0'
         )}
       >
-        <div className="flex h-14 shrink-0 items-center gap-2 border-b border-slate-800 px-4">
+        <div className="flex h-14 shrink-0 items-center gap-2 border-b border-sidebar-border px-4">
           <DeedRobotMark size={30} decorative={false} className="rounded-md" />
-          <h2 className="text-sm font-semibold text-white">Deed</h2>
-          <span className="truncate text-xs text-slate-500">· {context.surface}</span>
+          <h2 className="text-sm font-semibold text-sidebar-foreground">Deed</h2>
+          <span className="truncate text-xs text-muted-foreground">· {context.surface}</span>
 
           <button
             type="button"
@@ -128,8 +132,8 @@ export default function DeedPanel({ open, onClose }: Props) {
             disabled={turns.length === 0}
             tabIndex={open ? 0 : -1}
             className={cn(
-              'ml-auto inline-flex size-9 items-center justify-center rounded-md text-slate-400',
-              'outline-none transition-colors hover:bg-slate-800 hover:text-white',
+              'ml-auto inline-flex size-9 items-center justify-center rounded-md text-muted-foreground',
+              'outline-none transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
               'focus-visible:ring-2 focus-visible:ring-bd-orange disabled:opacity-40'
             )}
           >
@@ -142,8 +146,8 @@ export default function DeedPanel({ open, onClose }: Props) {
             onClick={onClose}
             tabIndex={open ? 0 : -1}
             className={cn(
-              'inline-flex size-9 items-center justify-center rounded-md text-slate-400',
-              'outline-none transition-colors hover:bg-slate-800 hover:text-white',
+              'inline-flex size-9 items-center justify-center rounded-md text-muted-foreground',
+              'outline-none transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
               'focus-visible:ring-2 focus-visible:ring-bd-orange'
             )}
           >

@@ -42,11 +42,11 @@ function Markdown({ children }: { children: string }) {
   return (
     <div
       className={cn(
-        'space-y-3 text-sm leading-relaxed text-slate-200',
+        'space-y-3 text-sm leading-relaxed text-sidebar-foreground',
         '[&_a]:text-bd-orange [&_a]:underline [&_a]:underline-offset-2',
-        '[&_code]:rounded [&_code]:bg-slate-800 [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-xs',
+        '[&_code]:rounded [&_code]:bg-sidebar-accent [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-xs',
         '[&_li]:ml-4 [&_li]:list-disc [&_ol_li]:list-decimal',
-        '[&_strong]:font-semibold [&_strong]:text-white',
+        '[&_strong]:font-semibold [&_strong]:text-sidebar-foreground',
         // Every currency and bid figure in an answer is tabular: numbers that
         // jitter between lines read as amateur in front of an investor.
         '[&_table]:w-full [&_table]:text-xs [&_td]:tabular [&_td]:py-1 [&_th]:py-1 [&_th]:text-left'
@@ -65,7 +65,7 @@ function ActionNote({ turn }: { turn: DeedTurn }) {
       : `Opened auction record ${turn.action.auctionId}`
   const Icon = turn.action.kind === 'filter_county' ? MapPinned : SquareArrowOutUpRight
   return (
-    <p className="mt-2 flex items-center gap-1.5 text-xs text-slate-500">
+    <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
       <Icon className="size-3.5 shrink-0" aria-hidden />
       {label}
     </p>
@@ -86,10 +86,10 @@ export default function DeedThread({ turns, streaming, status, surface, onSugges
           <DeedRobotMark size={44} decorative={false} className="rounded-xl" />
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-bd-orange">Deed Voice AI</p>
-            <h3 className="text-sm font-semibold text-white">Ask about this screen</h3>
+            <h3 className="text-sm font-semibold text-sidebar-foreground">Ask about this screen</h3>
           </div>
         </div>
-        <p className="mt-1.5 text-sm leading-relaxed text-slate-400">
+        <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
           Deed is looking at the {surface}. It answers from recorded auction data and cites
           the endpoint or case number behind every figure — and it can filter or open records
           for you.
@@ -101,9 +101,9 @@ export default function DeedThread({ turns, streaming, status, surface, onSugges
                 type="button"
                 onClick={() => onSuggestion(s)}
                 className={cn(
-                  'w-full rounded-lg border border-slate-800 bg-slate-900/40 px-3 py-2.5',
-                  'text-left text-sm text-slate-300 outline-none transition-colors',
-                  'hover:border-slate-700 hover:text-white focus-visible:ring-2 focus-visible:ring-bd-orange'
+                  'w-full rounded-lg border border-sidebar-border bg-sidebar-accent/40 px-3 py-2.5',
+                  'text-left text-sm text-sidebar-accent-foreground outline-none transition-colors',
+                  'hover:border-bd-orange/50 hover:text-sidebar-foreground focus-visible:ring-2 focus-visible:ring-bd-orange'
                 )}
               >
                 {s}
@@ -111,7 +111,7 @@ export default function DeedThread({ turns, streaming, status, surface, onSugges
             </li>
           ))}
         </ul>
-        <p className="mt-5 text-xs leading-relaxed text-slate-500">
+        <p className="mt-5 text-xs leading-relaxed text-muted-foreground">
           Deed is not legal, title or financial advice. A SIGNAL$ Property Report remains the
           document to rely on before bidding.
         </p>
@@ -124,16 +124,16 @@ export default function DeedThread({ turns, streaming, status, surface, onSugges
       {turns.map((turn) =>
         turn.role === 'user' ? (
           <div key={turn.id} className="flex justify-end">
-            <div className="max-w-[85%] rounded-2xl rounded-br-sm bg-slate-800 px-3.5 py-2.5">
+            <div className="max-w-[85%] rounded-2xl rounded-br-sm bg-sidebar-accent px-3.5 py-2.5">
               {turn.content ? (
-                <p className="whitespace-pre-wrap text-sm text-slate-100">{turn.content}</p>
+                <p className="whitespace-pre-wrap text-sm text-sidebar-accent-foreground">{turn.content}</p>
               ) : null}
               {turn.attachments?.length ? (
                 <ul className="mt-2 space-y-1">
                   {turn.attachments.map((a) => (
                     <li
                       key={a.id}
-                      className="flex items-center gap-1.5 text-xs text-slate-400"
+                      className="flex items-center gap-1.5 text-xs text-muted-foreground"
                     >
                       <Paperclip className="size-3 shrink-0" aria-hidden />
                       <span className="truncate">{a.name}</span>
@@ -163,7 +163,7 @@ export default function DeedThread({ turns, streaming, status, surface, onSugges
                 <ActionNote turn={turn} />
               </>
             ) : (
-              <p className="text-xs italic text-slate-500">Stopped before any answer arrived.</p>
+              <p className="text-xs italic text-muted-foreground">Stopped before any answer arrived.</p>
             )}
           </div>
         )
@@ -172,7 +172,7 @@ export default function DeedThread({ turns, streaming, status, surface, onSugges
       {streaming ? <Markdown>{streaming}</Markdown> : null}
 
       {status === 'streaming' && !streaming ? (
-        <p className="flex items-center gap-2 text-xs text-slate-500">
+        <p className="flex items-center gap-2 text-xs text-muted-foreground">
           <span className="size-1.5 animate-pulse rounded-full bg-bd-orange motion-reduce:animate-none" />
           Deed is reading the auction data…
         </p>

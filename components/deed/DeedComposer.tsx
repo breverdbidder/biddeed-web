@@ -172,7 +172,7 @@ export default function DeedComposer({
 
   return (
     <div
-      className="border-t border-slate-800 bg-[#0b1220] px-3 py-3"
+      className="border-t border-sidebar-border bg-sidebar px-3 py-3"
       onDragOver={(e) => {
         e.preventDefault()
         setDragging(true)
@@ -200,7 +200,7 @@ export default function DeedComposer({
             {files.map((f) => (
               <li
                 key={f.id}
-                className="flex max-w-full items-center gap-2 rounded-md border border-slate-700 bg-slate-900/70 py-1 pl-2 pr-1"
+                className="flex max-w-full items-center gap-2 rounded-md border border-sidebar-border bg-sidebar-accent py-1 pl-2 pr-1"
               >
                 {f.previewUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -210,20 +210,20 @@ export default function DeedComposer({
                     className="size-7 shrink-0 rounded object-cover"
                   />
                 ) : (
-                  <Paperclip className="size-4 shrink-0 text-slate-400" aria-hidden />
+                  <Paperclip className="size-4 shrink-0 text-muted-foreground" aria-hidden />
                 )}
                 <span className="min-w-0">
-                  <span className="block max-w-[10rem] truncate text-xs text-slate-200">
+                  <span className="block max-w-[10rem] truncate text-xs text-sidebar-accent-foreground">
                     {f.name}
                   </span>
-                  <span className="block text-[10px] tabular text-slate-500">
+                  <span className="block text-[10px] tabular text-muted-foreground">
                     {formatBytes(f.size)}
                   </span>
                 </span>
                 <button
                   type="button"
                   onClick={() => removeFile(f.id)}
-                  className="inline-flex size-6 shrink-0 items-center justify-center rounded text-slate-400 outline-none hover:bg-slate-800 hover:text-white focus-visible:ring-2 focus-visible:ring-bd-orange"
+                  className="inline-flex size-6 shrink-0 items-center justify-center rounded text-muted-foreground outline-none hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-bd-orange"
                 >
                   <X className="size-3.5" aria-hidden />
                   <span className="sr-only">Remove {f.name}</span>
@@ -231,7 +231,7 @@ export default function DeedComposer({
               </li>
             ))}
           </ul>
-          <p className="mb-2 text-[11px] leading-snug text-slate-500">
+          <p className="mb-2 text-[11px] leading-snug text-muted-foreground">
             Deed sees the file names, not the contents — attachments are passed as a list.
             Ask for the figure you need and it will answer from auction data.
           </p>
@@ -240,8 +240,8 @@ export default function DeedComposer({
 
       <div
         className={cn(
-          'relative rounded-xl border bg-slate-900/60 transition-colors',
-          dragging ? 'border-bd-orange' : 'border-slate-700'
+          'relative rounded-xl border bg-sidebar-accent transition-colors',
+          dragging ? 'border-bd-orange' : 'border-sidebar-border'
         )}
       >
         {slashOpen ? (
@@ -277,7 +277,7 @@ export default function DeedComposer({
           aria-activedescendant={
             slashOpen && matches.length ? `deed-slash-${matches[slashIndex]?.name}` : undefined
           }
-          className="block max-h-[200px] w-full resize-none bg-transparent px-3 pb-1 pt-3 text-sm text-slate-100 outline-none placeholder:text-slate-500"
+          className="block max-h-[200px] w-full resize-none bg-transparent px-3 pb-1 pt-3 text-sm text-sidebar-foreground outline-none placeholder:text-muted-foreground"
         />
 
         <div className="flex items-center gap-1 px-2 pb-2">
@@ -285,14 +285,14 @@ export default function DeedComposer({
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className="inline-flex size-9 items-center justify-center rounded-lg text-slate-400 outline-none transition-colors hover:bg-slate-800 hover:text-white focus-visible:ring-2 focus-visible:ring-bd-orange"
+                className="inline-flex size-9 items-center justify-center rounded-lg text-muted-foreground outline-none transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-bd-orange"
               >
                 <Plus className="size-4" aria-hidden />
                 <span className="sr-only">Add an attachment</span>
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" side="top" className="w-64">
-              <DropdownMenuLabel className="text-xs font-normal text-slate-400">
+              <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
                 Up to {MAX_FILES} files · images, PDF, CSV, XLSX
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
@@ -354,7 +354,7 @@ export default function DeedComposer({
             type="button"
             disabled
             title="Voice is not connected yet — the ElevenLabs bundle is still blocked by our content security policy."
-            className="inline-flex size-9 cursor-not-allowed items-center justify-center rounded-lg text-slate-600"
+            className="inline-flex size-9 cursor-not-allowed items-center justify-center rounded-lg text-muted-foreground/60"
           >
             <Mic className="size-4" aria-hidden />
             <span className="sr-only">
@@ -362,7 +362,7 @@ export default function DeedComposer({
             </span>
           </button>
 
-          <span className="ml-1 hidden text-[11px] text-slate-600 sm:inline">
+          <span className="ml-1 hidden text-[11px] text-muted-foreground/60 sm:inline">
             Enter to send · Shift+Enter for a new line
           </span>
 
@@ -374,8 +374,8 @@ export default function DeedComposer({
               'ml-auto inline-flex size-9 items-center justify-center rounded-lg outline-none',
               'transition-colors focus-visible:ring-2 focus-visible:ring-bd-orange',
               streaming
-                ? 'bg-slate-700 text-white hover:bg-slate-600'
-                : 'bg-bd-orange text-slate-950 hover:bg-bd-orange-300 disabled:bg-slate-800 disabled:text-slate-600'
+                ? 'bg-sidebar-accent text-sidebar-accent-foreground hover:bg-sidebar-accent/80'
+                : 'bg-primary text-primary-foreground hover:bg-primary/90 disabled:bg-sidebar-accent disabled:text-muted-foreground'
             )}
           >
             {streaming ? (

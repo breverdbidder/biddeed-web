@@ -13,8 +13,8 @@ interface Props {
 
 function pinColor(type: string): string {
   switch (type) {
-    case 'foreclosure': return '#0073CF'
-    case 'tax_deed': return '#222222'
+    case 'foreclosure': return '#005EB8'
+    case 'tax_deed': return '#0A2540'
     default: return '#6B7280'
   }
 }

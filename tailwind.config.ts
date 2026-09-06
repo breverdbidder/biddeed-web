@@ -13,31 +13,35 @@ const config: Config = {
   			display: ['var(--font-display)', 'Iowan Old Style', 'Palatino Linotype', 'Georgia', 'serif'],
   		},
   		colors: {
+  			// Canon per #20060 (memo default; PARITY_PRD s8). 'bd-orange' keeps its
+  			// name from an earlier brand pass but has carried the accent blue, not
+  			// orange, since that pass -- not renamed here to avoid touching every
+  			// call site; #19845 retires both scales into one token file.
   			'bd-navy': {
-  				'50': '#E8F4FC',
-  				'100': '#E8F4FC',
-  				'200': '#CCCCCC',
-  				'300': '#002A54',
-  				'400': '#002A54',
-  				'500': '#005DAA',
-  				'600': '#002A54',
-  				'700': '#002A54',
-  				'800': '#002A54',
-  				'900': '#002A54',
-  				DEFAULT: '#002A54'
+  				'50': '#E6F0FA',
+  				'100': '#E6F0FA',
+  				'200': '#D7E3F1',
+  				'300': '#0A2540',
+  				'400': '#0A2540',
+  				'500': '#004A92',
+  				'600': '#0A2540',
+  				'700': '#0A2540',
+  				'800': '#0A2540',
+  				'900': '#0A2540',
+  				DEFAULT: '#0A2540'
   			},
   			'bd-orange': {
-  				'50': '#E8F4FC',
-  				'100': '#E8F4FC',
-  				'200': '#E8F4FC',
-  				'300': '#0073CF',
-  				'400': '#0073CF',
-  				'500': '#0073CF',
-  				'600': '#005DAA',
-  				'700': '#005DAA',
-  				'800': '#002A54',
-  				'900': '#002A54',
-  				DEFAULT: '#0073CF'
+  				'50': '#E6F0FA',
+  				'100': '#E6F0FA',
+  				'200': '#E6F0FA',
+  				'300': '#005EB8',
+  				'400': '#005EB8',
+  				'500': '#005EB8',
+  				'600': '#004A92',
+  				'700': '#004A92',
+  				'800': '#0A2540',
+  				'900': '#0A2540',
+  				DEFAULT: '#005EB8'
   			},
   			border: 'hsl(var(--border))',
   			input: 'hsl(var(--input))',
