@@ -39,6 +39,12 @@ export default function AppShell({
 }) {
   const pathname = usePathname()
   const isHome = pathname === '/'
+  // Measured live at 390x844 (#20060): the fixed "Talk to Deed" card covered the
+  // composer Send button while Deed was open, and the Continue button / sign-in
+  // link on the Clerk forms. Once Deed is open the panel has its own close
+  // button and the Topbar has the toggle, so the card is redundant there; on
+  // the auth routes it must never sit over the form.
+  const isAuthRoute = pathname.startsWith('/sign-in') || pathname.startsWith('/sign-up')
   const [deedOpen, setDeedOpen] = useState(false)
   const toggleDeed = () => setDeedOpen((v) => !v)
 
@@ -59,7 +65,7 @@ export default function AppShell({
           {!isHome ? (
             <>
               <DeedPanel open={deedOpen} onClose={() => setDeedOpen(false)} />
-              <StickyDeedCta open={deedOpen} onToggle={toggleDeed} />
+              {!deedOpen && !isAuthRoute ? <StickyDeedCta open={deedOpen} onToggle={toggleDeed} /> : null}
             </>
           ) : null}
         </div>

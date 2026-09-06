@@ -98,7 +98,12 @@ export default function DeedPanel({ open, onClose }: Props) {
     <>
       {open ? (
         <div
-          className="fixed inset-0 z-30 bg-foreground/60 lg:hidden"
+          // top-14, not inset-0: the h-14 sticky Topbar - including the sidebar
+          // toggle - must stay reachable while Deed is open on a phone. Measured
+          // live at 390x844 (#20060): a full-height backdrop/panel at z-30/z-40 sat
+          // above the topbar's z-20 and ate every click on it (30 s Playwright
+          // timeout on the sidebar toggle).
+          className="fixed inset-x-0 top-14 bottom-0 z-30 bg-foreground/60 lg:hidden"
           aria-hidden
           onClick={onClose}
         />
@@ -109,9 +114,9 @@ export default function DeedPanel({ open, onClose }: Props) {
         aria-label="Deed — BidDeed agent"
         aria-hidden={!open}
         className={cn(
-          'fixed inset-y-0 right-0 z-40 flex w-full max-w-md flex-col border-l border-border',
+          'fixed top-14 bottom-0 right-0 z-40 flex w-full max-w-md flex-col border-l border-border',
           'bg-card transition-transform duration-200 motion-reduce:transition-none',
-          'lg:static lg:z-auto lg:h-auto lg:max-w-none lg:transition-[width] lg:duration-200',
+          'lg:static lg:top-auto lg:bottom-auto lg:z-auto lg:h-auto lg:max-w-none lg:transition-[width] lg:duration-200',
           open
             ? 'translate-x-0 lg:w-[26rem] xl:w-[30rem]'
             : 'pointer-events-none translate-x-full lg:w-0 lg:overflow-hidden lg:border-l-0'
