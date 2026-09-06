@@ -8,6 +8,7 @@ import { getRecommendation } from '@/lib/scoring'
 import { ZONING_CATEGORY_COLORS, type ZoningCategory } from '@/lib/zoning'
 import type { Auction } from '@/types/auctions'
 import { apiUrl } from '@/lib/api'
+import { LIGHT as C } from '@/lib/design-tokens'
 
 /**
  * AuctionRadar map.
@@ -280,10 +281,10 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
     // Zoning data has no source on the lean map feed (no dor_use_code, no
     // zoning_category on multi_county_auctions) - grey/unknown is honest,
     // inventing a category is not.
-    if (colorMode === 'zoning') return '#6B7280'
-    if (point.sale_type === 'foreclosure') return '#0073CF'
-    if (point.sale_type === 'tax_deed') return '#222222'
-    return '#6B7280'
+    if (colorMode === 'zoning') return `${C.border}`
+    if (point.sale_type === 'foreclosure') return `${C.brand}`
+    if (point.sale_type === 'tax_deed') return `${C.ink}`
+    return `${C.border}`
   }
 
   function buildGeoJSON() {
@@ -322,23 +323,23 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
   function getUnclusteredPaint(): any {
     if (colorMode === 'zoning') {
       return {
-        'circle-color': '#6B7280',
+        'circle-color': `${C.border}`,
         'circle-radius': 7,
         'circle-stroke-width': 2,
-        'circle-stroke-color': '#ffffff',
+        'circle-stroke-color': `${C.background}`,
       }
     }
     return {
       'circle-color': [
         'match',
         ['get', 'type_code'],
-        0, '#0073CF',
-        1, '#222222',
-        '#6B7280',
+        0, `${C.brand}`,
+        1, `${C.ink}`,
+        `${C.border}`,
       ],
       'circle-radius': 7,
       'circle-stroke-width': 2,
-      'circle-stroke-color': '#ffffff',
+      'circle-stroke-color': `${C.background}`,
     }
   }
 
@@ -394,9 +395,9 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
           // cluster on the same map, and the legend documented that collision
           // rather than resolving it. Blue is colourblind-safe against the
           // red/amber pair and reads on the satellite basemap.
-          '#60A5FA',
-          10, '#2563EB',
-          50, '#1E40AF',
+          `${C.brand}`,
+          10, `${C.brandHover}`,
+          50, `${C.navy}`,
         ],
         'circle-radius': [
           'step',
@@ -406,7 +407,7 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
           50, 32,
         ],
         'circle-stroke-width': 2,
-        'circle-stroke-color': '#ffffff',
+        'circle-stroke-color': `${C.background}`,
       },
     }, beforeId)
 
@@ -419,7 +420,7 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
         'text-field': '{point_count_abbreviated}',
         // Bold, not Medium. MEASURED 2026-08-20 on the production render:
         // 12px Medium over a saturated fill left almost every stroke pixel as
-        // partial coverage, so the declared #ffffff sampled #FBD3D3 - pink.
+        // partial coverage, so the declared white sampled as pink.
         'text-font': ['DIN Pro Bold', 'Arial Unicode MS Bold'],
         // Scale with the circle: an 18px-radius circle carried 12px text.
         'text-size': ['step', ['get', 'point_count'], 13, 10, 15, 50, 17],
@@ -429,10 +430,10 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
         'text-ignore-placement': true,
       },
       paint: {
-        'text-color': '#ffffff',
+        'text-color': `${C.background}`,
         // Halo keeps the count readable on the lightest bucket and over
-        // satellite imagery; white on #60A5FA alone is too low-contrast.
-        'text-halo-color': '#0B1929',
+        // satellite imagery; white on the brand blue alone is too low-contrast.
+        'text-halo-color': `${C.navy}`,
         'text-halo-width': 1,
       },
     }, beforeId)
@@ -466,7 +467,7 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
 
       const typeLabel = props.sale_type === 'foreclosure' ? 'Foreclosure' : 'Tax Deed'
       const recBadge = props.recommendation !== 'UNKNOWN'
-        ? `<span style="display:inline-block;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:700;color:#fff;background:${props.rec_color}">${props.recommendation}</span>`
+        ? `<span style="display:inline-block;padding:1px 6px;border-radius:4px;font-size:12px;font-weight:700;color:${C.background};background:${props.rec_color}">${props.recommendation}</span>`
         : ''
 
       new mapboxgl.Popup({ offset: 15, maxWidth: '280px' })
@@ -474,10 +475,10 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
         .setHTML(`
           <div style="font-family:system-ui;font-size:12px;">
             <p style="font-weight:600;margin:0 0 4px 0;">${props.address}</p>
-            <p style="color:#666;margin:0 0 2px 0;">${props.county} — ${typeLabel} ${recBadge}</p>
-            ${props.just_value ? `<p style="color:#666;margin:0 0 2px 0;">Value: ${formatCurrency(props.just_value)}</p>` : ''}
-            ${props.opening_bid ? `<p style="color:#666;margin:0 0 2px 0;">Opening Bid: ${formatCurrency(props.opening_bid)}</p>` : ''}
-            ${props.auction_date ? `<p style="color:#666;margin:0;">Date: ${props.auction_date}</p>` : ''}
+            <p style="color:${C.navy};margin:0 0 2px 0;">${props.county} — ${typeLabel} ${recBadge}</p>
+            ${props.just_value ? `<p style="color:${C.navy};margin:0 0 2px 0;">Value: ${formatCurrency(props.just_value)}</p>` : ''}
+            ${props.opening_bid ? `<p style="color:${C.navy};margin:0 0 2px 0;">Opening Bid: ${formatCurrency(props.opening_bid)}</p>` : ''}
+            ${props.auction_date ? `<p style="color:${C.navy};margin:0;">Date: ${props.auction_date}</p>` : ''}
           </div>
         `)
         .addTo(map)
@@ -671,9 +672,9 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
               </div>
               <div className="flex items-center gap-3 mt-1 pt-1 border-t border-border dark:border-border">
                 <span className="uppercase tracking-wide text-[10px] opacity-70 w-[68px] shrink-0">Cluster size</span>
-                <span><span className="inline-block w-3 h-3 rounded-full bg-blue-400 mr-1 text-[8px] text-white text-center leading-3">n</span> &lt;10</span>
-                <span><span className="inline-block w-3 h-3 rounded-full bg-blue-600 mr-1 text-[8px] text-white text-center leading-3">n</span> 10-49</span>
-                <span><span className="inline-block w-3 h-3 rounded-full bg-blue-800 mr-1 text-[8px] text-white text-center leading-3">n</span> 50+</span>
+                <span><span className="inline-block w-3 h-3 rounded-full bg-primary mr-1 text-[8px] text-white text-center leading-3">n</span> &lt;10</span>
+                <span><span className="inline-block w-3 h-3 rounded-full bg-bd-orange-600 mr-1 text-[8px] text-white text-center leading-3">n</span> 10-49</span>
+                <span><span className="inline-block w-3 h-3 rounded-full bg-muted-foreground mr-1 text-[8px] text-white text-center leading-3">n</span> 50+</span>
               </div>
             </>
           ) : (

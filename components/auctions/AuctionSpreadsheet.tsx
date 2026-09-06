@@ -68,7 +68,7 @@ export default function AuctionSpreadsheet({ auctions, loading, onSelectAuction 
       className="px-2 py-1.5 text-left text-[10px] font-semibold text-muted-foreground dark:text-muted-foreground uppercase tracking-wider cursor-pointer hover:text-foreground dark:hover:text-muted-foreground select-none whitespace-nowrap"
     >
       {label}
-      {sortField === field && <span className="ml-0.5">{sortDir === 'asc' ? '\u2191' : '\u2193'}</span>}
+      {sortField === field && <span className="ml-0.5">{sortDir === 'asc' ? '↑' : '↓'}</span>}
     </th>
   )
 
@@ -95,7 +95,7 @@ export default function AuctionSpreadsheet({ auctions, loading, onSelectAuction 
       </div>
 
       <div className="overflow-x-auto">
-        <table className="min-w-[1000px] w-full divide-y divide-gray-200 dark:divide-slate-800 text-xs">
+        <table className="min-w-[1000px] w-full divide-y divide-border text-xs">
           <thead className="bg-muted dark:bg-card/50">
             <tr>
               <SortTh field="county" label="County" />
@@ -111,7 +111,7 @@ export default function AuctionSpreadsheet({ auctions, loading, onSelectAuction 
               <th className="px-2 py-1.5 text-left text-[10px] font-semibold text-muted-foreground dark:text-muted-foreground uppercase whitespace-nowrap">Score</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100 dark:divide-slate-800/50">
+          <tbody className="divide-y divide-border">
             {paged.map((a) => {
               const justValue = a.market_value ?? a.assessed_value ?? null
               const score = getRecommendation(justValue, a.opening_bid)

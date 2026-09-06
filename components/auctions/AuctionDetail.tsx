@@ -65,11 +65,11 @@ function InfoRow({ label, value, mono, link }: { label: string; value: string | 
       <span className="text-sm text-muted-foreground dark:text-muted-foreground shrink-0 w-36">{label}</span>
       {link && display !== '—' ? (
         <a href={link} target="_blank" rel="noopener noreferrer"
-          className={`text-sm text-primary dark:text-bd-orange-400 hover:underline text-right ${mono ? 'font-mono text-xs' : ''}`}>
+          className={`text-sm text-primary text-primary hover:underline text-right ${mono ? 'font-mono text-xs' : ''}`}>
           {display} ↗
         </a>
       ) : (
-        <span className={`text-sm text-foreground dark:text-white text-right ${mono ? 'font-mono text-xs' : ''}`}>
+        <span className={`text-sm text-foreground text-foreground text-right ${mono ? 'font-mono text-xs' : ''}`}>
           {display}
         </span>
       )}
@@ -80,7 +80,7 @@ function InfoRow({ label, value, mono, link }: { label: string; value: string | 
 function SectionCard({ title, children, icon }: { title: string; children: React.ReactNode; icon?: string }) {
   return (
     <div className="bg-card dark:bg-card border border-border dark:border-border rounded-lg p-5">
-      <h2 className="text-sm font-semibold text-foreground dark:text-white uppercase tracking-wide mb-3 flex items-center gap-2">
+      <h2 className="text-sm font-semibold text-foreground text-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
         {icon && <span>{icon}</span>}
         {title}
       </h2>
@@ -133,7 +133,7 @@ export default function AuctionDetail({ auctionId }: Props) {
           <p className="text-primary text-sm">{error || 'Auction not found'}</p>
           <button
             onClick={() => router.push('/radar')}
-            className="text-sm text-primary hover:text-primary dark:text-bd-orange-400 dark:hover:text-bd-orange-300 underline"
+            className="text-sm text-primary hover:text-primary text-primary hover:text-bd-orange-600 underline"
           >
             ← Back to Auctions
           </button>
@@ -170,7 +170,7 @@ export default function AuctionDetail({ auctionId }: Props) {
 
           <div className="flex flex-wrap items-start gap-3">
             <div className="flex-1 min-w-0">
-              <h1 className="text-xl font-bold text-foreground dark:text-white truncate">
+              <h1 className="text-xl font-bold text-foreground text-foreground truncate">
                 {auction.property_address || 'No Address'}
               </h1>
               <p className="text-sm text-muted-foreground dark:text-muted-foreground mt-0.5">
@@ -184,7 +184,7 @@ export default function AuctionDetail({ auctionId }: Props) {
 
             {auction.recommendation && auction.recommendation !== 'UNKNOWN' && (
               <span
-                className="px-2.5 py-1 text-xs font-bold rounded-full text-white shrink-0"
+                className="px-2.5 py-1 text-xs font-bold rounded-full text-foreground shrink-0"
                 style={{ backgroundColor: auction.recommendation_color }}
               >
                 {auction.recommendation}
@@ -192,7 +192,7 @@ export default function AuctionDetail({ auctionId }: Props) {
             )}
 
             {daysUntilAuction != null && daysUntilAuction >= 0 && (
-              <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 shrink-0">
+              <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-secondary text-muted-foreground  shrink-0">
                 {daysUntilAuction === 0 ? 'Today' : daysUntilAuction === 1 ? 'Tomorrow' : `${daysUntilAuction} days`}
               </span>
             )}
@@ -308,20 +308,20 @@ export default function AuctionDetail({ auctionId }: Props) {
             <div className="grid grid-cols-2 gap-3">
               <div className="bg-card dark:bg-card border border-border dark:border-border rounded-lg p-4 text-center">
                 <p className="text-xs text-muted-foreground dark:text-muted-foreground uppercase">Just Value</p>
-                <p className="text-lg font-bold text-foreground dark:text-white mt-1">
+                <p className="text-lg font-bold text-foreground text-foreground mt-1">
                   {formatCurrency(auction.just_value)}
                 </p>
               </div>
               <div className="bg-card dark:bg-card border border-border dark:border-border rounded-lg p-4 text-center">
                 <p className="text-xs text-muted-foreground dark:text-muted-foreground uppercase">Land Value</p>
-                <p className="text-lg font-bold text-foreground dark:text-white mt-1">
+                <p className="text-lg font-bold text-foreground text-foreground mt-1">
                   {formatCurrency(auction.land_value)}
                 </p>
               </div>
               {auction.opening_bid != null && auction.opening_bid > 0 && (
                 <div className="col-span-2 bg-card dark:bg-card border border-border dark:border-border rounded-lg p-4 text-center">
                   <p className="text-xs text-muted-foreground dark:text-muted-foreground uppercase">Opening Bid</p>
-                  <p className="text-lg font-bold text-green-600 dark:text-green-400 mt-1">
+                  <p className="text-lg font-bold text-primary mt-1">
                     {formatCurrency(auction.opening_bid)}
                   </p>
                 </div>
@@ -329,7 +329,7 @@ export default function AuctionDetail({ auctionId }: Props) {
               {auction.just_value && auction.just_value > 0 && auction.land_value != null && (
                 <div className="col-span-2 bg-card dark:bg-card border border-border dark:border-border rounded-lg p-4 text-center">
                   <p className="text-xs text-muted-foreground dark:text-muted-foreground uppercase">Improvement Ratio</p>
-                  <p className="text-lg font-bold text-foreground dark:text-white mt-1">
+                  <p className="text-lg font-bold text-foreground text-foreground mt-1">
                     {(((auction.just_value - auction.land_value) / auction.just_value) * 100).toFixed(0)}%
                     <span className="text-xs font-normal text-muted-foreground ml-1">improvements</span>
                   </p>
@@ -343,7 +343,7 @@ export default function AuctionDetail({ auctionId }: Props) {
                 <p className="text-xs text-muted-foreground dark:text-muted-foreground uppercase mb-3">Investment Score</p>
                 <div className="text-center mb-3">
                   <span
-                    className="inline-block px-4 py-2 rounded-lg text-xl font-bold text-white"
+                    className="inline-block px-4 py-2 rounded-lg text-xl font-bold text-foreground"
                     style={{ backgroundColor: auction.recommendation_color }}
                   >
                     {auction.recommendation}
@@ -352,7 +352,7 @@ export default function AuctionDetail({ auctionId }: Props) {
                 {auction.max_bid != null && (
                   <div className="text-center mb-2">
                     <p className="text-xs text-muted-foreground dark:text-muted-foreground">Max Bid</p>
-                    <p className="text-lg font-bold text-foreground dark:text-white">
+                    <p className="text-lg font-bold text-foreground text-foreground">
                       {formatCurrency(auction.max_bid)}
                     </p>
                   </div>
@@ -360,7 +360,7 @@ export default function AuctionDetail({ auctionId }: Props) {
                 {auction.bid_ratio != null && (
                   <div className="text-center mb-3">
                     <p className="text-xs text-muted-foreground dark:text-muted-foreground">Bid-to-Value Ratio</p>
-                    <p className="text-lg font-bold text-foreground dark:text-white">{auction.bid_ratio}%</p>
+                    <p className="text-lg font-bold text-foreground text-foreground">{auction.bid_ratio}%</p>
                   </div>
                 )}
                 <p className="text-[10px] text-muted-foreground dark:text-muted-foreground text-center mt-2">
@@ -392,7 +392,7 @@ export default function AuctionDetail({ auctionId }: Props) {
                   href={`https://www.google.com/maps?q=${auction.latitude},${auction.longitude}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs text-primary dark:text-bd-orange-400 hover:underline mt-1 inline-block"
+                  className="text-xs text-primary text-primary hover:underline mt-1 inline-block"
                 >
                   Open in Google Maps ↗
                 </a>
@@ -414,20 +414,20 @@ export default function AuctionDetail({ auctionId }: Props) {
               <p className="text-xs text-muted-foreground dark:text-muted-foreground uppercase mb-2">External Links</p>
               {bcpaoLink && (
                 <a href={bcpaoLink} target="_blank" rel="noopener noreferrer"
-                  className="block text-sm text-primary dark:text-bd-orange-400 hover:underline">
+                  className="block text-sm text-primary text-primary hover:underline">
                   BCPAO Property Page ↗
                 </a>
               )}
               {auction.source_url && (
                 <a href={auction.source_url} target="_blank" rel="noopener noreferrer"
-                  className="block text-sm text-primary dark:text-bd-orange-400 hover:underline">
+                  className="block text-sm text-primary text-primary hover:underline">
                   Auction Source ↗
                 </a>
               )}
               {hasCoords && (
                 <a href={`https://www.google.com/maps/@${auction.latitude},${auction.longitude},17z/data=!3m1!1e3`}
                   target="_blank" rel="noopener noreferrer"
-                  className="block text-sm text-primary dark:text-bd-orange-400 hover:underline">
+                  className="block text-sm text-primary text-primary hover:underline">
                   Google Maps Satellite ↗
                 </a>
               )}

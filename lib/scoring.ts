@@ -1,3 +1,4 @@
+import { LIGHT as C } from '@/lib/design-tokens'
 /**
  * Shapira Formula - Investment Scoring
  *
@@ -32,23 +33,23 @@ export function getRecommendation(
 ): ScoringResult {
   const maxBid = calculateMaxBid(justValue)
   if (maxBid === null) {
-    return { recommendation: 'UNKNOWN', color: '#6B7280', ratio: null, maxBid: null }
+    return { recommendation: 'UNKNOWN', color: C.border, ratio: null, maxBid: null }
   }
 
   const bid = openingBid || justValue || 0
   if (bid <= 0) {
-    return { recommendation: 'UNKNOWN', color: '#6B7280', ratio: null, maxBid }
+    return { recommendation: 'UNKNOWN', color: C.border, ratio: null, maxBid }
   }
 
   const ratio = Math.round((maxBid / bid) * 100)
 
   if (ratio >= 75) {
-    return { recommendation: 'BID', color: '#22C55E', ratio, maxBid }
+    return { recommendation: 'BID', color: C.brand, ratio, maxBid }
   }
   if (ratio >= 60) {
-    return { recommendation: 'REVIEW', color: '#F59E0B', ratio, maxBid }
+    return { recommendation: 'REVIEW', color: C.navy, ratio, maxBid }
   }
-  return { recommendation: 'SKIP', color: '#EF4444', ratio, maxBid }
+  return { recommendation: 'SKIP', color: C.border, ratio, maxBid }
 }
 
 export function formatCurrency(val: number | null | undefined): string {

@@ -1,3 +1,4 @@
+import { LIGHT as C } from '@/lib/design-tokens'
 /**
  * Zoning Intelligence — Shared Utilities
  *
@@ -104,12 +105,12 @@ export const ZONING_CATEGORY_LABELS: Record<ZoningCategory, string> = {
 
 /** Badge/map colors for zoning categories */
 export const ZONING_CATEGORY_COLORS: Record<ZoningCategory, { bg: string; text: string; hex: string }> = {
-  RES: { bg: 'bg-blue-100 dark:bg-blue-900/30', text: 'text-blue-700 dark:text-blue-400', hex: '#3B82F6' },
-  COM: { bg: 'bg-purple-100 dark:bg-purple-900/30', text: 'text-purple-700 dark:text-purple-400', hex: '#8B5CF6' },
-  IND: { bg: 'bg-orange-100 dark:bg-orange-900/30', text: 'text-orange-700 dark:text-orange-400', hex: '#F97316' },
-  AGR: { bg: 'bg-green-100 dark:bg-green-900/30', text: 'text-green-700 dark:text-green-400', hex: '#22C55E' },
-  INST: { bg: 'bg-teal-100 dark:bg-teal-900/30', text: 'text-teal-700 dark:text-teal-400', hex: '#14B8A6' },
-  MISC: { bg: 'bg-gray-100 dark:bg-gray-800', text: 'text-gray-600 dark:text-gray-400', hex: '#6B7280' },
+  RES: { bg: 'bg-secondary', text: 'text-muted-foreground', hex: C.brandHover },
+  COM: { bg: 'bg-secondary', text: 'text-muted-foreground', hex: C.navy },
+  IND: { bg: 'bg-secondary', text: 'text-muted-foreground', hex: C.brandHover },
+  AGR: { bg: 'bg-secondary', text: 'text-muted-foreground', hex: C.brand },
+  INST: { bg: 'bg-secondary', text: 'text-muted-foreground', hex: C.brand },
+  MISC: { bg: 'bg-secondary', text: 'text-muted-foreground', hex: C.border },
 }
 
 /** Get DOR description for a code */

@@ -63,7 +63,7 @@ export default function AuctionSidebarList({
         {total > auctions.length && <> of {total.toLocaleString()}</>} auctions
       </div>
 
-      <ul className="overflow-y-auto flex-1 min-h-0 divide-y divide-gray-100 dark:divide-slate-800">
+      <ul className="overflow-y-auto flex-1 min-h-0 divide-y divide-border">
         {auctions.map((a) => {
           const isSelected = selectedId != null && String(selectedId) === String(a.id)
           const type = (a.sale_type || '').toLowerCase()

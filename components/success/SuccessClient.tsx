@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 
 import { apiUrl } from '@/lib/api'
+import { LIGHT as C } from '@/lib/design-tokens'
 
 type Phase = 'confirming' | 'delivered' | 'pending' | 'unpaid' | 'error'
 
@@ -145,7 +146,7 @@ export default function SuccessClient() {
 const S: Record<string, React.CSSProperties> = {
   main: {
     minHeight: '100vh',
-    background: '#020617',
+    background: C.background,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -154,8 +155,8 @@ const S: Record<string, React.CSSProperties> = {
   card: {
     width: '100%',
     maxWidth: 620,
-    background: '#0b1220',
-    border: '1px solid #1e293b',
+    background: C.card,
+    border: `1px solid ${C.border}`,
     borderRadius: 14,
     padding: '36px 32px',
   },
@@ -163,29 +164,29 @@ const S: Record<string, React.CSSProperties> = {
     fontSize: 12,
     letterSpacing: '0.16em',
     textTransform: 'uppercase',
-    color: '#38bdf8',
+    color: C.brand,
     fontWeight: 700,
     marginBottom: 22,
   },
-  h1: { fontSize: 27, lineHeight: 1.2, margin: '0 0 12px', color: '#f1f5f9', fontWeight: 700 },
-  lede: { fontSize: 15.5, lineHeight: 1.65, margin: 0, color: '#94a3b8' },
-  strong: { color: '#e2e8f0', fontWeight: 600 },
-  divider: { height: 1, background: '#1e293b', margin: '26px 0' },
+  h1: { fontSize: 27, lineHeight: 1.2, margin: '0 0 12px', color: C.ink, fontWeight: 700 },
+  lede: { fontSize: 15.5, lineHeight: 1.65, margin: 0, color: C.navy },
+  strong: { color: C.ink, fontWeight: 600 },
+  divider: { height: 1, background: C.border, margin: '26px 0' },
   listLabel: {
     fontSize: 11,
     letterSpacing: '0.14em',
     textTransform: 'uppercase',
-    color: '#64748b',
+    color: C.navy,
     fontWeight: 700,
     marginBottom: 14,
   },
   list: { listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: 12 },
   item: { display: 'flex', flexDirection: 'column', gap: 3 },
-  itemName: { fontSize: 14.5, color: '#e2e8f0', fontWeight: 600 },
-  itemNote: { fontSize: 13, color: '#64748b' },
-  next: { fontSize: 14.5, lineHeight: 1.6, margin: 0, color: '#94a3b8' },
-  nextLabel: { color: '#38bdf8', fontWeight: 600 },
-  detail: { fontSize: 12.5, color: '#002A54', marginTop: 18, marginBottom: 0 },
-  footer: { display: 'flex', gap: 20, marginTop: 30, paddingTop: 20, borderTop: '1px solid #1e293b' },
-  link: { fontSize: 13.5, color: '#38bdf8', textDecoration: 'none', fontWeight: 500 },
+  itemName: { fontSize: 14.5, color: C.ink, fontWeight: 600 },
+  itemNote: { fontSize: 13, color: C.navy },
+  next: { fontSize: 14.5, lineHeight: 1.6, margin: 0, color: C.navy },
+  nextLabel: { color: C.brand, fontWeight: 600 },
+  detail: { fontSize: 12.5, color: C.navy, marginTop: 18, marginBottom: 0 },
+  footer: { display: 'flex', gap: 20, marginTop: 30, paddingTop: 20, borderTop: `1px solid ${C.border}` },
+  link: { fontSize: 13.5, color: C.brand, textDecoration: 'none', fontWeight: 500 },
 }

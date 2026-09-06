@@ -5,6 +5,7 @@ import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import listPlugin from '@fullcalendar/list'
 import { apiUrl } from '@/lib/api'
+import { LIGHT as C } from '@/lib/design-tokens'
 
 /**
  * AuctionRadar calendar.
@@ -49,9 +50,9 @@ interface Props {
 }
 
 const TYPE_STYLE: Record<string, { bg: string; border: string; label: string }> = {
-  foreclosure: { bg: '#0073CF', border: '#DC2626', label: 'Foreclosures' },
-  tax_deed: { bg: '#222222', border: '#D97706', label: 'Tax Deeds' },
-  other: { bg: '#3B82F6', border: '#2563EB', label: 'Other' },
+  foreclosure: { bg: C.brand, border: C.brandHover, label: 'Foreclosures' },
+  tax_deed: { bg: C.ink, border: C.navy, label: 'Tax Deeds' },
+  other: { bg: C.brandHover, border: C.brandHover, label: 'Other' },
 }
 
 function plural(n: number, label: string) {

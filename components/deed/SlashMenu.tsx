@@ -71,7 +71,7 @@ export default function SlashMenu({ query, activeIndex, onHover, onPick }: Props
       aria-label="Commands"
       className={cn(
         'absolute bottom-full left-0 z-50 mb-2 max-h-56 w-full overflow-y-auto rounded-lg',
-        'border border-slate-700 bg-[#0b1220] py-1 shadow-xl shadow-slate-950/60'
+        'border border-border bg-card py-1 shadow-xl shadow-black/20'
       )}
     >
       {items.map((c, i) => {
@@ -108,13 +108,13 @@ export default function SlashMenu({ query, activeIndex, onHover, onPick }: Props
             }}
             className={cn(
               'flex cursor-pointer items-start gap-2.5 px-3 py-2 text-sm',
-              active ? 'bg-slate-800 text-white' : 'text-slate-300'
+              active ? 'bg-secondary text-foreground' : 'text-muted-foreground'
             )}
           >
             <Icon className="mt-0.5 size-4 shrink-0 text-bd-orange" aria-hidden />
             <span className="min-w-0">
               <span className="font-medium">{c.label}</span>
-              <span className="block truncate text-xs text-slate-500">{c.hint}</span>
+              <span className="block truncate text-xs text-muted-foreground">{c.hint}</span>
             </span>
           </li>
         )

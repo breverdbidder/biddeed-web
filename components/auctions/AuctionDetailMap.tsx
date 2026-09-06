@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
+import { LIGHT as C } from '@/lib/design-tokens'
 
 interface Props {
   lat: number
@@ -13,9 +14,9 @@ interface Props {
 
 function pinColor(type: string): string {
   switch (type) {
-    case 'foreclosure': return '#0073CF'
-    case 'tax_deed': return '#222222'
-    default: return '#6B7280'
+    case 'foreclosure': return `${C.brand}`
+    case 'tax_deed': return `${C.ink}`
+    default: return `${C.border}`
   }
 }
 

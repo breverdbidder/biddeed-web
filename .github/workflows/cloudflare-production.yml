@@ -168,3 +168,37 @@ jobs:
           code=$(curl -sS -o /tmp/canon_response -D /tmp/canon_headers --max-time 30 -w '%{http_code}' "https://biddeed.ai/r/F5oeMD")
           echo "/r/F5oeMD -> $code (want 302)"
           [[ "$code" == "302" ]] || { echo "Canonical smoke check FAILED for /r/F5oeMD: got $code, want 302" >&2; cat /tmp/canon_headers >&2; exit 1; }
+
+  # Rendered parity audit after every production deploy (PARITY_PRD.md §3.2).
+  # ui-audit.yml in cli-anything-biddeed only fires on Worker deploys, so a
+  # biddeed-web deploy was never audited; this job runs the SAME harness (checked
+  # out from the public canon repo, never copied) against the live apex. The
+  # table lands in the run summary + artifact. continue-on-error until D11
+  # (0 red gates) is met, so a red table records the truth without painting
+  # the deploy itself red; flip it to blocking when the board reaches D11.
+  ui-parity-audit:
+    needs: deploy-production
+    if: ${{ always() && needs.deploy-production.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    continue-on-error: true
+    steps:
+      - name: Checkout the canon harness (cli-anything-biddeed/scripts/ui-audit)
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.3.0
+        with:
+          repository: breverdbidder/cli-anything-biddeed
+          sparse-checkout: scripts/ui-audit
+          sparse-checkout-cone-mode: true
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install --quiet playwright && python -m playwright install --with-deps chromium
+      - name: Run the eight-gate audit against https://biddeed.ai
+        env:
+          SAMPLE_REPORT_KEY: ${{ vars.SAMPLE_REPORT_KEY }}
+        run: python3 scripts/ui-audit/audit.py --base https://biddeed.ai --routes scripts/ui-audit/routes.json --out ui-audit.md --fail-on-red
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with: { name: ui-audit, path: ui-audit.md }
+      - if: always()
+        name: Summary
+        run: cat ui-audit.md >> "$GITHUB_STEP_SUMMARY"
