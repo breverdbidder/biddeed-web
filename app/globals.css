@@ -3,70 +3,69 @@
 @tailwind utilities;
 
 :root {
-  /* Navy accent colors */
-  --navy-50: #E8F4FC;
-  --navy-100: #E8F4FC;
-  --navy-200: #CCCCCC;
-  --navy-300: #002A54;
-  --navy-400: #002A54;
-  --navy-500: #005DAA;
-  --navy-600: #002A54;
-  --navy-700: #002A54;
-  --navy-800: #002A54;
-  --navy-900: #002A54;
+  /* WinnerDataAI house-brand light tokens */
+  --navy-50: #F8D4C5;
+  --navy-100: #F8D4C5;
+  --navy-200: #DDD5C9;
+  --navy-300: #1F1B16;
+  --navy-400: #1F1B16;
+  --navy-500: #766F67;
+  --navy-600: #1F1B16;
+  --navy-700: #1F1B16;
+  --navy-800: #1F1B16;
+  --navy-900: #1F1B16;
 
-  /* Orange accent colors */
-  --orange-50: #E8F4FC;
-  --orange-100: #E8F4FC;
-  --orange-200: #E8F4FC;
-  --orange-300: #0073CF;
-  --orange-400: #0073CF;
-  --orange-500: #0073CF;
-  --orange-600: #005DAA;
+  /* Terracotta action tokens */
+  --orange-50: #F8D4C5;
+  --orange-100: #F8D4C5;
+  --orange-200: #EDE3D7;
+  --orange-300: #C15F3C;
+  --orange-400: #C15F3C;
+  --orange-500: #C15F3C;
+  --orange-600: #A94D30;
 
-  /* Slate colors for dark theme */
-  --slate-50: #ffffff;
-  --slate-100: #E8F4FC;
-  --slate-200: #CCCCCC;
-  --slate-300: #CCCCCC;
-  --slate-400: #002A54;
-  --slate-500: #002A54;
-  --slate-600: #002A54;
-  --slate-700: #002A54;
-  --slate-800: #002A54;
-  --slate-900: #002A54;
-  --slate-950: #002A54;
+  /* Warm neutral surfaces */
+  --slate-50: #FBFAF7;
+  --slate-100: #F5F0E8;
+  --slate-200: #DDD5C9;
+  --slate-300: #DDD5C9;
+  --slate-400: #766F67;
+  --slate-500: #766F67;
+  --slate-600: #1F1B16;
+  --slate-700: #1F1B16;
+  --slate-800: #1F1B16;
+  --slate-900: #1F1B16;
+  --slate-950: #1F1B16;
 
-  /* shadcn semantic colors (HSL values — no hsl() wrapper) */
-  /* Light theme = Ariel's palette, 2026-09-04 evening (PR #44): page/card #ffffff, tint #E8F4FC, ink #222222, secondary text #002A54 (headings + secondary, 8.5:1), border #CCCCCC, brand blue #0073CF (4.8:1 on white, hover #005DAA). Nothing else. JS mirror: lib/design-tokens.ts */
-  --background: 0 0% 100%;
-  --foreground: 0 0% 13.3%;
-  --card: 0 0% 100%;
-  --card-foreground: 0 0% 13.3%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 0 0% 13.3%;
-  --primary: 206.7 100% 40.6%;
-  --primary-foreground: 0 0% 100%;
-  --secondary: 204 77% 95%;
-  --secondary-foreground: 0 0% 13.3%;
-  --muted: 204 77% 95%;
-  --muted-foreground: 210 100% 16.5%;
-  --accent: 206.7 100% 40.6%;
-  --accent-foreground: 0 0% 100%;
-  --destructive: 210 100% 16.5%;
-  --destructive-foreground: 0 0% 100%;
-  --border: 0 0% 80%;
-  --input: 0 0% 80%;
-  --ring: 206.7 100% 40.6%;
-  --primary-hover: 207.2 100% 33.3%;   /* #005DAA - brand text ON THE TINT (brand on tint is 4.31:1) and hover fills */
+  /* shadcn semantic colors: cream canvas, terracotta action, black-brown ink */
+  --background: 39 33% 94%;
+  --foreground: 30 17% 10%;
+  --card: 40 33% 98%;
+  --card-foreground: 30 17% 10%;
+  --popover: 40 33% 98%;
+  --popover-foreground: 30 17% 10%;
+  --primary: 14 54% 49%;
+  --primary-foreground: 40 33% 98%;
+  --secondary: 36 23% 83%;
+  --secondary-foreground: 30 17% 10%;
+  --muted: 36 23% 83%;
+  --muted-foreground: 30 7% 46%;
+  --accent: 14 54% 49%;
+  --accent-foreground: 40 33% 98%;
+  --destructive: 14 54% 49%;
+  --destructive-foreground: 40 33% 98%;
+  --border: 36 23% 83%;
+  --input: 36 23% 83%;
+  --ring: 14 54% 49%;
+  --primary-hover: 14 56% 43%;
   --radius: 0.5rem;
 
   /* Chart colors */
-  --chart-1: 206.7 100% 40.6%;   /* brand */
-  --chart-2: 210 100% 16.5%;     /* navy */
-  --chart-3: 207.2 100% 33.3%;   /* brand hover #005DAA */
-  --chart-4: 204 77% 95%;        /* tint */
-  --chart-5: 0 0% 80%;           /* border grey */
+  --chart-1: 14 54% 49%;         /* terracotta */
+  --chart-2: 30 17% 10%;         /* black-brown ink */
+  --chart-3: 14 56% 43%;         /* terracotta hover */
+  --chart-4: 36 23% 83%;         /* warm fill */
+  --chart-5: 36 23% 83%;         /* warm border */
 }
 
 * {
@@ -100,21 +99,21 @@ body {
  *  - grade-a/b/c: deal quality grade
  */
 .glass-diamond {
-  background: rgba(0, 115, 207, 0.12);
+  background: rgba(193, 95, 60, 0.12);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(0, 115, 207, 0.3);
+  border: 1px solid rgba(193, 95, 60, 0.3);
 }
 
 .glass-triangle {
-  background: rgba(0, 42, 84, 0.12);
+  background: rgba(31, 27, 22, 0.12);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(0, 42, 84, 0.3);
+  border: 1px solid rgba(31, 27, 22, 0.3);
 }
 
 .glass-sold {
-  background: rgba(0, 93, 170, 0.12);
+  background: rgba(169, 77, 48, 0.12);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(0, 93, 170, 0.3);
+  border: 1px solid rgba(169, 77, 48, 0.3);
 }
 
 .glass-canceled {
@@ -125,15 +124,15 @@ body {
 }
 
 .grade-a {
-  color: #0073CF;
+  color: #C15F3C;
 }
 
 .grade-b {
-  color: #005DAA;
+  color: #A94D30;
 }
 
 .grade-c {
-  color: #002A54;
+  color: #1F1B16;
 }
 
 /* Custom scrollbar */
@@ -171,13 +170,13 @@ body {
    blue, C navy, D tint with navy text, E/X/Z border grey with ink. (An earlier
    port had .grade-E navy-on-navy — invisible. Do not "restore" it.)
    ───────────────────────────────────────────────────────────────────────── */
-.grade-A { background: #0073CF; color: #ffffff; }
-.grade-B { background: #005DAA; color: #ffffff; }
-.grade-C { background: #002A54; color: #ffffff; }
-.grade-D { background: #E8F4FC; color: #002A54; }
+.grade-A { background: #C15F3C; color: #FBFAF7; }
+.grade-B { background: #A94D30; color: #FBFAF7; }
+.grade-C { background: #1F1B16; color: #FBFAF7; }
+.grade-D { background: #F8D4C5; color: #1F1B16; }
 .grade-E,
 .grade-X,
-.grade-Z { background: #CCCCCC; color: #222222; }
+.grade-Z { background: #DDD5C9; color: #1F1B16; }
 
 /* ─────────────────────────────────────────────────────────────────────────
    Tabular figures. Every currency, bid and count column must use these.
@@ -211,12 +210,12 @@ th[data-numeric] { font-variant-numeric: tabular-nums; font-feature-settings: "t
   :root {
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 0 0% 13.3%;
-    --sidebar-primary: 206.7 100% 40.6%;
+    --sidebar-primary: 14 54% 49%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 204 77% 95%;
+    --sidebar-accent: 36 23% 83%;
     --sidebar-accent-foreground: 0 0% 13.3%;
     --sidebar-border: 0 0% 80%;
-    --sidebar-ring: 206.7 100% 40.6%;
+    --sidebar-ring: 14 54% 49%;
   }
   html.dark {
     --sidebar-background: 213 39% 7%;
@@ -268,45 +267,45 @@ th[data-numeric] { font-variant-numeric: tabular-nums; font-feature-settings: "t
    brand blue #0073CF. Dark mode is explicit.
    ───────────────────────────────────────────────────────────────────────── */
 html[data-theme='light'] {
-  --background: 0 0% 100%;          /* #ffffff page */
-  --foreground: 0 0% 13.3%;           /* #222222 ink */
-  --card: 0 0% 100%;                 /* #ffffff */
-  --card-foreground: 0 0% 13.3%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 0 0% 13.3%;
-  --primary: 206.7 100% 40.6%;              /* #0073CF brand blue */
-  --primary-foreground: 0 0% 100%;
-  --secondary: 204 77% 95%;
-  --secondary-foreground: 0 0% 13.3%;
-  --muted: 204 77% 95%;
-  --muted-foreground: 210 100% 16.5%;      /* #002A54 secondary, 8.5:1 */
-  --accent: 206.7 100% 40.6%;
-  --accent-foreground: 0 0% 100%;
-  --border: 0 0% 80%;               /* #CCCCCC */
-  --input: 0 0% 80%;
-  --ring: 206.7 100% 40.6%;
-  --sidebar-background: 0 0% 100%;
-  --sidebar-foreground: 0 0% 13.3%;
-  --sidebar-primary: 206.7 100% 40.6%;
-  --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 204 77% 95%;
-  --sidebar-accent-foreground: 0 0% 13.3%;
-  --sidebar-border: 0 0% 80%;
-  --sidebar-ring: 206.7 100% 40.6%;
+  --background: 39 33% 94%;          /* #F5F0E8 cream canvas */
+  --foreground: 30 17% 10%;           /* #1F1B16 ink */
+  --card: 40 33% 98%;                 /* #FBFAF7 */
+  --card-foreground: 30 17% 10%;
+  --popover: 40 33% 98%;
+  --popover-foreground: 30 17% 10%;
+  --primary: 14 54% 49%;              /* #C15F3C terracotta */
+  --primary-foreground: 40 33% 98%;
+  --secondary: 36 23% 83%;
+  --secondary-foreground: 30 17% 10%;
+  --muted: 36 23% 83%;
+  --muted-foreground: 30 7% 46%;      /* #766F67 warm secondary */
+  --accent: 14 54% 49%;
+  --accent-foreground: 40 33% 98%;
+  --border: 36 23% 83%;               /* #DDD5C9 */
+  --input: 36 23% 83%;
+  --ring: 14 54% 49%;
+  --sidebar-background: 39 33% 94%;
+  --sidebar-foreground: 30 17% 10%;
+  --sidebar-primary: 14 54% 49%;
+  --sidebar-primary-foreground: 40 33% 98%;
+  --sidebar-accent: 36 23% 83%;
+  --sidebar-accent-foreground: 30 17% 10%;
+  --sidebar-border: 36 23% 83%;
+  --sidebar-ring: 14 54% 49%;
 }
 
 html[data-theme='light'] body {
-  background: #ffffff;
-  color: #222222;
+  background: #F5F0E8;
+  color: #1F1B16;
 }
 /* The pre-#45 [class~='text-white'] / slate / bd-orange override block that used
    to live here is gone: every component reads the tokens now, and the
    `text-white -> #222222` rule was painting ink on the brand-blue buttons
    (3.3:1 measured live on /radar 2026-09-06 18:40 UTC). */
-html[data-theme='light'] ::selection { background: #0073CF; color: #ffffff; }
-html[data-theme='light'] ::-webkit-scrollbar-track { background: #E8F4FC; }
-html[data-theme='light'] ::-webkit-scrollbar-thumb { background: #CCCCCC; }
-html[data-theme='light'] ::-webkit-scrollbar-thumb:hover { background: #002A54; }
+html[data-theme='light'] ::selection { background: #C15F3C; color: #FBFAF7; }
+html[data-theme='light'] ::-webkit-scrollbar-track { background: #EDE3D7; }
+html[data-theme='light'] ::-webkit-scrollbar-thumb { background: #DDD5C9; }
+html[data-theme='light'] ::-webkit-scrollbar-thumb:hover { background: #A94D30; }
 
 /* ─────────────────────────────────────────────────────────────────────────
    Dark mode — semantic tokens.
@@ -356,7 +355,7 @@ html.dark body {
 
 
 /* Sky theme (Ariel, 2026-09-04): white backgrounds, blue accent, navy headings - light mode only */
-html[data-theme='light'] h1, html[data-theme='light'] h2, html[data-theme='light'] h3, :root:not([data-theme='dark']) h1, :root:not([data-theme='dark']) h2, :root:not([data-theme='dark']) h3 { color: #002A54; }
+html[data-theme='light'] h1, html[data-theme='light'] h2, html[data-theme='light'] h3, :root:not([data-theme='dark']) h1, :root:not([data-theme='dark']) h2, :root:not([data-theme='dark']) h3 { color: #1F1B16; }
 
 /* ─────────────────────────────────────────────────────────────────────────
    Brand blue on the tint. #0073CF on #E8F4FC measures 4.31:1 - under the
@@ -402,16 +401,11 @@ html[data-theme='light'] h1, html[data-theme='light'] h2, html[data-theme='light
 .fc .fc-list-day-cushion { background: hsl(var(--secondary)); }
 .fc .fc-daygrid-more-link { color: hsl(var(--primary-hover)); }
 
-/* mapbox-gl.css is imported by AuctionMap.tsx and lands AFTER this file in the
-   bundle, so equal-specificity overrides lose (measured live 2026-09-06 19:25
-   UTC: "© Mapbox" still rgba(0,0,0,.75)). Every selector below carries one
-   extra class so it out-ranks the vendor rule regardless of order. */
-.mapboxgl-map.mapboxgl-map { font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-.mapboxgl-map .mapboxgl-ctrl-attrib, .mapboxgl-map .mapboxgl-ctrl-attrib a, .mapboxgl-map .mapboxgl-ctrl-attrib a:hover, .mapboxgl-map .mapboxgl-ctrl-attrib-button { color: hsl(var(--muted-foreground)); }
-.mapboxgl-map .mapboxgl-ctrl-attrib.mapboxgl-compact, .mapboxgl-map .mapboxgl-ctrl-attrib { background: hsl(var(--background) / 0.9); }
-.mapboxgl-map .mapboxgl-ctrl-group { background: hsl(var(--card)); }
-.mapboxgl-map .mapboxgl-ctrl-group button + button { border-top-color: hsl(var(--border)); }
-.mapboxgl-map .mapboxgl-popup-content { background: hsl(var(--card)); color: hsl(var(--foreground)); border: 1px solid hsl(var(--border)); }
-.mapboxgl-map .mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip { border-top-color: hsl(var(--card)); }
-.mapboxgl-map .mapboxgl-popup-anchor-top .mapboxgl-popup-tip { border-bottom-color: hsl(var(--card)); }
-.mapboxgl-map .mapboxgl-popup-close-button { color: hsl(var(--muted-foreground)); }
+.mapboxgl-ctrl-attrib, .mapboxgl-ctrl-attrib a, .mapboxgl-ctrl-attrib-button { color: hsl(var(--muted-foreground)); }
+.mapboxgl-ctrl-attrib.mapboxgl-compact, .mapboxgl-ctrl-attrib { background: hsl(var(--background) / 0.9); }
+.mapboxgl-ctrl-group { background: hsl(var(--card)); }
+.mapboxgl-ctrl-group button + button { border-top-color: hsl(var(--border)); }
+.mapboxgl-popup-content { background: hsl(var(--card)); color: hsl(var(--foreground)); border: 1px solid hsl(var(--border)); }
+.mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip { border-top-color: hsl(var(--card)); }
+.mapboxgl-popup-anchor-top .mapboxgl-popup-tip { border-bottom-color: hsl(var(--card)); }
+.mapboxgl-popup-close-button { color: hsl(var(--muted-foreground)); }
