@@ -58,12 +58,13 @@
   --border: 0 0% 80%;
   --input: 0 0% 80%;
   --ring: 206.7 100% 40.6%;
+  --primary-hover: 207.2 100% 33.3%;   /* #005DAA - brand text ON THE TINT (brand on tint is 4.31:1) and hover fills */
   --radius: 0.5rem;
 
   /* Chart colors */
   --chart-1: 206.7 100% 40.6%;   /* brand */
   --chart-2: 210 100% 16.5%;     /* navy */
-  --chart-3: 207 100% 33%;       /* brand hover */
+  --chart-3: 207.2 100% 33.3%;   /* brand hover #005DAA */
   --chart-4: 204 77% 95%;        /* tint */
   --chart-5: 0 0% 80%;           /* border grey */
 }
@@ -298,28 +299,10 @@ html[data-theme='light'] body {
   background: #ffffff;
   color: #222222;
 }
-html[data-theme='light'] [class~='bg-slate-950'] { background-color: #ffffff !important; }
-html[data-theme='light'] [class~='bg-slate-900'] { background-color: #ffffff !important; }
-html[data-theme='light'] [class~='bg-slate-800'] { background-color: #E8F4FC !important; }
-html[data-theme='light'] [class~='text-white'],
-html[data-theme='light'] [class~='text-slate-100'],
-html[data-theme='light'] [class~='text-slate-200'] { color: #222222 !important; }
-html[data-theme='light'] [class~='text-slate-300'],
-html[data-theme='light'] [class~='text-slate-400'] { color: #002A54 !important; }
-html[data-theme='light'] [class~='text-slate-500'],
-html[data-theme='light'] [class~='text-slate-600'] { color: #002A54 !important; }
-html[data-theme='light'] [class~='border-slate-800'],
-html[data-theme='light'] [class~='border-slate-700'],
-html[data-theme='light'] [class~='border-slate-600'] { border-color: #CCCCCC !important; }
-html[data-theme='light'] [class~='hover:bg-slate-800']:hover { background-color: #E8F4FC !important; }
-html[data-theme='light'] [class~='hover:text-white']:hover { color: #222222 !important; }
-html[data-theme='light'] [class~='text-bd-orange'] { color: #0073CF !important; }
-html[data-theme='light'] [class~='bg-bd-orange'] { background-color: #0073CF !important; }
-html[data-theme='light'] [class~='border-bd-orange'] { border-color: #0073CF !important; }
-html[data-theme='light'] [class~='border-bd-orange\/50'] { border-color: rgba(0,115,207,.5) !important; }
-html[data-theme='light'] [class~='bg-bd-orange\/5'],
-html[data-theme='light'] [class~='bg-bd-orange\/10'] { background-color: #E8F4FC !important; }
-html[data-theme='light'] [class~='bg-slate-950\/60'] { background-color: rgba(0,42,84,.6) !important; }
+/* The pre-#45 [class~='text-white'] / slate / bd-orange override block that used
+   to live here is gone: every component reads the tokens now, and the
+   `text-white -> #222222` rule was painting ink on the brand-blue buttons
+   (3.3:1 measured live on /radar 2026-09-06 18:40 UTC). */
 html[data-theme='light'] ::selection { background: #0073CF; color: #ffffff; }
 html[data-theme='light'] ::-webkit-scrollbar-track { background: #E8F4FC; }
 html[data-theme='light'] ::-webkit-scrollbar-thumb { background: #CCCCCC; }
@@ -374,3 +357,56 @@ html.dark body {
 
 /* Sky theme (Ariel, 2026-09-04): white backgrounds, blue accent, navy headings - light mode only */
 html[data-theme='light'] h1, html[data-theme='light'] h2, html[data-theme='light'] h3, :root:not([data-theme='dark']) h1, :root:not([data-theme='dark']) h2, :root:not([data-theme='dark']) h3 { color: #002A54; }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Brand blue on the tint. #0073CF on #E8F4FC measures 4.31:1 - under the
+   4.5:1 gate - so brand-coloured TEXT that sits on a tinted surface takes the
+   hover blue #005DAA (5.97:1 on the tint, 6.67:1 on white). Fills stay #0073CF.
+   ───────────────────────────────────────────────────────────────────────── */
+.bg-secondary .text-primary, .bg-muted .text-primary, .bg-secondary.text-primary, .bg-muted.text-primary,
+[class*="bg-primary/"] .text-primary, [class*="bg-primary/"].text-primary,
+[class*="bg-secondary/"] .text-primary, [class*="bg-muted/"] .text-primary { color: hsl(var(--primary-hover)); }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Vendor widgets read the tokens too. FullCalendar ships --fc-* custom
+   properties on :root (#2C3E50 buttons, #ddd borders, yellow "today"); they
+   were the last two off-palette colours on /radar?view=calendar. Mapbox's
+   attribution text is rgba(0,0,0,.75) - #000000 on the desktop /radar audit.
+   ───────────────────────────────────────────────────────────────────────── */
+.fc {
+  --fc-button-bg-color: hsl(var(--primary));
+  --fc-button-border-color: hsl(var(--primary));
+  --fc-button-text-color: hsl(var(--primary-foreground));
+  --fc-button-hover-bg-color: hsl(var(--primary-hover));
+  --fc-button-hover-border-color: hsl(var(--primary-hover));
+  --fc-button-active-bg-color: hsl(var(--primary-hover));
+  --fc-button-active-border-color: hsl(var(--primary-hover));
+  --fc-border-color: hsl(var(--border));
+  --fc-page-bg-color: hsl(var(--background));
+  --fc-neutral-bg-color: hsl(var(--secondary));
+  --fc-neutral-text-color: hsl(var(--muted-foreground));
+  --fc-today-bg-color: hsl(var(--secondary));
+  --fc-highlight-color: hsl(var(--secondary));
+  --fc-non-business-color: hsl(var(--secondary));
+  --fc-list-event-hover-bg-color: hsl(var(--secondary));
+  --fc-more-link-bg-color: hsl(var(--secondary));
+  --fc-more-link-text-color: hsl(var(--muted-foreground));
+  --fc-event-bg-color: hsl(var(--primary));
+  --fc-event-border-color: hsl(var(--primary));
+  --fc-event-text-color: hsl(var(--primary-foreground));
+  --fc-bg-event-color: hsl(var(--secondary));
+  --fc-now-indicator-color: hsl(var(--primary));
+}
+.fc .fc-button-primary:disabled { background: hsl(var(--secondary)); border-color: hsl(var(--border)); color: hsl(var(--muted-foreground)); opacity: 1; }
+.fc .fc-daygrid-day-number, .fc .fc-col-header-cell-cushion, .fc .fc-list-day-text, .fc .fc-list-day-side-text, .fc .fc-toolbar-title { color: hsl(var(--muted-foreground)); }
+.fc .fc-list-day-cushion { background: hsl(var(--secondary)); }
+.fc .fc-daygrid-more-link { color: hsl(var(--primary-hover)); }
+
+.mapboxgl-ctrl-attrib, .mapboxgl-ctrl-attrib a, .mapboxgl-ctrl-attrib-button { color: hsl(var(--muted-foreground)); }
+.mapboxgl-ctrl-attrib.mapboxgl-compact, .mapboxgl-ctrl-attrib { background: hsl(var(--background) / 0.9); }
+.mapboxgl-ctrl-group { background: hsl(var(--card)); }
+.mapboxgl-ctrl-group button + button { border-top-color: hsl(var(--border)); }
+.mapboxgl-popup-content { background: hsl(var(--card)); color: hsl(var(--foreground)); border: 1px solid hsl(var(--border)); }
+.mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip { border-top-color: hsl(var(--card)); }
+.mapboxgl-popup-anchor-top .mapboxgl-popup-tip { border-bottom-color: hsl(var(--card)); }
+.mapboxgl-popup-close-button { color: hsl(var(--muted-foreground)); }
