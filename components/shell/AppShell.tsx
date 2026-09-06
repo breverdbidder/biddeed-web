@@ -48,6 +48,14 @@ export default function AppShell({
   const [deedOpen, setDeedOpen] = useState(false)
   const toggleDeed = () => setDeedOpen((v) => !v)
 
+  // Authentication pages own their centered layout. Mounting the application
+  // shell around them creates a second navigation system and puts fixed Deed
+  // surfaces over Clerk controls, especially at 390px. Keep the route boundary
+  // explicit so auth styling remains independent of workspace navigation.
+  if (isAuthRoute) {
+    return <div className="min-h-screen bg-background text-foreground">{children}</div>
+  }
+
   return (
     <SidebarProvider>
       <AppSidebar deedOpen={deedOpen && !isHome} onToggleDeed={toggleDeed} authEnabled={authEnabled} showDeedToggle={!isHome} />

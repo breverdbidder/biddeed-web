@@ -123,7 +123,33 @@ export default function DiscoveryPage() {
           <div className="flex items-start gap-3"><ShieldCheck className="mt-0.5 h-5 w-5 text-primary" aria-hidden="true" /><div><p className="text-sm font-bold">Evidence rule</p><p className="mt-1 text-sm text-muted-foreground">Every result retains its source link.</p></div></div>
         </div>
 
-        {searched && rows.length > 0 && <div className="mt-8 overflow-x-auto"><table className="w-full min-w-[760px] text-left text-sm"><caption className="mb-3 text-left text-lg font-bold">Upcoming source-backed inventory</caption><thead className="border-b border-border text-xs uppercase tracking-wider text-muted-foreground"><tr><th className="py-3 pr-4">Property</th><th className="py-3 pr-4">County</th><th className="py-3 pr-4">Date</th><th className="py-3 pr-4">Sale</th><th className="py-3 pr-4">Opening bid</th><th className="py-3">Source</th></tr></thead><tbody>{rows.map((row) => <tr key={String(row.id)} className="border-b border-border"><td className="py-4 pr-4"><div className="font-semibold">{row.property_address || 'Address not published'}</div><div className="mt-1 text-xs text-muted-foreground">{row.city || '—'} · {row.case_number || 'Case unavailable'}</div></td><td className="py-4 pr-4">{row.county || '—'}</td><td className="py-4 pr-4">{row.auction_date || '—'}</td><td className="py-4 pr-4">{row.sale_type || '—'}</td><td className="py-4 pr-4">{money(row.opening_bid)}</td><td className="py-4">{row.source_url ? <a className="font-semibold text-primary underline" href={row.source_url} target="_blank" rel="noreferrer">View source</a> : <span className="text-muted-foreground">Unavailable</span>}</td></tr>)}</tbody></table></div>}
+        {searched && rows.length > 0 && (
+          <div className="mt-8">
+            <div className="hidden overflow-x-auto sm:block">
+              <table className="w-full min-w-[760px] text-left text-sm">
+                <caption className="mb-3 text-left text-lg font-bold">Upcoming source-backed inventory</caption>
+                <thead className="border-b border-border text-xs uppercase tracking-wider text-muted-foreground"><tr><th className="py-3 pr-4">Property</th><th className="py-3 pr-4">County</th><th className="py-3 pr-4">Date</th><th className="py-3 pr-4">Sale</th><th className="py-3 pr-4">Opening bid</th><th className="py-3">Source</th></tr></thead>
+                <tbody>{rows.map((row) => <tr key={String(row.id)} className="border-b border-border"><td className="py-4 pr-4"><div className="font-semibold">{row.property_address || 'Address not published'}</div><div className="mt-1 text-xs text-muted-foreground">{row.city || '—'} · {row.case_number || 'Case unavailable'}</div></td><td className="py-4 pr-4">{row.county || '—'}</td><td className="py-4 pr-4">{row.auction_date || '—'}</td><td className="py-4 pr-4">{row.sale_type || '—'}</td><td className="py-4 pr-4">{money(row.opening_bid)}</td><td className="py-4">{row.source_url ? <a className="font-semibold text-primary underline" href={row.source_url} target="_blank" rel="noreferrer">View source</a> : <span className="text-muted-foreground">Unavailable</span>}</td></tr>)}</tbody>
+              </table>
+            </div>
+            <div className="space-y-3 sm:hidden">
+              <h2 className="text-lg font-bold">Upcoming source-backed inventory</h2>
+              {rows.map((row) => (
+                <article key={String(row.id)} className="border border-border bg-card p-4 text-sm">
+                  <h3 className="font-semibold leading-6">{row.property_address || 'Address not published'}</h3>
+                  <p className="mt-1 text-xs text-muted-foreground">{row.city || '—'} · {row.case_number || 'Case unavailable'}</p>
+                  <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-sm">
+                    <div><dt className="text-xs uppercase tracking-wide text-muted-foreground">County</dt><dd className="mt-0.5 break-words">{row.county || '—'}</dd></div>
+                    <div><dt className="text-xs uppercase tracking-wide text-muted-foreground">Date</dt><dd className="mt-0.5 break-words">{row.auction_date || '—'}</dd></div>
+                    <div><dt className="text-xs uppercase tracking-wide text-muted-foreground">Sale</dt><dd className="mt-0.5 break-words">{row.sale_type || '—'}</dd></div>
+                    <div><dt className="text-xs uppercase tracking-wide text-muted-foreground">Opening bid</dt><dd className="mt-0.5 break-words">{money(row.opening_bid)}</dd></div>
+                  </dl>
+                  <div className="mt-4">{row.source_url ? <a className="inline-flex min-h-11 items-center font-semibold text-primary underline" href={row.source_url} target="_blank" rel="noreferrer">View official source</a> : <span className="text-muted-foreground">Source unavailable</span>}</div>
+                </article>
+              ))}
+            </div>
+          </div>
+        )}
         {searched && rows.length === 0 && <div className="mt-8 flex items-start gap-3 border border-border bg-card px-5 py-4 text-sm text-muted-foreground"><AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden="true" /><p>No result table is shown without source-backed records. Coverage varies by county and sale type; confirm material facts with the relevant clerk or official source.</p></div>}
       </div>
     </section>

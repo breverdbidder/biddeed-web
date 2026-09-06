@@ -248,8 +248,8 @@ export default function AuctionsLayout({ initialView, initialCounty, initialSale
     : null
 
   return (
-    <div className="w-full bg-muted dark:bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+    <div className="w-full min-w-0 overflow-x-hidden bg-muted dark:bg-background">
+      <div className="mx-auto max-w-7xl min-w-0 space-y-6 px-4 py-6 sm:px-6">
         <div>
           <h1 className="text-xl font-bold text-foreground dark:text-white">Auction Intelligence</h1>
           <p className="text-sm text-muted-foreground dark:text-muted-foreground mt-1">
@@ -314,13 +314,13 @@ export default function AuctionsLayout({ initialView, initialCounty, initialSale
         )}
 
         {viewMode === 'split' && (
-          <div className="grid grid-cols-1 lg:grid-cols-[380px_minmax(0,1fr)] gap-4 h-[70vh] min-h-[520px]">
+          <div className="grid min-w-0 grid-cols-1 gap-4 lg:h-[70vh] lg:grid-cols-[380px_minmax(0,1fr)]">
             {/* Sidebar and map are siblings in one fixed-height row so the list
                 scrolls independently and the map never gets pushed off-screen
                 by a long list. Below lg they stack - a 380px column beside a map
                 is unusable on a phone - and the map goes first, because "where"
                 is the question the phone screen can actually answer at a glance. */}
-            <div className="order-2 lg:order-1 bg-card dark:bg-card border border-border dark:border-border rounded-lg overflow-hidden flex flex-col min-h-0 h-[60vh] lg:h-auto">
+            <div className="order-2 flex min-h-0 min-w-0 flex-col overflow-hidden rounded-lg border border-border bg-card lg:order-1 lg:h-auto">
               <AuctionSidebarList
                 auctions={auctions}
                 selectedId={focusId}
@@ -329,7 +329,7 @@ export default function AuctionsLayout({ initialView, initialCounty, initialSale
                 onOpen={(auction) => router.push(`/radar/${auction.id}`)}
               />
             </div>
-            <div className="order-1 lg:order-2 min-h-[320px] h-[45vh] lg:h-auto">
+            <div className="order-1 min-h-[280px] min-w-0 h-[45vh] lg:order-2 lg:h-auto">
               <AuctionMap
                 county={selectedCounty}
                 saleType={selectedType}

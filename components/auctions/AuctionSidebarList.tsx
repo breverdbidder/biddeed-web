@@ -91,7 +91,7 @@ export default function AuctionSidebarList({
                     {a.property_address || 'Address not published'}
                   </p>
                   {type && (
-                    <span className={`shrink-0 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide border ${
+                    <span className={`shrink-0 px-1.5 py-0.5 rounded text-xs font-bold uppercase tracking-wide border ${
                       TYPE_BADGE[type] || 'bg-muted0/15 text-muted-foreground dark:text-muted-foreground border-border/30'
                     }`}>
                       {type === 'tax_deed' ? 'Tax Deed' : type === 'foreclosure' ? 'Foreclosure' : type}
@@ -116,13 +116,13 @@ export default function AuctionSidebarList({
                     <a
                       href={`/chat?new_project_county=${encodeURIComponent(a.county || '')}&case=${encodeURIComponent(a.case_number || '')}&source=radar_calendar`}
                       onClick={(e) => e.stopPropagation()}
-                      className="text-xs font-semibold text-foreground dark:text-white underline hover:no-underline min-h-6"
+                      className="inline-flex min-h-11 items-center text-xs font-semibold text-foreground dark:text-white underline hover:no-underline"
                     >
-                      📁 Add to project
+                      Add to project
                     </a>
                     <button
                       onClick={(e) => { e.stopPropagation(); onOpen(a) }}
-                      className="text-xs font-semibold text-primary dark:text-primary underline hover:no-underline min-h-6"
+                      className="inline-flex min-h-11 items-center text-xs font-semibold text-primary dark:text-primary underline hover:no-underline"
                     >
                       Full report →
                     </button>
