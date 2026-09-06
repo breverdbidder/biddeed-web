@@ -21,6 +21,9 @@ export const metadata: Metadata = {
   title: 'AuctionRadar — BidDeed.AI',
   description:
     'Live Florida foreclosure and tax deed auctions: map, calendar, table and spreadsheet views across 67 counties.',
+  alternates: {
+    canonical: 'https://biddeed.ai/radar',
+  },
 }
 
 const VIEWS: ViewMode[] = ['split', 'table', 'map', 'calendar', 'spreadsheet']
