@@ -290,7 +290,7 @@ html[data-theme='light'] {
   --secondary: 36 23% 83%;
   --secondary-foreground: 30 17% 10%;
   --muted: 36 23% 83%;
-  --muted-foreground: 30 7% 46%;      /* #766F67 warm secondary */
+  --muted-foreground: 30 9% 39%;      /* #6A625B contrast-safe warm secondary */
   --accent: 14 54% 49%;
   --accent-foreground: 40 33% 98%;
   --border: 36 23% 83%;               /* #DDD5C9 */
@@ -315,6 +315,7 @@ html[data-theme='light'] body {
    `text-white -> #222222` rule was painting ink on the brand-blue buttons
    (3.3:1 measured live on /radar 2026-09-06 18:40 UTC). */
 html[data-theme='light'] ::selection { background: #C15F3C; color: #FBFAF7; }
+html[data-theme='light'] .text-primary { color: hsl(var(--primary-hover)); }
 html[data-theme='light'] ::-webkit-scrollbar-track { background: #EDE3D7; }
 html[data-theme='light'] ::-webkit-scrollbar-thumb { background: #DDD5C9; }
 html[data-theme='light'] ::-webkit-scrollbar-thumb:hover { background: #A94D30; }

@@ -65,7 +65,7 @@ if (findings.length) {
  * files may not carry any other light value. Dark-mode values remain a separate
  * lifted palette. Anything else fails, in CI and in the deploy.
  */
-const CANON_LIGHT = ['#f5f0e8', '#fbfaf7', '#f8d4c5', '#1f1b16', '#ddd5c9', '#c15f3c', '#a94d30', '#766f67', '#ede3d7']
+const CANON_LIGHT = ['#f5f0e8', '#fbfaf7', '#f8d4c5', '#1f1b16', '#ddd5c9', '#c15f3c', '#a94d30', '#766f67', '#6a625b', '#ede3d7']
 const CANON_DARK = ['#0b1119', '#111b27', '#1b2737', '#ededed', '#9eb2c7', '#24344c', '#1a90ff', '#4da6ff']
 const CANON = new Set([...CANON_LIGHT, ...CANON_DARK])
 const tokenFindings = []
@@ -82,7 +82,7 @@ for (const rel of ALLOW) {
     for (const m of line.matchAll(/^\s*--(?:background|foreground|card|popover|primary|secondary|muted|accent|destructive|border|input|ring|primary-hover|chart-\d|sidebar-[a-z-]+)(?:-foreground)?:\s*([\d.]+ [\d.]+% [\d.]+%)/g)) {
       const hsl = m[1]
       const ok = [
-        '39 33% 94%', '40 33% 98%', '14 54% 49%', '36 23% 83%', '30 17% 10%', '30 7% 46%', '14 56% 43%', '0 0% 100%', '0 0% 13.3%', '0 0% 80%',
+        '39 33% 94%', '40 33% 98%', '14 54% 49%', '36 23% 83%', '30 17% 10%', '30 7% 46%', '30 9% 39%', '14 56% 43%', '0 0% 100%', '0 0% 13.3%', '0 0% 80%',
         '213 39% 7%', '214 39% 11%', '214 35% 16%', '0 0% 93%', '211 27% 70%', '216 35% 22%', '209 100% 55%',
       ].includes(hsl)
       if (!ok) tokenFindings.push({ rel, line: i + 1, hit: `hsl ${hsl}` })
