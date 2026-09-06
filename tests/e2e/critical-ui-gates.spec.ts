@@ -4,9 +4,7 @@ const BASE = process.env.BASE_URL ?? 'https://biddeed.ai'
 const MOBILE = { width: 390, height: 844 }
 const DESKTOP = { width: 1440, height: 900 }
 const HOUSE_COLORS = new Set([
-  '#f5f0e8', '#fbfaf7', '#f8d4c5', '#1f1b16', '#766f67',
-  '#ddd5c9', '#c15f3c', '#a94d30', '#ede3d7',
-  '#fcfaf8', '#f5f1eb', '#1e1a15', '#7e756d', '#ded6ca', '#c05939',
+  '#ffffff', '#e8f4fc', '#222222', '#002a54', '#cccccc', '#0073cf', '#005daa',
 ])
 const APPROVED_FONTS = new Set([
   'Inter', 'Inter Fallback', 'Source Serif 4', 'Source Serif 4 Fallback',

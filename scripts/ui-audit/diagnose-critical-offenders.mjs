@@ -4,7 +4,7 @@ import fs from 'node:fs'
 const base = process.env.BASE_URL || 'https://biddeed.ai'
 const routes = ['/', '/radar', '/radar?view=map', '/radar?view=calendar', '/discover', '/auctions', '/sign-in', '/sign-up', '/buy-report']
 const viewports = [{ name: 'desktop', width: 1440, height: 900 }, { name: 'mobile', width: 390, height: 844 }]
-const canon = new Set(['#f5f0e8', '#fbfaf7', '#f8d4c5', '#1f1b16', '#766f67', '#ddd5c9', '#c15f3c', '#a94d30', '#ede3d7', '#fcfaf8', '#f5f1eb', '#1e1a15', '#7e756d', '#ded6ca', '#c05939'])
+const canon = new Set(['#ffffff', '#e8f4fc', '#222222', '#002a54', '#cccccc', '#0073cf', '#005daa'])
 const parseRgb = (value) => { const match = value.match(/rgba?\(([^)]+)\)/); if (!match) return null; const parts = match[1].split(',').map(Number); return { rgb: parts.slice(0, 3), alpha: parts[3] ?? 1 } }
 const hex = (rgb) => `#${rgb.map((v) => Math.round(v).toString(16).padStart(2, '0')).join('')}`
 const luminance = (rgb) => rgb.map((v) => { const x=v/255; return x<=0.03928?x/12.92:((x+0.055)/1.055)**2.4 }).reduce((s,v,i)=>s+v*[0.2126,0.7152,0.0722][i],0)

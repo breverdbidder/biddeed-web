@@ -59,13 +59,14 @@ if (findings.length) {
   process.exit(1)
 }
 /*
- * Canon-values check. The light palette is the WinnerDataAI house brand:
- * cream canvas, bright cream surface, terracotta action, black-brown ink,
- * warm border, warm secondary text, and soft terracotta tint. The two token
- * files may not carry any other light value. Dark-mode values remain a separate
- * lifted palette. Anything else fails, in CI and in the deploy.
+ * Canon-values check (added 2026-09-06 after 124ffc1 pushed cream/terracotta
+ * straight to main and passed this gate — the literal rule only asked WHERE a
+ * colour lives, never WHICH colour). The light palette is exactly the seven
+ * Ariel set on 2026-09-04; the two token files may not carry any other light
+ * value. Dark-mode values (html[data-theme='dark'] / DARK) are the same family
+ * lifted and are listed too. Anything else fails, in CI and in the deploy.
  */
-const CANON_LIGHT = ['#f5f0e8', '#fbfaf7', '#f8d4c5', '#1f1b16', '#ddd5c9', '#c15f3c', '#a94d30', '#766f67', '#6a625b', '#ede3d7']
+const CANON_LIGHT = ['#ffffff', '#e8f4fc', '#222222', '#002a54', '#cccccc', '#0073cf', '#005daa']
 const CANON_DARK = ['#0b1119', '#111b27', '#1b2737', '#ededed', '#9eb2c7', '#24344c', '#1a90ff', '#4da6ff']
 const CANON = new Set([...CANON_LIGHT, ...CANON_DARK])
 const tokenFindings = []
@@ -82,7 +83,7 @@ for (const rel of ALLOW) {
     for (const m of line.matchAll(/^\s*--(?:background|foreground|card|popover|primary|secondary|muted|accent|destructive|border|input|ring|primary-hover|chart-\d|sidebar-[a-z-]+)(?:-foreground)?:\s*([\d.]+ [\d.]+% [\d.]+%)/g)) {
       const hsl = m[1]
       const ok = [
-        '39 33% 94%', '40 33% 98%', '14 54% 49%', '36 23% 83%', '30 17% 10%', '30 7% 46%', '30 9% 39%', '30 10% 32%', '14 56% 36%', '14 56% 43%', '0 0% 100%', '0 0% 13.3%', '0 0% 80%',
+        '0 0% 100%', '204 77% 95%', '0 0% 13.3%', '210 100% 16.5%', '0 0% 80%', '206.7 100% 40.6%', '207.2 100% 33.3%',
         '213 39% 7%', '214 39% 11%', '214 35% 16%', '0 0% 93%', '211 27% 70%', '216 35% 22%', '209 100% 55%',
       ].includes(hsl)
       if (!ok) tokenFindings.push({ rel, line: i + 1, hit: `hsl ${hsl}` })
@@ -92,7 +93,7 @@ for (const rel of ALLOW) {
 if (tokenFindings.length) {
   console.error(`palette-gate: ${tokenFindings.length} value(s) in the token files that are NOT the canon palette (light: ${CANON_LIGHT.join(' ')})\n`)
   for (const f of tokenFindings) console.error(`  ${f.rel}:${f.line}  ${f.hit}`)
-  console.error('\nThe canon is the WinnerDataAI house-brand palette approved for BidDeed.AI. Any palette change must update this list in the same reviewed change.')
+  console.error('\nThe seven canon colours are Ariel\'s 2026-09-04 palette (PR #44). A different palette needs his explicit decision, then this list changes in the same PR.')
   process.exit(1)
 }
 
