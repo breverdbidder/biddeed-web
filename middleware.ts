@@ -108,6 +108,18 @@ const isPublicRoute = createRouteMatcher([
   '/parcel(.*)',
   '/property(.*)',
     '/card(.*)',
+  // #20053 — reel funnel: end card / QR / biddeed.ai/r/<code> must land a
+  // signed-out visitor on the public deal page. These paths are normally
+  // served by the legacy router Worker (src/worker.js in cli-anything-biddeed),
+  // never routed to this app — allowlisted here anyway so a future proxy or
+  // zone-route change fails open to public instead of a Clerk protect-rewrite.
+  '/deal(.*)',
+  '/r(.*)',
+  '/reels(.*)',
+  '/subscribe(.*)',
+  '/support(.*)',
+  '/contact(.*)',
+  '/api/capture(.*)',
   // SEO files — belt & suspenders (matcher also excludes txt|xml below)
   '/robots.txt',
   '/sitemap.xml',

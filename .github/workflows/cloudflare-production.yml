@@ -85,7 +85,20 @@ jobs:
         # through the npm script.
         run: npx opennextjs-cloudflare build --config wrangler.production.jsonc
 
-      - name: Reconcile production Worker route ownership
+      # #20053 P0: the previous version of this step (97aa6e1, 2026-09-06
+      # 13:53 UTC) claimed biddeed.ai/* for this Worker and deleted every
+      # other route on the zone not owned by biddeed-web-production -- which
+      # deleted the legacy router's (worker-damp-snowflake-cead) route and
+      # sent /deal, /r, /reels, /subscribe, /support, /contact straight into
+      # this Next.js app's Clerk middleware with no matching page, producing
+      # the protect-rewrite 404 this issue is about. This app implements only
+      # /, /_next/*, /api/*, /radar*, /success, /order, /sign-in, /sign-up,
+      # /discover, /alerts, /buy-report -- everything else is the router's.
+      # Fix: this Worker releases any zone route it holds and goes back to
+      # workers.dev-only, reached in production solely via the router's
+      # RADAR_ORIGIN proxy (src/worker.js in cli-anything-biddeed), matching
+      # wrangler.production.jsonc, which no longer declares a routes key.
+      - name: Release any zone route claimed by this Worker
         shell: bash
         run: |
           set -euo pipefail
@@ -94,12 +107,12 @@ jobs:
           zone_id=$(curl -fsS "$api/zones?name=biddeed.ai&status=active" "${auth[@]}" | jq -er '.result[0].id')
           routes=$(curl -fsS "$api/zones/$zone_id/workers/routes" "${auth[@]}")
           echo "$routes" | jq -r '.result[] | [.id,.pattern,.script] | @tsv'
-          echo "$routes" | jq -r '.result[] | select((.pattern | startswith("biddeed.ai/")) and (.script != "biddeed-web-production")) | .id' | while read -r route_id; do
+          echo "$routes" | jq -r '.result[] | select(.script == "biddeed-web-production") | .id' | while read -r route_id; do
             [ -n "$route_id" ] || continue
-            echo "Deleting legacy BidDeed route $route_id"
+            echo "Releasing biddeed-web-production route $route_id"
             curl -fsS -X DELETE "$api/zones/$zone_id/workers/routes/$route_id" "${auth[@]}" | jq -e '.success == true' >/dev/null
           done
-      - name: Deploy production Worker with canonical apex route
+      - name: Deploy production Worker (workers.dev only, no zone route)
         run: npx wrangler deploy --config wrangler.production.jsonc --env production
 
       - name: Bind server-only secrets to the Worker runtime
@@ -112,7 +125,7 @@ jobs:
       - name: Print deployment URL without secrets
         run: |
           echo 'Cloudflare OpenNext production Worker deployed: biddeed-web-production'
-          echo 'Canonical route: https://biddeed.ai/*'
+          echo 'Reachable at its workers.dev URL only -- no zone route bound by this workflow.'
 
       - name: Public smoke checks against the workers.dev URL
         shell: bash
@@ -129,3 +142,29 @@ jobs:
             [[ "$code" =~ ^2|3 ]] || { echo "Production Worker check failed for $path" >&2; exit 1; }
           done
         id: smoke
+
+      # #20053 P0: the workers.dev checks above cannot catch this bug class --
+      # the regression was a Cloudflare zone-route ownership change, which
+      # only shows up against the real biddeed.ai domain. This is the
+      # canonical-domain, signed-out smoke test the issue requires; it fails
+      # the deploy (and therefore blocks promoting a broken route table) if
+      # any of these come back non-200 (or non-302 for the /r/ short-link).
+      - name: Canonical-domain smoke checks (signed-out, biddeed.ai)
+        shell: bash
+        run: |
+          set -euo pipefail
+          check() {
+            local path="$1" want="$2"
+            local code
+            code=$(curl -sS -o /tmp/canon_response -w '%{http_code}' --max-time 30 "https://biddeed.ai$path")
+            echo "$path -> $code (want $want)"
+            [[ "$code" == "$want" ]] || { echo "Canonical smoke check FAILED for $path: got $code, want $want" >&2; exit 1; }
+          }
+          check "/" 200
+          check "/deal/polk/2024ca000341000000" 200
+          check "/deal/lee/2026000141" 200
+          check "/deal/broward/cace-24-008115" 200
+          check "/subscribe" 200
+          code=$(curl -sS -o /tmp/canon_response -D /tmp/canon_headers --max-time 30 -w '%{http_code}' "https://biddeed.ai/r/F5oeMD")
+          echo "/r/F5oeMD -> $code (want 302)"
+          [[ "$code" == "302" ]] || { echo "Canonical smoke check FAILED for /r/F5oeMD: got $code, want 302" >&2; cat /tmp/canon_headers >&2; exit 1; }
