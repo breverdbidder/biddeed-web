@@ -155,7 +155,7 @@ export function Founder() {
           </p>
           <p className="text-xs text-muted-foreground">
             Figures from the publicly recorded closings at{' '}
-            <a href="https://everestcapitalusa.com" className="underline decoration-border underline-offset-4 hover:text-foreground" rel="noopener">everestcapitalusa.com</a>.
+            <a href="https://everestcapitalusa.com" className="inline-flex min-h-8 items-center underline decoration-border underline-offset-4 hover:text-foreground" rel="noopener">everestcapitalusa.com</a>.
           </p>
         </div>
       </div>
@@ -376,7 +376,7 @@ export function Pricing({ onPrompt }: { onPrompt: (p: string) => void }) {
 
       <p className="mt-6 text-center text-sm text-muted-foreground">
         Founding investors: the first 100 BidDeed.AI Pioneers set founding pricing.{' '}
-        <a href={W.pioneers} className="font-medium text-primary underline underline-offset-2">
+        <a href={W.pioneers} className="inline-flex min-h-8 items-center font-medium text-primary underline underline-offset-2">
           Join the Pioneer waitlist
         </a>
       </p>
@@ -400,7 +400,11 @@ export function Footer() {
     <footer className="mx-auto max-w-6xl border-t border-border px-4 py-10 sm:px-6">
       <nav aria-label="Footer" className="flex flex-wrap gap-x-6 gap-y-2">
         {links.map((l) => (
-          <a key={l.href} href={l.href} className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+          <a
+            key={l.href}
+            href={l.href}
+            className="inline-flex min-h-8 min-w-8 items-center text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
             {l.label}
           </a>
         ))}

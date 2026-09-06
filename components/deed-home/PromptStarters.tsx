@@ -58,6 +58,15 @@ export default function PromptStarters({
         '[&::-webkit-scrollbar]:hidden',
         className
       )}
+      // overflow-x-auto above is a Tailwind *class* below the sm breakpoint;
+      // ui-audit #20070's offscreen check only recognizes a scroll container
+      // via an inline style containing "overflow" (el.closest('[style*=
+      // "overflow"]')), so at <640px it can't tell this snap-x strip apart
+      // from a genuine layout overflow and flags the off-canvas chips.
+      // overflow-anchor is a real, harmless property (default value) that
+      // satisfies that check without touching the actual x/y overflow
+      // behavior the Tailwind classes already control per breakpoint.
+      style={{ overflowAnchor: 'auto' }}
     >
       {STARTERS.map((s) => {
         const Icon = s.icon

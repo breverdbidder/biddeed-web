@@ -414,4 +414,12 @@ html[data-theme='light'] h1, html[data-theme='light'] h2, html[data-theme='light
 .mapboxgl-map .mapboxgl-popup-content { background: hsl(var(--card)); color: hsl(var(--foreground)); border: 1px solid hsl(var(--border)); }
 .mapboxgl-map .mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip { border-top-color: hsl(var(--card)); }
 .mapboxgl-map .mapboxgl-popup-anchor-top .mapboxgl-popup-tip { border-bottom-color: hsl(var(--card)); }
+
+/* TYPE gate (ui-audit #20070): body text carried in a P/LI/DD tag with more
+   than 20 characters must be >=15px @1440 or >=16px @<600. Tailwind's
+   text-xs (12px) and text-sm (14px) defaults are used throughout for real
+   paragraph/list copy on the marketing pages, not just short badges -- those
+   live on span/div and are untouched since the gate only walks P/LI/DD. */
+p.text-xs, li.text-xs, dd.text-xs,
+p.text-sm, li.text-sm, dd.text-sm { font-size: 1rem; }
 .mapboxgl-map .mapboxgl-popup-close-button { color: hsl(var(--muted-foreground)); }

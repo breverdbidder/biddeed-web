@@ -118,8 +118,12 @@ export default function DeedPanel({ open, onClose }: Props) {
           'bg-card transition-transform duration-200 motion-reduce:transition-none',
           'lg:static lg:top-auto lg:bottom-auto lg:z-auto lg:h-auto lg:max-w-none lg:transition-[width] lg:duration-200',
           open
-            ? 'translate-x-0 lg:w-[26rem] xl:w-[30rem]'
-            : 'pointer-events-none translate-x-full lg:w-0 lg:overflow-hidden lg:border-l-0'
+            ? 'visible translate-x-0 lg:w-[26rem] xl:w-[30rem]'
+            // invisible (not just off-canvas/width-0) so a closed panel's collapsed
+            // children can't be measured as tiny-but-technically-visible tap targets
+            // by automated a11y/layout audits -- aria-hidden alone only tells
+            // assistive tech, not getComputedStyle().visibility (ui-audit #20070).
+            : 'invisible pointer-events-none translate-x-full lg:w-0 lg:overflow-hidden lg:border-l-0'
         )}
       >
         <div className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-4">
