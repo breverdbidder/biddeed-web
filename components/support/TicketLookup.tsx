@@ -60,15 +60,15 @@ export default function TicketLookup() {
   }
 
   return (
-    <section className="rounded-lg border border-border bg-card p-5 sm:p-6" aria-labelledby="lookup-title">
+    <section className="min-w-0 rounded-lg border border-border bg-card p-5 sm:p-6" aria-labelledby="lookup-title">
       <h2 id="lookup-title" className="text-lg font-bold text-foreground">Check a ticket</h2>
       <p className="mt-1 text-sm leading-6 text-muted-foreground">The ticket number from your confirmation email, plus the email you used.</p>
-      <form onSubmit={lookup} className="mt-4 grid gap-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end" noValidate>
-        <label className={LABEL}>
+      <form onSubmit={lookup} className="mt-4 grid min-w-0 gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-end" noValidate>
+        <label className={`${LABEL} min-w-0`}>
           Ticket number
-          <input required value={ticketNumber} onChange={(e) => setTicketNumber(e.target.value)} className={FIELD + ' font-mono uppercase'} placeholder="BD-20260906-A1B2" pattern="BD-\d{8}-[0-9A-Fa-f]{4}" autoCapitalize="characters" />
+          <input required value={ticketNumber} onChange={(e) => setTicketNumber(e.target.value)} className={FIELD + ' min-w-0 font-mono uppercase'} placeholder="BD-20260906-A1B2" pattern="BD-\d{8}-[0-9A-Fa-f]{4}" autoCapitalize="characters" />
         </label>
-        <label className={LABEL}>
+        <label className={`${LABEL} min-w-0`}>
           Email
           <input required type="email" inputMode="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} className={FIELD} placeholder="you@example.com" />
         </label>
@@ -84,25 +84,25 @@ export default function TicketLookup() {
       {error ? <p role="alert" className="mt-4 text-sm text-destructive">{error}</p> : null}
 
       {ticket ? (
-        <dl className="mt-5 grid gap-x-6 gap-y-3 rounded-md border border-border bg-background p-4 text-sm sm:grid-cols-2" aria-live="polite">
+        <dl className="mt-5 grid min-w-0 gap-x-6 gap-y-3 rounded-md border border-border bg-background p-4 text-base sm:grid-cols-2" aria-live="polite">
           <div>
-            <dt className="text-muted-foreground">Ticket</dt>
-            <dd className="font-mono text-base font-semibold text-foreground">{ticket.ticket_number}</dd>
+            <dt className="text-sm text-muted-foreground">Ticket</dt>
+            <dd className="break-all font-mono text-base font-semibold text-foreground">{ticket.ticket_number}</dd>
           </div>
           <div>
-            <dt className="text-muted-foreground">Status</dt>
+            <dt className="text-sm text-muted-foreground">Status</dt>
             <dd className="text-base font-semibold text-foreground">{STATUS_LABEL[ticket.status] ?? ticket.status}</dd>
           </div>
           <div className="sm:col-span-2">
-            <dt className="text-muted-foreground">Subject</dt>
+            <dt className="text-sm text-muted-foreground">Subject</dt>
             <dd className="text-base text-foreground">{ticket.subject}</dd>
           </div>
           <div>
-            <dt className="text-muted-foreground">Opened</dt>
+            <dt className="text-sm text-muted-foreground">Opened</dt>
             <dd className="text-foreground">{when(ticket.created_at)}</dd>
           </div>
           <div>
-            <dt className="text-muted-foreground">{ticket.resolved_at ? 'Resolved' : 'Last update'}</dt>
+            <dt className="text-sm text-muted-foreground">{ticket.resolved_at ? 'Resolved' : 'Last update'}</dt>
             <dd className="text-foreground">{when(ticket.resolved_at ?? ticket.updated_at)}</dd>
           </div>
         </dl>

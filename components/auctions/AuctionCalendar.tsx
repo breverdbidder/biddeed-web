@@ -50,9 +50,9 @@ interface Props {
 }
 
 const TYPE_STYLE: Record<string, { bg: string; border: string; label: string }> = {
-  foreclosure: { bg: C.brand, border: C.brandHover, label: 'Foreclosures' },
-  tax_deed: { bg: C.ink, border: C.navy, label: 'Tax Deeds' },
-  other: { bg: C.brandHover, border: C.brandHover, label: 'Other' },
+  foreclosure: { bg: C.tint, border: C.brand, label: 'Foreclosures' },
+  tax_deed: { bg: C.card, border: C.ink, label: 'Tax Deeds' },
+  other: { bg: C.card, border: C.border, label: 'Other' },
 }
 
 function plural(n: number, label: string) {
@@ -241,6 +241,41 @@ export default function AuctionCalendar({ county, saleType, onSelectDay }: Props
           line-height: 1.3;
           text-align: center;
         }
+        .zw-auction-calendar :global(.fc .fc-button) {
+          min-height: 44px;
+          min-width: 44px;
+          padding: 0.55rem 0.8rem;
+          font-size: 0.9rem;
+          line-height: 1.2;
+          color: var(--foreground);
+          background: var(--card);
+          border-color: var(--border);
+        }
+        .zw-auction-calendar :global(.fc .fc-button-primary:not(:disabled).fc-button-active),
+        .zw-auction-calendar :global(.fc .fc-button-primary:not(:disabled):active) {
+          color: var(--primary-foreground);
+          background: var(--primary);
+          border-color: var(--primary);
+        }
+        .zw-auction-calendar :global(.fc .fc-event) {
+          min-height: 44px;
+          display: flex;
+          align-items: center;
+          padding: 0.35rem 0.5rem;
+          color: var(--foreground) !important;
+          border-radius: 0.375rem;
+        }
+        .zw-auction-calendar :global(.fc .fc-event-main) {
+          color: var(--foreground) !important;
+          font-size: 0.9rem;
+          line-height: 1.25;
+          white-space: normal;
+        }
+        .zw-auction-calendar :global(.fc .fc-daygrid-day-number),
+        .zw-auction-calendar :global(.fc .fc-col-header-cell-cushion) {
+          font-size: 0.9rem;
+          color: var(--foreground);
+        }
         @media (min-width: 768px) {
           .zw-auction-calendar :global(.fc .fc-toolbar.fc-header-toolbar) {
             flex-direction: row;
@@ -254,22 +289,22 @@ export default function AuctionCalendar({ county, saleType, onSelectDay }: Props
       <div className="flex flex-wrap items-center gap-4 mb-4">
         <div className="flex items-center gap-1.5">
           <span className="w-3 h-3 rounded-full bg-primary" />
-          <span className="text-xs text-muted-foreground dark:text-muted-foreground">Foreclosure</span>
+          <span className="text-sm text-muted-foreground dark:text-muted-foreground">Foreclosure</span>
         </div>
         <div className="flex items-center gap-1.5">
           <span className="w-3 h-3 rounded-full bg-foreground" />
-          <span className="text-xs text-muted-foreground dark:text-muted-foreground">Tax Deed</span>
+          <span className="text-sm text-muted-foreground dark:text-muted-foreground">Tax Deed</span>
         </div>
 
-        <div className="ml-auto flex items-center gap-3 text-xs">
+        <div className="ml-auto flex flex-wrap items-center gap-3 text-sm">
           {loading && (
-            <span className="flex items-center gap-2 text-muted-foreground dark:text-muted-foreground">
+            <span className="flex min-h-11 items-center gap-2 text-sm text-muted-foreground dark:text-muted-foreground">
               <span className="w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin" />
               Loading counts...
             </span>
           )}
           {!loading && totals && (
-            <span className="text-muted-foreground dark:text-muted-foreground">
+            <span className="text-sm text-muted-foreground dark:text-muted-foreground">
               <span className="font-semibold text-foreground dark:text-white">
                 {totals.total.toLocaleString()}
               </span>{' '}
@@ -284,13 +319,13 @@ export default function AuctionCalendar({ county, saleType, onSelectDay }: Props
       </div>
 
       {error && (
-        <div className="mb-4 px-3 py-2 rounded-md bg-primary/10 dark:bg-primary/15/20 text-xs text-primary dark:text-primary">
+        <div className="mb-4 min-h-11 rounded-md bg-primary/10 px-3 py-2 text-sm leading-6 text-foreground dark:bg-primary/15/20 dark:text-foreground">
           {error}
         </div>
       )}
 
       {!loading && !error && totals?.total === 0 && (
-        <div className="mb-4 px-3 py-2 rounded-md bg-muted dark:bg-card text-xs text-muted-foreground dark:text-muted-foreground">
+        <div className="mb-4 min-h-11 rounded-md bg-muted px-3 py-2 text-sm leading-6 text-muted-foreground dark:bg-card dark:text-muted-foreground">
           No auctions scheduled in this range
           {county ? ` for ${county}` : ''}. Try another month or clear the filters.
         </div>

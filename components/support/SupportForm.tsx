@@ -87,7 +87,7 @@ export default function SupportForm() {
   if (result) {
     return (
       <div role="status" className="rounded-lg border border-primary/30 bg-secondary p-6 sm:p-8" aria-live="polite">
-        <p className="text-xs font-bold uppercase tracking-[0.16em] text-primary">Ticket received</p>
+        <p className="text-base font-bold uppercase tracking-[0.16em] text-primary">Ticket received</p>
         <h2 className="font-display mt-2 text-2xl font-medium text-foreground">
           Your ticket number is{' '}
           <code className="rounded-md bg-background px-2 py-1 font-mono text-xl font-semibold tracking-wide text-foreground">
@@ -126,7 +126,7 @@ export default function SupportForm() {
     <form onSubmit={submit} className="space-y-5 rounded-lg border border-border bg-card p-5 sm:p-6" aria-labelledby="ticket-form-title" noValidate>
       <div>
         <h2 id="ticket-form-title" className="text-lg font-bold text-foreground">Open a ticket</h2>
-        <p className="mt-1 text-sm leading-6 text-muted-foreground">
+        <p className="mt-1 text-base leading-7 text-muted-foreground">
           County, case number, parcel ID, the report you bought — whatever helps us reproduce it.
         </p>
       </div>
@@ -188,7 +188,7 @@ export default function SupportForm() {
       </label>
 
       {error ? (
-        <div role="alert" className="rounded-md border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">{error}</div>
+        <div role="alert" className="rounded-md border border-destructive/40 bg-destructive/10 px-4 py-3 text-base leading-7 text-destructive">{error}</div>
       ) : null}
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -199,7 +199,7 @@ export default function SupportForm() {
         >
           {submitting ? 'Sending…' : 'Submit ticket'}
         </button>
-        <p className="text-sm leading-6 text-muted-foreground">
+        <p className="text-base leading-7 text-muted-foreground">
           We only use your email to answer this request. See our{' '}
           <a href="/privacy" className="font-semibold text-primary underline-offset-4 hover:underline">Privacy Policy</a>.
         </p>
