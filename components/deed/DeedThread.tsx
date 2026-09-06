@@ -43,7 +43,7 @@ function Markdown({ children }: { children: string }) {
     <div
       className={cn(
         'space-y-3 text-sm leading-relaxed text-foreground',
-        '[&_a]:text-bd-orange [&_a]:underline [&_a]:underline-offset-2',
+        '[&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2',
         '[&_code]:rounded [&_code]:bg-secondary [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-xs',
         '[&_li]:ml-4 [&_li]:list-disc [&_ol_li]:list-decimal',
         '[&_strong]:font-semibold [&_strong]:text-foreground',
@@ -85,7 +85,7 @@ export default function DeedThread({ turns, streaming, status, surface, onSugges
         <div className="mb-4 flex items-center gap-3">
           <DeedRobotMark size={44} decorative={false} className="rounded-xl" />
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-bd-orange">Deed Voice AI</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Deed Voice AI</p>
             <h3 className="text-sm font-semibold text-foreground">Ask about this screen</h3>
           </div>
         </div>
@@ -103,7 +103,7 @@ export default function DeedThread({ turns, streaming, status, surface, onSugges
                 className={cn(
                   'w-full rounded-lg border border-border bg-secondary px-3 py-2.5',
                   'text-left text-sm text-muted-foreground outline-none transition-colors',
-                  'hover:border-primary hover:text-foreground focus-visible:ring-2 focus-visible:ring-bd-orange'
+                  'hover:border-primary hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring'
                 )}
               >
                 {s}
@@ -173,7 +173,7 @@ export default function DeedThread({ turns, streaming, status, surface, onSugges
 
       {status === 'streaming' && !streaming ? (
         <p className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span className="size-1.5 animate-pulse rounded-full bg-bd-orange motion-reduce:animate-none" />
+          <span className="size-1.5 animate-pulse rounded-full bg-primary motion-reduce:animate-none" />
           Deed is reading the auction data…
         </p>
       ) : null}
