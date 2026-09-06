@@ -235,7 +235,7 @@ export function useDeedThread(initialId: string | null) {
           content: [
             contextPreamble(HOME_CONTEXT, counts),
             intent
-              ? `The page is ALREADY showing the customer a card grid of ${intent.label.toLowerCase()} from /api/auctions. Do not retype those rows as a table; add what the cards cannot: what to check before bidding, how the Shapira Max Bid is reached, and what a SIGNAL$ Property Report adds. Keep it under 180 words.`
+              ? `The page is ALREADY showing the customer a card grid of ${intent.label.toLowerCase()} from /api/auctions. Do not retype those rows as a table; add what the cards cannot: what to check before bidding, how the SIGNAL$ Max Bid is reached, and what a SIGNAL$ Property Report adds. Keep it under 180 words.`
               : 'Keep the answer under 220 words, in plain language for a property investor. No developer or database terminology.',
             '',
             trimmed || '(no message text — see the attached file)',

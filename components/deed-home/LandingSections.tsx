@@ -241,7 +241,7 @@ const PLANS: Plan[] = [
     per: '/month',
     blurb: 'The exact ceiling on every lot in your counties.',
     features: [
-      'Exact Shapira Max Bid',
+      'Exact SIGNAL$ Max Bid',
       'Unlimited property cards',
       'Plaintiff identity and max-bid intelligence',
       'Outcome scorecard after each sale',
@@ -351,7 +351,7 @@ export function Pricing({ onPrompt }: { onPrompt: (p: string) => void }) {
               One property, one report — SIGNAL$ Property Report, <span className="tabular">$25</span>
             </h3>
             <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-              All 18 sections on a single property: value band, Shapira Max Bid ceiling, comparable sales, zoning read and
+              All 18 sections on a single property: value band, SIGNAL$ Max Bid ceiling, comparable sales, zoning read and
               red flags. When the sale closes, you get the outcome scorecard re-issued free.
             </p>
           </div>
