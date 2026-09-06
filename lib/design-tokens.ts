@@ -8,18 +8,18 @@
  * Tailwind token classes (bg-background, text-foreground, text-muted-foreground,
  * bg-primary, border-border, bg-secondary …), never these values.
  *
- * Light palette = WinnerDataAI house brand: cream, terracotta, black-brown
- * ink, warm border, and soft terracotta tint. No legacy blue/gold variants.
+ * Light palette = Ariel, 2026-09-04 evening (PR #44): brand blue, navy, tint,
+ * ink, border — plus white. No other colours.
  */
 export const LIGHT = {
-  background: '#F5F0E8',
-  card: '#FBFAF7',
-  tint: '#F8D4C5',
-  ink: '#1F1B16',
-  navy: '#1F1B16',
-  border: '#DDD5C9',
-  brand: '#C15F3C',
-  brandHover: '#A94D30',
+  background: '#ffffff',
+  card: '#ffffff',
+  tint: '#E8F4FC',
+  ink: '#222222',
+  navy: '#002A54',
+  border: '#CCCCCC',
+  brand: '#0073CF',
+  brandHover: '#005DAA',
 } as const
 
 /** Dark palette = same family lifted for contrast on a navy-black ground. */
