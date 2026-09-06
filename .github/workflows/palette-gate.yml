@@ -1,0 +1,25 @@
+name: Palette gate (no colour literals outside the token files)
+
+# PARITY_PRD.md §4 change control: "No new colour literal may enter either repo".
+# This is the source-level half; the rendered half is the eight-gate harness in
+# cli-anything-biddeed/scripts/ui-audit (run after every production deploy by
+# cloudflare-production.yml → ui-parity-audit).
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+    paths: ['app/**', 'components/**', 'lib/**', 'scripts/palette-gate.mjs']
+
+permissions:
+  contents: read
+
+jobs:
+  palette-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.3.0
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - run: node scripts/palette-gate.mjs

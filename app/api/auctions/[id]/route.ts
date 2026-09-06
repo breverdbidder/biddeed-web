@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { resolveBcpaoPhotoUrl } from '@/lib/bcpao'
+import { LIGHT as C } from '@/lib/design-tokens'
 
 export const dynamic = 'force-dynamic'
 
@@ -224,7 +225,7 @@ export async function GET(
   let recommendation: 'BID' | 'REVIEW' | 'SKIP' | 'UNKNOWN' = 'UNKNOWN'
   let maxBid: number | null = null
   let bidRatio: number | null = null
-  let recommendationColor = '#6B7280' // gray
+  let recommendationColor = `${C.border}` // gray
 
   if (justValue && justValue > 0) {
     maxBid = Math.round((justValue * 0.70) - 10000 - Math.min(25000, justValue * 0.15))
@@ -234,13 +235,13 @@ export async function GET(
       bidRatio = Math.round((maxBid / compareBid) * 100)
       if (bidRatio >= 75) {
         recommendation = 'BID'
-        recommendationColor = '#22C55E'
+        recommendationColor = `${C.brand}`
       } else if (bidRatio >= 60) {
         recommendation = 'REVIEW'
-        recommendationColor = '#F59E0B'
+        recommendationColor = `${C.navy}`
       } else {
         recommendation = 'SKIP'
-        recommendationColor = '#EF4444'
+        recommendationColor = `${C.border}`
       }
     }
   }

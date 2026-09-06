@@ -7,6 +7,7 @@ import ChatwootWidget from '@/components/ChatwootWidget'
 import ConditionalClerkProvider from '@/components/ConditionalClerkProvider'
 import { isClerkHostAuthorized } from '@/lib/clerk-host'
 import { ThemeProvider } from '@/lib/theme-context'
+import { LIGHT as C } from '@/lib/design-tokens'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -62,7 +63,7 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic'
 
 export const viewport: Viewport = {
-  themeColor: '#ffffff',
+  themeColor: C.background,
 }
 
 export default async function RootLayout({

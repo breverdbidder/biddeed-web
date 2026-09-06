@@ -2,37 +2,38 @@
 
 import { ClerkProvider } from '@clerk/nextjs'
 import { useTheme } from '@/lib/theme-context'
+import { palette } from '@/lib/design-tokens'
 
 // Ported from zonewise-web 2026-08-20 with one deliberate deviation: no
-// `@clerk/themes` import. That package is not in this repo's dependencies and
-// adding it for `baseTheme: dark` alone is not worth a new dependency — the
-// variables + elements below reproduce the dark treatment directly against
-// this app's fixed #020617 chrome.
+// `@clerk/themes` import. Clerk's appearance API needs real colour strings (it
+// derives hover/focus shades from colorPrimary), so the values come from the JS
+// mirror of the token file (lib/design-tokens.ts); the `elements` overrides use
+// the same Tailwind token classes as the rest of the app.
 const CLERK_KEY = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
 
 function clerkAppearance(theme: 'light' | 'dark') {
-  const light = theme === 'light'
+  const c = palette(theme)
   return {
     variables: {
-      colorBackground: light ? '#ffffff' : '#0b1220',
-      colorText: light ? '#222222' : '#e2e8f0',
-      colorTextSecondary: light ? '#002A54' : '#94a3b8',
-      colorInputBackground: light ? '#ffffff' : '#1e293b',
-      colorInputText: light ? '#222222' : '#e2e8f0',
-      colorPrimary: light ? '#c15f3c' : '#F59E0B',
-      colorDanger: '#dc2626',
-      colorSuccess: '#16a34a',
-      colorWarning: light ? '#c15f3c' : '#F59E0B',
+      colorBackground: c.card,
+      colorText: c.ink,
+      colorTextSecondary: c.navy,
+      colorInputBackground: c.background,
+      colorInputText: c.ink,
+      colorPrimary: c.brand,
+      colorDanger: c.navy,
+      colorSuccess: c.brandHover,
+      colorWarning: c.brand,
       fontFamily: 'Inter, system-ui, sans-serif',
     },
     elements: {
-      formButtonPrimary: light ? 'bg-[#C15F3C] hover:bg-[#A94D30] text-[#F5F0E8] font-semibold' : 'bg-[#F59E0B] hover:bg-[#fbbf24] text-[#020617] font-semibold',
-      card: light ? 'shadow-lg border border-[#DDD5C9] bg-[#FBFAF7]' : 'shadow-lg border border-slate-700 bg-[#0b1220]',
-      headerTitle: light ? 'text-[#1F1B16]' : 'text-white',
-      headerSubtitle: light ? 'text-[#766F67]' : 'text-slate-400',
-      socialButtonsBlockButton: light ? 'border-[#B5A9A0] text-[#1F1B16] hover:bg-[#EDE3D7]' : 'border-slate-600 text-slate-300 hover:bg-slate-800',
-      formFieldInput: light ? 'bg-[#F5F0E8] border-[#B5A9A0] text-[#1F1B16]' : 'bg-slate-800 border-slate-600 text-white',
-      footerActionLink: light ? 'text-[#C15F3C] hover:text-[#A94D30]' : 'text-[#F59E0B] hover:text-[#fbbf24]',
+      formButtonPrimary: 'bg-primary hover:bg-bd-orange-600 text-primary-foreground font-semibold',
+      card: 'shadow-lg border border-border bg-card',
+      headerTitle: 'text-foreground',
+      headerSubtitle: 'text-muted-foreground',
+      socialButtonsBlockButton: 'border-border text-foreground hover:bg-secondary',
+      formFieldInput: 'bg-background border-border text-foreground',
+      footerActionLink: 'text-primary hover:text-bd-orange-600',
       userButtonAvatarBox: 'w-7 h-7',
     },
   }

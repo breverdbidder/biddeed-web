@@ -15,10 +15,10 @@ export const metadata: Metadata = {
 
 export default function AuctionsPage() {
   return (
-    <div className="bg-[#020617] min-h-screen">
-      <div className="border-b border-slate-700/50 bg-bd-navy-700/80 px-4 sm:px-6 pt-6 pb-4 max-w-7xl mx-auto">
-        <h1 className="text-2xl font-bold text-white">Auction Calendar</h1>
-        <p className="text-slate-400 text-sm mt-1">Florida foreclosure &amp; tax deed auctions — live data</p>
+    <div className="bg-background min-h-screen">
+      <div className="border-b border-border bg-card px-4 sm:px-6 pt-6 pb-4 max-w-7xl mx-auto">
+        <h1 className="text-2xl font-bold text-foreground">Auction Calendar</h1>
+        <p className="text-muted-foreground text-sm mt-1">Florida foreclosure &amp; tax deed auctions — live data</p>
       </div>
       <AuctionsLayout />
     </div>

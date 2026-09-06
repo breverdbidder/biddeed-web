@@ -71,7 +71,7 @@ export default function AuctionTable({ auctions, loading, onSelectAuction }: Pro
     >
       {label}
       {sortField === field && (
-        <span className="ml-1">{sortDir === 'asc' ? '\u2191' : '\u2193'}</span>
+        <span className="ml-1">{sortDir === 'asc' ? '↑' : '↓'}</span>
       )}
     </th>
   )
@@ -97,7 +97,7 @@ export default function AuctionTable({ auctions, loading, onSelectAuction }: Pro
   return (
     <div className="bg-card dark:bg-card border border-border dark:border-border rounded-lg overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200 dark:divide-slate-800">
+        <table className="min-w-full divide-y divide-border">
           <thead className="bg-muted dark:bg-card/50">
             <tr>
               <SortHeader field="county" label="County" />
@@ -111,7 +111,7 @@ export default function AuctionTable({ auctions, loading, onSelectAuction }: Pro
               <th className="px-3 py-2 text-left text-xs font-medium text-muted-foreground dark:text-muted-foreground uppercase tracking-wider">Score</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100 dark:divide-slate-800/50">
+          <tbody className="divide-y divide-border">
             {sorted.map((auction) => {
               const justValue = auction.market_value ?? auction.assessed_value ?? null
               const score = getRecommendation(justValue, auction.opening_bid)
