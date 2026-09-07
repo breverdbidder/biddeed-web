@@ -14,12 +14,12 @@
 export const LIGHT = {
   background: '#ffffff',
   card: '#ffffff',
-  tint: '#E8F4FC',
-  ink: '#222222',
-  navy: '#002A54',
-  border: '#CCCCCC',
-  brand: '#0073CF',
-  brandHover: '#005DAA',
+  tint: '#E6F0FA',
+  ink: '#1a1a1a',
+  navy: '#0A2540',
+  border: '#D7E3F1',
+  brand: '#005EB8',
+  brandHover: '#004A92',
 } as const
 
 /** Dark palette = same family lifted for contrast on a navy-black ground. */

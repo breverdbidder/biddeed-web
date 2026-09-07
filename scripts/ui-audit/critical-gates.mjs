@@ -9,7 +9,7 @@ const outDir = process.env.OUT_DIR || path.resolve('artifacts/critical-ui-gates'
 fs.mkdirSync(outDir, { recursive: true })
 const routes = ['/', '/radar', '/radar?view=map', '/radar?view=calendar', '/discover', '/auctions', '/sign-in', '/sign-up', '/buy-report']
 const viewports = [{ name: 'desktop', width: 1440, height: 900 }, { name: 'mobile', width: 390, height: 844 }]
-const canon = new Set(['#ffffff', '#e8f4fc', '#222222', '#002a54', '#cccccc', '#0073cf', '#005daa'])
+const canon = new Set(['#ffffff', '#e6f0fa', '#1a1a1a', '#0a2540', '#d7e3f1', '#005eb8', '#004a92'])
 const fonts = new Set(['Inter', 'Inter Fallback', 'Source Serif 4', 'Source Serif 4 Fallback', 'JetBrains Mono', 'system-ui', 'serif', 'sans-serif', 'monospace', 'Iowan Old Style', 'ui-monospace', 'Segoe UI Emoji'])
 
 const sweep = () => {
