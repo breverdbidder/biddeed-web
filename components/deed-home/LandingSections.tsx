@@ -19,6 +19,7 @@ export const W = {
   freeReport: '/free-report',
   subscribeInvestor: '/subscribe?tier=investor',
   subscribePro: '/subscribe?tier=pro',
+  subscribeProPlus: '/subscribe?tier=proplus',
   counties: '/counties',
   blog: '/blog',
   pioneers: '/pioneers',
@@ -216,6 +217,91 @@ export function HowItWorks() {
   )
 }
 
+/* ── Drive for Dollars ───────────────────────────────────────────────────── */
+
+const D4D_STEPS = [
+  {
+    n: '1',
+    title: 'Pick the lots you want to see',
+    body: 'Filter the calendar to a county and a sale date, then tick the properties worth a look. Every upcoming lot with a real address and coordinates is selectable.',
+  },
+  {
+    n: '2',
+    title: 'BidDeed.AI builds the route',
+    body: 'Stops are ordered from wherever you start and clustered so you are not crossing the county twice. You get the mileage and the drive time before you turn the key.',
+  },
+  {
+    n: '3',
+    title: 'Drive it without touching the phone',
+    body: 'Deed reads out the next stop with its judgment and its SIGNAL$ Max Bid. Say what you see — vacant, overgrown, no plates — and it lands on that lot.',
+  },
+  {
+    n: '4',
+    title: 'Keep what you find off the list',
+    body: 'Spot a boarded-up house nobody has filed on yet? Drop a pin and it becomes a D4D find, researched and tracked like any other lead.',
+  },
+]
+
+export function FieldRoutes() {
+  return (
+    <section id="d4d" className="mx-auto max-w-5xl px-4 sm:px-6">
+      <div className="max-w-2xl">
+        <Eyebrow>Drive for Dollars</Eyebrow>
+        <H2>Build a route from the lots you actually want to see.</H2>
+        <p className="mt-4 text-base leading-7 text-muted-foreground">
+          The report tells you what to bid. Driving the street tells you what the report cannot — whether
+          anyone still lives there, what the roof looks like, and which house nobody has filed on yet.
+          Choose your properties off the auction calendar and BidDeed.AI turns them into a drive.
+        </p>
+      </div>
+
+      <ol className="mt-10 grid gap-4 sm:grid-cols-2">
+        {D4D_STEPS.map((s) => (
+          <li key={s.n} className="rounded-2xl border border-border bg-card p-5">
+            <div className="flex items-baseline gap-3">
+              <span className="text-xs font-semibold tabular-nums text-primary">{s.n}</span>
+              <h3 className="text-sm font-semibold text-foreground">{s.title}</h3>
+            </div>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">{s.body}</p>
+          </li>
+        ))}
+      </ol>
+
+      <div className="mt-8 rounded-2xl border border-border bg-secondary p-5 sm:p-6">
+        <p className="text-sm font-semibold text-foreground">The Palm Bay run</p>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+          Seven lots off one county calendar, driven in a single afternoon — and one property that was
+          never on the auction list at all: vacant, overgrown, servicer-managed, found from the car.
+        </p>
+        <dl className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
+          {[
+            ['7', 'lots driven'],
+            ['2', 'worth bidding'],
+            ['2', 'ruled out on sight'],
+            ['1', 'off-auction find'],
+          ].map(([v, l]) => (
+            <div key={l}>
+              <dt className="font-display text-2xl font-medium tabular-nums text-foreground">{v}</dt>
+              <dd className="mt-1 text-xs leading-5 text-muted-foreground">{l}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+
+      <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <a className={BTN_PRIMARY} href={W.subscribePro}>
+          Start Pro — routes included
+          <ArrowRight className="size-4" aria-hidden />
+        </a>
+        <p className="text-sm leading-6 text-muted-foreground">
+          Route planning and field capture are Pro and Pro Plus. Investor sees what is coming to auction;
+          Pro lets you go and look at it.
+        </p>
+      </div>
+    </section>
+  )
+}
+
 /* ── Pricing ─────────────────────────────────────────────────────────────── */
 
 interface Plan {
@@ -266,6 +352,7 @@ const PLANS: Plan[] = [
     blurb: 'Investor, plus the zoning read on every property.',
     features: [
       'Everything in Investor',
+      'D4D field routes: pick lots off the calendar and drive them',
       'Full ZoneWise zoning per property: setbacks, parking, height, land use, units per acre, FAR, permitted uses, overlays',
       '10 SIGNAL$ Property Reports a month',
       '15 skip traces · 3 county monitors',
@@ -275,17 +362,19 @@ const PLANS: Plan[] = [
   },
   {
     name: 'Pro Plus',
-    price: '$299',
+    price: '$399',
     per: '/month',
-    blurb: 'For teams working several counties at once.',
+    blurb: 'Everything you need from the auction calendar to the closing table.',
     features: [
       'Everything in Pro',
+      'Construction and property management: budgets, scopes of work, schedule and lender draws',
+      'Books that match the job: bills, ledger and budget-vs-actual per property',
       '25 SIGNAL$ Property Reports a month',
       'Entitlement feasibility',
       '50 skip traces · 10 county monitors',
     ],
     soon: ['Due-diligence title report (pre-bid summary, not title insurance)'],
-    cta: { label: 'Ask Deed about Pro Plus', prompt: 'I want the Pro Plus plan at $299 a month. How do I subscribe, and what does it include?' },
+    cta: { label: 'Start Pro Plus', href: W.subscribeProPlus },
   },
 ]
 
