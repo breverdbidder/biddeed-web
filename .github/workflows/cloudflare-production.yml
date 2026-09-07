@@ -84,6 +84,12 @@ jobs:
       - name: Palette gate (canon values only, no literals outside the token files)
         run: node scripts/palette-gate.mjs
 
+      # Same reasoning as the palette gate, applied to prices and retired terms.
+      # Sessions push straight to main under one shared identity, so a silent price
+      # revert would otherwise deploy green. Ariel, 2026-09-07: Pro Plus is $399.
+      - name: Canon gate (prices and retired terms)
+        run: node scripts/canon-gate.mjs
+
       - name: Build OpenNext Worker (production)
         # opennextjs-cloudflare build refuses to run in CI without an explicit
         # --config when there's no bare wrangler.jsonc at the repo root (there
