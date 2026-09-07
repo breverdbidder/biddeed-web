@@ -1,10 +1,25 @@
 'use client'
 
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AlertTriangle, ChevronRight, Loader2, MapPinPlus, Mic, MicOff } from 'lucide-react'
 import { apiUrl } from '@/lib/api'
+import { D4D_DEFAULT_LANG, D4D_VOICE_LANGUAGES } from '@/lib/d4d/voice-grammar'
 import { speak, useD4DVoice } from './useD4DVoice'
+import { useD4DAsk } from './useD4DAsk'
 import type { D4DRouteDetail, FieldStatus } from './types'
+
+const LANG_STORAGE_KEY = 'bd_d4d_lang'
+
+function initialLang(): string {
+  if (typeof window === 'undefined') return D4D_DEFAULT_LANG
+  try {
+    const saved = window.localStorage.getItem(LANG_STORAGE_KEY)
+    if (saved) return saved
+  } catch {
+    /* storage unavailable — fall through to navigator.language */
+  }
+  return navigator.language || D4D_DEFAULT_LANG
+}
 
 interface Props {
   detail: D4DRouteDetail
@@ -36,28 +51,46 @@ export default function D4DDriveTab({ detail, routeId, onStopUpdated }: Props) {
   const [saving, setSaving] = useState(false)
   const [loggingFind, setLoggingFind] = useState(false)
   const [findMessage, setFindMessage] = useState<string | null>(null)
+  const [lang, setLang] = useState<string>(D4D_DEFAULT_LANG)
+
+  useEffect(() => {
+    setLang(initialLang())
+  }, [])
+
+  const setLangPersisted = useCallback((value: string) => {
+    setLang(value)
+    try {
+      window.localStorage.setItem(LANG_STORAGE_KEY, value)
+    } catch {
+      /* storage unavailable — the selection still applies for this session */
+    }
+  }, [])
 
   const activeStop = stops[activeIndex] ?? null
 
   // patchStop/handleLogFind are memoized before `voice` exists below (voice's
-  // own handlers depend on them), so they read confirmation-speech gating
-  // through this ref rather than closing over `voice.enabled` directly — a
-  // useCallback with a fixed dep array would otherwise keep speaking (or
-  // staying silent) based on whatever `enabled` was true the first time the
-  // callback was created, never seeing later toggles.
+  // own handlers depend on them), so they read confirmation-speech gating and
+  // the active language through refs rather than closing over `voice.enabled`
+  // / `lang` directly — a useCallback with a fixed dep array would otherwise
+  // keep speaking (or staying silent, or speaking the wrong language) based
+  // on whatever those were the first time the callback was created, never
+  // seeing later toggles or language switches.
   const voiceEnabledRef = useRef(false)
+  const langRef = useRef(lang)
+  langRef.current = lang
 
   const speakStop = useCallback((index: number) => {
     if (!voiceEnabledRef.current) return
     const stop = stops[index]
     if (!stop) {
-      speak('That was the last stop on this route.')
+      speak('That was the last stop on this route.', langRef.current)
       return
     }
     speak(
       `Stop ${stop.seq}. ${stop.property_address ?? 'address unknown'}. ` +
         `Judgment ${formatMoney(stop.judgment_amount)}. ` +
-        `SIGNAL dollar max bid ${formatMoney(stop.signal_max_bid)}.`
+        `SIGNAL dollar max bid ${formatMoney(stop.signal_max_bid)}.`,
+      langRef.current
     )
   }, [stops])
 
@@ -72,12 +105,12 @@ export default function D4DDriveTab({ detail, routeId, onStopUpdated }: Props) {
         })
         if (res.ok) {
           onStopUpdated()
-          if (voiceEnabledRef.current) speak(confirmation)
+          if (voiceEnabledRef.current) speak(confirmation, langRef.current)
         } else if (voiceEnabledRef.current) {
-          speak('That did not go through. Try again.')
+          speak('That did not go through. Try again.', langRef.current)
         }
       } catch {
-        if (voiceEnabledRef.current) speak('That did not go through. Try again.')
+        if (voiceEnabledRef.current) speak('That did not go through. Try again.', langRef.current)
       } finally {
         setSaving(false)
       }
@@ -128,10 +161,10 @@ export default function D4DDriveTab({ detail, routeId, onStopUpdated }: Props) {
           if (res.ok) {
             setFindMessage('Find logged at your current location.')
             onStopUpdated()
-            if (voiceEnabledRef.current) speak('Find logged.')
+            if (voiceEnabledRef.current) speak('Find logged.', langRef.current)
           } else {
             setFindMessage('Could not log this find.')
-            if (voiceEnabledRef.current) speak('That did not go through. Try again.')
+            if (voiceEnabledRef.current) speak('That did not go through. Try again.', langRef.current)
           }
         } finally {
           setLoggingFind(false)
@@ -146,28 +179,54 @@ export default function D4DDriveTab({ detail, routeId, onStopUpdated }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [routeId, onStopUpdated])
 
-  const voice = useD4DVoice(
-    useMemo(
-      () => ({ onNextStop: handleNextStop, onMarkStatus: handleMarkStatus, onNote: handleNote, onLogFind: handleLogFind }),
-      [handleNextStop, handleMarkStatus, handleNote, handleLogFind]
-    )
+  const voiceHandlers = useMemo(
+    () => ({ onNextStop: handleNextStop, onMarkStatus: handleMarkStatus, onNote: handleNote, onLogFind: handleLogFind }),
+    [handleNextStop, handleMarkStatus, handleNote, handleLogFind]
   )
+
+  const voice = useD4DVoice(voiceHandlers, lang)
   voiceEnabledRef.current = voice.enabled
+
+  const askContext = useMemo(
+    () => ({ lang, routeId, stopId: activeStop?.id ?? null, county: detail.route.county }),
+    [lang, routeId, activeStop?.id, detail.route.county]
+  )
+  const ask = useD4DAsk(askContext, voiceHandlers)
 
   if (!activeStop) {
     return <p className="mt-6 text-sm text-muted-foreground">This route has no stops.</p>
   }
 
   return (
-    <div className="mt-4 space-y-4">
+    <div className="mt-4 space-y-4 pb-24">
       <div className="rounded-xl border border-primary/40 bg-secondary px-4 py-3 text-xs leading-5 text-muted-foreground">
         <AlertTriangle className="mr-1.5 inline size-3.5 text-primary" aria-hidden />
         You are responsible for your own attention behind the wheel. Pull over before reading or typing
         anything on this screen.
       </div>
 
+      {(voice.supported || ask.supported) && (
+        <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border bg-card px-4 py-3">
+          <label htmlFor="d4d-lang" className="shrink-0 text-xs font-medium text-muted-foreground">
+            Voice language
+          </label>
+          <select
+            id="d4d-lang"
+            value={lang}
+            onChange={(e) => setLangPersisted(e.target.value)}
+            className="min-h-11 min-w-0 flex-1 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+          >
+            {D4D_VOICE_LANGUAGES.map((l) => (
+              <option key={l.bcp47} value={l.bcp47}>
+                {l.nativeLabel} ({l.label})
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
       {voice.supported && (
-        <div className="flex items-center justify-between rounded-xl border border-border bg-card px-4 py-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-card px-4 py-3">
           <div className="flex items-center gap-2 text-sm text-foreground">
             {voice.enabled ? <Mic className="size-4 text-primary" aria-hidden /> : <MicOff className="size-4 text-muted-foreground" aria-hidden />}
             Hands-free voice
@@ -185,6 +244,32 @@ export default function D4DDriveTab({ detail, routeId, onStopUpdated }: Props) {
         </div>
       )}
       {voice.enabled && voice.lastHeard && <p className="text-xs text-muted-foreground">Heard: "{voice.lastHeard}"</p>}
+
+      {ask.supported && (
+        <div className="rounded-xl border border-border bg-card px-4 py-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2 text-sm text-foreground">
+              <Mic className={`size-4 ${ask.status !== 'idle' ? 'text-primary' : 'text-muted-foreground'}`} aria-hidden />
+              Ask Deed
+              {ask.status === 'listening' && <span className="text-xs text-muted-foreground">(listening…)</span>}
+              {ask.status === 'thinking' && <span className="text-xs text-muted-foreground">(thinking…)</span>}
+            </div>
+            <button
+              type="button"
+              onClick={() => (ask.status === 'listening' ? ask.stop() : ask.start())}
+              disabled={ask.status === 'thinking'}
+              className={`inline-flex min-h-11 min-w-11 items-center justify-center rounded-full px-4 text-xs font-semibold transition-colors disabled:opacity-50 ${
+                ask.status === 'listening' ? 'bg-primary text-primary-foreground' : 'border border-border bg-background text-foreground'
+              }`}
+            >
+              {ask.status === 'listening' ? 'Stop' : ask.status === 'thinking' ? 'Thinking…' : 'Ask'}
+            </button>
+          </div>
+          {ask.transcript && <p className="mt-2 text-xs text-muted-foreground">Heard: "{ask.transcript}"</p>}
+          {ask.answer && <p className="mt-2 text-sm leading-6 text-foreground">{ask.answer}</p>}
+          {ask.error && <p className="mt-2 text-xs text-destructive">{ask.error}</p>}
+        </div>
+      )}
 
       <div className="rounded-2xl border border-border bg-card p-5">
         <div className="flex items-center justify-between">
