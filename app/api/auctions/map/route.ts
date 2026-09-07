@@ -1,22 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { getRetryingSupabaseClient } from '@/lib/supabase-retry'
 
 export const dynamic = 'force-dynamic'
 
+// Same no-store, retry-wrapped data-layer client as the other auction
+// routes - see app/api/auctions/route.ts.
 function getSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      // Same no-store data-layer fetch as the other auction routes - see
-      // app/api/auctions/route.ts for why this cannot be a cache-busting
-      // query string instead.
-      global: {
-        fetch: (url: RequestInfo | URL, init?: RequestInit) =>
-          fetch(url, { ...init, cache: 'no-store' }),
-      },
-    }
-  )
+  return getRetryingSupabaseClient()
 }
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/

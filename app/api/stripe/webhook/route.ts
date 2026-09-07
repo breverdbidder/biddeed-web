@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createHmac, timingSafeEqual } from 'crypto'
-import { createClient } from '@supabase/supabase-js'
+import { getRetryingSupabaseClient } from '@/lib/supabase-retry'
 
 // Node, not edge: signature verification needs the raw body and node:crypto.
 export const runtime = 'nodejs'
@@ -72,7 +72,15 @@ function supabaseAdmin() {
   if (!url || !key) throw new Error('Supabase service credentials are not set')
   // Service role: purchases and stripe_events are RLS-protected with no anon
   // policy, because they hold every buyer's email address.
-  return createClient(url, key, { auth: { persistSession: false } })
+  //
+  // Retry (issue #20090): the stripe_events upsert below sends
+  // Prefer: resolution=ignore-duplicates, which getRetryingSupabaseClient()
+  // recognizes as retry-safe automatically. fulfil_stripe_purchase is a
+  // plain RPC POST, so it gets the conservative 'connect-only' retry mode by
+  // default — this webhook handler itself is never retried as a whole
+  // (Stripe already does that on a non-2xx), only the two DB calls inside
+  // it, and only in a way that can't double-write.
+  return getRetryingSupabaseClient(key)
 }
 
 export async function POST(request: NextRequest) {

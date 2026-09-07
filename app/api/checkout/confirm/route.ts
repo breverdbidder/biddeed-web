@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { getRetryingSupabaseClient } from '@/lib/supabase-retry'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -42,12 +42,12 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, serviceKey, {
-    global: {
-      fetch: (url: RequestInfo | URL, init?: RequestInit) =>
-        fetch(url, { ...init, cache: 'no-store' }),
-    },
-  })
+  // confirm_checkout_session re-reads payment_status from Stripe before
+  // writing anything, but we have no evidence it dedupes an already-
+  // fulfilled session the way fulfil_stripe_purchase does — so this stays
+  // on the default 'connect-only' retry mode (safe for a plain RPC POST):
+  // retried only when we're sure the request never reached Postgres.
+  const supabase = getRetryingSupabaseClient(serviceKey)
 
   const { data, error } = await supabase.rpc('confirm_checkout_session', {
     p_session_id: sessionId,

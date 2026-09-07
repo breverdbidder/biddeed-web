@@ -1,5 +1,5 @@
 import { auth } from '@clerk/nextjs/server'
-import { createClient } from '@supabase/supabase-js'
+import { getRetryingSupabaseClient } from '@/lib/supabase-retry'
 
 const ALERT_TYPES = new Set(['sale_date_change', 'opening_bid_change', 'status_change'])
 const CHANNELS = new Set(['email'])
@@ -22,7 +22,7 @@ export async function requireAlertContext() {
     if (!url || !key) return { userId: null, supabase: null, error: 'Alerts service is not configured.' }
     return {
       userId,
-      supabase: createClient(url, key, { auth: { persistSession: false } }),
+      supabase: getRetryingSupabaseClient(key),
       error: null,
     }
   } catch {

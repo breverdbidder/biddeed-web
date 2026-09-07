@@ -1,19 +1,13 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { getRetryingSupabaseClient } from '@/lib/supabase-retry'
 
 export const dynamic = 'force-dynamic'
 
+// auctions_summary_ssot is read-only; force 'full' retry mode since
+// supabase-js's .rpc() always issues a POST and would otherwise be treated
+// as a potentially non-idempotent write (see supabase-retry.ts).
 function getSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      global: {
-        fetch: (url: RequestInfo | URL, init?: RequestInit) =>
-          fetch(url, { ...init, cache: 'no-store' }),
-      },
-    }
-  )
+  return getRetryingSupabaseClient(undefined, { retryMode: 'full' })
 }
 
 /**
@@ -30,20 +24,12 @@ function getSupabase() {
 export async function GET() {
   const supabase = getSupabase()
 
-  // The SSOT RPC can transiently fail during a cold start. Retry only the
-  // server-side read, with a short bounded backoff, so the client does not
-  // render a misleading empty workspace or fail after its own retries have
-  // already been exhausted. Diagnostic detail stays server-side; the public
-  // response remains generic.
-  let data: unknown = null
-  let lastError: { message?: string } | null = null
-  for (let attempt = 0; attempt < 3; attempt++) {
-    const result = await supabase.rpc('auctions_summary_ssot')
-    data = result.data
-    lastError = result.error
-    if (!result.error) break
-    if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 250 * 2 ** attempt))
-  }
+  // auctions_summary_ssot is a read-only RPC, so getRetryingSupabaseClient()
+  // already retries transient failures (including the ~10-30s windows where
+  // Supabase's whole compute stack bounces, issue #20090) before this ever
+  // sees an error. Diagnostic detail stays server-side; the public response
+  // remains generic.
+  const { data, error: lastError } = await supabase.rpc('auctions_summary_ssot')
 
   if (lastError) {
     return NextResponse.json(

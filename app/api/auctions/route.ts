@@ -1,23 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { getRetryingSupabaseClient } from '@/lib/supabase-retry'
 
 export const dynamic = 'force-dynamic'
 
+// Next's App Router caches fetch() by default and supabase-js goes through
+// fetch, so query results get frozen in the Data Cache. Auction data is
+// live; it is never cached at the data layer. Edge caching stays with
+// Cache-Control. getRetryingSupabaseClient() also absorbs the ~10-30s
+// windows where Supabase's whole compute stack bounces (issue #20090).
 function getSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      // Next's App Router caches fetch() by default and supabase-js goes
-      // through fetch, so query results get frozen in the Data Cache.
-      // Auction data is live; it is never cached at the data layer.
-      // Edge caching stays with Cache-Control.
-      global: {
-        fetch: (url: RequestInfo | URL, init?: RequestInit) =>
-          fetch(url, { ...init, cache: 'no-store' }),
-      },
-    }
-  )
+  return getRetryingSupabaseClient()
 }
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/

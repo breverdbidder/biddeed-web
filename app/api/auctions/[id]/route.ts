@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
 import { resolveBcpaoPhotoUrl } from '@/lib/bcpao'
 import { LIGHT as C } from '@/lib/design-tokens'
+import { getRetryingSupabaseClient } from '@/lib/supabase-retry'
 
 export const dynamic = 'force-dynamic'
 
+// auction_detail_enriched and fl_parcel_for_auction are both read-only;
+// force 'full' retry mode (see lib/supabase-retry.ts — .rpc() always POSTs
+// regardless of read/write).
 function getSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
+  return getRetryingSupabaseClient(undefined, { retryMode: 'full' })
 }
 
 /**

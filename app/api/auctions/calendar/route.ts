@@ -1,19 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { getRetryingSupabaseClient } from '@/lib/supabase-retry'
 
 export const dynamic = 'force-dynamic'
 
+// auctions_calendar_counts is read-only; force 'full' retry mode (see
+// lib/supabase-retry.ts — .rpc() always POSTs regardless of read/write).
 function getSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      global: {
-        fetch: (url: RequestInfo | URL, init?: RequestInit) =>
-          fetch(url, { ...init, cache: 'no-store' }),
-      },
-    }
-  )
+  return getRetryingSupabaseClient(undefined, { retryMode: 'full' })
 }
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/
