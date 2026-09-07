@@ -4,69 +4,69 @@
 
 :root {
   /* Navy accent colors */
-  --navy-50: #E8F4FC;
-  --navy-100: #E8F4FC;
-  --navy-200: #CCCCCC;
-  --navy-300: #002A54;
-  --navy-400: #002A54;
-  --navy-500: #005DAA;
-  --navy-600: #002A54;
-  --navy-700: #002A54;
-  --navy-800: #002A54;
-  --navy-900: #002A54;
+  --navy-50: #E6F0FA;
+  --navy-100: #E6F0FA;
+  --navy-200: #D7E3F1;
+  --navy-300: #0A2540;
+  --navy-400: #0A2540;
+  --navy-500: #004A92;
+  --navy-600: #0A2540;
+  --navy-700: #0A2540;
+  --navy-800: #0A2540;
+  --navy-900: #0A2540;
 
   /* Orange accent colors */
-  --orange-50: #E8F4FC;
-  --orange-100: #E8F4FC;
-  --orange-200: #E8F4FC;
-  --orange-300: #0073CF;
-  --orange-400: #0073CF;
-  --orange-500: #0073CF;
-  --orange-600: #005DAA;
+  --orange-50: #E6F0FA;
+  --orange-100: #E6F0FA;
+  --orange-200: #E6F0FA;
+  --orange-300: #005EB8;
+  --orange-400: #005EB8;
+  --orange-500: #005EB8;
+  --orange-600: #004A92;
 
   /* Slate colors for dark theme */
   --slate-50: #ffffff;
-  --slate-100: #E8F4FC;
-  --slate-200: #CCCCCC;
-  --slate-300: #CCCCCC;
-  --slate-400: #002A54;
-  --slate-500: #002A54;
-  --slate-600: #002A54;
-  --slate-700: #002A54;
-  --slate-800: #002A54;
-  --slate-900: #002A54;
-  --slate-950: #002A54;
+  --slate-100: #E6F0FA;
+  --slate-200: #D7E3F1;
+  --slate-300: #D7E3F1;
+  --slate-400: #0A2540;
+  --slate-500: #0A2540;
+  --slate-600: #0A2540;
+  --slate-700: #0A2540;
+  --slate-800: #0A2540;
+  --slate-900: #0A2540;
+  --slate-950: #0A2540;
 
   /* shadcn semantic colors (HSL values — no hsl() wrapper) */
-  /* Light theme = Ariel's palette, 2026-09-04 evening (PR #44): page/card #ffffff, tint #E8F4FC, ink #222222, secondary text #002A54 (headings + secondary, 8.5:1), border #CCCCCC, brand blue #0073CF (4.8:1 on white, hover #005DAA). Nothing else. JS mirror: lib/design-tokens.ts */
+  /* Light theme = Ariel's palette, 2026-09-04 evening (PR #44): page/card #ffffff, tint #E6F0FA, ink #1a1a1a, secondary text #0A2540 (headings + secondary, 8.5:1), border #D7E3F1, brand blue #005EB8 (4.8:1 on white, hover #004A92). Nothing else. JS mirror: lib/design-tokens.ts */
   --background: 0 0% 100%;
-  --foreground: 0 0% 13.3%;
+  --foreground: 0 0% 10%;
   --card: 0 0% 100%;
-  --card-foreground: 0 0% 13.3%;
+  --card-foreground: 0 0% 10%;
   --popover: 0 0% 100%;
-  --popover-foreground: 0 0% 13.3%;
-  --primary: 206.7 100% 40.6%;
+  --popover-foreground: 0 0% 10%;
+  --primary: 209.3 100% 36.1%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 204 77% 95%;
-  --secondary-foreground: 0 0% 13.3%;
-  --muted: 204 77% 95%;
-  --muted-foreground: 210 100% 16.5%;
-  --accent: 206.7 100% 40.6%;
+  --secondary: 210 66.7% 94.1%;
+  --secondary-foreground: 0 0% 10%;
+  --muted: 210 66.7% 94.1%;
+  --muted-foreground: 210 73% 14.5%;
+  --accent: 209.3 100% 36.1%;
   --accent-foreground: 0 0% 100%;
-  --destructive: 210 100% 16.5%;
+  --destructive: 210 73% 14.5%;
   --destructive-foreground: 0 0% 100%;
-  --border: 0 0% 80%;
-  --input: 0 0% 80%;
-  --ring: 206.7 100% 40.6%;
-  --primary-hover: 207.2 100% 33.3%;   /* #005DAA - brand text ON THE TINT (brand on tint is 4.31:1) and hover fills */
+  --border: 212.3 48.1% 89.4%;
+  --input: 212.3 48.1% 89.4%;
+  --ring: 209.3 100% 36.1%;
+  --primary-hover: 209.6 100% 28.6%;   /* #004A92 - brand text ON THE TINT (brand on tint is 4.31:1) and hover fills */
   --radius: 0.5rem;
 
   /* Chart colors */
-  --chart-1: 206.7 100% 40.6%;   /* brand */
-  --chart-2: 210 100% 16.5%;     /* navy */
-  --chart-3: 207.2 100% 33.3%;   /* brand hover #005DAA */
-  --chart-4: 204 77% 95%;        /* tint */
-  --chart-5: 0 0% 80%;           /* border grey */
+  --chart-1: 209.3 100% 36.1%;   /* brand */
+  --chart-2: 210 73% 14.5%;     /* navy */
+  --chart-3: 209.6 100% 28.6%;   /* brand hover #004A92 */
+  --chart-4: 210 66.7% 94.1%;        /* tint */
+  --chart-5: 212.3 48.1% 89.4%;           /* border grey */
 }
 
 * {
@@ -100,40 +100,40 @@ body {
  *  - grade-a/b/c: deal quality grade
  */
 .glass-diamond {
-  background: rgba(0, 115, 207, 0.12);
+  background: rgba(0,94,184, 0.12);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(0, 115, 207, 0.3);
+  border: 1px solid rgba(0,94,184, 0.3);
 }
 
 .glass-triangle {
-  background: rgba(0, 42, 84, 0.12);
+  background: rgba(10,37,64, 0.12);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(0, 42, 84, 0.3);
+  border: 1px solid rgba(10,37,64, 0.3);
 }
 
 .glass-sold {
-  background: rgba(0, 93, 170, 0.12);
+  background: rgba(0,74,146, 0.12);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(0, 93, 170, 0.3);
+  border: 1px solid rgba(0,74,146, 0.3);
 }
 
 .glass-canceled {
-  background: rgba(204, 204, 204, 0.25);
+  background: rgba(215,227,241, 0.25);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(204, 204, 204, 0.6);
+  border: 1px solid rgba(215,227,241, 0.6);
   opacity: 0.7;
 }
 
 .grade-a {
-  color: #0073CF;
+  color: #005EB8;
 }
 
 .grade-b {
-  color: #005DAA;
+  color: #004A92;
 }
 
 .grade-c {
-  color: #002A54;
+  color: #0A2540;
 }
 
 /* Custom scrollbar */
@@ -171,13 +171,13 @@ body {
    blue, C navy, D tint with navy text, E/X/Z border grey with ink. (An earlier
    port had .grade-E navy-on-navy — invisible. Do not "restore" it.)
    ───────────────────────────────────────────────────────────────────────── */
-.grade-A { background: #0073CF; color: #ffffff; }
-.grade-B { background: #005DAA; color: #ffffff; }
-.grade-C { background: #002A54; color: #ffffff; }
-.grade-D { background: #E8F4FC; color: #002A54; }
+.grade-A { background: #005EB8; color: #ffffff; }
+.grade-B { background: #004A92; color: #ffffff; }
+.grade-C { background: #0A2540; color: #ffffff; }
+.grade-D { background: #E6F0FA; color: #0A2540; }
 .grade-E,
 .grade-X,
-.grade-Z { background: #CCCCCC; color: #222222; }
+.grade-Z { background: #D7E3F1; color: #1a1a1a; }
 
 /* ─────────────────────────────────────────────────────────────────────────
    Tabular figures. Every currency, bid and count column must use these.
@@ -222,13 +222,13 @@ th[data-numeric] { font-variant-numeric: tabular-nums; font-feature-settings: "t
 @layer base {
   :root {
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 0 0% 13.3%;
-    --sidebar-primary: 206.7 100% 40.6%;
+    --sidebar-foreground: 0 0% 10%;
+    --sidebar-primary: 209.3 100% 36.1%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 204 77% 95%;
-    --sidebar-accent-foreground: 0 0% 13.3%;
-    --sidebar-border: 0 0% 80%;
-    --sidebar-ring: 206.7 100% 40.6%;
+    --sidebar-accent: 210 66.7% 94.1%;
+    --sidebar-accent-foreground: 0 0% 10%;
+    --sidebar-border: 212.3 48.1% 89.4%;
+    --sidebar-ring: 209.3 100% 36.1%;
   }
   html.dark {
     --sidebar-background: 213 39% 7%;
@@ -276,49 +276,49 @@ th[data-numeric] { font-variant-numeric: tabular-nums; font-feature-settings: "t
 
 /* ─────────────────────────────────────────────────────────────────────────
    Light mode (default) — Ariel's 2026-09-04 palette: white canvas, ink
-   #222222, navy #002A54 headings/secondary, tint #E8F4FC, border #CCCCCC,
-   brand blue #0073CF. Dark mode is explicit.
+   #1a1a1a, navy #0A2540 headings/secondary, tint #E6F0FA, border #D7E3F1,
+   brand blue #005EB8. Dark mode is explicit.
    ───────────────────────────────────────────────────────────────────────── */
 html[data-theme='light'] {
   --background: 0 0% 100%;          /* #ffffff page */
-  --foreground: 0 0% 13.3%;           /* #222222 ink */
+  --foreground: 0 0% 10%;           /* #1a1a1a ink */
   --card: 0 0% 100%;                 /* #ffffff */
-  --card-foreground: 0 0% 13.3%;
+  --card-foreground: 0 0% 10%;
   --popover: 0 0% 100%;
-  --popover-foreground: 0 0% 13.3%;
-  --primary: 206.7 100% 40.6%;              /* #0073CF brand blue */
+  --popover-foreground: 0 0% 10%;
+  --primary: 209.3 100% 36.1%;              /* #005EB8 brand blue */
   --primary-foreground: 0 0% 100%;
-  --secondary: 204 77% 95%;
-  --secondary-foreground: 0 0% 13.3%;
-  --muted: 204 77% 95%;
-  --muted-foreground: 210 100% 16.5%;      /* #002A54 secondary, 8.5:1 */
-  --accent: 206.7 100% 40.6%;
+  --secondary: 210 66.7% 94.1%;
+  --secondary-foreground: 0 0% 10%;
+  --muted: 210 66.7% 94.1%;
+  --muted-foreground: 210 73% 14.5%;      /* #0A2540 secondary, 8.5:1 */
+  --accent: 209.3 100% 36.1%;
   --accent-foreground: 0 0% 100%;
-  --border: 0 0% 80%;               /* #CCCCCC */
-  --input: 0 0% 80%;
-  --ring: 206.7 100% 40.6%;
+  --border: 212.3 48.1% 89.4%;               /* #D7E3F1 */
+  --input: 212.3 48.1% 89.4%;
+  --ring: 209.3 100% 36.1%;
   --sidebar-background: 0 0% 100%;
-  --sidebar-foreground: 0 0% 13.3%;
-  --sidebar-primary: 206.7 100% 40.6%;
+  --sidebar-foreground: 0 0% 10%;
+  --sidebar-primary: 209.3 100% 36.1%;
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 204 77% 95%;
-  --sidebar-accent-foreground: 0 0% 13.3%;
-  --sidebar-border: 0 0% 80%;
-  --sidebar-ring: 206.7 100% 40.6%;
+  --sidebar-accent: 210 66.7% 94.1%;
+  --sidebar-accent-foreground: 0 0% 10%;
+  --sidebar-border: 212.3 48.1% 89.4%;
+  --sidebar-ring: 209.3 100% 36.1%;
 }
 
 html[data-theme='light'] body {
   background: #ffffff;
-  color: #222222;
+  color: #1a1a1a;
 }
 /* The pre-#45 [class~='text-white'] / slate / bd-orange override block that used
    to live here is gone: every component reads the tokens now, and the
-   `text-white -> #222222` rule was painting ink on the brand-blue buttons
+   `text-white -> #1a1a1a` rule was painting ink on the brand-blue buttons
    (3.3:1 measured live on /radar 2026-09-06 18:40 UTC). */
-html[data-theme='light'] ::selection { background: #0073CF; color: #ffffff; }
-html[data-theme='light'] ::-webkit-scrollbar-track { background: #E8F4FC; }
-html[data-theme='light'] ::-webkit-scrollbar-thumb { background: #CCCCCC; }
-html[data-theme='light'] ::-webkit-scrollbar-thumb:hover { background: #002A54; }
+html[data-theme='light'] ::selection { background: #005EB8; color: #ffffff; }
+html[data-theme='light'] ::-webkit-scrollbar-track { background: #E6F0FA; }
+html[data-theme='light'] ::-webkit-scrollbar-thumb { background: #D7E3F1; }
+html[data-theme='light'] ::-webkit-scrollbar-thumb:hover { background: #0A2540; }
 
 /* ─────────────────────────────────────────────────────────────────────────
    Dark mode — semantic tokens.
@@ -368,12 +368,12 @@ html.dark body {
 
 
 /* Sky theme (Ariel, 2026-09-04): white backgrounds, blue accent, navy headings - light mode only */
-html[data-theme='light'] h1, html[data-theme='light'] h2, html[data-theme='light'] h3, :root:not([data-theme='dark']) h1, :root:not([data-theme='dark']) h2, :root:not([data-theme='dark']) h3 { color: #002A54; }
+html[data-theme='light'] h1, html[data-theme='light'] h2, html[data-theme='light'] h3, :root:not([data-theme='dark']) h1, :root:not([data-theme='dark']) h2, :root:not([data-theme='dark']) h3 { color: #0A2540; }
 
 /* ─────────────────────────────────────────────────────────────────────────
-   Brand blue on the tint. #0073CF on #E8F4FC measures 4.31:1 - under the
+   Brand blue on the tint. #005EB8 on #E6F0FA measures 4.31:1 - under the
    4.5:1 gate - so brand-coloured TEXT that sits on a tinted surface takes the
-   hover blue #005DAA (5.97:1 on the tint, 6.67:1 on white). Fills stay #0073CF.
+   hover blue #004A92 (5.97:1 on the tint, 6.67:1 on white). Fills stay #005EB8.
    ───────────────────────────────────────────────────────────────────────── */
 .bg-secondary .text-primary, .bg-muted .text-primary, .bg-secondary.text-primary, .bg-muted.text-primary,
 [class*="bg-primary/"] .text-primary, [class*="bg-primary/"].text-primary,
