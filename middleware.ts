@@ -43,6 +43,7 @@ const isPublicRoute = createRouteMatcher([
   '/api/skip-trace(.*)', // API enforces its own Clerk account scope and provider gate
   '/api/watchlist(.*)', // API enforces its own Clerk account scope and JSON 401 responses
   '/api/d4d(.*)', // API enforces its own capability gate via requireCapability(), returns 402 not a Clerk redirect
+  '/api/projects(.*)', // API enforces its own capability gate via requireCapability(), returns 402 not a Clerk redirect
   '/api/csp-report(.*)',
   // Deed's same-origin SSE proxy to the Worker's /chat/api. Public for the
   // same reason /chat is on the Worker: the conversational surface is how a
@@ -131,6 +132,9 @@ const isPublicRoute = createRouteMatcher([
   // upgrade trigger (issue #20100), so a Clerk redirect here loses the sale
   // instead of showing it. requireCapability() gates the actual data.
   '/d4d(.*)',
+  // Same reasoning as /d4d above: /projects' locked panel is the Pro-to-Pro-Plus
+  // upgrade trigger (issue #20106).
+  '/projects(.*)',
   '/privacy(.*)',
   '/terms(.*)',
   '/disclaimer(.*)',

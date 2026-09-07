@@ -302,6 +302,91 @@ export function FieldRoutes() {
   )
 }
 
+/* ── Projects (rehab budget + scopes of work) ───────────────────────────── */
+
+const CM_STEPS = [
+  {
+    n: '1',
+    title: 'Win the auction',
+    body: 'The report told you the max bid. You held it, and the property is now yours.',
+  },
+  {
+    n: '2',
+    title: 'Build the rehab budget',
+    body: 'Start from a cosmetic, standard or gut template and edit every line — an editable baseline, not a priced catalog quote.',
+  },
+  {
+    n: '3',
+    title: 'Price the scopes of work',
+    body: 'Send grouped lines to a contractor, log the bid the moment it comes back, and see it against budget instantly.',
+  },
+  {
+    n: '4',
+    title: 'Track spend to the exit',
+    body: 'Log actuals as invoices land. Variance and projected gross profit move with every entry, not at month-end.',
+  },
+]
+
+export function RehabProjects() {
+  return (
+    <section id="projects" className="mx-auto max-w-5xl px-4 sm:px-6">
+      <div className="max-w-2xl">
+        <Eyebrow>Projects</Eyebrow>
+        <H2>Budget the rehab, price the scopes, track spend against budget.</H2>
+        <p className="mt-4 text-base leading-7 text-muted-foreground">
+          Winning the auction is the easy part to measure. What happens between the gavel and the closing
+          table is where a deal actually makes or loses money — and that is usually tracked in a spreadsheet
+          nobody updates. BidDeed.AI turns the property you just won straight into a working budget.
+        </p>
+      </div>
+
+      <ol className="mt-10 grid gap-4 sm:grid-cols-2">
+        {CM_STEPS.map((s) => (
+          <li key={s.n} className="rounded-2xl border border-border bg-card p-5">
+            <div className="flex items-baseline gap-3">
+              <span className="text-xs font-semibold tabular-nums text-primary">{s.n}</span>
+              <h3 className="text-sm font-semibold text-foreground">{s.title}</h3>
+            </div>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">{s.body}</p>
+          </li>
+        ))}
+      </ol>
+
+      <div className="mt-8 rounded-2xl border border-border bg-secondary p-5 sm:p-6">
+        <p className="text-sm font-semibold text-foreground">5400 Pina Vista Dr, Melbourne — 25-line standard rehab</p>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+          Bought at $165,000 against a $315,000 ARV. One scope — roof and exterior envelope — budgeted at
+          $11,962.50 came back with a $24,800 contractor bid, called out the moment it landed.
+        </p>
+        <dl className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
+          {[
+            ['$81,790.61', 'budget total'],
+            ['$21,650.00', 'actual spend'],
+            ['$60,140.61', 'variance'],
+            ['$68,209.39', 'projected gross profit'],
+          ].map(([v, l]) => (
+            <div key={l}>
+              <dt className="font-display text-xl font-medium tabular-nums text-foreground sm:text-2xl">{v}</dt>
+              <dd className="mt-1 text-xs leading-5 text-muted-foreground">{l}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+
+      <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <a className={BTN_PRIMARY} href={W.subscribeProPlus}>
+          Start Pro Plus — construction management included
+          <ArrowRight className="size-4" aria-hidden />
+        </a>
+        <p className="text-sm leading-6 text-muted-foreground">
+          Budgets, scopes of work, and budget-vs-actual are Pro Plus. Pro sees the zoning and the field route;
+          Pro Plus takes you to the closing table.
+        </p>
+      </div>
+    </section>
+  )
+}
+
 /* ── Pricing ─────────────────────────────────────────────────────────────── */
 
 interface Plan {

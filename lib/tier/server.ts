@@ -23,6 +23,11 @@ export type Capability =
   | 'get_d4d_route'
   | 'log_d4d_field'
   | 'get_d4d_discoveries'
+  | 'build_rehab_budget'
+  | 'get_rehab_budget'
+  | 'log_rehab_actual'
+  | 'build_scope_of_work'
+  | 'get_cost_catalog'
 
 export interface CapabilityCheck {
   allowed: boolean
@@ -31,9 +36,10 @@ export interface CapabilityCheck {
   upgradeTier: string | null
   upgradePrice: number | null
   userId: string | null
+  email: string | null
 }
 
-const DENIED_BASE: Omit<CapabilityCheck, 'userId'> = {
+const DENIED_BASE: Omit<CapabilityCheck, 'userId' | 'email'> = {
   allowed: false,
   tierId: 'free',
   tierName: 'Free',
@@ -61,7 +67,7 @@ export async function requireCapability(cap: Capability): Promise<CapabilityChec
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY
-  if (!url || !key) return { ...DENIED_BASE, userId }
+  if (!url || !key) return { ...DENIED_BASE, userId, email }
 
   try {
     // The RPC has no non-idempotent side effect a caller needs to protect
@@ -73,7 +79,7 @@ export async function requireCapability(cap: Capability): Promise<CapabilityChec
       p_capability: cap,
       p_email: email,
     })
-    if (error || !data || typeof data !== 'object') return { ...DENIED_BASE, userId }
+    if (error || !data || typeof data !== 'object') return { ...DENIED_BASE, userId, email }
 
     const result = data as Record<string, unknown>
     return {
@@ -83,8 +89,9 @@ export async function requireCapability(cap: Capability): Promise<CapabilityChec
       upgradeTier: typeof result.upgrade_tier === 'string' ? result.upgrade_tier : null,
       upgradePrice: typeof result.upgrade_price === 'number' ? result.upgrade_price : null,
       userId,
+      email,
     }
   } catch {
-    return { ...DENIED_BASE, userId }
+    return { ...DENIED_BASE, userId, email }
   }
 }

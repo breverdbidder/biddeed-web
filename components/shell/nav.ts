@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react'
-import { Bell, CalendarDays, FileText, FolderKanban, Gavel, MapPinned, Route, Search } from 'lucide-react'
+import { Bell, CalendarDays, FileText, FolderKanban, Gavel, HardHat, MapPinned, Route, Search } from 'lucide-react'
 
 /**
  * Primary navigation.
@@ -59,6 +59,16 @@ export const NAV_ITEMS: NavItem[] = [
     href: '/d4d',
     icon: Route,
     description: 'Build a field route from the lots you plan to bid on',
+  },
+  {
+    // Not "Projects" — that label is already taken by the Claude.ai-Projects-
+    // parity entry above (key 'projects', /chat#projects). This is the
+    // construction-management surface (issue #20106).
+    key: 'construction',
+    label: 'Construction',
+    href: '/projects',
+    icon: HardHat,
+    description: 'Budget the rehab, price the scopes, track spend against budget',
   },
   {
     key: 'alerts',

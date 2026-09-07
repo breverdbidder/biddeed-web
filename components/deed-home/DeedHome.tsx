@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import DeedRobotMark from '@/components/deed/DeedRobotMark'
 import { cn } from '@/lib/utils'
 import Composer from './Composer'
-import { FieldRoutes, Footer, Founder, HowItWorks, Pricing, Proof, TrustStrip } from './LandingSections'
+import { FieldRoutes, Footer, Founder, HowItWorks, Pricing, Proof, RehabProjects, TrustStrip } from './LandingSections'
 import PromptStarters from './PromptStarters'
 import ThreadView from './ThreadView'
 import { useDeedThread, type DeedSendOptions } from './useDeedThread'
@@ -128,6 +128,7 @@ export default function DeedHome() {
         <Founder />
         <HowItWorks />
         <FieldRoutes />
+        <RehabProjects />
         <Pricing onPrompt={(p) => onSend(p)} />
       </div>
       <Footer />
