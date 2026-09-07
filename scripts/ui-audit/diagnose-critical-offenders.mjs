@@ -2,7 +2,7 @@ import { chromium } from 'playwright'
 import fs from 'node:fs'
 
 const base = process.env.BASE_URL || 'https://biddeed.ai'
-const routes = ['/', '/radar', '/radar?view=map', '/radar?view=calendar', '/discover', '/auctions', '/sign-in', '/sign-up', '/buy-report']
+const routes = ['/', '/radar', '/radar?view=map', '/radar?view=calendar', '/discover', '/auctions', '/counties', '/sign-in', '/sign-up', '/buy-report', '/support']
 const viewports = [{ name: 'desktop', width: 1440, height: 900 }, { name: 'mobile', width: 390, height: 844 }]
 const canon = new Set(['#ffffff', '#e8f4fc', '#222222', '#002a54', '#cccccc', '#0073cf', '#005daa'])
 const parseRgb = (value) => { const match = value.match(/rgba?\(([^)]+)\)/); if (!match) return null; const parts = match[1].split(',').map(Number); return { rgb: parts.slice(0, 3), alpha: parts[3] ?? 1 } }

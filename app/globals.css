@@ -419,11 +419,14 @@ html[data-theme='light'] h1, html[data-theme='light'] h2, html[data-theme='light
    UTC: "© Mapbox" still rgba(0,0,0,.75)). Every selector below carries one
    extra class so it out-ranks the vendor rule regardless of order. */
 .mapboxgl-map.mapboxgl-map { font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-.mapboxgl-map .mapboxgl-ctrl-attrib, .mapboxgl-map .mapboxgl-ctrl-attrib a, .mapboxgl-map .mapboxgl-ctrl-attrib a:hover, .mapboxgl-map .mapboxgl-ctrl-attrib-button { color: hsl(var(--muted-foreground)); }
-.mapboxgl-map .mapboxgl-ctrl-attrib.mapboxgl-compact, .mapboxgl-map .mapboxgl-ctrl-attrib { background: hsl(var(--background) / 0.9); }
+.mapboxgl-map .mapboxgl-ctrl-attrib, .mapboxgl-map .mapboxgl-ctrl-attrib a, .mapboxgl-map .mapboxgl-ctrl-attrib a:hover, .mapboxgl-map .mapboxgl-ctrl-attrib-button { color: hsl(var(--muted-foreground)) !important; font: 500 11px/1.3 Inter, system-ui, sans-serif; }
+.mapboxgl-map .mapboxgl-ctrl-attrib.mapboxgl-compact, .mapboxgl-map .mapboxgl-ctrl-attrib { background: hsl(var(--background) / 0.9) !important; }
 .mapboxgl-map .mapboxgl-ctrl-group { background: hsl(var(--card)); }
+.mapboxgl-map .mapboxgl-ctrl-group button { width: 44px; height: 44px; }
+.mapboxgl-map .mapboxgl-ctrl-group button:hover { background: hsl(var(--secondary)); }
 .mapboxgl-map .mapboxgl-ctrl-group button + button { border-top-color: hsl(var(--border)); }
 .mapboxgl-map .mapboxgl-popup-content { background: hsl(var(--card)); color: hsl(var(--foreground)); border: 1px solid hsl(var(--border)); }
 .mapboxgl-map .mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip { border-top-color: hsl(var(--card)); }
 .mapboxgl-map .mapboxgl-popup-anchor-top .mapboxgl-popup-tip { border-bottom-color: hsl(var(--card)); }
 .mapboxgl-map .mapboxgl-popup-close-button { color: hsl(var(--muted-foreground)); }
+.mapboxgl-map .mapboxgl-ctrl-attrib a { text-decoration: underline; }
