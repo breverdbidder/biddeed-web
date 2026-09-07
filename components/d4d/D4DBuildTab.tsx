@@ -122,7 +122,7 @@ export default function D4DBuildTab({ onBuilt }: Props) {
             <select
               value={county}
               onChange={(e) => setCounty(e.target.value)}
-              className="min-h-11 rounded-md border border-border bg-card px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+              className="min-h-11 rounded-md border border-input bg-card px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
             >
               {FL_COUNTIES.map((c) => (
                 <option key={c.slug} value={c.slug}>
@@ -138,7 +138,7 @@ export default function D4DBuildTab({ onBuilt }: Props) {
               type="date"
               value={from}
               onChange={(e) => setFrom(e.target.value)}
-              className="min-h-11 rounded-md border border-border bg-card px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+              className="min-h-11 rounded-md border border-input bg-card px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
           </label>
 
@@ -148,7 +148,7 @@ export default function D4DBuildTab({ onBuilt }: Props) {
               type="date"
               value={to}
               onChange={(e) => setTo(e.target.value)}
-              className="min-h-11 rounded-md border border-border bg-card px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+              className="min-h-11 rounded-md border border-input bg-card px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
           </label>
         </div>
@@ -212,7 +212,7 @@ export default function D4DBuildTab({ onBuilt }: Props) {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder={defaultName}
-            className="min-h-11 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+            className="min-h-11 rounded-md border border-input bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
           />
         </label>
 
@@ -233,7 +233,7 @@ export default function D4DBuildTab({ onBuilt }: Props) {
               value={originLat ?? ''}
               onChange={(e) => setOriginLat(e.target.value ? Number(e.target.value) : null)}
               placeholder="Latitude"
-              className="min-h-11 w-full rounded-md border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+              className="min-h-11 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
             <input
               type="number"
@@ -241,7 +241,7 @@ export default function D4DBuildTab({ onBuilt }: Props) {
               value={originLng ?? ''}
               onChange={(e) => setOriginLng(e.target.value ? Number(e.target.value) : null)}
               placeholder="Longitude"
-              className="min-h-11 w-full rounded-md border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+              className="min-h-11 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
           </div>
         </div>

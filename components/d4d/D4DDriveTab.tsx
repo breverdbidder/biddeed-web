@@ -214,7 +214,7 @@ export default function D4DDriveTab({ detail, routeId, onStopUpdated }: Props) {
             id="d4d-lang"
             value={lang}
             onChange={(e) => setLangPersisted(e.target.value)}
-            className="min-h-11 min-w-0 flex-1 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+            className="min-h-11 min-w-0 flex-1 rounded-md border border-input bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
           >
             {D4D_VOICE_LANGUAGES.map((l) => (
               <option key={l.bcp47} value={l.bcp47}>
@@ -236,7 +236,7 @@ export default function D4DDriveTab({ detail, routeId, onStopUpdated }: Props) {
             type="button"
             onClick={() => voice.setEnabled(!voice.enabled)}
             className={`inline-flex min-h-11 min-w-11 items-center justify-center rounded-full px-4 text-xs font-semibold transition-colors ${
-              voice.enabled ? 'bg-primary text-primary-foreground' : 'border border-border bg-background text-foreground'
+              voice.enabled ? 'bg-primary text-primary-foreground' : 'border border-input bg-background text-foreground'
             }`}
           >
             {voice.enabled ? 'On' : 'Off'}
@@ -259,7 +259,7 @@ export default function D4DDriveTab({ detail, routeId, onStopUpdated }: Props) {
               onClick={() => (ask.status === 'listening' ? ask.stop() : ask.start())}
               disabled={ask.status === 'thinking'}
               className={`inline-flex min-h-11 min-w-11 items-center justify-center rounded-full px-4 text-xs font-semibold transition-colors disabled:opacity-50 ${
-                ask.status === 'listening' ? 'bg-primary text-primary-foreground' : 'border border-border bg-background text-foreground'
+                ask.status === 'listening' ? 'bg-primary text-primary-foreground' : 'border border-input bg-background text-foreground'
               }`}
             >
               {ask.status === 'listening' ? 'Stop' : ask.status === 'thinking' ? 'Thinking…' : 'Ask'}
@@ -334,7 +334,7 @@ export default function D4DDriveTab({ detail, routeId, onStopUpdated }: Props) {
               onChange={(e) => setNoteDraft(e.target.value)}
               rows={2}
               placeholder="Boarded windows, overgrown lot, no vehicles…"
-              className="min-h-11 flex-1 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+              className="min-h-11 flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
             <button
               type="button"

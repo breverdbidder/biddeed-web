@@ -237,7 +237,7 @@ export default function ScopesTab({ detail, detailLoading, onRefreshDetail }: Pr
                   type="number"
                   value={bidAmount}
                   onChange={(e) => setBidAmount(e.target.value)}
-                  className="min-h-11 w-40 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  className="min-h-11 w-40 rounded-md border border-input bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                 />
               </label>
               <label className="flex flex-col gap-1 text-sm">
@@ -245,7 +245,7 @@ export default function ScopesTab({ detail, detailLoading, onRefreshDetail }: Pr
                 <select
                   value={bidStatus}
                   onChange={(e) => setBidStatus(e.target.value)}
-                  className="min-h-11 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  className="min-h-11 rounded-md border border-input bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                 >
                   {['draft', 'sent', 'bid_received', 'awarded', 'declined'].map((s) => (
                     <option key={s} value={s}>
@@ -303,7 +303,7 @@ export default function ScopesTab({ detail, detailLoading, onRefreshDetail }: Pr
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Roof + exterior envelope"
-            className="min-h-11 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+            className="min-h-11 rounded-md border border-input bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
@@ -312,7 +312,7 @@ export default function ScopesTab({ detail, detailLoading, onRefreshDetail }: Pr
             type="text"
             value={contractorName}
             onChange={(e) => setContractorName(e.target.value)}
-            className="min-h-11 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+            className="min-h-11 rounded-md border border-input bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
@@ -321,7 +321,7 @@ export default function ScopesTab({ detail, detailLoading, onRefreshDetail }: Pr
             type="email"
             value={contractorEmail}
             onChange={(e) => setContractorEmail(e.target.value)}
-            className="min-h-11 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+            className="min-h-11 rounded-md border border-input bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
           />
         </label>
 

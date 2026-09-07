@@ -95,16 +95,16 @@ export default function DiscoveryPage() {
 
         <form onSubmit={submit} className="mt-8 border-y border-border py-5" aria-label="Auction discovery search">
           <div className="flex flex-col gap-3 lg:flex-row">
-            <label className="flex min-w-0 flex-1 items-center gap-3 border border-border bg-card px-4 py-3 focus-within:border-primary">
+            <label className="flex min-w-0 flex-1 items-center gap-3 border border-input bg-card px-4 py-3 focus-within:border-primary">
               <Search className="h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
               <span className="sr-only">Search auctions</span>
               <input value={query} onChange={(e) => setQuery(e.target.value)} maxLength={80} className="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-muted-foreground" placeholder="Address, city, ZIP, parcel, case number…" />
             </label>
-            <label className="border border-border bg-card px-3 py-2 text-sm lg:w-48">
+            <label className="border border-input bg-card px-3 py-2 text-sm lg:w-48">
               <span className="block text-xs font-bold uppercase tracking-wider text-muted-foreground">County slug</span>
               <input value={county} onChange={(e) => setCounty(e.target.value)} maxLength={40} className="mt-1 w-full bg-transparent outline-none" placeholder="miami_dade" />
             </label>
-            <label className="border border-border bg-card px-3 py-2 text-sm lg:w-48">
+            <label className="border border-input bg-card px-3 py-2 text-sm lg:w-48">
               <span className="block text-xs font-bold uppercase tracking-wider text-muted-foreground">Sale type</span>
               <select value={saleType} onChange={(e) => setSaleType(e.target.value)} className="mt-1 w-full bg-transparent outline-none">
                 <option value="">All sale types</option>

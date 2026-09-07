@@ -241,7 +241,7 @@ export default function DeedComposer({
       <div
         className={cn(
           'relative rounded-xl border bg-secondary transition-colors',
-          dragging ? 'border-primary' : 'border-border'
+          dragging ? 'border-primary' : 'border-input'
         )}
       >
         {slashOpen ? (

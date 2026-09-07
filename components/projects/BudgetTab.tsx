@@ -267,7 +267,7 @@ export default function BudgetTab({
             value={selectedId ?? ''}
             onChange={(e) => onSelect(e.target.value)}
             disabled={budgetsLoading || !budgets.length}
-            className="min-h-11 min-w-72 rounded-md border border-border bg-card px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+            className="min-h-11 min-w-72 rounded-md border border-input bg-card px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
           >
             {!budgets.length && <option value="">No budgets yet</option>}
             {budgets.map((b) => (
@@ -298,7 +298,7 @@ export default function BudgetTab({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Rehab budget — 5400 Pina Vista Dr"
-                className="min-h-11 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                className="min-h-11 rounded-md border border-input bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
             </label>
             <label className="flex flex-col gap-1 text-sm">
@@ -307,7 +307,7 @@ export default function BudgetTab({
                 type="number"
                 value={purchasePrice}
                 onChange={(e) => setPurchasePrice(e.target.value)}
-                className="min-h-11 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                className="min-h-11 rounded-md border border-input bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
             </label>
             <label className="flex flex-col gap-1 text-sm">
@@ -316,7 +316,7 @@ export default function BudgetTab({
                 type="number"
                 value={arv}
                 onChange={(e) => setArv(e.target.value)}
-                className="min-h-11 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                className="min-h-11 rounded-md border border-input bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
             </label>
             <label className="flex flex-col gap-1 text-sm">
@@ -325,7 +325,7 @@ export default function BudgetTab({
                 type="number"
                 value={sqft}
                 onChange={(e) => setSqft(e.target.value)}
-                className="min-h-11 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                className="min-h-11 rounded-md border border-input bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
             </label>
             <label className="flex flex-col gap-1 text-sm">
@@ -334,7 +334,7 @@ export default function BudgetTab({
                 type="number"
                 value={contingencyPct}
                 onChange={(e) => setContingencyPct(e.target.value)}
-                className="min-h-11 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                className="min-h-11 rounded-md border border-input bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
             </label>
           </div>
@@ -348,7 +348,7 @@ export default function BudgetTab({
                   type="button"
                   onClick={() => setTemplate(t.value)}
                   className={`rounded-xl border px-3 py-2 text-left text-sm transition-colors ${
-                    template === t.value ? 'border-primary bg-secondary text-foreground' : 'border-border bg-background text-muted-foreground hover:border-primary/60'
+                    template === t.value ? 'border-primary bg-secondary text-foreground' : 'border-input bg-background text-muted-foreground hover:border-primary/60'
                   }`}
                 >
                   <span className="block font-semibold text-foreground">{t.label}</span>
@@ -377,7 +377,7 @@ export default function BudgetTab({
           <select
             value={lang}
             onChange={(e) => setLangPersisted(e.target.value)}
-            className="min-h-11 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+            className="min-h-11 rounded-md border border-input bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
           >
             {PROJECTS_VOICE_LANGUAGES.map((l) => (
               <option key={l.bcp47} value={l.bcp47}>
@@ -394,7 +394,7 @@ export default function BudgetTab({
             type="button"
             onClick={() => voice.setEnabled(!voice.enabled)}
             className={`ml-auto inline-flex min-h-11 items-center justify-center rounded-full px-4 text-xs font-semibold transition-colors ${
-              voice.enabled ? 'bg-primary text-primary-foreground' : 'border border-border bg-background text-foreground'
+              voice.enabled ? 'bg-primary text-primary-foreground' : 'border border-input bg-background text-foreground'
             }`}
           >
             {voice.enabled ? 'On' : 'Off'}
@@ -451,7 +451,7 @@ export default function BudgetTab({
                         value={catalogQuery}
                         onChange={(e) => setCatalogQuery(e.target.value)}
                         placeholder="tile, roofing, cabinets…"
-                        className="min-h-11 w-full rounded-md border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                        className="min-h-11 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                       />
                       {catalogLoading && <Loader2 className="size-4 shrink-0 animate-spin text-muted-foreground" aria-hidden />}
                     </div>
@@ -482,7 +482,7 @@ export default function BudgetTab({
                     value={addCategory}
                     onChange={(e) => setAddCategory(e.target.value)}
                     placeholder="Category"
-                    className="min-h-11 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 lg:col-span-2"
+                    className="min-h-11 rounded-md border border-input bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 lg:col-span-2"
                   />
                   <input
                     ref={addDescRef}
@@ -490,35 +490,35 @@ export default function BudgetTab({
                     value={addDescription}
                     onChange={(e) => setAddDescription(e.target.value)}
                     placeholder="Description"
-                    className="min-h-11 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 lg:col-span-2"
+                    className="min-h-11 rounded-md border border-input bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 lg:col-span-2"
                   />
                   <input
                     type="text"
                     value={addUnit}
                     onChange={(e) => setAddUnit(e.target.value)}
                     placeholder="Unit"
-                    className="min-h-11 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    className="min-h-11 rounded-md border border-input bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                   />
                   <input
                     type="number"
                     value={addQty}
                     onChange={(e) => setAddQty(e.target.value)}
                     placeholder="Qty"
-                    className="min-h-11 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    className="min-h-11 rounded-md border border-input bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                   />
                   <input
                     type="number"
                     value={addMaterial}
                     onChange={(e) => setAddMaterial(e.target.value)}
                     placeholder="Material $/unit"
-                    className="min-h-11 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    className="min-h-11 rounded-md border border-input bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                   />
                   <input
                     type="number"
                     value={addLabor}
                     onChange={(e) => setAddLabor(e.target.value)}
                     placeholder="Labor $/unit"
-                    className="min-h-11 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    className="min-h-11 rounded-md border border-input bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                   />
                 </div>
 
@@ -619,7 +619,7 @@ function LineRow({
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           onBlur={commit}
-          className="min-h-9 w-full min-w-[220px] rounded-md border border-transparent bg-transparent px-2 text-foreground hover:border-border focus:border-border focus:outline-none focus:ring-2 focus:ring-primary/30"
+          className="min-h-9 w-full min-w-[220px] rounded-md border border-input bg-transparent px-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
         />
       </td>
       <td className="px-3 py-2">
@@ -628,7 +628,7 @@ function LineRow({
           value={qty}
           onChange={(e) => setQty(e.target.value)}
           onBlur={commit}
-          className="min-h-9 w-20 rounded-md border border-transparent bg-transparent px-2 text-foreground hover:border-border focus:border-border focus:outline-none focus:ring-2 focus:ring-primary/30"
+          className="min-h-9 w-20 rounded-md border border-input bg-transparent px-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
         />
       </td>
       <td className="px-3 py-2 text-muted-foreground">{line.unit}</td>
@@ -638,7 +638,7 @@ function LineRow({
           value={material}
           onChange={(e) => setMaterial(e.target.value)}
           onBlur={commit}
-          className="min-h-9 w-24 rounded-md border border-transparent bg-transparent px-2 text-foreground hover:border-border focus:border-border focus:outline-none focus:ring-2 focus:ring-primary/30"
+          className="min-h-9 w-24 rounded-md border border-input bg-transparent px-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
         />
       </td>
       <td className="px-3 py-2">
@@ -647,7 +647,7 @@ function LineRow({
           value={labor}
           onChange={(e) => setLabor(e.target.value)}
           onBlur={commit}
-          className="min-h-9 w-24 rounded-md border border-transparent bg-transparent px-2 text-foreground hover:border-border focus:border-border focus:outline-none focus:ring-2 focus:ring-primary/30"
+          className="min-h-9 w-24 rounded-md border border-input bg-transparent px-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
         />
       </td>
       <td className="px-3 py-2 text-right font-mono text-foreground">{formatMoney(line.line_total)}</td>

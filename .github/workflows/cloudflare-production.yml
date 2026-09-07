@@ -92,6 +92,13 @@ jobs:
       - name: Canon gate (prices and retired terms)
         run: node scripts/canon-gate.mjs
 
+      # #20109: the dark-to-light conversion left form controls resting at an
+      # invisible or near-invisible boundary until focus. Same reasoning as
+      # the two gates above - this makes the fix a precondition of deploying,
+      # not of reviewing, since sessions push straight to main with no PR.
+      - name: Control-boundary gate (every control needs a visible resting edge)
+        run: node scripts/control-boundary-gate.mjs
+
       - name: Build OpenNext Worker (production)
         # opennextjs-cloudflare build refuses to run in CI without an explicit
         # --config when there's no bare wrangler.jsonc at the repo root (there

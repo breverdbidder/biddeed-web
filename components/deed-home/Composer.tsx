@@ -324,7 +324,7 @@ export default function Composer({
         'relative rounded-2xl border bg-card text-card-foreground transition-shadow',
         'shadow-[0_1px_2px_rgba(31,27,22,0.06),0_8px_24px_-12px_rgba(31,27,22,0.18)]',
         'focus-within:border-primary/60 focus-within:shadow-[0_0_0_4px_hsl(var(--primary)/0.12)]',
-        hero ? 'border-border' : 'border-border'
+        hero ? 'border-input' : 'border-input'
       )}
     >
       {notice ? (
