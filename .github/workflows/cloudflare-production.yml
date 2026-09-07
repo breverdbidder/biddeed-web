@@ -20,6 +20,8 @@ on:
       - 'app/**'
       - 'components/**'
       - 'lib/**'
+      # the gates themselves live here: a gate change must be exercised by a deploy
+      - 'scripts/**'
       - 'public/**'
       - 'middleware.ts'
       - 'next.config.mjs'
