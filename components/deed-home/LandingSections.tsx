@@ -139,7 +139,7 @@ export function Founder() {
         <div className="space-y-4 text-base leading-7 text-muted-foreground">
           <p>
             Rainsville started as a $5,330 tax deed. After a ground-up build it closed at $398,600 &mdash; both
-            figures on the clerk&rsquo;s record. Lakewood was a $28,100 tax deed &mdash; $1,756 a door once we took it
+            figures on the clerk&rsquo;s record. Lakewood was a $20,100 tax deed &mdash; $1,256 a door once we took it
             through site-plan approval for 16 units. It sold at $320,000, $20,000 a door, multifamily land in
             Brevard County, Florida, near the L3Harris headquarters &mdash; deed, approval and closing all on the
             record. Twenty-plus years of results like these at foreclosure and tax deed auctions across Florida,
