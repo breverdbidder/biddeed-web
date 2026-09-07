@@ -1,0 +1,291 @@
+'use client'
+
+import { useCallback, useMemo, useRef, useState } from 'react'
+import { AlertTriangle, ChevronRight, Loader2, MapPinPlus, Mic, MicOff } from 'lucide-react'
+import { apiUrl } from '@/lib/api'
+import { speak, useD4DVoice } from './useD4DVoice'
+import type { D4DRouteDetail, FieldStatus } from './types'
+
+interface Props {
+  detail: D4DRouteDetail
+  routeId: string
+  onStopUpdated: () => void
+}
+
+function formatMoney(value: number | null): string {
+  if (value == null) return 'not available'
+  return `$${Math.round(value).toLocaleString()}`
+}
+
+const STATUS_BUTTONS: { status: FieldStatus; label: string }[] = [
+  { status: 'vacant', label: 'Vacant' },
+  { status: 'occupied', label: 'Occupied' },
+  { status: 'uncertain', label: 'Uncertain' },
+]
+
+const VERDICT_BUTTONS: { status: FieldStatus; label: string }[] = [
+  { status: 'bid', label: 'Bid' },
+  { status: 'review', label: 'Review' },
+  { status: 'skip', label: 'Skip' },
+]
+
+export default function D4DDriveTab({ detail, routeId, onStopUpdated }: Props) {
+  const stops = detail.stops
+  const [activeIndex, setActiveIndex] = useState(0)
+  const [noteDraft, setNoteDraft] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [loggingFind, setLoggingFind] = useState(false)
+  const [findMessage, setFindMessage] = useState<string | null>(null)
+
+  const activeStop = stops[activeIndex] ?? null
+
+  // patchStop/handleLogFind are memoized before `voice` exists below (voice's
+  // own handlers depend on them), so they read confirmation-speech gating
+  // through this ref rather than closing over `voice.enabled` directly — a
+  // useCallback with a fixed dep array would otherwise keep speaking (or
+  // staying silent) based on whatever `enabled` was true the first time the
+  // callback was created, never seeing later toggles.
+  const voiceEnabledRef = useRef(false)
+
+  const speakStop = useCallback((index: number) => {
+    if (!voiceEnabledRef.current) return
+    const stop = stops[index]
+    if (!stop) {
+      speak('That was the last stop on this route.')
+      return
+    }
+    speak(
+      `Stop ${stop.seq}. ${stop.property_address ?? 'address unknown'}. ` +
+        `Judgment ${formatMoney(stop.judgment_amount)}. ` +
+        `SIGNAL dollar max bid ${formatMoney(stop.signal_max_bid)}.`
+    )
+  }, [stops])
+
+  const patchStop = useCallback(
+    async (stopId: string, body: { fieldStatus?: FieldStatus | null; note?: string | null }, confirmation: string) => {
+      setSaving(true)
+      try {
+        const res = await fetch(apiUrl(`/api/d4d/stops/${stopId}`), {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        })
+        if (res.ok) {
+          onStopUpdated()
+          if (voiceEnabledRef.current) speak(confirmation)
+        } else if (voiceEnabledRef.current) {
+          speak('That did not go through. Try again.')
+        }
+      } catch {
+        if (voiceEnabledRef.current) speak('That did not go through. Try again.')
+      } finally {
+        setSaving(false)
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [onStopUpdated]
+  )
+
+  const handleNextStop = useCallback(() => {
+    setActiveIndex((prev) => {
+      const next = Math.min(prev + 1, stops.length - 1)
+      speakStop(next)
+      return next
+    })
+  }, [stops.length, speakStop])
+
+  const handleMarkStatus = useCallback(
+    (status: FieldStatus) => {
+      if (!activeStop) return
+      patchStop(activeStop.id, { fieldStatus: status }, `Marked ${status}.`)
+    },
+    [activeStop, patchStop]
+  )
+
+  const handleNote = useCallback(
+    (text: string) => {
+      if (!activeStop) return
+      patchStop(activeStop.id, { note: text }, 'Note saved.')
+    },
+    [activeStop, patchStop]
+  )
+
+  const handleLogFind = useCallback(() => {
+    if (!('geolocation' in navigator)) {
+      setFindMessage('Location is not available on this device.')
+      return
+    }
+    setLoggingFind(true)
+    setFindMessage(null)
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const res = await fetch(apiUrl('/api/d4d/discoveries'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ routeId, lat: pos.coords.latitude, lng: pos.coords.longitude }),
+          })
+          if (res.ok) {
+            setFindMessage('Find logged at your current location.')
+            onStopUpdated()
+            if (voiceEnabledRef.current) speak('Find logged.')
+          } else {
+            setFindMessage('Could not log this find.')
+            if (voiceEnabledRef.current) speak('That did not go through. Try again.')
+          }
+        } finally {
+          setLoggingFind(false)
+        }
+      },
+      () => {
+        setFindMessage('Could not get your location.')
+        setLoggingFind(false)
+      },
+      { timeout: 8000 }
+    )
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [routeId, onStopUpdated])
+
+  const voice = useD4DVoice(
+    useMemo(
+      () => ({ onNextStop: handleNextStop, onMarkStatus: handleMarkStatus, onNote: handleNote, onLogFind: handleLogFind }),
+      [handleNextStop, handleMarkStatus, handleNote, handleLogFind]
+    )
+  )
+  voiceEnabledRef.current = voice.enabled
+
+  if (!activeStop) {
+    return <p className="mt-6 text-sm text-muted-foreground">This route has no stops.</p>
+  }
+
+  return (
+    <div className="mt-4 space-y-4">
+      <div className="rounded-xl border border-primary/40 bg-secondary px-4 py-3 text-xs leading-5 text-muted-foreground">
+        <AlertTriangle className="mr-1.5 inline size-3.5 text-primary" aria-hidden />
+        You are responsible for your own attention behind the wheel. Pull over before reading or typing
+        anything on this screen.
+      </div>
+
+      {voice.supported && (
+        <div className="flex items-center justify-between rounded-xl border border-border bg-card px-4 py-3">
+          <div className="flex items-center gap-2 text-sm text-foreground">
+            {voice.enabled ? <Mic className="size-4 text-primary" aria-hidden /> : <MicOff className="size-4 text-muted-foreground" aria-hidden />}
+            Hands-free voice
+            {voice.enabled && voice.listening && <span className="text-xs text-muted-foreground">(listening…)</span>}
+          </div>
+          <button
+            type="button"
+            onClick={() => voice.setEnabled(!voice.enabled)}
+            className={`inline-flex min-h-11 min-w-11 items-center justify-center rounded-full px-4 text-xs font-semibold transition-colors ${
+              voice.enabled ? 'bg-primary text-primary-foreground' : 'border border-border bg-background text-foreground'
+            }`}
+          >
+            {voice.enabled ? 'On' : 'Off'}
+          </button>
+        </div>
+      )}
+      {voice.enabled && voice.lastHeard && <p className="text-xs text-muted-foreground">Heard: "{voice.lastHeard}"</p>}
+
+      <div className="rounded-2xl border border-border bg-card p-5">
+        <div className="flex items-center justify-between">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
+            {activeStop.seq}
+          </span>
+          <span className="text-xs text-muted-foreground">
+            Stop {activeIndex + 1} of {stops.length}
+          </span>
+        </div>
+        <p className="mt-3 text-lg font-semibold text-foreground">{activeStop.property_address ?? `Case ${activeStop.case_number}`}</p>
+        <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 font-mono text-sm text-muted-foreground">
+          <span>Judgment {formatMoney(activeStop.judgment_amount)}</span>
+          <span className="text-primary">SIGNAL$ Max Bid {formatMoney(activeStop.signal_max_bid)}</span>
+        </div>
+        {activeStop.field_status !== 'pending' && (
+          <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-primary">Marked: {activeStop.field_status}</p>
+        )}
+
+        <div className="mt-5">
+          <p className="text-xs font-medium text-muted-foreground">Occupancy</p>
+          <div className="mt-2 grid grid-cols-3 gap-2">
+            {STATUS_BUTTONS.map((b) => (
+              <button
+                key={b.status}
+                type="button"
+                disabled={saving}
+                onClick={() => handleMarkStatus(b.status)}
+                className="min-h-11 min-w-11 rounded-xl border border-border bg-background px-3 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:text-primary disabled:opacity-50"
+              >
+                {b.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <p className="text-xs font-medium text-muted-foreground">Decision</p>
+          <div className="mt-2 grid grid-cols-3 gap-2">
+            {VERDICT_BUTTONS.map((b) => (
+              <button
+                key={b.status}
+                type="button"
+                disabled={saving}
+                onClick={() => handleMarkStatus(b.status)}
+                className="min-h-11 min-w-11 rounded-xl bg-primary px-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+              >
+                {b.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <label className="text-xs font-medium text-muted-foreground" htmlFor="d4d-note">
+            Note
+          </label>
+          <div className="mt-2 flex gap-2">
+            <textarea
+              id="d4d-note"
+              value={noteDraft}
+              onChange={(e) => setNoteDraft(e.target.value)}
+              rows={2}
+              placeholder="Boarded windows, overgrown lot, no vehicles…"
+              className="min-h-11 flex-1 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+            />
+            <button
+              type="button"
+              disabled={saving || !noteDraft.trim()}
+              onClick={() => {
+                handleNote(noteDraft.trim())
+                setNoteDraft('')
+              }}
+              className="min-h-11 min-w-11 shrink-0 rounded-md border border-border bg-card px-4 text-sm font-semibold text-foreground disabled:opacity-50"
+            >
+              Save
+            </button>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleNextStop}
+          disabled={activeIndex >= stops.length - 1}
+          className="mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-border bg-background text-sm font-semibold text-foreground disabled:opacity-50"
+        >
+          Next stop
+          <ChevronRight className="size-4" aria-hidden />
+        </button>
+      </div>
+
+      <button
+        type="button"
+        onClick={handleLogFind}
+        disabled={loggingFind}
+        className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+      >
+        {loggingFind ? <Loader2 className="size-4 animate-spin" aria-hidden /> : <MapPinPlus className="size-4" aria-hidden />}
+        Log a find
+      </button>
+      {findMessage && <p className="text-center text-xs text-muted-foreground">{findMessage}</p>}
+    </div>
+  )
+}

@@ -42,6 +42,7 @@ const isPublicRoute = createRouteMatcher([
   '/api/title-search(.*)', // API enforces its own Clerk account scope and JSON 401 responses
   '/api/skip-trace(.*)', // API enforces its own Clerk account scope and provider gate
   '/api/watchlist(.*)', // API enforces its own Clerk account scope and JSON 401 responses
+  '/api/d4d(.*)', // API enforces its own capability gate via requireCapability(), returns 402 not a Clerk redirect
   '/api/csp-report(.*)',
   // Deed's same-origin SSE proxy to the Worker's /chat/api. Public for the
   // same reason /chat is on the Worker: the conversational surface is how a
@@ -126,6 +127,10 @@ const isPublicRoute = createRouteMatcher([
   // instead of their paid confirmation page.
   '/success(.*)',
   '/radar(.*)',
+  // /d4d must be reachable signed-out: the locked panel IS the Investor-to-Pro
+  // upgrade trigger (issue #20100), so a Clerk redirect here loses the sale
+  // instead of showing it. requireCapability() gates the actual data.
+  '/d4d(.*)',
   '/privacy(.*)',
   '/terms(.*)',
   '/disclaimer(.*)',
