@@ -27,7 +27,7 @@ export default function D4DLocked({ check }: { check: CapabilityCheck }) {
   const subscribeHref = `/subscribe?tier=${check.upgradeTier ?? 'pro'}`
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+    <div className="mx-auto w-full max-w-5xl px-4 pb-28 pt-10 sm:px-6 sm:pb-16 lg:px-8">
       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Drive for Dollars</p>
       <h1 className="font-display mt-2 text-[1.9rem] font-medium leading-[1.15] tracking-tight text-foreground sm:text-4xl">
         Build a route from the lots you actually want to see.
@@ -44,14 +44,14 @@ export default function D4DLocked({ check }: { check: CapabilityCheck }) {
         <p className="text-sm font-semibold text-foreground">Example: a 3-stop Palm Bay run</p>
         <ol className="mt-4 divide-y divide-border">
           {EXAMPLE_STOPS.map((s) => (
-            <li key={s.seq} className="flex items-center justify-between gap-4 py-3 text-sm">
-              <div className="flex items-center gap-3">
+            <li key={s.seq} className="flex flex-col gap-2 py-3 text-sm sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+              <div className="flex min-w-0 items-center gap-3">
                 <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
                   {s.seq}
                 </span>
-                <span className="text-foreground">{s.address}</span>
+                <span className="min-w-0 text-foreground">{s.address}</span>
               </div>
-              <div className="flex shrink-0 gap-4 font-mono text-xs text-muted-foreground">
+              <div className="flex flex-wrap gap-x-4 gap-y-1 pl-10 font-mono text-xs text-muted-foreground sm:shrink-0 sm:pl-0">
                 <span>Judgment {s.judgment}</span>
                 <span className="text-primary">SIGNAL$ Max Bid {s.maxBid}</span>
               </div>
