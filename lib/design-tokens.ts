@@ -12,14 +12,14 @@
  * ink, border — plus white. No other colours.
  */
 export const LIGHT = {
-  background: '#F5F0E8',
-  card: '#FBFAF7',
-  tint: '#F8D4C5',
-  ink: '#1F1B16',
-  navy: '#1F1B16',
-  border: '#DDD5C9',
-  brand: '#8F4028',
-  brandHover: '#7A3424',
+  background: '#ffffff',
+  card: '#ffffff',
+  tint: '#E6F0FA',
+  ink: '#1a1a1a',
+  navy: '#0A2540',
+  border: '#D7E3F1',
+  brand: '#005EB8',
+  brandHover: '#004A92',
 } as const
 
 /** Dark palette = same family lifted for contrast on a navy-black ground. */

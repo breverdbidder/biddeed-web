@@ -3,70 +3,74 @@
 @tailwind utilities;
 
 :root {
-  /* WinnerDataAI house-brand light tokens */
-  --navy-50: #F8D4C5;
-  --navy-100: #F8D4C5;
-  --navy-200: #DDD5C9;
-  --navy-300: #1F1B16;
-  --navy-400: #1F1B16;
-  --navy-500: #766F67;
-  --navy-600: #1F1B16;
-  --navy-700: #1F1B16;
-  --navy-800: #1F1B16;
-  --navy-900: #1F1B16;
+  /* Navy accent colors */
+  --navy-50: #E6F0FA;
+  --navy-100: #E6F0FA;
+  --navy-200: #D7E3F1;
+  --navy-300: #0A2540;
+  --navy-400: #0A2540;
+  --navy-500: #004A92;
+  --navy-600: #0A2540;
+  --navy-700: #0A2540;
+  --navy-800: #0A2540;
+  --navy-900: #0A2540;
 
-  /* Terracotta action tokens */
-  --orange-50: #F8D4C5;
-  --orange-100: #F8D4C5;
-  --orange-200: #EDE3D7;
-  --orange-300: #C15F3C;
-  --orange-400: #C15F3C;
-  --orange-500: #C15F3C;
-  --orange-600: #A94D30;
+  /* Orange accent colors */
+  --orange-50: #E6F0FA;
+  --orange-100: #E6F0FA;
+  --orange-200: #E6F0FA;
+  --orange-300: #005EB8;
+  --orange-400: #005EB8;
+  --orange-500: #005EB8;
+  --orange-600: #004A92;
 
-  /* Warm neutral surfaces */
-  --slate-50: #FBFAF7;
-  --slate-100: #F5F0E8;
-  --slate-200: #DDD5C9;
-  --slate-300: #DDD5C9;
-  --slate-400: #766F67;
-  --slate-500: #766F67;
-  --slate-600: #1F1B16;
-  --slate-700: #1F1B16;
-  --slate-800: #1F1B16;
-  --slate-900: #1F1B16;
-  --slate-950: #1F1B16;
+  /* Slate colors for dark theme */
+  --slate-50: #ffffff;
+  --slate-100: #E6F0FA;
+  --slate-200: #D7E3F1;
+  --slate-300: #D7E3F1;
+  --slate-400: #0A2540;
+  --slate-500: #0A2540;
+  --slate-600: #0A2540;
+  --slate-700: #0A2540;
+  --slate-800: #0A2540;
+  --slate-900: #0A2540;
+  --slate-950: #0A2540;
 
   /* shadcn semantic colors (HSL values — no hsl() wrapper) */
-  /* Light theme = WinnerDataAI child-brand house palette: cream, terracotta, ink, and warm neutrals. */
-  --background: 39 33% 94%;
-  --foreground: 30 17% 10%;
-  --card: 40 33% 98%;
-  --card-foreground: 30 17% 10%;
-  --popover: 40 33% 98%;
-  --popover-foreground: 30 17% 10%;
-  --primary: 14 56% 36%;
-  --primary-foreground: 40 33% 98%;
-  --secondary: 36 23% 83%;
-  --secondary-foreground: 30 17% 10%;
-  --muted: 36 23% 83%;
-  --muted-foreground: 30 10% 32%;
-  --accent: 14 56% 36%;
-  --accent-foreground: 40 33% 98%;
-  --destructive: 14 56% 36%;
-  --destructive-foreground: 40 33% 98%;
-  --border: 36 23% 83%;
-  --input: 36 23% 83%;
-  --ring: 14 56% 36%;
-  --primary-hover: 14 56% 30%;
+  /* Light theme = Ariel's palette, 2026-09-04 evening (PR #44): page/card #ffffff, tint #E6F0FA, ink #1a1a1a, secondary text #0A2540 (headings + secondary, 8.5:1), border #D7E3F1, brand blue #005EB8 (4.8:1 on white, hover #004A92). Nothing else. JS mirror: lib/design-tokens.ts */
+  --background: 0 0% 100%;
+  --foreground: 0 0% 10%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 10%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 10%;
+  --primary: 209.3 100% 36.1%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 210 66.7% 94.1%;
+  --secondary-foreground: 0 0% 10%;
+  --muted: 210 66.7% 94.1%;
+  --muted-foreground: 210 73% 14.5%;
+  --accent: 209.3 100% 36.1%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 210 73% 14.5%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 212.3 48.1% 89.4%;
+  /* WCAG 2.2 SC 1.4.11: a control boundary needs 3:1. #D7E3F1 on white is 1.30:1,
+     so --input is the navy (15.54:1), NOT --primary -- a brand-blue resting field
+     reads as an action and breaks accent-for-CTA-only. --border stays #D7E3F1:
+     dividers and card edges are non-interactive and exempt. */
+  --input: 210 73% 14.5%;
+  --ring: 209.3 100% 36.1%;
+  --primary-hover: 209.6 100% 28.6%;   /* #004A92 - brand text ON THE TINT (brand on tint is 4.31:1) and hover fills */
   --radius: 0.5rem;
 
   /* Chart colors */
-  --chart-1: 14 56% 36%;
-  --chart-2: 30 17% 10%;
-  --chart-3: 14 56% 30%;
-  --chart-4: 36 23% 83%;
-  --chart-5: 36 23% 83%;
+  --chart-1: 209.3 100% 36.1%;   /* brand */
+  --chart-2: 210 73% 14.5%;     /* navy */
+  --chart-3: 209.6 100% 28.6%;   /* brand hover #004A92 */
+  --chart-4: 210 66.7% 94.1%;        /* tint */
+  --chart-5: 212.3 48.1% 89.4%;           /* border grey */
 }
 
 * {
@@ -125,15 +129,15 @@ body {
 }
 
 .grade-a {
-  color: #C15F3C;
+  color: #005EB8;
 }
 
 .grade-b {
-  color: #A94D30;
+  color: #004A92;
 }
 
 .grade-c {
-  color: #1F1B16;
+  color: #0A2540;
 }
 
 /* Custom scrollbar */
@@ -171,13 +175,13 @@ body {
    blue, C navy, D tint with navy text, E/X/Z border grey with ink. (An earlier
    port had .grade-E navy-on-navy — invisible. Do not "restore" it.)
    ───────────────────────────────────────────────────────────────────────── */
-.grade-A { background: #C15F3C; color: #FBFAF7; }
-.grade-B { background: #A94D30; color: #FBFAF7; }
-.grade-C { background: #1F1B16; color: #FBFAF7; }
-.grade-D { background: #F8D4C5; color: #1F1B16; }
+.grade-A { background: #005EB8; color: #ffffff; }
+.grade-B { background: #004A92; color: #ffffff; }
+.grade-C { background: #0A2540; color: #ffffff; }
+.grade-D { background: #E6F0FA; color: #0A2540; }
 .grade-E,
 .grade-X,
-.grade-Z { background: #DDD5C9; color: #1F1B16; }
+.grade-Z { background: #D7E3F1; color: #1a1a1a; }
 
 /* ─────────────────────────────────────────────────────────────────────────
    Tabular figures. Every currency, bid and count column must use these.
@@ -221,14 +225,14 @@ th[data-numeric] { font-variant-numeric: tabular-nums; font-feature-settings: "t
 
 @layer base {
   :root {
-    --sidebar-background: 39 33% 94%;
-    --sidebar-foreground: 30 17% 10%;
-    --sidebar-primary: 14 56% 36%;
-    --sidebar-primary-foreground: 40 33% 98%;
-    --sidebar-accent: 36 23% 83%;
-    --sidebar-accent-foreground: 30 17% 10%;
-    --sidebar-border: 36 23% 83%;
-    --sidebar-ring: 14 56% 36%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 0 0% 10%;
+    --sidebar-primary: 209.3 100% 36.1%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 66.7% 94.1%;
+    --sidebar-accent-foreground: 0 0% 10%;
+    --sidebar-border: 212.3 48.1% 89.4%;
+    --sidebar-ring: 209.3 100% 36.1%;
   }
   html.dark {
     --sidebar-background: 213 39% 7%;
@@ -274,47 +278,51 @@ th[data-numeric] { font-variant-numeric: tabular-nums; font-feature-settings: "t
 .fc-icon-plus-square::before { content: '\002B'; }
 .fc-icon-x::before { content: '\00D7'; }
 
-/* Light mode (default) — WinnerDataAI child-brand cream, terracotta, and ink. */
+/* ─────────────────────────────────────────────────────────────────────────
+   Light mode (default) — Ariel's 2026-09-04 palette: white canvas, ink
+   #1a1a1a, navy #0A2540 headings/secondary, tint #E6F0FA, border #D7E3F1,
+   brand blue #005EB8. Dark mode is explicit.
+   ───────────────────────────────────────────────────────────────────────── */
 html[data-theme='light'] {
-  --background: 39 33% 94%;
-  --foreground: 30 17% 10%;
-  --card: 40 33% 98%;
-  --card-foreground: 30 17% 10%;
-  --popover: 40 33% 98%;
-  --popover-foreground: 30 17% 10%;
-  --primary: 14 56% 36%;
-  --primary-foreground: 40 33% 98%;
-  --secondary: 36 23% 83%;
-  --secondary-foreground: 30 17% 10%;
-  --muted: 36 23% 83%;
-  --muted-foreground: 30 10% 32%;
-  --accent: 14 56% 36%;
-  --accent-foreground: 40 33% 98%;
-  --border: 36 23% 83%;
-  --input: 36 23% 83%;
-  --ring: 14 56% 36%;
-  --sidebar-background: 39 33% 94%;
-  --sidebar-foreground: 30 17% 10%;
-  --sidebar-primary: 14 56% 36%;
-  --sidebar-primary-foreground: 40 33% 98%;
-  --sidebar-accent: 36 23% 83%;
-  --sidebar-accent-foreground: 30 17% 10%;
-  --sidebar-border: 36 23% 83%;
-  --sidebar-ring: 14 56% 36%;
+  --background: 0 0% 100%;          /* #ffffff page */
+  --foreground: 0 0% 10%;           /* #1a1a1a ink */
+  --card: 0 0% 100%;                 /* #ffffff */
+  --card-foreground: 0 0% 10%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 10%;
+  --primary: 209.3 100% 36.1%;              /* #005EB8 brand blue */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 210 66.7% 94.1%;
+  --secondary-foreground: 0 0% 10%;
+  --muted: 210 66.7% 94.1%;
+  --muted-foreground: 210 73% 14.5%;      /* #0A2540 secondary, 8.5:1 */
+  --accent: 209.3 100% 36.1%;
+  --accent-foreground: 0 0% 100%;
+  --border: 212.3 48.1% 89.4%;               /* #D7E3F1 */
+  --input: 210 73% 14.5%;                    /* #0A2540 - control boundary, 15.54:1 */
+  --ring: 209.3 100% 36.1%;
+  --sidebar-background: 0 0% 100%;
+  --sidebar-foreground: 0 0% 10%;
+  --sidebar-primary: 209.3 100% 36.1%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 210 66.7% 94.1%;
+  --sidebar-accent-foreground: 0 0% 10%;
+  --sidebar-border: 212.3 48.1% 89.4%;
+  --sidebar-ring: 209.3 100% 36.1%;
 }
 
 html[data-theme='light'] body {
-  background: #F5F0E8;
-  color: #1F1B16;
+  background: #ffffff;
+  color: #1a1a1a;
 }
 /* The pre-#45 [class~='text-white'] / slate / bd-orange override block that used
    to live here is gone: every component reads the tokens now, and the
    `text-white -> #1a1a1a` rule was painting ink on the brand-blue buttons
    (3.3:1 measured live on /radar 2026-09-06 18:40 UTC). */
-html[data-theme='light'] ::selection { background: #C15F3C; color: #FBFAF7; }
-html[data-theme='light'] ::-webkit-scrollbar-track { background: #EDE3D7; }
-html[data-theme='light'] ::-webkit-scrollbar-thumb { background: #DDD5C9; }
-html[data-theme='light'] ::-webkit-scrollbar-thumb:hover { background: #A94D30; }
+html[data-theme='light'] ::selection { background: #005EB8; color: #ffffff; }
+html[data-theme='light'] ::-webkit-scrollbar-track { background: #E6F0FA; }
+html[data-theme='light'] ::-webkit-scrollbar-thumb { background: #D7E3F1; }
+html[data-theme='light'] ::-webkit-scrollbar-thumb:hover { background: #0A2540; }
 
 /* ─────────────────────────────────────────────────────────────────────────
    Dark mode — semantic tokens.
@@ -364,7 +372,7 @@ html.dark body {
 
 
 /* Sky theme (Ariel, 2026-09-04): white backgrounds, blue accent, navy headings - light mode only */
-html[data-theme='light'] h1, html[data-theme='light'] h2, html[data-theme='light'] h3, :root:not([data-theme='dark']) h1, :root:not([data-theme='dark']) h2, :root:not([data-theme='dark']) h3 { color: #1F1B16; }
+html[data-theme='light'] h1, html[data-theme='light'] h2, html[data-theme='light'] h3, :root:not([data-theme='dark']) h1, :root:not([data-theme='dark']) h2, :root:not([data-theme='dark']) h3 { color: #0A2540; }
 
 /* ─────────────────────────────────────────────────────────────────────────
    Brand blue on the tint. #005EB8 on #E6F0FA measures 4.31:1 - under the
