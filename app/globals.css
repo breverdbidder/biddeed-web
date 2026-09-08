@@ -45,26 +45,26 @@
   --card-foreground: 30 17% 10%;
   --popover: 40 33% 98%;
   --popover-foreground: 30 17% 10%;
-  --primary: 14 54% 49%;
+  --primary: 14 56% 36%;
   --primary-foreground: 40 33% 98%;
   --secondary: 36 23% 83%;
   --secondary-foreground: 30 17% 10%;
   --muted: 36 23% 83%;
   --muted-foreground: 30 10% 32%;
-  --accent: 14 54% 49%;
+  --accent: 14 56% 36%;
   --accent-foreground: 40 33% 98%;
-  --destructive: 14 54% 49%;
+  --destructive: 14 56% 36%;
   --destructive-foreground: 40 33% 98%;
   --border: 36 23% 83%;
-  --input: 210 73% 14.5%;                /* #0A2540 - control boundary, 13.70:1 on #F5F0E8 (WCAG 2.2 SC 1.4.11) */
-  --ring: 14 54% 49%;
-  --primary-hover: 14 55% 43%;
+  --input: 36 23% 83%;
+  --ring: 14 56% 36%;
+  --primary-hover: 14 56% 30%;
   --radius: 0.5rem;
 
   /* Chart colors */
-  --chart-1: 14 54% 49%;
+  --chart-1: 14 56% 36%;
   --chart-2: 30 17% 10%;
-  --chart-3: 14 55% 43%;
+  --chart-3: 14 56% 30%;
   --chart-4: 36 23% 83%;
   --chart-5: 36 23% 83%;
 }
@@ -223,12 +223,12 @@ th[data-numeric] { font-variant-numeric: tabular-nums; font-feature-settings: "t
   :root {
     --sidebar-background: 39 33% 94%;
     --sidebar-foreground: 30 17% 10%;
-    --sidebar-primary: 14 54% 49%;
+    --sidebar-primary: 14 56% 36%;
     --sidebar-primary-foreground: 40 33% 98%;
     --sidebar-accent: 36 23% 83%;
     --sidebar-accent-foreground: 30 17% 10%;
     --sidebar-border: 36 23% 83%;
-    --sidebar-ring: 14 54% 49%;
+    --sidebar-ring: 14 56% 36%;
   }
   html.dark {
     --sidebar-background: 213 39% 7%;
@@ -282,25 +282,25 @@ html[data-theme='light'] {
   --card-foreground: 30 17% 10%;
   --popover: 40 33% 98%;
   --popover-foreground: 30 17% 10%;
-  --primary: 14 54% 49%;
+  --primary: 14 56% 36%;
   --primary-foreground: 40 33% 98%;
   --secondary: 36 23% 83%;
   --secondary-foreground: 30 17% 10%;
   --muted: 36 23% 83%;
   --muted-foreground: 30 10% 32%;
-  --accent: 14 54% 49%;
+  --accent: 14 56% 36%;
   --accent-foreground: 40 33% 98%;
   --border: 36 23% 83%;
-  --input: 210 73% 14.5%;                /* #0A2540 - control boundary, 13.70:1 on #F5F0E8 (WCAG 2.2 SC 1.4.11) */
-  --ring: 14 54% 49%;
+  --input: 36 23% 83%;
+  --ring: 14 56% 36%;
   --sidebar-background: 39 33% 94%;
   --sidebar-foreground: 30 17% 10%;
-  --sidebar-primary: 14 54% 49%;
+  --sidebar-primary: 14 56% 36%;
   --sidebar-primary-foreground: 40 33% 98%;
   --sidebar-accent: 36 23% 83%;
   --sidebar-accent-foreground: 30 17% 10%;
   --sidebar-border: 36 23% 83%;
-  --sidebar-ring: 14 54% 49%;
+  --sidebar-ring: 14 56% 36%;
 }
 
 html[data-theme='light'] body {

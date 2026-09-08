@@ -66,7 +66,7 @@ if (findings.length) {
  * value. Dark-mode values (html[data-theme='dark'] / DARK) are the same family
  * lifted and are listed too. Anything else fails, in CI and in the deploy.
  */
-const CANON_LIGHT = ['#f5f0e8', '#fbfaf7', '#f8d4c5', '#1f1b16', '#766f67', '#ddd5c9', '#c15f3c', '#a94d30', '#ede3d7', '#0a2540']
+const CANON_LIGHT = ['#f5f0e8', '#fbfaf7', '#f8d4c5', '#1f1b16', '#766f67', '#ddd5c9', '#c15f3c', '#a94d30', '#8f4028', '#7a3424', '#ede3d7']
 const CANON_DARK = ['#0b1119', '#111b27', '#1b2737', '#ededed', '#9eb2c7', '#24344c', '#1a90ff', '#4da6ff']
 const CANON = new Set([...CANON_LIGHT, ...CANON_DARK])
 const tokenFindings = []
@@ -83,7 +83,7 @@ for (const rel of ALLOW) {
     for (const m of line.matchAll(/^\s*--(?:background|foreground|card|popover|primary|secondary|muted|accent|destructive|border|input|ring|primary-hover|chart-\d|sidebar-[a-z-]+)(?:-foreground)?:\s*([\d.]+ [\d.]+% [\d.]+%)/g)) {
       const hsl = m[1]
       const ok = [
-        '39 33% 94%', '40 33% 98%', '30 17% 10%', '36 23% 83%', '30 10% 32%', '14 54% 49%', '14 55% 43%',
+        '39 33% 94%', '40 33% 98%', '30 17% 10%', '36 23% 83%', '30 10% 32%', '14 54% 49%', '14 55% 43%', '14 56% 36%', '14 56% 30%',
         '213 39% 7%', '214 39% 11%', '214 35% 16%', '0 0% 93%', '211 27% 70%', '216 35% 22%', '209 100% 55%',
         '210 73% 14.5%',
       ].includes(hsl)

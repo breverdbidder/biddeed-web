@@ -18,8 +18,8 @@ export const LIGHT = {
   ink: '#1F1B16',
   navy: '#1F1B16',
   border: '#DDD5C9',
-  brand: '#C15F3C',
-  brandHover: '#A94D30',
+  brand: '#8F4028',
+  brandHover: '#7A3424',
 } as const
 
 /** Dark palette = same family lifted for contrast on a navy-black ground. */
