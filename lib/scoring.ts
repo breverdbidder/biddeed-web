@@ -15,6 +15,7 @@ export type Recommendation = 'BID' | 'REVIEW' | 'SKIP' | 'UNKNOWN'
 export interface ScoringResult {
   recommendation: Recommendation
   color: string
+  textColor: string
   maxBid: number | null
   ratio: number | null
 }
@@ -33,23 +34,26 @@ export function getRecommendation(
 ): ScoringResult {
   const maxBid = calculateMaxBid(justValue)
   if (maxBid === null) {
-    return { recommendation: 'UNKNOWN', color: C.border, ratio: null, maxBid: null }
+    return { recommendation: 'UNKNOWN', color: C.border, textColor: C.ink, ratio: null, maxBid: null }
   }
 
   const bid = openingBid || justValue || 0
   if (bid <= 0) {
-    return { recommendation: 'UNKNOWN', color: C.border, ratio: null, maxBid }
+    return { recommendation: 'UNKNOWN', color: C.border, textColor: C.ink, ratio: null, maxBid }
   }
 
   const ratio = Math.round((maxBid / bid) * 100)
 
   if (ratio >= 75) {
-    return { recommendation: 'BID', color: C.brand, ratio, maxBid }
+    return { recommendation: 'BID', color: C.brand, textColor: C.background, ratio, maxBid }
   }
   if (ratio >= 60) {
-    return { recommendation: 'REVIEW', color: C.navy, ratio, maxBid }
+    return { recommendation: 'REVIEW', color: C.navy, textColor: C.background, ratio, maxBid }
   }
-  return { recommendation: 'SKIP', color: C.border, ratio, maxBid }
+  // SKIP's fill is the light border tint (C.border) -- white text on it is a
+  // near-invisible 1.3:1 (same failure class as the white-on-white incident).
+  // Match .grade-E/.grade-X/.grade-Z: light fill takes dark ink text.
+  return { recommendation: 'SKIP', color: C.border, textColor: C.ink, ratio, maxBid }
 }
 
 export function formatCurrency(val: number | null | undefined): string {

@@ -67,7 +67,7 @@ export default function PromptStarters({
               type="button"
               onClick={() => onPick(s.prompt)}
               className={cn(
-                'inline-flex min-h-11 items-center gap-2 whitespace-nowrap rounded-full border border-border bg-card px-3.5 text-sm text-foreground',
+                'inline-flex min-h-11 items-center gap-2 whitespace-nowrap rounded-full border border-input bg-card px-3.5 text-sm text-foreground',
                 'transition-colors hover:border-primary/60 hover:bg-primary/5 hover:text-primary',
                 'outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background'
               )}

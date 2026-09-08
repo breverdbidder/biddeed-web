@@ -65,7 +65,7 @@ export default function PricingTiers() {
               <div className="flex items-center justify-between gap-2">
                 <h2 className="text-base font-semibold text-foreground">{p.name}</h2>
                 {p.featured ? (
-                  <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
+                  <span className="rounded-full bg-secondary px-2.5 py-0.5 text-xs font-semibold text-primary">
                     Most chosen
                   </span>
                 ) : null}

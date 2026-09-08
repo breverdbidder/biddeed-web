@@ -428,7 +428,7 @@ html[data-theme='light'] h1, html[data-theme='light'] h2, html[data-theme='light
 .mapboxgl-map .mapboxgl-ctrl-group { background: hsl(var(--card)); }
 .mapboxgl-map .mapboxgl-ctrl-group button { width: 44px; height: 44px; }
 .mapboxgl-map .mapboxgl-ctrl-group button:hover { background: hsl(var(--secondary)); }
-.mapboxgl-map .mapboxgl-ctrl-group button + button { border-top-color: hsl(var(--border)); }
+.mapboxgl-map .mapboxgl-ctrl-group button + button { border-top-color: hsl(var(--input)); }
 .mapboxgl-map .mapboxgl-popup-content { background: hsl(var(--card)); color: hsl(var(--foreground)); border: 1px solid hsl(var(--border)); }
 .mapboxgl-map .mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip { border-top-color: hsl(var(--card)); }
 .mapboxgl-map .mapboxgl-popup-anchor-top .mapboxgl-popup-tip { border-bottom-color: hsl(var(--card)); }

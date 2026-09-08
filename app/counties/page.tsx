@@ -76,7 +76,7 @@ export default async function CountiesPage() {
                     {c.county_display}
                   </span>
                   {c.is_gold_standard ? (
-                    <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
+                    <span className="rounded-full bg-secondary px-2.5 py-0.5 text-xs font-semibold text-primary">
                       Gold Standard
                     </span>
                   ) : null}

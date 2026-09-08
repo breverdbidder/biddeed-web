@@ -82,7 +82,7 @@ export default function AuctionSidebarList({
                 }}
                 className={`w-full text-left px-3 py-3 cursor-pointer transition-colors ${
                   isSelected
-                    ? 'bg-primary/10 dark:bg-primary/20'
+                    ? 'bg-secondary dark:bg-primary/20'
                     : 'hover:bg-muted dark:hover:bg-card/60'
                 }`}
               >

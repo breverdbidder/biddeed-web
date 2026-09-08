@@ -138,8 +138,8 @@ export default function AuctionSpreadsheet({ auctions, loading, onSelectAuction 
                   <td className="px-2 py-1.5 whitespace-nowrap">
                     {score.recommendation !== 'UNKNOWN' && (
                       <span
-                        className="px-1.5 py-0.5 rounded text-[10px] font-bold text-white"
-                        style={{ backgroundColor: score.color }}
+                        className="px-1.5 py-0.5 rounded text-[10px] font-bold"
+                        style={{ backgroundColor: score.color, color: score.textColor }}
                       >
                         {score.recommendation}
                       </span>

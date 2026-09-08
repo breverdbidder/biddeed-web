@@ -71,7 +71,7 @@ export default function Topbar({ deedOpen, onToggleDeed, showDeedToggle = true }
         the button primitive. On mobile it opens the Sheet; on desktop it
         collapses the rail to icons.
       */}
-      <SidebarTrigger aria-label="Toggle navigation sidebar" className="border border-sidebar-border bg-sidebar text-sidebar-foreground shadow-sm hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
+      <SidebarTrigger aria-label="Toggle navigation sidebar" className="border border-input bg-sidebar text-sidebar-foreground shadow-sm hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
         <PanelLeft aria-hidden />
       </SidebarTrigger>
 
@@ -118,7 +118,7 @@ export default function Topbar({ deedOpen, onToggleDeed, showDeedToggle = true }
           type="button"
           onClick={toggleTheme}
           aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-          className="mr-1 inline-flex min-h-9 items-center gap-1.5 rounded-md border border-border px-2.5 text-xs font-semibold text-muted-foreground outline-none transition-colors hover:border-primary hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+          className="mr-1 inline-flex min-h-9 items-center gap-1.5 rounded-md border border-input px-2.5 text-xs font-semibold text-muted-foreground outline-none transition-colors hover:border-primary hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
         >
           <span aria-hidden>{theme === 'dark' ? '☼' : '☾'}</span>
           <span className={isMobile ? 'sr-only' : undefined}>{theme === 'dark' ? 'Light' : 'Dark'}</span>

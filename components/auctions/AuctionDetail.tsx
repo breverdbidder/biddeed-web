@@ -39,9 +39,9 @@ function typeBadge(type: string): string {
   switch (type) {
     case 'foreclosure':
     case 'active':
-      return 'bg-primary/10 dark:bg-primary/15/30 text-primary dark:text-primary'
+      return 'bg-secondary dark:bg-primary/15/30 text-primary dark:text-primary'
     case 'tax_deed':
-      return 'bg-foreground/10 dark:bg-foreground/15/30 text-foreground dark:text-foreground'
+      return 'bg-secondary dark:bg-foreground/15/30 text-foreground dark:text-foreground'
     case 'cancelled':
       return 'bg-muted dark:bg-card text-muted-foreground dark:text-muted-foreground'
     default:

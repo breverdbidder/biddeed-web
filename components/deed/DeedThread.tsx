@@ -101,7 +101,7 @@ export default function DeedThread({ turns, streaming, status, surface, onSugges
                 type="button"
                 onClick={() => onSuggestion(s)}
                 className={cn(
-                  'w-full rounded-lg border border-border bg-secondary px-3 py-2.5',
+                  'w-full rounded-lg border border-input bg-secondary px-3 py-2.5',
                   'text-left text-sm text-muted-foreground outline-none transition-colors',
                   'hover:border-primary hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring'
                 )}

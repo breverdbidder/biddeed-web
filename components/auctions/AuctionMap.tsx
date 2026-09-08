@@ -554,7 +554,7 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
       {fetchError && (
         <div
           data-testid="map-fetch-error"
-          className="mb-3 px-3 py-2 rounded-md bg-primary/10 dark:bg-primary/15/20 text-xs text-primary dark:text-primary"
+          className="mb-3 px-3 py-2 rounded-md bg-secondary dark:bg-primary/15/20 text-xs text-primary dark:text-primary"
         >
           {fetchError}
         </div>
@@ -563,7 +563,7 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
       {showTruncationBanner && (
         <div
           data-testid="map-truncation-banner"
-          className="mb-3 px-3 py-2 rounded-md bg-foreground/10 dark:bg-foreground/15/20 text-xs text-foreground dark:text-foreground"
+          className="mb-3 px-3 py-2 rounded-md bg-secondary dark:bg-foreground/15/20 text-xs text-foreground dark:text-foreground"
         >
           Showing {resp!.returned.toLocaleString()} of {resp!.total_matching.toLocaleString()} matching auctions on the map.
           {noCoords > 0 && ` ${noCoords.toLocaleString()} have no coordinates and cannot be plotted.`}
@@ -604,7 +604,7 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
           {/* Fullscreen toggle */}
           <button
             onClick={toggleFullscreen}
-            className="min-h-11 bg-card/90 dark:bg-card/90 backdrop-blur-sm border border-border dark:border-border rounded-md px-3 py-2 text-sm font-medium text-foreground dark:text-foreground hover:bg-card dark:hover:bg-card transition-colors shadow-sm flex items-center gap-1.5"
+            className="min-h-11 bg-card/90 dark:bg-card/90 backdrop-blur-sm border border-input dark:border-input rounded-md px-3 py-2 text-sm font-medium text-foreground dark:text-foreground hover:bg-card dark:hover:bg-card transition-colors shadow-sm flex items-center gap-1.5"
             title={isFullscreen ? 'Exit fullscreen (Esc)' : 'Fullscreen map'}
           >
             {isFullscreen ? (
@@ -627,7 +627,7 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
           {/* Satellite/Streets toggle */}
           <button
             onClick={toggleStyle}
-            className="min-h-11 bg-card/90 dark:bg-card/90 backdrop-blur-sm border border-border dark:border-border rounded-md px-3 py-2 text-sm font-medium text-foreground dark:text-foreground hover:bg-card dark:hover:bg-card transition-colors shadow-sm flex items-center gap-1.5"
+            className="min-h-11 bg-card/90 dark:bg-card/90 backdrop-blur-sm border border-input dark:border-input rounded-md px-3 py-2 text-sm font-medium text-foreground dark:text-foreground hover:bg-card dark:hover:bg-card transition-colors shadow-sm flex items-center gap-1.5"
             title={isSatellite ? 'Switch to streets' : 'Switch to satellite'}
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

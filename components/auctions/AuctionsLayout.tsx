@@ -280,7 +280,7 @@ export default function AuctionsLayout({ initialView, initialCounty, initialSale
 
         {dayFilter && (
           <div className="flex items-center gap-2 text-sm">
-            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-foreground dark:text-foreground border border-border dark:border-border">
+            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary text-foreground dark:text-foreground border border-border dark:border-border">
               Showing{' '}
               {dayFilter.saleType === 'tax_deed'
                 ? 'tax deed'

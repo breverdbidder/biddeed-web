@@ -73,7 +73,7 @@ function AuctionCard({ row }: { row: AuctionCardData }) {
           <span
             className={cn(
               'mt-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium',
-              isTax ? 'bg-secondary text-secondary-foreground' : 'bg-primary/10 text-primary'
+              isTax ? 'bg-secondary text-secondary-foreground' : 'bg-secondary text-primary'
             )}
           >
             {isTax ? <Landmark className="size-3" aria-hidden /> : <Gavel className="size-3" aria-hidden />}

@@ -512,7 +512,7 @@ export function Pricing({ onPrompt }: { onPrompt: (p: string) => void }) {
             <div className="flex items-center justify-between gap-2">
               <h3 className="text-base font-semibold text-foreground">{p.name}</h3>
               {p.featured ? (
-                <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">Most chosen</span>
+                <span className="rounded-full bg-secondary px-2.5 py-0.5 text-xs font-semibold text-primary">Most chosen</span>
               ) : null}
             </div>
             <p className="mt-3 flex items-baseline gap-1">
