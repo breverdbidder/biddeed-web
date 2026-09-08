@@ -22,6 +22,32 @@ function isTierSlug(v: string | null): v is TierSlug {
   return v === 'investor' || v === 'pro' || v === 'proplus'
 }
 
+// Enterprise has no Stripe price — it is a sales-assisted quote, never a
+// checkout. Before this, ?tier=enterprise fell through to the 'pro' default
+// and silently sold the wrong plan (#20120).
+function EnterpriseContact() {
+  return (
+    <div className="mx-auto flex min-h-[70vh] w-full max-w-lg flex-col justify-center px-4 py-10 sm:px-6">
+      <div className="rounded-2xl border border-border bg-card p-6 sm:p-8">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">BidDeed.AI Enterprise</p>
+        <h1 className="font-display mt-2 text-2xl font-medium tracking-tight text-foreground">
+          Let&apos;s talk about your team.
+        </h1>
+        <p className="mt-4 text-sm leading-6 text-muted-foreground">
+          Enterprise is white-label, unlimited, and priced to your county footprint and seat count — it is not
+          a self-serve checkout. Tell us what you need and we will follow up with a custom contract.
+        </p>
+        <a
+          href="/support"
+          className="mt-6 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground outline-none transition-colors hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        >
+          Contact us
+        </a>
+      </div>
+    </div>
+  )
+}
+
 /**
  * Posts the existing Worker checkout contract unchanged:
  * {tier, customer_email, interval} -> POST /subscribe/checkout -> {url}.
@@ -31,7 +57,13 @@ function isTierSlug(v: string | null): v is TierSlug {
  */
 export default function SubscribeCheckout() {
   const params = useSearchParams()
-  const tier: TierSlug = isTierSlug(params.get('tier')) ? (params.get('tier') as TierSlug) : 'pro'
+  const rawTier = params.get('tier')
+
+  if (rawTier === 'enterprise') {
+    return <EnterpriseContact />
+  }
+
+  const tier: TierSlug = isTierSlug(rawTier) ? (rawTier as TierSlug) : 'pro'
   const plan = TIER_PLAN[tier]
   const initialInterval: Interval = params.get('interval') === 'annual' ? 'annual' : 'monthly'
 

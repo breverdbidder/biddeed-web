@@ -473,6 +473,19 @@ export const PLANS: Plan[] = [
     soon: ['Due-diligence title report (pre-bid summary, not title insurance)'],
     cta: { label: 'Start Pro Plus', href: W.subscribeProPlus },
   },
+  {
+    name: 'Enterprise',
+    price: 'Custom',
+    per: '',
+    blurb: 'White-label, unlimited, broker B2B — priced to your county footprint and seat count.',
+    features: [
+      'Everything in Pro Plus, unlimited',
+      'White-label memos and REST API',
+      'Webhook push + custom county prioritization',
+      'Team seats, close-and-fee via FL broker',
+    ],
+    cta: { label: 'Contact us', href: W.support },
+  },
 ]
 
 export function Pricing({ onPrompt }: { onPrompt: (p: string) => void }) {
@@ -487,7 +500,7 @@ export function Pricing({ onPrompt }: { onPrompt: (p: string) => void }) {
         </p>
       </div>
 
-      <div className="mt-10 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {PLANS.map((p) => (
           <div
             key={p.name}

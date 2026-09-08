@@ -450,7 +450,14 @@ export default CLERK_ENABLED
       if (rateLimitResponse) return rateLimitResponse
 
       if (!isPublicRoute(req)) {
-        await auth.protect()
+        // Plain auth.protect() falls back to Clerk's internal protect-rewrite
+        // 404 whenever it cannot resolve a sign-in destination on its own —
+        // measured live on /admin/support (#20120): signed-out visitors got a
+        // bare 404 instead of a redirect. /admin/support is the only page
+        // route this branch ever reaches (everything else is in
+        // isPublicRoute), so an explicit unauthenticatedUrl fixes it here
+        // without changing behaviour anywhere else.
+        await auth.protect({ unauthenticatedUrl: new URL('/sign-in', req.url).toString() })
       }
 
       const nonce = generateNonce()

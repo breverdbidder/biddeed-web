@@ -44,7 +44,7 @@ export default function PricingTiers() {
         ))}
       </div>
 
-      <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {PLANS.map((p) => {
           const showAnnual = interval === 'annual' && p.annualPrice
           const price = showAnnual ? p.annualPrice : p.price
@@ -75,6 +75,15 @@ export default function PricingTiers() {
                   {price}
                 </span>
                 <span className="text-sm text-muted-foreground">{per}</span>
+                {/* The visible price flips with the client-side interval toggle above,
+                    so a plain (non-JS) fetch of this page only ever sees one state.
+                    This keeps the other price in the server-rendered HTML too —
+                    sr-only, so it changes nothing visually. */}
+                {p.annualPrice ? (
+                  <span className="sr-only">
+                    {showAnnual ? `${p.price}${p.per} also available monthly` : `${p.annualPrice}${p.annualPer} also available annually`}
+                  </span>
+                ) : null}
               </p>
               <p className="mt-2 text-sm text-muted-foreground">{p.blurb}</p>
               <ul className="mt-5 flex-1 space-y-2.5">
