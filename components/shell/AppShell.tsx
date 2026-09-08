@@ -53,7 +53,11 @@ export default function AppShell({
   // surfaces over Clerk controls, especially at 390px. Keep the route boundary
   // explicit so auth styling remains independent of workspace navigation.
   if (isAuthRoute) {
-    return <div className="min-h-screen bg-background text-foreground">{children}</div>
+    return (
+      <main id="main" className="min-h-screen bg-background text-foreground">
+        {children}
+      </main>
+    )
   }
 
   return (
@@ -65,7 +69,7 @@ export default function AppShell({
         plain div on purpose: two nested <main> elements is an accessibility
         error (one landmark per page), and screen readers announced both.
       */}
-      <SidebarInset className="min-w-0 bg-background text-foreground">
+      <SidebarInset id="main" className="min-w-0 bg-background text-foreground">
         <Topbar deedOpen={deedOpen && !isHome} onToggleDeed={toggleDeed} showDeedToggle={!isHome} />
 
         <div className="flex min-h-0 flex-1">

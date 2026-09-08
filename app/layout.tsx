@@ -5,6 +5,7 @@ import './globals.css'
 import AppShell from '@/components/shell/AppShell'
 import ChatwootWidget from '@/components/ChatwootWidget'
 import ConditionalClerkProvider from '@/components/ConditionalClerkProvider'
+import SkipToContent from '@/components/shell/SkipToContent'
 import { isClerkHostAuthorized } from '@/lib/clerk-host'
 import { ThemeProvider } from '@/lib/theme-context'
 import { LIGHT as C } from '@/lib/design-tokens'
@@ -40,11 +41,34 @@ const sourceSerif = Source_Serif_4({
 const ICON =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23F59E0B'/%3E%3Ctext x='16' y='23' font-family='system-ui,sans-serif' font-size='20' font-weight='800' text-anchor='middle' fill='%23020617'%3EB%3C/text%3E%3C/svg%3E"
 
+// metadataBase resolves the relative image path emitted by app/opengraph-image.tsx
+// into the absolute og:image / twitter:image URL every crawler requires — without
+// it Next falls back to localhost in production. Per-route pages already set
+// their own `title`/`description` and keep overriding these (Next replaces, not
+// merges, when a page defines the field) — openGraph/twitter are absent from
+// every page-level export today, so this default cascades to all of them.
+const SITE_URL = 'https://biddeed.ai'
+const DEFAULT_TITLE = 'BidDeed.AI — Auction Intelligence'
+const DEFAULT_DESCRIPTION =
+  'AI-powered foreclosure and tax deed auction intelligence for Florida — with zoning analysis on every property.'
+
 export const metadata: Metadata = {
-  title: 'BidDeed.AI — Auction Intelligence',
-  description:
-    'AI-powered foreclosure and tax deed auction intelligence for Florida — with zoning analysis on every property.',
+  metadataBase: new URL(SITE_URL),
+  title: DEFAULT_TITLE,
+  description: DEFAULT_DESCRIPTION,
   icons: { icon: [{ url: ICON, type: 'image/svg+xml' }] },
+  openGraph: {
+    title: DEFAULT_TITLE,
+    description: DEFAULT_DESCRIPTION,
+    url: SITE_URL,
+    siteName: 'BidDeed.AI',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: DEFAULT_TITLE,
+    description: DEFAULT_DESCRIPTION,
+  },
 }
 
 /**
@@ -111,6 +135,12 @@ export default async function RootLayout({
       style={{ background: 'hsl(var(--background))', color: 'hsl(var(--foreground))' }}
     >
       <body>
+        {/*
+          First focusable element in the document (WCAG 2.4.1). Must render
+          before the shell so it is the first tab stop on every route, not
+          just the ones the sidebar happens to render after.
+        */}
+        <SkipToContent />
         {/*
           The shell wraps every route: nav rail, topbar and the Deed panel are
           persistent chrome, so they mount once here rather than per page.

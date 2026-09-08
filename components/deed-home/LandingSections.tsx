@@ -389,10 +389,13 @@ export function RehabProjects() {
 
 /* ── Pricing ─────────────────────────────────────────────────────────────── */
 
-interface Plan {
+export interface Plan {
   name: string
   price: string
   per: string
+  /** Annual price, billed yearly. Absent on Free — there is no annual Free tier. */
+  annualPrice?: string
+  annualPer?: string
   blurb: string
   features: string[]
   soon?: string[]
@@ -400,7 +403,10 @@ interface Plan {
   featured?: boolean
 }
 
-const PLANS: Plan[] = [
+// Exported so app/pricing/page.tsx renders the identical canon prices from one
+// source of truth — scripts/canon-gate.mjs validates the monthly `price` fields
+// here, so both surfaces stay in sync with one gate.
+export const PLANS: Plan[] = [
   {
     name: 'Free',
     price: '$0',
@@ -419,6 +425,8 @@ const PLANS: Plan[] = [
     name: 'Investor',
     price: '$99',
     per: '/month',
+    annualPrice: '$990',
+    annualPer: '/year',
     blurb: 'The exact ceiling on every lot in your counties.',
     features: [
       'Exact SIGNAL$ Max Bid',
@@ -434,6 +442,8 @@ const PLANS: Plan[] = [
     name: 'Pro',
     price: '$199',
     per: '/month',
+    annualPrice: '$1,990',
+    annualPer: '/year',
     blurb: 'Investor, plus the zoning read on every property.',
     features: [
       'Everything in Investor',
@@ -449,6 +459,8 @@ const PLANS: Plan[] = [
     name: 'Pro Plus',
     price: '$399',
     per: '/month',
+    annualPrice: '$3,990',
+    annualPer: '/year',
     blurb: 'Everything you need from the auction calendar to the closing table.',
     features: [
       'Everything in Pro',
