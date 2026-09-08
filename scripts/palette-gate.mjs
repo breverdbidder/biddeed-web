@@ -66,7 +66,7 @@ if (findings.length) {
  * value. Dark-mode values (html[data-theme='dark'] / DARK) are the same family
  * lifted and are listed too. Anything else fails, in CI and in the deploy.
  */
-const CANON_LIGHT = ['#ffffff', '#e6f0fa', '#1a1a1a', '#0a2540', '#d7e3f1', '#005eb8', '#004a92']
+const CANON_LIGHT = ['#f5f0e8', '#fbfaf7', '#f8d4c5', '#1f1b16', '#766f67', '#ddd5c9', '#c15f3c', '#a94d30', '#ede3d7']
 const CANON_DARK = ['#0b1119', '#111b27', '#1b2737', '#ededed', '#9eb2c7', '#24344c', '#1a90ff', '#4da6ff']
 const CANON = new Set([...CANON_LIGHT, ...CANON_DARK])
 const tokenFindings = []
@@ -83,7 +83,7 @@ for (const rel of ALLOW) {
     for (const m of line.matchAll(/^\s*--(?:background|foreground|card|popover|primary|secondary|muted|accent|destructive|border|input|ring|primary-hover|chart-\d|sidebar-[a-z-]+)(?:-foreground)?:\s*([\d.]+ [\d.]+% [\d.]+%)/g)) {
       const hsl = m[1]
       const ok = [
-        '0 0% 100%', '210 66.7% 94.1%', '0 0% 10%', '210 73% 14.5%', '212.3 48.1% 89.4%', '209.3 100% 36.1%', '209.6 100% 28.6%',
+        '39 33% 94%', '40 33% 98%', '30 17% 10%', '36 23% 83%', '30 10% 32%', '14 54% 49%', '14 55% 43%',
         '213 39% 7%', '214 39% 11%', '214 35% 16%', '0 0% 93%', '211 27% 70%', '216 35% 22%', '209 100% 55%',
       ].includes(hsl)
       if (!ok) tokenFindings.push({ rel, line: i + 1, hit: `hsl ${hsl}` })
@@ -93,7 +93,7 @@ for (const rel of ALLOW) {
 if (tokenFindings.length) {
   console.error(`palette-gate: ${tokenFindings.length} value(s) in the token files that are NOT the canon palette (light: ${CANON_LIGHT.join(' ')})\n`)
   for (const f of tokenFindings) console.error(`  ${f.rel}:${f.line}  ${f.hit}`)
-  console.error('\nThe seven canon colours are Ariel\'s 2026-09-04 palette (PR #44). A different palette needs his explicit decision, then this list changes in the same PR.')
+  console.error('\nThe token files must use the deployed WinnerDataAI child-brand light palette or explicit dark palette; update the canon and tokens together when the design system changes.')
   process.exit(1)
 }
 
