@@ -30,7 +30,9 @@ export async function GET(req: NextRequest) {
       signal: AbortSignal.timeout(15_000),
     })
   } catch (err) {
-    return bad(502, `Could not reach the chat service: ${(err as Error).message}`)
+    // Upstream detail (host, status, adapter message) stays server-side.
+    console.error(JSON.stringify({ level: 'error', scope: 'deed.projects', detail: (err as Error).message, ts: new Date().toISOString() }))
+    return bad(502, 'Could not reach the chat service. Please retry shortly.')
   }
 
   const text = await upstream.text()
@@ -61,7 +63,9 @@ export async function POST(req: NextRequest) {
       signal: AbortSignal.timeout(15_000),
     })
   } catch (err) {
-    return bad(502, `Could not reach the chat service: ${(err as Error).message}`)
+    // Upstream detail (host, status, adapter message) stays server-side.
+    console.error(JSON.stringify({ level: 'error', scope: 'deed.projects', detail: (err as Error).message, ts: new Date().toISOString() }))
+    return bad(502, 'Could not reach the chat service. Please retry shortly.')
   }
 
   const text = await upstream.text()

@@ -28,8 +28,13 @@ export async function GET() {
   return NextResponse.json(
     {
       status: 'ok',
+      // BUILD_SHA stays: the CI smoke check polls this until it matches the
+      // SHA it just deployed, and a public commit hash discloses nothing that
+      // the public repo does not already.
       sha: process.env.BUILD_SHA ?? 'unknown',
-      node: process.version,
+      // `node: process.version` used to be here. It told anonymous callers the
+      // exact runtime patch level — free CVE targeting, and of no use to any
+      // legitimate caller. Liveness only; readiness lives at /api/ready.
       ts: new Date().toISOString(),
     },
     { headers: { 'Cache-Control': 'no-store, max-age=0' } }

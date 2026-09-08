@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getRetryingSupabaseClient } from '@/lib/supabase-retry'
+import { serverError } from '@/lib/api-errors'
 
 export const dynamic = 'force-dynamic'
 
@@ -155,7 +156,7 @@ export async function GET(request: NextRequest) {
     mappable = result
 
     if (matchingResult.error) {
-      return NextResponse.json({ error: matchingResult.error.message }, { status: 500 })
+      return serverError('auctions.map.matching', matchingResult.error)
     }
 
     return NextResponse.json(
@@ -177,7 +178,6 @@ export async function GET(request: NextRequest) {
       }
     )
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'unknown error'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return serverError('auctions.map', err as Error)
   }
 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getRetryingSupabaseClient } from '@/lib/supabase-retry'
+import { serverError } from '@/lib/api-errors'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -54,7 +55,9 @@ export async function POST(req: NextRequest) {
   })
 
   if (error) {
-    return NextResponse.json({ status: 'error', error: error.message }, { status: 502 })
+    // The buyer cannot act on an RPC's internal message, and this route sits on
+    // the money path where upstream detail is most sensitive. Detail to logs.
+    return serverError('checkout.confirm', error, 503)
   }
 
   const result = (data || {}) as Record<string, unknown>
