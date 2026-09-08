@@ -102,6 +102,13 @@ const isPublicRoute = createRouteMatcher([
   '/chat(.*)',
   '/dashboard(.*)',
   '/pricing(.*)',
+  // County coverage index (#20120) — a prospect must be able to see the
+  // calendar before there is an account to protect, same reasoning as
+  // /auctions(.*) below. Omitting this was an oversight in the same commit
+  // that added the page: it went undetected locally because Clerk is
+  // disabled without real keys, and surfaced live as a protect-rewrite
+  // redirect to /sign-in on every signed-out visit.
+  '/counties(.*)',
   '/help(.*)',
   '/docs(.*)',
   '/explore(.*)',
