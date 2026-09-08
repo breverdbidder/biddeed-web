@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Loader2, MapPin } from 'lucide-react'
 import { FL_COUNTIES, formatCountyLabel } from '@/lib/counties'
 import { apiUrl } from '@/lib/api'
+import EmptyState from '@/components/ui/empty-state'
 import { MAX_STOPS, type D4DCandidate } from './types'
 
 interface Props {
@@ -169,7 +170,22 @@ export default function D4DBuildTab({ onBuilt }: Props) {
           )}
           {candidatesError && <p className="p-4 text-sm text-destructive">{candidatesError}</p>}
           {!candidatesLoading && !candidatesError && candidates.length === 0 && (
-            <p className="p-4 text-sm text-muted-foreground">No upcoming lots with coordinates for this filter.</p>
+            <div className="p-4">
+              <EmptyState
+                message={`No upcoming lots with coordinates in ${formatCountyLabel(county)} County${from || to ? ' for this date range' : ''}.`}
+                action={{
+                  label: from || to ? 'Clear date range' : 'Try another county',
+                  onClick: () => {
+                    if (from || to) {
+                      setFrom('')
+                      setTo('')
+                    } else {
+                      setCounty('brevard')
+                    }
+                  },
+                }}
+              />
+            </div>
           )}
           <ul className="divide-y divide-border">
             {candidates.map((c) => {

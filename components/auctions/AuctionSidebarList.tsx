@@ -1,6 +1,7 @@
 'use client'
 
 import { formatCountyLabel } from '@/lib/counties'
+import EmptyState from '@/components/ui/empty-state'
 import type { Auction } from '@/types/auctions'
 
 /**
@@ -22,6 +23,8 @@ interface Props {
   onHighlight: (auction: Auction) => void
   onOpen: (auction: Auction) => void
   total: number
+  emptyMessage: string
+  onClearFilters: () => void
 }
 
 function money(v: number | null | undefined): string {
@@ -44,12 +47,12 @@ const TYPE_BADGE: Record<string, string> = {
 }
 
 export default function AuctionSidebarList({
-  auctions, selectedId, onHighlight, onOpen, total,
+  auctions, selectedId, onHighlight, onOpen, total, emptyMessage, onClearFilters,
 }: Props) {
   if (!auctions.length) {
     return (
-      <div className="p-4 text-sm text-muted-foreground dark:text-muted-foreground">
-        No auctions match these filters.
+      <div className="p-4">
+        <EmptyState message={emptyMessage} action={{ label: 'Clear filters', onClick: onClearFilters }} />
       </div>
     )
   }

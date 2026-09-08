@@ -120,6 +120,20 @@ export default function AuctionsLayout({
     pushQuery({ saleType })
   }
 
+  // Names the active filter for the empty state (G-STATES item 3, #20184) —
+  // "No results" alone gives a bidder nothing to act on.
+  const saleTypeLabel = selectedType ? (selectedType === 'tax_deed' ? 'tax deed ' : 'foreclosure ') : ''
+  const countyLabel = selectedCounty ? ` in ${formatCountyLabel(selectedCounty)} County` : ''
+  const dayLabel = dayFilter ? ` on ${new Date(dayFilter.date + 'T00:00:00').toLocaleDateString()}` : ''
+  const emptyFilterMessage = `No ${saleTypeLabel}auctions${countyLabel}${dayLabel} right now.`
+
+  function clearFilters() {
+    setSelectedCounty('')
+    setSelectedType('')
+    setDayFilter(null)
+    pushQuery({ county: '', saleType: '', view: viewMode })
+  }
+
   const counties = summary ? Object.keys(summary.by_county).sort() : []
 
   // Header counts come from the SSOT summary function, not from the length of
@@ -347,6 +361,8 @@ export default function AuctionsLayout({
                 total={total}
                 onHighlight={handleHighlight}
                 onOpen={(auction) => router.push(`/radar/${auction.id}`)}
+                emptyMessage={emptyFilterMessage}
+                onClearFilters={clearFilters}
               />
             </div>
             <div className="order-1 min-h-[280px] min-w-0 h-[45vh] lg:order-2 lg:h-auto">
@@ -366,6 +382,8 @@ export default function AuctionsLayout({
             auctions={auctions}
             loading={false}
             onSelectAuction={(auction) => router.push(`/radar/${auction.id}`)}
+            emptyMessage={emptyFilterMessage}
+            onClearFilters={clearFilters}
           />
         )}
         {viewMode === 'map' && (

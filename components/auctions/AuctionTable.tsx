@@ -4,12 +4,15 @@ import { useState } from 'react'
 import { getRecommendation } from '@/lib/scoring'
 import ZoningBadge from './ZoningBadge'
 import { formatCountyLabel } from '@/lib/counties'
+import EmptyState from '@/components/ui/empty-state'
 import type { Auction, SortField, SortDirection } from '@/types/auctions'
 
 interface Props {
   auctions: Auction[]
   loading: boolean
   onSelectAuction: (auction: Auction) => void
+  emptyMessage: string
+  onClearFilters: () => void
 }
 
 function typeColor(type: string): string {
@@ -39,7 +42,7 @@ function formatDate(val: string | null): string {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
-export default function AuctionTable({ auctions, loading, onSelectAuction }: Props) {
+export default function AuctionTable({ auctions, loading, onSelectAuction, emptyMessage, onClearFilters }: Props) {
   const [sortField, setSortField] = useState<SortField>('auction_date')
   const [sortDir, setSortDir] = useState<SortDirection>('desc')
 
@@ -87,11 +90,7 @@ export default function AuctionTable({ auctions, loading, onSelectAuction }: Pro
   }
 
   if (auctions.length === 0) {
-    return (
-      <div className="bg-card dark:bg-card border border-border dark:border-border rounded-lg p-8 text-center">
-        <p className="text-muted-foreground dark:text-muted-foreground">No auctions found matching your filters.</p>
-      </div>
-    )
+    return <EmptyState message={emptyMessage} action={{ label: 'Clear filters', onClick: onClearFilters }} />
   }
 
   return (

@@ -1,8 +1,9 @@
 'use client'
 
 import { FormEvent, useEffect, useMemo, useState } from 'react'
-import { Search, MapPinned, CalendarDays, ShieldCheck, AlertTriangle } from 'lucide-react'
+import { Search, MapPinned, CalendarDays, ShieldCheck } from 'lucide-react'
 import { apiUrl } from '@/lib/api'
+import EmptyState from '@/components/ui/empty-state'
 
 type Auction = {
   id: string | number
@@ -150,7 +151,32 @@ export default function DiscoveryPage() {
             </div>
           </div>
         )}
-        {searched && rows.length === 0 && <div className="mt-8 flex items-start gap-3 border border-border bg-card px-5 py-4 text-sm text-muted-foreground"><AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden="true" /><p>No result table is shown without source-backed records. Coverage varies by county and sale type; confirm material facts with the relevant clerk or official source.</p></div>}
+        {searched && rows.length === 0 && (
+          <div className="mt-8">
+            <EmptyState
+              message={(() => {
+                const bits: string[] = []
+                if (query.trim()) bits.push(`"${query.trim()}"`)
+                if (county.trim()) bits.push(`county "${county.trim()}"`)
+                if (saleType) bits.push(saleType === 'tax_deed' ? 'tax deed' : 'foreclosure')
+                return bits.length
+                  ? `No source-backed inventory matches ${bits.join(', ')}.`
+                  : 'No source-backed inventory matches this search.'
+              })()}
+              action={{
+                label: 'Clear search',
+                onClick: () => {
+                  setQuery('')
+                  setCounty('')
+                  setSaleType('')
+                  setRows([])
+                  setSearched(false)
+                  setMessage('Search by address, case number, city, ZIP, parcel, or county.')
+                },
+              }}
+            />
+          </div>
+        )}
       </div>
     </section>
   )
