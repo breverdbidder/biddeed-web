@@ -130,7 +130,9 @@ export async function POST(req: NextRequest) {
       signal: AbortSignal.timeout(120_000),
     })
   } catch (err) {
-    return bad(502, `Could not reach the chat service: ${(err as Error).message}`)
+    // Upstream detail (host, status, adapter message) stays server-side.
+    console.error(JSON.stringify({ level: 'error', scope: 'deed.chat', detail: (err as Error).message, ts: new Date().toISOString() }))
+    return bad(502, 'Could not reach the chat service. Please retry shortly.')
   }
 
   if (!upstream.ok || !upstream.body) {
