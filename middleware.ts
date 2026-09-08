@@ -23,6 +23,12 @@ const IS_PROD = process.env.NODE_ENV === 'production'
 const isPublicRoute = createRouteMatcher([
   // API routes — public data endpoints
   '/api/health(.*)',
+  // Readiness (#56). Same reasoning as /success and /order above: a route that
+  // is not listed here gets Clerk's protect-rewrite 404, and a readiness probe
+  // that 404s to every signed-out caller is a probe nothing can use. Verified
+  // live 2026-09-08 — /api/ready returned 404 at both the apex and the
+  // workers.dev origin until this line existed, while /api/health returned 200.
+  '/api/ready(.*)',
   '/api/stats(.*)',
   '/api/coverage(.*)', // public: customers verify county coverage BEFORE paying
   '/api/parcels/search(.*)', // public: look up any address before paying
