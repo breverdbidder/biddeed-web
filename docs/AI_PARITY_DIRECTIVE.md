@@ -83,6 +83,30 @@ These are the pre-2026-09-07 blues. They are close enough to canon to look right
 
 **Source of truth:** `PARITY_PRD.md` section 4 in `biddeed-web`. Read it before you touch UI.
 
+### 1e-bis. WHY THIS KEEPS HAPPENING — the Worker's token names lie to you
+
+Read this before you "fix" any colour in `cli-anything-biddeed/src/worker.js`.
+
+That file's CSS custom properties are **named for the retired palette but hold the canon blue values**:
+
+```
+--orange:  #005EB8      <- brand blue, named "orange"
+--orange2: #004A92      <- brand hover, named "orange"
+--navy:    #ffffff / #1a1a1a
+--navy2:   #ffffff      --navy3: #ffffff
+--green:   #005EB8      --amber: #005EB8      --gold: #005EB8
+--red:     #0A2540      --charcoal: #ffffff
+```
+
+Every one of those names is wrong and every one of those values is right. An agent that
+reads `--orange: #005EB8` and concludes "the orange token is broken, restore it to orange"
+is reading the code correctly and reaching the wrong answer. **That is the actual cause of
+the five cream regressions on 2026-09-08, not carelessness.** 23 `:root` blocks carry these names.
+
+**The rule: the VALUE is canon, the NAME is legacy. Never change a value to match a name.**
+If a token's name bothers you, the fix is a rename with the value untouched — a deliberate,
+reviewed change, never folded into a colour fix.
+
 ### 1f. How to verify you did it right — paste this output
 
 ```bash
