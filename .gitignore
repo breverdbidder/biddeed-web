@@ -41,3 +41,6 @@ next-env.d.ts
 # OpenNext / Cloudflare build output
 .open-next/
 cloudflare-env.d.ts
+
+# audit script run output
+artifacts/
