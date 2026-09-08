@@ -153,7 +153,7 @@ export async function POST(request: NextRequest) {
  *      reports green for an endpoint that cannot process a single event.
  *
  * Stripe only ever POSTs. Configuration is asserted by deploy checks and by
- * Stripe''s own delivery log, which is the only source that can actually prove
+ * Stripe's own delivery log, which is the only source that can actually prove
  * an event was received — never by a public boolean.
  *
  * NOTE for whoever wires this next: as of 2026-09-08 the live Stripe account
@@ -166,5 +166,5 @@ export async function POST(request: NextRequest) {
  * here.
  */
 export async function GET() {
-  return new NextResponse(null, { status: 405, headers: { Allow: ''POST'' } })
+  return new NextResponse(null, { status: 405, headers: { Allow: 'POST' } })
 }
