@@ -27,17 +27,23 @@ function clerkAppearance(theme: 'light' | 'dark') {
       fontFamily: 'Inter, system-ui, sans-serif',
     },
     elements: {
-      formButtonPrimary: 'bg-primary hover:bg-primary-hover text-primary-foreground font-semibold',
+      // min-h-11: Clerk's own buttons/links render at their stock ~32px
+      // (buttons) / ~18px (footer link) heights — under the 44px tap-target
+      // floor the rest of the app ships. inline-flex+items-center on the
+      // footer link for the same reason the prose links elsewhere in this
+      // app needed it: a bare line-height bump does not inflate an inline
+      // element's own bounding box.
+      formButtonPrimary: 'min-h-11 bg-primary hover:bg-primary-hover text-primary-foreground font-semibold',
       card: 'shadow-lg border border-border bg-card',
       headerTitle: 'text-foreground',
-      headerSubtitle: 'text-muted-foreground',
-      socialButtonsBlockButton: 'border-border text-foreground hover:bg-secondary',
+      headerSubtitle: 'text-base text-muted-foreground',
+      socialButtonsBlockButton: 'min-h-11 border-border text-foreground hover:bg-secondary',
       formFieldLabel: 'text-foreground',
       formFieldInput: 'bg-background border-border text-foreground placeholder:text-muted-foreground',
       formFieldErrorText: 'text-primary',
       formFieldSuccessText: 'text-primary',
       footerActionText: 'text-muted-foreground',
-      footerActionLink: 'text-primary hover:text-primary-hover',
+      footerActionLink: 'inline-flex min-h-11 items-center text-primary hover:text-primary-hover',
       identityPreviewText: 'text-foreground',
       identityPreviewEditButton: 'text-primary hover:text-primary-hover',
       alert: 'border-border bg-secondary text-foreground',
