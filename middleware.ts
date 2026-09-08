@@ -303,12 +303,13 @@ async function rateLimitMiddleware(req: NextRequest): Promise<NextResponse | und
  * talk to ElevenLabs but its own bundle is refused before it can. The voice
  * agent cannot load, and the comment said otherwise for two days.
  *
- * Two further gaps in the same policy, both UNTESTED against a real session:
- *  - media-src is absent entirely, so it falls back to default-src 'self',
- *    which does not permit blob:. Conversational audio playback is a blob:
- *    path.
+ * One further gap in the same policy, UNTESTED against a real session:
  *  - frame-src carries no ElevenLabs origin. If the chosen integration
  *    iframes, it is blocked.
+ *
+ * media-src was closed 2026-09-08 (issue #20197, biddeed-ai/cli-anything-biddeed)
+ * to unblock cross-origin Supabase Storage MP4 playback on /reels; blob: is kept
+ * for the ElevenLabs conversational-audio path noted above.
  *
  * RECOMMENDED FIX, pending Ariel's sign-off (CSP is his lane): use the npm SDK
  * (@elevenlabs/react) rather than the unpkg widget embed. A bundled dependency
@@ -362,6 +363,7 @@ function buildCspHeaders(nonce: string): Record<string, string> {
     `worker-src 'self' blob:`,
     `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com`,
     `img-src 'self' data: blob: https://img.clerk.com https://images.clerk.dev https://*.clerk.accounts.dev https://clerk.biddeed.ai https://*.supabase.co https://www.bcpao.us https://gis.brevardfl.gov https://api.mapbox.com https://*.mapbox.com`,
+    `media-src 'self' blob: https://mocerqjnksmhcjzxrewo.supabase.co https://*.supabase.co`,
     `font-src 'self' https://fonts.gstatic.com`,
     `connect-src 'self' https://*.clerk.accounts.dev wss://*.clerk.accounts.dev https://clerk.biddeed.ai https://api.clerk.com https://*.supabase.co wss://*.supabase.co https://api.mapbox.com https://events.mapbox.com https://api.stripe.com https://api.us.elevenlabs.io wss://api.us.elevenlabs.io https://api.elevenlabs.io wss://api.elevenlabs.io https://app.chatwoot.com wss://app.chatwoot.com`,
     `frame-src 'self' https://*.clerk.accounts.dev https://clerk.biddeed.ai https://challenges.cloudflare.com https://js.stripe.com https://hooks.stripe.com https://app.chatwoot.com`,
