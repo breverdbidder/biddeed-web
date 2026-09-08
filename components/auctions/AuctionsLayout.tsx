@@ -28,9 +28,21 @@ interface Props {
   initialCounty?: string
   /** Sale type from ?sale_type= on /radar. */
   initialSaleType?: string
+  /**
+   * Whether this component should render its own <h1>. Defaults to true for
+   * /radar, which has no page-level heading of its own. /auctions already
+   * renders its own h1 in app/auctions/page.tsx and passes false so the
+   * route carries exactly one.
+   */
+  showHeading?: boolean
 }
 
-export default function AuctionsLayout({ initialView, initialCounty, initialSaleType }: Props = {}) {
+export default function AuctionsLayout({
+  initialView,
+  initialCounty,
+  initialSaleType,
+  showHeading = true,
+}: Props = {}) {
   const router = useRouter()
   const pathname = usePathname()
   const [loading, setLoading] = useState(true)
@@ -222,7 +234,11 @@ export default function AuctionsLayout({ initialView, initialCounty, initialSale
     return (
       <div className="flex min-h-[60vh] items-center justify-center bg-muted dark:bg-background">
         <div className="flex flex-col items-center gap-4">
-          <h1 className="sr-only">Auction Intelligence</h1>
+          {showHeading ? (
+            <h1 className="sr-only">Auction Intelligence</h1>
+          ) : (
+            <p className="sr-only">Auction Intelligence</p>
+          )}
           <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
           <p className="text-muted-foreground dark:text-muted-foreground text-sm">Loading auctions...</p>
         </div>
@@ -251,8 +267,12 @@ export default function AuctionsLayout({ initialView, initialCounty, initialSale
     <div className="w-full min-w-0 overflow-x-hidden bg-muted dark:bg-background">
       <div className="mx-auto max-w-7xl min-w-0 space-y-6 px-4 py-6 sm:px-6">
         <div>
-          <h1 className="text-xl font-bold text-foreground dark:text-white">Auction Intelligence</h1>
-          <p className="text-sm text-muted-foreground dark:text-muted-foreground mt-1">
+          {showHeading ? (
+            <h1 className="text-xl font-bold text-foreground dark:text-white">Auction Intelligence</h1>
+          ) : (
+            <p className="text-xl font-bold text-foreground dark:text-white">Auction Intelligence</p>
+          )}
+          <p className="text-base text-muted-foreground dark:text-muted-foreground mt-1">
             {headerTotal.toLocaleString()} auctions across {headerCounties} Florida counties
             {summary?.upcoming ? (
               <>

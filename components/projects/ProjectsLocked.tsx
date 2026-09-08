@@ -40,10 +40,10 @@ export default function ProjectsLocked({ check }: { check: CapabilityCheck }) {
 
       {/* Static example lines — not live data, purely illustrative. */}
       <div className="mt-10 rounded-2xl border border-border bg-card p-5 sm:p-6">
-        <p className="text-sm font-semibold text-foreground">Example: three lines from a standard rehab</p>
+        <p className="text-base font-semibold text-foreground">Example: three lines from a standard rehab</p>
         <ol className="mt-4 divide-y divide-border">
           {EXAMPLE_LINES.map((l) => (
-            <li key={l.description} className="flex flex-col gap-2 py-3 text-sm sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+            <li key={l.description} className="flex flex-col gap-2 py-3 text-base sm:flex-row sm:items-center sm:justify-between sm:gap-4">
               <div className="flex min-w-0 items-center gap-3">
                 <span className="rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-muted-foreground">{l.category}</span>
                 <span className="min-w-0 text-foreground">{l.description}</span>
@@ -52,7 +52,7 @@ export default function ProjectsLocked({ check }: { check: CapabilityCheck }) {
             </li>
           ))}
         </ol>
-        <p className="mt-4 text-xs text-muted-foreground">
+        <p className="mt-4 text-base text-muted-foreground">
           Real budgets are 12 to 34 editable lines depending on template, grouped by category, with a live
           rollup for subtotal, contingency, total, actual spend, variance and projected gross profit.
         </p>
@@ -77,7 +77,7 @@ export default function ProjectsLocked({ check }: { check: CapabilityCheck }) {
               <item.icon className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
               <div>
                 <p className="text-sm font-semibold text-foreground">{item.title}</p>
-                <p className="mt-1 text-xs leading-5 text-muted-foreground">{item.body}</p>
+                <p className="mt-1 text-base leading-5 text-muted-foreground">{item.body}</p>
               </div>
             </li>
           ))}
@@ -92,7 +92,7 @@ export default function ProjectsLocked({ check }: { check: CapabilityCheck }) {
             Upgrade to {upgradeLabel}
             {upgradePriceLabel ? ` — ${upgradePriceLabel}/mo` : ''}
           </a>
-          <p className="text-sm leading-6 text-muted-foreground">
+          <p className="text-base leading-6 text-muted-foreground">
             You are on {TIER_LABELS[check.tierId] ?? check.tierId} today. Construction management is{' '}
             {upgradeLabel} and above.
           </p>

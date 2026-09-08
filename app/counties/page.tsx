@@ -9,7 +9,10 @@ export const dynamic = 'force-dynamic'
 export const metadata: Metadata = {
   title: 'Counties — BidDeed.AI',
   description:
-    'Every Florida county BidDeed.AI covers, with live upcoming-auction counts and the next sale date. Gold Standard counties carry the full CMA, ZoneWise zoning, and win-probability prediction.',
+    'Every Florida county BidDeed.AI covers, with live auction counts and next sale dates. Gold Standard counties add full CMA and ZoneWise zoning.',
+  alternates: {
+    canonical: 'https://biddeed.ai/counties',
+  },
 }
 
 type CountyRow = {
@@ -87,10 +90,10 @@ export default async function CountiesPage() {
                   </span>
                   <span className="text-sm text-muted-foreground">upcoming</span>
                 </p>
-                <p className="mt-2 text-xs text-muted-foreground">
+                <p className="mt-2 text-base text-muted-foreground">
                   {c.next_auction ? `Next sale ${c.next_auction}` : 'No sale currently scheduled'}
                 </p>
-                <p className="mt-1 text-xs capitalize text-muted-foreground">
+                <p className="mt-1 text-base capitalize text-muted-foreground">
                   {c.sale_types.replace(/\+/g, ' + ').replace(/_/g, ' ')}
                 </p>
               </a>

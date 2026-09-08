@@ -114,13 +114,13 @@ export default function DiscoveryPage() {
             </label>
             <button type="submit" disabled={loading} className="bg-primary px-6 py-3 font-bold text-primary-foreground hover:bg-primary-hover disabled:opacity-60">{loading ? 'Searching…' : 'Search'}</button>
           </div>
-          <p className="mt-3 text-sm text-muted-foreground" role="status">{message}</p>
+          <p className="mt-3 text-base text-muted-foreground" role="status">{message}</p>
         </form>
 
         <div className="grid gap-4 border-b border-border py-6 sm:grid-cols-3">
-          <div className="flex items-start gap-3"><MapPinned className="mt-0.5 h-5 w-5 text-primary" aria-hidden="true" /><div><p className="text-sm font-bold">Coverage</p><p className="mt-1 text-sm text-muted-foreground">{coverageLabel}</p></div></div>
-          <div className="flex items-start gap-3"><CalendarDays className="mt-0.5 h-5 w-5 text-primary" aria-hidden="true" /><div><p className="text-sm font-bold">Upcoming scope</p><p className="mt-1 text-sm text-muted-foreground">{summary?.upcoming?.toLocaleString('en-US') ?? '—'} scheduled records</p></div></div>
-          <div className="flex items-start gap-3"><ShieldCheck className="mt-0.5 h-5 w-5 text-primary" aria-hidden="true" /><div><p className="text-sm font-bold">Evidence rule</p><p className="mt-1 text-sm text-muted-foreground">Every result retains its source link.</p></div></div>
+          <div className="flex items-start gap-3"><MapPinned className="mt-0.5 h-5 w-5 text-primary" aria-hidden="true" /><div><p className="text-sm font-bold">Coverage</p><p className="mt-1 text-base text-muted-foreground">{coverageLabel}</p></div></div>
+          <div className="flex items-start gap-3"><CalendarDays className="mt-0.5 h-5 w-5 text-primary" aria-hidden="true" /><div><p className="text-sm font-bold">Upcoming scope</p><p className="mt-1 text-base text-muted-foreground">{summary?.upcoming?.toLocaleString('en-US') ?? '—'} scheduled records</p></div></div>
+          <div className="flex items-start gap-3"><ShieldCheck className="mt-0.5 h-5 w-5 text-primary" aria-hidden="true" /><div><p className="text-sm font-bold">Evidence rule</p><p className="mt-1 text-base text-muted-foreground">Every result retains its source link.</p></div></div>
         </div>
 
         {searched && rows.length > 0 && (

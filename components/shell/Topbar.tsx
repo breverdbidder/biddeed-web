@@ -79,7 +79,7 @@ export default function Topbar({ deedOpen, onToggleDeed, showDeedToggle = true }
 
       <Link
         href="/"
-        className="truncate text-sm font-semibold text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        className="inline-flex min-h-11 min-w-11 items-center truncate text-sm font-semibold text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       >
         {label}
       </Link>

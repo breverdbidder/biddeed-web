@@ -23,4 +23,7 @@ export default function AlertsPage() {
 export const metadata = {
   title: 'Alerts — BidDeed.AI',
   description: 'Private auction alerts for verified BidDeed.AI inventory.',
+  alternates: {
+    canonical: 'https://biddeed.ai/alerts',
+  },
 }

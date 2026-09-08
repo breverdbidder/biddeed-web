@@ -85,16 +85,16 @@ export default function PricingTiers() {
                   </span>
                 ) : null}
               </p>
-              <p className="mt-2 text-sm text-muted-foreground">{p.blurb}</p>
+              <p className="mt-2 text-base text-muted-foreground">{p.blurb}</p>
               <ul className="mt-5 flex-1 space-y-2.5">
                 {p.features.map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-sm leading-5 text-foreground">
+                  <li key={f} className="flex items-start gap-2 text-base leading-5 text-foreground">
                     <Check className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
                     {f}
                   </li>
                 ))}
                 {p.soon?.map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-sm leading-5 text-muted-foreground">
+                  <li key={f} className="flex items-start gap-2 text-base leading-5 text-muted-foreground">
                     <span className="mt-1 inline-block size-2.5 shrink-0 rounded-full border border-input" aria-hidden />
                     <span>
                       {f} <span className="text-xs font-semibold uppercase tracking-wide text-primary">soon</span>
@@ -113,7 +113,7 @@ export default function PricingTiers() {
       <div className="mt-10 flex flex-col items-start justify-between gap-4 rounded-2xl border border-border bg-secondary p-6 sm:flex-row sm:items-center">
         <div>
           <h2 className="text-base font-semibold text-foreground">Not ready to subscribe?</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="mt-1 text-base text-muted-foreground">
             Buy one SIGNAL$ Property Report for a single auction — $25, no subscription.
           </p>
         </div>

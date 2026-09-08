@@ -87,7 +87,7 @@ export default function AuctionSidebarList({
                 }`}
               >
                 <div className="flex items-start justify-between gap-2">
-                  <p className="text-sm font-semibold text-foreground dark:text-white leading-snug">
+                  <p className="text-base font-semibold text-foreground dark:text-white leading-snug">
                     {a.property_address || 'Address not published'}
                   </p>
                   {type && (
@@ -99,7 +99,7 @@ export default function AuctionSidebarList({
                   )}
                 </div>
 
-                <p className="text-xs text-muted-foreground dark:text-muted-foreground mt-1">
+                <p className="text-base text-muted-foreground dark:text-muted-foreground mt-1">
                   {formatCountyLabel(a.county)} County &middot; {shortDate(a.auction_date)}
                 </p>
 

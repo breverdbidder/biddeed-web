@@ -19,6 +19,9 @@ export const metadata = {
   title: 'Support — BidDeed.AI',
   description:
     'Open a support ticket with BidDeed.AI for auction data, SIGNAL$ Property Reports, billing or your account — or ask Deed for an instant answer.',
+  alternates: {
+    canonical: 'https://biddeed.ai/support',
+  },
 }
 
 export default function SupportPage() {
@@ -43,7 +46,7 @@ export default function SupportPage() {
           </a>
           <p className="text-base leading-7 text-muted-foreground">
             Security issue? Email{' '}
-            <a href="mailto:security@biddeed.ai" className="font-semibold text-primary underline-offset-4 hover:underline">
+            <a href="mailto:security@biddeed.ai" className="inline-flex items-center py-3.5 font-semibold text-primary underline-offset-4 hover:underline">
               security@biddeed.ai
             </a>{' '}
             or pick “Security concern” below — it is prioritised automatically.
@@ -60,15 +63,15 @@ export default function SupportPage() {
             <ul className="mt-3 space-y-2">
               <li>
                 General:{' '}
-                <a href="mailto:hello@biddeed.ai" className="font-semibold text-primary underline-offset-4 hover:underline">hello@biddeed.ai</a>
+                <a href="mailto:hello@biddeed.ai" className="inline-flex items-center py-3.5 font-semibold text-primary underline-offset-4 hover:underline">hello@biddeed.ai</a>
               </li>
               <li>
                 Privacy requests:{' '}
-                <a href="mailto:privacy@biddeed.ai" className="font-semibold text-primary underline-offset-4 hover:underline">privacy@biddeed.ai</a>
+                <a href="mailto:privacy@biddeed.ai" className="inline-flex items-center py-3.5 font-semibold text-primary underline-offset-4 hover:underline">privacy@biddeed.ai</a>
               </li>
               <li>
                 Plans and pricing:{' '}
-                <a href="/subscribe" className="font-semibold text-primary underline-offset-4 hover:underline">biddeed.ai/subscribe</a>
+                <a href="/subscribe" className="inline-flex items-center py-3.5 font-semibold text-primary underline-offset-4 hover:underline">biddeed.ai/subscribe</a>
               </li>
             </ul>
             <p className="mt-4">

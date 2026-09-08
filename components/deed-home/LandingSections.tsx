@@ -37,8 +37,8 @@ export const BTN =
 export const BTN_PRIMARY = cn(BTN, 'bg-primary text-primary-foreground hover:bg-primary/90')
 export const BTN_QUIET = cn(BTN, 'border border-border bg-card text-foreground hover:border-primary/60 hover:text-primary')
 
-function Eyebrow({ children }: { children: React.ReactNode }) {
-  return <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">{children}</p>
+function Eyebrow({ children, className }: { children: React.ReactNode; className?: string }) {
+  return <p className={cn('text-xs font-semibold uppercase tracking-[0.18em] text-primary', className)}>{children}</p>
 }
 
 function H2({ children, className }: { children: React.ReactNode; className?: string }) {
@@ -81,7 +81,7 @@ export function Proof() {
     <section className="mx-auto max-w-5xl px-4 sm:px-6">
       <div className="grid gap-8 rounded-3xl border border-border bg-card p-6 sm:p-10 lg:grid-cols-2 lg:items-center">
         <div>
-          <Eyebrow>Published before the sale. Checked after it.</Eyebrow>
+          <Eyebrow className="text-base">Published before the sale. Checked after it.</Eyebrow>
           <H2>Every US auction. One number. Zero guesswork.</H2>
           <p className="mt-4 max-w-lg text-base leading-7 text-muted-foreground">
             For a Marion County foreclosure on 20 July 2026, BidDeed.AI published a maximum bid of $82,000
@@ -115,7 +115,7 @@ export function Proof() {
             <dt className="text-xs uppercase leading-snug tracking-wide text-muted-foreground sm:flex sm:h-9 sm:items-end sm:justify-center">Outcome</dt>
             <dd className="whitespace-nowrap text-lg font-semibold text-foreground sm:mt-2 sm:text-2xl">Held</dd>
           </div>
-          <p className="text-xs text-muted-foreground sm:col-span-3">
+          <p className="text-base text-muted-foreground sm:col-span-3">
             Marion County foreclosure, July 2026. Figures from the published report and the clerk&rsquo;s recorded sale.
           </p>
         </dl>
@@ -133,7 +133,7 @@ export function Founder() {
         <div>
           <Eyebrow>Why we built it</Eyebrow>
           <H2>I bid with my own money first.</H2>
-          <p className="mt-4 text-sm text-muted-foreground">
+          <p className="mt-4 text-base text-muted-foreground">
             Ariel Shapira · Founder · Developer · Builder · Property Manager · Inventor of ZoneWise.AI · The Real Estate AI Oracle&trade;
           </p>
         </div>
@@ -155,9 +155,9 @@ export function Founder() {
             bid, and what the zoning allows become crystal clear &mdash; before you raise your hand. For everyone,
             everywhere, on data that is ours alone.
           </p>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-base text-muted-foreground">
             Figures from the publicly recorded closings at{' '}
-            <a href="https://everestcapitalusa.com" className="underline decoration-border underline-offset-4 hover:text-foreground" rel="noopener">everestcapitalusa.com</a>.
+            <a href="https://everestcapitalusa.com" className="inline-flex items-center py-3.5 underline decoration-border underline-offset-4 hover:text-foreground" rel="noopener">everestcapitalusa.com</a>.
           </p>
         </div>
       </div>
@@ -208,7 +208,7 @@ export function HowItWorks() {
                 <span className="tabular text-xs font-semibold text-muted-foreground">0{i + 1}</span>
               </div>
               <h3 className="mt-4 text-base font-semibold text-foreground">{s.title}</h3>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">{s.body}</p>
+              <p className="mt-2 text-base leading-6 text-muted-foreground">{s.body}</p>
             </li>
           )
         })}
@@ -262,14 +262,14 @@ export function FieldRoutes() {
               <span className="text-xs font-semibold tabular-nums text-primary">{s.n}</span>
               <h3 className="text-sm font-semibold text-foreground">{s.title}</h3>
             </div>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">{s.body}</p>
+            <p className="mt-2 text-base leading-6 text-muted-foreground">{s.body}</p>
           </li>
         ))}
       </ol>
 
       <div className="mt-8 rounded-2xl border border-border bg-secondary p-5 sm:p-6">
         <p className="text-sm font-semibold text-foreground">The Palm Bay run</p>
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+        <p className="mt-2 text-base leading-6 text-muted-foreground">
           Seven lots off one county calendar, driven in a single afternoon — and one property that was
           never on the auction list at all: vacant, overgrown, servicer-managed, found from the car.
         </p>
@@ -282,7 +282,7 @@ export function FieldRoutes() {
           ].map(([v, l]) => (
             <div key={l}>
               <dt className="font-display text-2xl font-medium tabular-nums text-foreground">{v}</dt>
-              <dd className="mt-1 text-xs leading-5 text-muted-foreground">{l}</dd>
+              <dd className="mt-1 text-base leading-5 text-muted-foreground">{l}</dd>
             </div>
           ))}
         </dl>
@@ -293,7 +293,7 @@ export function FieldRoutes() {
           Start Pro — routes included
           <ArrowRight className="size-4" aria-hidden />
         </a>
-        <p className="text-sm leading-6 text-muted-foreground">
+        <p className="text-base leading-6 text-muted-foreground">
           Route planning and field capture are Pro and Pro Plus. Investor sees what is coming to auction;
           Pro lets you go and look at it.
         </p>
@@ -347,14 +347,14 @@ export function RehabProjects() {
               <span className="text-xs font-semibold tabular-nums text-primary">{s.n}</span>
               <h3 className="text-sm font-semibold text-foreground">{s.title}</h3>
             </div>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">{s.body}</p>
+            <p className="mt-2 text-base leading-6 text-muted-foreground">{s.body}</p>
           </li>
         ))}
       </ol>
 
       <div className="mt-8 rounded-2xl border border-border bg-secondary p-5 sm:p-6">
-        <p className="text-sm font-semibold text-foreground">5400 Pina Vista Dr, Melbourne — 25-line standard rehab</p>
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+        <p className="text-base font-semibold text-foreground">5400 Pina Vista Dr, Melbourne — 25-line standard rehab</p>
+        <p className="mt-2 text-base leading-6 text-muted-foreground">
           Bought at $165,000 against a $315,000 ARV. One scope — roof and exterior envelope — budgeted at
           $11,962.50 came back with a $24,800 contractor bid, called out the moment it landed.
         </p>
@@ -367,7 +367,7 @@ export function RehabProjects() {
           ].map(([v, l]) => (
             <div key={l}>
               <dt className="font-display text-xl font-medium tabular-nums text-foreground sm:text-2xl">{v}</dt>
-              <dd className="mt-1 text-xs leading-5 text-muted-foreground">{l}</dd>
+              <dd className="mt-1 text-base leading-5 text-muted-foreground">{l}</dd>
             </div>
           ))}
         </dl>
@@ -378,7 +378,7 @@ export function RehabProjects() {
           Start Pro Plus — construction management included
           <ArrowRight className="size-4" aria-hidden />
         </a>
-        <p className="text-sm leading-6 text-muted-foreground">
+        <p className="text-base leading-6 text-muted-foreground">
           Budgets, scopes of work, and budget-vs-actual are Pro Plus. Pro sees the zoning and the field route;
           Pro Plus takes you to the closing table.
         </p>
@@ -519,16 +519,16 @@ export function Pricing({ onPrompt }: { onPrompt: (p: string) => void }) {
               <span className="tabular font-display text-4xl font-medium tracking-tight text-foreground">{p.price}</span>
               <span className="text-sm text-muted-foreground">{p.per}</span>
             </p>
-            <p className="mt-2 text-sm text-muted-foreground">{p.blurb}</p>
+            <p className="mt-2 text-base text-muted-foreground">{p.blurb}</p>
             <ul className="mt-5 flex-1 space-y-2.5">
               {p.features.map((f) => (
-                <li key={f} className="flex items-start gap-2 text-sm leading-5 text-foreground">
+                <li key={f} className="flex items-start gap-2 text-base leading-5 text-foreground">
                   <Check className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
                   {f}
                 </li>
               ))}
               {p.soon?.map((f) => (
-                <li key={f} className="flex items-start gap-2 text-sm leading-5 text-muted-foreground">
+                <li key={f} className="flex items-start gap-2 text-base leading-5 text-muted-foreground">
                   <span className="mt-1 inline-block size-2.5 shrink-0 rounded-full border border-border" aria-hidden />
                   <span>
                     {f} <span className="text-xs font-semibold uppercase tracking-wide text-primary">soon</span>
@@ -558,7 +558,7 @@ export function Pricing({ onPrompt }: { onPrompt: (p: string) => void }) {
             <h3 className="text-base font-semibold text-foreground">
               One property, one report — SIGNAL$ Property Report, <span className="tabular">$25</span>
             </h3>
-            <p className="mt-1 max-w-xl text-sm text-muted-foreground">
+            <p className="mt-1 max-w-xl text-base text-muted-foreground">
               All 18 sections on a single property: value band, SIGNAL$ Max Bid ceiling, comparable sales, zoning read and
               red flags. When the sale closes, you get the outcome scorecard re-issued free.
             </p>
@@ -574,9 +574,9 @@ export function Pricing({ onPrompt }: { onPrompt: (p: string) => void }) {
         </div>
       </div>
 
-      <p className="mt-6 text-center text-sm text-muted-foreground">
+      <p className="mt-6 text-center text-base text-muted-foreground">
         Founding investors: the first 100 BidDeed.AI Pioneers set founding pricing.{' '}
-        <a href={W.pioneers} className="font-medium text-primary underline underline-offset-2">
+        <a href={W.pioneers} className="inline-flex items-center py-3.5 font-medium text-primary underline underline-offset-2">
           Join the Pioneer waitlist
         </a>
       </p>
@@ -601,19 +601,19 @@ export function Footer() {
     <footer className="mx-auto max-w-6xl border-t border-border px-4 py-10 sm:px-6">
       <nav aria-label="Footer" className="flex flex-wrap gap-x-6 gap-y-2">
         {links.map((l) => (
-          <a key={l.href} href={l.href} className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+          <a key={l.href} href={l.href} className="inline-flex min-w-8 items-center py-3.5 text-sm text-muted-foreground transition-colors hover:text-foreground">
             {l.label}
           </a>
         ))}
       </nav>
-      <p className="mt-6 max-w-3xl text-xs leading-relaxed text-muted-foreground">
+      <p className="mt-6 max-w-3xl text-base leading-relaxed text-muted-foreground">
         BidDeed.AI is an investment decision-support tool. It is not legal advice, not an appraisal and not title
         insurance. Auction data and bid estimates are informational and must be independently verified before you
         bid. Title and lien content is provided for due-diligence purposes only; obtain independent legal advice
         and/or title insurance before relying on it. The underlying method is the subject of a pending provisional
         patent application; nothing here is issued.
       </p>
-      <p className="mt-4 text-xs text-muted-foreground">
+      <p className="mt-4 text-base text-muted-foreground">
         © {new Date().getFullYear()} BidDeed.AI · AI-Powered Foreclosure &amp; Tax Deed Auction Intelligence — With Zoning
         Analysis on Every Property
       </p>

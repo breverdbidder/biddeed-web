@@ -32,7 +32,7 @@ export default async function SignUpCatchAllPage() {
           <div style={{ backgroundColor: C.background, border: `1px solid ${C.border}`, borderRadius: '12px', padding: '28px', textAlign: 'center', color: C.ink }}>
             <p style={{ margin: 0, fontWeight: 600 }}>Account creation is not configured on this deployment</p>
             <p style={{ margin: '10px 0 0', fontSize: '16px', lineHeight: 1.5, color: C.navy }}>
-              Configure the Clerk production key pair for <a href="https://biddeed.ai" style={{ color: C.brand }}>biddeed.ai</a> to activate accounts.
+              Configure the Clerk production key pair for <a href="https://biddeed.ai" style={{ color: C.brand, display: 'inline-flex', alignItems: 'center', minHeight: '44px' }}>biddeed.ai</a> to activate accounts.
             </p>
           </div>
         )}

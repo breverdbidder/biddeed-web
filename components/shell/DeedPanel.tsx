@@ -119,10 +119,19 @@ export default function DeedPanel({ open, onClose }: Props) {
           'lg:static lg:top-auto lg:bottom-auto lg:z-auto lg:h-auto lg:max-w-none lg:transition-[width] lg:duration-200',
           open
             ? 'translate-x-0 lg:w-[26rem] xl:w-[30rem]'
-            : 'hidden pointer-events-none translate-x-full lg:flex lg:w-0 lg:overflow-hidden lg:border-l-0'
+            : // lg:invisible, not just lg:w-0 lg:overflow-hidden: at w-0 the panel is
+              // pixel-perfect empty to a human (overflow-hidden clips it), but its
+              // flex-column children don't shrink below their own min-content
+              // (align-items:stretch can't force a child under its intrinsic size),
+              // so real, positioned, non-zero-size boxes remain in the layout tree
+              // past the viewport's right edge -- invisible to the eye, present to
+              // any DOM-based sweep. visibility:hidden inherits to every descendant
+              // that doesn't set its own visibility, which removes them from layout
+              // measurement entirely rather than merely painting over them.
+              'hidden pointer-events-none translate-x-full lg:flex lg:w-0 lg:overflow-hidden lg:border-l-0 lg:invisible'
         )}
       >
-        <div className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-4">
+        <div className="flex h-14 min-w-0 shrink-0 items-center gap-2 border-b border-border px-4">
           <DeedRobotMark size={30} decorative={false} className="rounded-md" />
           <h2 className="text-sm font-semibold text-foreground">Deed</h2>
           <span className="truncate text-xs text-muted-foreground">· {context.surface}</span>

@@ -41,10 +41,10 @@ export default function D4DLocked({ check }: { check: CapabilityCheck }) {
 
       {/* Static example route — not live data, purely illustrative. */}
       <div className="mt-10 rounded-2xl border border-border bg-card p-5 sm:p-6">
-        <p className="text-sm font-semibold text-foreground">Example: a 3-stop Palm Bay run</p>
+        <p className="text-base font-semibold text-foreground">Example: a 3-stop Palm Bay run</p>
         <ol className="mt-4 divide-y divide-border">
           {EXAMPLE_STOPS.map((s) => (
-            <li key={s.seq} className="flex flex-col gap-2 py-3 text-sm sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+            <li key={s.seq} className="flex flex-col gap-2 py-3 text-base sm:flex-row sm:items-center sm:justify-between sm:gap-4">
               <div className="flex min-w-0 items-center gap-3">
                 <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
                   {s.seq}
@@ -58,7 +58,7 @@ export default function D4DLocked({ check }: { check: CapabilityCheck }) {
             </li>
           ))}
         </ol>
-        <p className="mt-4 text-xs text-muted-foreground">
+        <p className="mt-4 text-base text-muted-foreground">
           Real routes are ordered nearest-neighbour from your starting point, with mileage and drive-time
           estimates for every leg.
         </p>
@@ -82,8 +82,8 @@ export default function D4DLocked({ check }: { check: CapabilityCheck }) {
             <li key={item.title} className="flex items-start gap-3 rounded-xl border border-border bg-card p-4">
               <item.icon className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
               <div>
-                <p className="text-sm font-semibold text-foreground">{item.title}</p>
-                <p className="mt-1 text-xs leading-5 text-muted-foreground">{item.body}</p>
+                <p className="text-base font-semibold text-foreground">{item.title}</p>
+                <p className="mt-1 text-base leading-5 text-muted-foreground">{item.body}</p>
               </div>
             </li>
           ))}
@@ -98,7 +98,7 @@ export default function D4DLocked({ check }: { check: CapabilityCheck }) {
             Upgrade to {upgradeLabel}
             {upgradePriceLabel ? ` — ${upgradePriceLabel}/mo` : ''}
           </a>
-          <p className="text-sm leading-6 text-muted-foreground">
+          <p className="text-base leading-6 text-muted-foreground">
             You are on {TIER_LABELS[check.tierId] ?? check.tierId} today. Route planning and field capture
             are {upgradeLabel} and above.
           </p>

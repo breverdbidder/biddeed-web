@@ -196,7 +196,7 @@ export default function BuyReportCheckout() {
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 pb-28 pt-10 sm:px-6 sm:pb-16 lg:px-8">
-      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">One-time · no subscription</p>
+      <p className="text-base font-semibold uppercase tracking-[0.18em] text-primary">One-time · no subscription</p>
       <h1 className="font-display mt-2 text-[1.9rem] font-medium leading-[1.15] tracking-tight text-foreground sm:text-4xl">
         One SIGNAL$ Property Report — $25
       </h1>
@@ -206,16 +206,16 @@ export default function BuyReportCheckout() {
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
         <div className="rounded-2xl border border-border bg-card p-5 sm:p-6">
-          <p className="text-sm font-semibold text-foreground">What your report includes</p>
+          <p className="text-base font-semibold text-foreground">What your report includes</p>
           <ol className="mt-4 grid gap-x-8 gap-y-2 sm:grid-cols-2">
             {REPORT_SECTIONS.map((section, index) => (
-              <li key={section} className="flex gap-3 text-sm">
+              <li key={section} className="flex gap-3 text-base">
                 <span className="font-mono text-xs font-bold text-primary">{String(index + 1).padStart(2, '0')}</span>
                 <span className="text-foreground">{section}</span>
               </li>
             ))}
           </ol>
-          <p className="mt-4 border-t border-border pt-4 text-xs leading-5 text-muted-foreground">
+          <p className="mt-4 border-t border-border pt-4 text-base leading-5 text-muted-foreground">
             Included intelligence overlays: the Shapira third-party-purchase model and ZoneWise.AI land/zoning
             intelligence.
           </p>
@@ -239,7 +239,7 @@ export default function BuyReportCheckout() {
           {step === 'county' && !mcaId ? (
             <div className="mt-5">
               <h2 className="text-lg font-semibold text-foreground">Pick your county</h2>
-              <p className="mt-1 text-sm text-muted-foreground">
+              <p className="mt-1 text-base text-muted-foreground">
                 Gold Standard counties include full CMA, ZoneWise zoning, and ML prediction. All counties include
                 SIGNAL$ Max Bid and opening bid analysis.
               </p>
@@ -247,9 +247,9 @@ export default function BuyReportCheckout() {
               {counties === null && !countiesError ? (
                 <p className="mt-4 text-sm text-muted-foreground">Loading counties…</p>
               ) : null}
-              {countiesError ? <p className="mt-4 text-sm text-destructive">{countiesError}</p> : null}
+              {countiesError ? <p className="mt-4 text-base text-destructive">{countiesError}</p> : null}
               {counties && counties.length === 0 ? (
-                <p className="mt-4 text-sm text-muted-foreground">
+                <p className="mt-4 text-base text-muted-foreground">
                   No counties with upcoming auctions right now — check back soon.
                 </p>
               ) : null}
@@ -291,13 +291,13 @@ export default function BuyReportCheckout() {
                 ← Change county
               </button>
               <h2 className="mt-3 text-lg font-semibold text-foreground">Pick your auction</h2>
-              <p className="mt-1 text-sm text-muted-foreground">Upcoming auctions in {countyName}.</p>
+              <p className="mt-1 text-base text-muted-foreground">Upcoming auctions in {countyName}.</p>
 
               {auctions === null ? <p className="mt-4 text-sm text-muted-foreground">Loading auctions…</p> : null}
               {auctions && auctions.length === 0 ? (
-                <p className="mt-4 text-sm text-muted-foreground">
+                <p className="mt-4 text-base text-muted-foreground">
                   Calendar sync in progress for {countyName || 'this county'}. Check back in 24 hours or{' '}
-                  <a href="/chat" className="font-semibold text-primary underline-offset-4 hover:underline">
+                  <a href="/chat" className="inline-flex items-center py-3.5 font-semibold text-primary underline-offset-4 hover:underline">
                     browse live auctions in chat
                   </a>
                   .
@@ -349,7 +349,7 @@ export default function BuyReportCheckout() {
               </div>
 
               {prefillLoading ? <p className="mt-4 text-sm text-muted-foreground">Loading property…</p> : null}
-              {prefillError ? <p className="mt-4 text-sm text-destructive">{prefillError}</p> : null}
+              {prefillError ? <p className="mt-4 text-base text-destructive">{prefillError}</p> : null}
 
               <form onSubmit={handleSubmit} className="mt-5 flex flex-col gap-3">
                 <label htmlFor="br-email" className="text-sm font-medium text-foreground">
@@ -383,16 +383,16 @@ export default function BuyReportCheckout() {
                     </>
                   )}
                 </Button>
-                {error ? <p className="text-sm text-destructive">{error}</p> : null}
+                {error ? <p className="text-base text-destructive">{error}</p> : null}
               </form>
             </div>
           ) : null}
 
-          <p className="mt-6 border-t border-border pt-4 text-xs leading-5 text-muted-foreground">
+          <p className="mt-6 border-t border-border pt-4 text-base leading-5 text-muted-foreground">
             Not legal advice. BidDeed.AI is an information and analytics platform, not a law firm or title company.
             Auction data and bid estimates are informational and must be independently verified — always consult a
             licensed Florida attorney before bidding. See{' '}
-            <a href="/disclaimer" className="font-semibold text-primary underline-offset-4 hover:underline">
+            <a href="/disclaimer" className="inline-flex items-center py-3.5 font-semibold text-primary underline-offset-4 hover:underline">
               full disclaimer
             </a>
             .

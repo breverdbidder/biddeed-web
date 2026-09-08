@@ -11,6 +11,9 @@ export const dynamic = 'force-dynamic'
 export const metadata: Metadata = {
   title: 'Auction Calendar — BidDeed.AI',
   description: 'Live foreclosure and tax deed auction calendar across Florida counties.',
+  alternates: {
+    canonical: 'https://biddeed.ai/auctions',
+  },
 }
 
 export default function AuctionsPage() {
@@ -18,9 +21,13 @@ export default function AuctionsPage() {
     <div className="bg-background min-h-screen">
       <div className="border-b border-border bg-card px-4 sm:px-6 pt-6 pb-4 max-w-7xl mx-auto">
         <h1 className="text-2xl font-bold text-foreground">Auction Calendar</h1>
-        <p className="text-muted-foreground text-sm mt-1">Florida foreclosure &amp; tax deed auctions — live data</p>
+        <p className="text-muted-foreground text-base mt-1">Florida foreclosure &amp; tax deed auctions — live data</p>
       </div>
-      <AuctionsLayout />
+      {/* This page already carries the page's one h1 above — AuctionsLayout's
+          own heading would be a second h1. /radar has no page-level h1 of its
+          own and relies on AuctionsLayout for it, so the heading is opt-out,
+          not opt-in. */}
+      <AuctionsLayout showHeading={false} />
     </div>
   )
 }

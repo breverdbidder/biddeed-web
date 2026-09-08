@@ -201,7 +201,7 @@ export default function SupportForm() {
         </button>
         <p className="text-base leading-7 text-muted-foreground">
           We only use your email to answer this request. See our{' '}
-          <a href="/privacy" className="font-semibold text-primary underline-offset-4 hover:underline">Privacy Policy</a>.
+          <a href="/privacy" className="inline-flex items-center py-3.5 font-semibold text-primary underline-offset-4 hover:underline">Privacy Policy</a>.
         </p>
       </div>
     </form>

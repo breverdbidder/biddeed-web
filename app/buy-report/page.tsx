@@ -10,6 +10,9 @@ export const metadata: Metadata = {
   title: 'Buy One SIGNAL$ Property Report — $25 | BidDeed.AI',
   description:
     'Exact SIGNAL$ Max Bid + ZoneWise zoning + ML prediction for one auction. One-time $25, no subscription.',
+  alternates: {
+    canonical: 'https://biddeed.ai/buy-report',
+  },
 }
 
 export default function BuyReportPage() {

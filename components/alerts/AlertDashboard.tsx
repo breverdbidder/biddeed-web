@@ -156,7 +156,7 @@ export default function AlertDashboard() {
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.16em] text-primary">Auction alerts</p>
           <h1 id="alerts-title" className="mt-2 text-3xl font-extrabold tracking-tight text-foreground">Stay ahead of the auction clock.</h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Create private watches for auctions you are evaluating. Alerts are tied to your account and never expose raw contact details in the dashboard.</p>
+          <p className="mt-2 max-w-2xl text-base leading-6 text-muted-foreground">Create private watches for auctions you are evaluating. Alerts are tied to your account and never expose raw contact details in the dashboard.</p>
         </div>
         <div className="rounded-lg border border-border bg-card px-4 py-3 text-sm text-muted-foreground">
           <span className="font-semibold text-foreground">{activeCount}</span> active {activeCount === 1 ? 'watch' : 'watches'}
@@ -170,7 +170,7 @@ export default function AlertDashboard() {
         <form onSubmit={createWatch} className="space-y-5 border border-border bg-card p-5 sm:p-6" aria-labelledby="create-alert-title">
           <div>
             <h2 id="create-alert-title" className="text-lg font-bold text-foreground">Create an alert</h2>
-            <p className="mt-1 text-sm text-muted-foreground">Use a case number from the verified auction inventory.</p>
+            <p className="mt-1 text-base text-muted-foreground">Use a case number from the verified auction inventory.</p>
           </div>
           <label className="block text-sm font-semibold text-foreground">Case number<input required value={draft.case_number} onChange={(event) => setDraft({ ...draft, case_number: event.target.value })} className="mt-2 min-h-11 w-full border border-input bg-background px-3 text-foreground outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring" placeholder="422021CA000414CAAXXX" /></label>
           <label className="block text-sm font-semibold text-foreground">County<input required value={draft.county} onChange={(event) => setDraft({ ...draft, county: event.target.value })} className="mt-2 min-h-11 w-full border border-input bg-background px-3 text-foreground outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring" placeholder="Marion" /></label>
@@ -182,12 +182,12 @@ export default function AlertDashboard() {
             </div>
           </fieldset>
           <label className="block text-sm font-semibold text-foreground">Timezone<select value={draft.timezone} onChange={(event) => setDraft({ ...draft, timezone: event.target.value })} className="mt-2 min-h-11 w-full border border-input bg-background px-3 text-foreground outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"><option>America/New_York</option><option>UTC</option></select></label>
-          <p className="text-xs leading-5 text-muted-foreground">Email delivery requires a separate confirmed consent record. Informational only—this is not legal, financial, or investment advice.</p>
+          <p className="text-base leading-5 text-muted-foreground">Email delivery requires a separate confirmed consent record. Informational only—this is not legal, financial, or investment advice.</p>
           <button disabled={submitting || draft.alert_types.length === 0} className="min-h-11 w-full bg-primary px-4 text-sm font-bold text-primary-foreground outline-none hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50">{submitting ? 'Saving…' : 'Save auction alert'}</button>
         </form>
 
         <div className="space-y-4" aria-live="polite">
-          <div className="flex items-center justify-between"><h2 className="text-lg font-bold text-foreground">Your watches</h2><button type="button" onClick={() => void loadWatches()} className="text-sm font-semibold text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Refresh</button></div>
+          <div className="flex items-center justify-between"><h2 className="text-lg font-bold text-foreground">Your watches</h2><button type="button" onClick={() => void loadWatches()} className="inline-flex min-h-11 items-center text-sm font-semibold text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Refresh</button></div>
           {loading ? <div className="border border-border bg-card p-6 text-sm text-muted-foreground">Loading your private alerts…</div> : null}
           {!loading && watches.length === 0 ? <div className="border border-dashed border-border bg-card p-8 text-sm text-muted-foreground">No alerts yet. Create your first watch to track a verified auction.</div> : null}
           {!loading && watches.length > 0 ? <ul className="space-y-3">{watches.map((watch) => <li key={watch.id} className="border border-border bg-card p-4 sm:p-5"><div className="flex flex-wrap items-start justify-between gap-3"><div><p className="font-mono text-sm font-bold text-foreground">{watch.case_number}</p><p className="mt-1 text-sm text-muted-foreground">{watch.county} County · {watch.max_bid == null ? 'No bid ceiling' : `$${watch.max_bid.toLocaleString()} ceiling`}</p></div><span className="border border-border px-2 py-1 text-xs font-bold uppercase tracking-wide text-muted-foreground">{watch.status}</span></div><div className="mt-4 flex flex-wrap gap-2">{watch.alert_types.map((type) => <span key={type} className="bg-secondary px-2 py-1 text-xs text-secondary-foreground">{type.replaceAll('_', ' ')}</span>)}</div><div className="mt-4 flex gap-4 text-sm"><button type="button" onClick={() => void updateStatus(watch)} disabled={watch.status === 'cancelled'} className="font-semibold text-primary underline-offset-4 hover:underline disabled:opacity-40">{watch.status === 'active' ? 'Pause' : 'Resume'}</button><button type="button" onClick={() => void cancelWatch(watch)} disabled={watch.status === 'cancelled'} className="font-semibold text-destructive underline-offset-4 hover:underline disabled:opacity-40">Cancel</button></div></li>)}</ul> : null}

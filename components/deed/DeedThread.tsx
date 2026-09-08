@@ -81,7 +81,7 @@ export default function DeedThread({ turns, streaming, status, surface, onSugges
 
   if (turns.length === 0 && !streaming) {
     return (
-      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-6">
+      <div className="min-h-0 min-w-0 flex-1 overflow-y-auto px-4 py-6">
         <div className="mb-4 flex items-center gap-3">
           <DeedRobotMark size={44} decorative={false} className="rounded-xl" />
           <div>
@@ -120,7 +120,7 @@ export default function DeedThread({ turns, streaming, status, surface, onSugges
   }
 
   return (
-    <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-4 py-5">
+    <div className="min-h-0 min-w-0 flex-1 space-y-5 overflow-y-auto px-4 py-5">
       {turns.map((turn) =>
         turn.role === 'user' ? (
           <div key={turn.id} className="flex justify-end">

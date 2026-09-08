@@ -8,7 +8,10 @@ export const dynamic = 'force-dynamic'
 export const metadata: Metadata = {
   title: 'Pricing — BidDeed.AI',
   description:
-    'BidDeed.AI plans and pricing — Free, Investor, Pro and Pro Plus. Full property intelligence, win-probability prediction, and construction/PM tools for Florida foreclosure and tax deed auctions.',
+    'BidDeed.AI plans and pricing — Free, Investor, Pro and Pro Plus. Property intelligence, win-probability prediction, and PM tools for FL auctions.',
+  alternates: {
+    canonical: 'https://biddeed.ai/pricing',
+  },
 }
 
 export default function PricingPage() {

@@ -62,7 +62,7 @@ export default function TicketLookup() {
   return (
     <section className="min-w-0 rounded-lg border border-border bg-card p-5 sm:p-6" aria-labelledby="lookup-title">
       <h2 id="lookup-title" className="text-lg font-bold text-foreground">Check a ticket</h2>
-      <p className="mt-1 text-sm leading-6 text-muted-foreground">The ticket number from your confirmation email, plus the email you used.</p>
+      <p className="mt-1 text-base leading-6 text-muted-foreground">The ticket number from your confirmation email, plus the email you used.</p>
       <form onSubmit={lookup} className="mt-4 grid min-w-0 gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-end" noValidate>
         <label className={`${LABEL} min-w-0`}>
           Ticket number

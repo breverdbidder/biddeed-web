@@ -276,6 +276,28 @@ export default function AuctionCalendar({ county, saleType, onSelectDay }: Props
           font-size: 0.9rem;
           color: var(--foreground);
         }
+        /*
+         * Both are real <a> tags FullCalendar renders internally (day numbers
+         * and weekday headers), sized only to their text by default — 13-41px
+         * wide, 26-30px tall. Below the 44px tap-target floor. inline-flex +
+         * min-width/min-height pads the hit area up without changing the
+         * digit/label's own font size or the day-cell grid geometry around it.
+         */
+        .zw-auction-calendar :global(.fc .fc-daygrid-day-number) {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 44px;
+          min-height: 44px;
+        }
+        .zw-auction-calendar :global(.fc .fc-col-header-cell-cushion) {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 44px;
+          min-height: 44px;
+          padding: 0 0.4rem;
+        }
         @media (min-width: 768px) {
           .zw-auction-calendar :global(.fc .fc-toolbar.fc-header-toolbar) {
             flex-direction: row;

@@ -13,6 +13,9 @@ export const metadata: Metadata = {
   title: 'Projects — BidDeed.AI',
   description:
     'Budget the rehab, price the scopes of work, and track spend against budget for every property you win.',
+  alternates: {
+    canonical: 'https://biddeed.ai/projects',
+  },
 }
 
 export default async function ProjectsPage() {

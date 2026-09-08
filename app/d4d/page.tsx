@@ -12,6 +12,9 @@ export const metadata: Metadata = {
   title: 'Drive for Dollars — BidDeed.AI',
   description:
     'Build a field route from upcoming Florida foreclosure and tax deed lots, drive it hands-free, and log what you find off the auction calendar.',
+  alternates: {
+    canonical: 'https://biddeed.ai/d4d',
+  },
 }
 
 export default async function D4DPage() {

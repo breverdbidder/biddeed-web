@@ -120,12 +120,12 @@ export default function SubscribeCheckout() {
   return (
     <div className="mx-auto flex min-h-[70vh] w-full max-w-lg flex-col justify-center px-4 py-10 sm:px-6">
       <div className="rounded-2xl border border-border bg-card p-6 sm:p-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">BidDeed.AI {plan.name}</p>
+        <h1 className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">BidDeed.AI {plan.name}</h1>
         <p className="mt-2 flex items-baseline gap-1">
           <span className="tabular font-display text-4xl font-medium tracking-tight text-foreground">{price}</span>
           <span className="text-sm text-muted-foreground">{per}</span>
         </p>
-        <p className="mt-4 text-sm leading-6 text-muted-foreground">
+        <p className="mt-4 text-base leading-6 text-muted-foreground">
           Enter your email to continue to secure checkout. You are redirected to Stripe — no card is stored here.
         </p>
 
@@ -168,7 +168,7 @@ export default function SubscribeCheckout() {
           {error ? <p className="text-sm text-destructive">{error}</p> : null}
         </form>
 
-        <p className="mt-5 text-center text-xs text-muted-foreground">
+        <p className="mt-5 text-center text-base text-muted-foreground">
           Not ready to pay?{' '}
           <a href="/free-report" className="font-semibold text-primary underline-offset-4 hover:underline">
             Try 67 counties free — no card required →

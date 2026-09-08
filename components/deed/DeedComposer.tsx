@@ -172,7 +172,7 @@ export default function DeedComposer({
 
   return (
     <div
-      className="border-t border-border bg-card px-3 py-3"
+      className="min-w-0 border-t border-border bg-card px-3 py-3"
       onDragOver={(e) => {
         e.preventDefault()
         setDragging(true)
