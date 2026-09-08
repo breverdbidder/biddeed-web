@@ -56,7 +56,7 @@
   --destructive: 14 54% 49%;
   --destructive-foreground: 40 33% 98%;
   --border: 36 23% 83%;
-  --input: 210 73% 15%;                /* #0A2540 - control boundary, 13.70:1 on #F5F0E8 (WCAG 2.2 SC 1.4.11) */
+  --input: 210 73% 14.5%;                /* #0A2540 - control boundary, 13.70:1 on #F5F0E8 (WCAG 2.2 SC 1.4.11) */
   --ring: 14 54% 49%;
   --primary-hover: 14 55% 43%;
   --radius: 0.5rem;
@@ -291,7 +291,7 @@ html[data-theme='light'] {
   --accent: 14 54% 49%;
   --accent-foreground: 40 33% 98%;
   --border: 36 23% 83%;
-  --input: 210 73% 15%;                /* #0A2540 - control boundary, 13.70:1 on #F5F0E8 (WCAG 2.2 SC 1.4.11) */
+  --input: 210 73% 14.5%;                /* #0A2540 - control boundary, 13.70:1 on #F5F0E8 (WCAG 2.2 SC 1.4.11) */
   --ring: 14 54% 49%;
   --sidebar-background: 39 33% 94%;
   --sidebar-foreground: 30 17% 10%;
