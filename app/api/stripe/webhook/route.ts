@@ -140,11 +140,31 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({ received: true, id: event.id })
 }
 
-// A GET here is almost always a human checking the endpoint is alive.
+/**
+ * No GET surface.
+ *
+ * This used to answer `{endpoint:'stripe-webhook', healthy:true,
+ * configured:false}` to anyone who asked. Two problems, both real:
+ *
+ *   1. It published whether the money path was wired up. An external review
+ *      on 2026-09-08 read `configured:false` off the live site and (correctly)
+ *      graded the billing integrity of the whole product on it.
+ *   2. `healthy:true` next to `configured:false` is worse than no probe: it
+ *      reports green for an endpoint that cannot process a single event.
+ *
+ * Stripe only ever POSTs. Configuration is asserted by deploy checks and by
+ * Stripe''s own delivery log, which is the only source that can actually prove
+ * an event was received — never by a public boolean.
+ *
+ * NOTE for whoever wires this next: as of 2026-09-08 the live Stripe account
+ * delivers to the Supabase Edge Functions (stripe-webhook, stripe-sync-webhook,
+ * zonewise-stripe-webhook), NOT to this route. Registering this URL as a fourth
+ * endpoint without first reconciling fulfilment would double-fulfil every
+ * checkout.session.completed — this route writes public.stripe_events +
+ * fulfil_stripe_purchase, the Edge Function writes public.stripe_webhook_events
+ * and fulfils separately. Pick one owner of fulfilment before pointing Stripe
+ * here.
+ */
 export async function GET() {
-  return NextResponse.json({
-    endpoint: 'stripe-webhook',
-    healthy: true,
-    configured: Boolean(process.env.STRIPE_WEBHOOK_SECRET && process.env.SUPABASE_SERVICE_ROLE_KEY),
-  })
+  return new NextResponse(null, { status: 405, headers: { Allow: ''POST'' } })
 }
