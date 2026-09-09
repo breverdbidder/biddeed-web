@@ -465,3 +465,14 @@ html[data-theme='light'] h1, html[data-theme='light'] h2, html[data-theme='light
 @container (min-width: 26rem) { .tier-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @container (min-width: 44rem) { .tier-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @container (min-width: 68rem) { .tier-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+
+/* 2026-09-09: /d4d example stop rows keyed row-vs-stacked off the VIEWPORT
+   (sm:flex-row), so with the 26-30rem Deed panel open the ~470px card gave
+   the money column its full 297px and crushed addresses to one word per
+   line ("1113 / Brook St, / Palm / Bay"). Container-query the card: rows go
+   side-by-side only when the CARD has 36rem. Verified live via injection:
+   stacked renders "1113 Brook St, Palm Bay" on one line. */
+.d4d-stops-cq { container-type: inline-size; }
+@container (min-width: 36rem) {
+  .d4d-stop { flex-direction: row; align-items: center; justify-content: space-between; gap: 1rem; }
+}
