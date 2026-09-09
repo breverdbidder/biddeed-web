@@ -1,3 +1,4 @@
+import './support.css'
 import SupportForm from '@/components/support/SupportForm'
 import TicketLookup from '@/components/support/TicketLookup'
 
@@ -26,7 +27,7 @@ export const metadata = {
 
 export default function SupportPage() {
   return (
-    <section className="mx-auto min-w-0 w-full max-w-6xl space-y-8 px-4 py-8 sm:px-6 lg:px-8" aria-labelledby="support-title">
+    <section className="support-cq mx-auto min-w-0 w-full max-w-6xl space-y-8 px-4 py-8 sm:px-6 lg:px-8" aria-labelledby="support-title">
       <header className="border-b border-border pb-6">
         <p className="text-base font-bold uppercase tracking-[0.16em] text-primary">Support</p>
         <h1 id="support-title" className="font-display mt-2 text-3xl font-medium leading-tight tracking-tight text-foreground sm:text-4xl">
@@ -54,7 +55,7 @@ export default function SupportPage() {
         </div>
       </header>
 
-      <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
+      <div className="support-outer">
         <SupportForm />
         <div className="space-y-8">
           <TicketLookup />

@@ -60,10 +60,10 @@ export default function TicketLookup() {
   }
 
   return (
-    <section className="min-w-0 rounded-lg border border-border bg-card p-5 sm:p-6" aria-labelledby="lookup-title">
+    <section className="support-card min-w-0 rounded-lg border border-border bg-card p-5 sm:p-6" aria-labelledby="lookup-title">
       <h2 id="lookup-title" className="text-lg font-bold text-foreground">Check a ticket</h2>
       <p className="mt-1 text-base leading-6 text-muted-foreground">The ticket number from your confirmation email, plus the email you used.</p>
-      <form onSubmit={lookup} className="mt-4 grid min-w-0 gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-end" noValidate>
+      <form onSubmit={lookup} className="mt-4 support-lookup" noValidate>
         <label className={`${LABEL} min-w-0`}>
           Ticket number
           <input required value={ticketNumber} onChange={(e) => setTicketNumber(e.target.value)} className={FIELD + ' min-w-0 font-mono uppercase'} placeholder="BD-20260906-A1B2" pattern="BD-\d{8}-[0-9A-Fa-f]{4}" autoCapitalize="characters" />
@@ -84,7 +84,7 @@ export default function TicketLookup() {
       {error ? <p role="alert" className="mt-4 text-sm text-destructive">{error}</p> : null}
 
       {ticket ? (
-        <dl className="mt-5 grid min-w-0 gap-x-6 gap-y-3 rounded-md border border-border bg-background p-4 text-base sm:grid-cols-2" aria-live="polite">
+        <dl className="mt-5 support-dl rounded-md border border-border bg-background p-4 text-base" aria-live="polite">
           <div>
             <dt className="text-sm text-muted-foreground">Ticket</dt>
             <dd className="break-all font-mono text-base font-semibold text-foreground">{ticket.ticket_number}</dd>

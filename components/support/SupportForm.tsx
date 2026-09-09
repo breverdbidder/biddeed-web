@@ -123,7 +123,7 @@ export default function SupportForm() {
   const bad = (field: string) => (invalid.includes(field) ? ' border-destructive' : '')
 
   return (
-    <form onSubmit={submit} className="space-y-5 rounded-lg border border-border bg-card p-5 sm:p-6" aria-labelledby="ticket-form-title" noValidate>
+    <form onSubmit={submit} className="support-card space-y-5 rounded-lg border border-border bg-card p-5 sm:p-6" aria-labelledby="ticket-form-title" noValidate>
       <div>
         <h2 id="ticket-form-title" className="text-lg font-bold text-foreground">Open a ticket</h2>
         <p className="mt-1 text-base leading-7 text-muted-foreground">
@@ -139,7 +139,7 @@ export default function SupportForm() {
         </label>
       </div>
 
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="support-fields">
         <label className={LABEL}>
           Name
           <input required autoComplete="name" value={draft.name} onChange={set('name')} className={FIELD + bad('name')} placeholder="Your name" maxLength={120} />
@@ -150,7 +150,7 @@ export default function SupportForm() {
         </label>
       </div>
 
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="support-fields">
         <label className={LABEL}>
           Topic
           <select required value={draft.category} onChange={set('category')} className={FIELD + bad('category')}>

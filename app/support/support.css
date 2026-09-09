@@ -1,0 +1,33 @@
+/* 2026-09-09: Deed panel is a static flex sibling at lg+ (26-30rem), so the
+   support content column shrinks ~40% while viewport-based sm:/lg: grids
+   stayed two/three-up and crushed the ticket cards (measured live at 1280:
+   Name/Email inputs overlapped with Deed open). These raw container queries
+   (Tailwind v3: no container-query plugin) respond to the column the page
+   actually gets, Deed open or closed. No colours here - layout only. */
+
+/* The page content column: its inline size IS the truth the layout needs. */
+.support-cq { container-type: inline-size; }
+
+.support-outer { display: grid; min-width: 0; gap: 2rem; }
+@container (min-width: 56rem) {
+  .support-outer { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); }
+}
+
+/* Each card is its own container so inner field rows follow the CARD width,
+   not the viewport. */
+.support-card { container-type: inline-size; }
+
+.support-fields { display: grid; gap: 1.25rem; }
+@container (min-width: 26rem) {
+  .support-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+.support-lookup { display: grid; min-width: 0; gap: 1rem; }
+@container (min-width: 30rem) {
+  .support-lookup { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; align-items: end; }
+}
+
+.support-dl { display: grid; min-width: 0; column-gap: 1.5rem; row-gap: .75rem; }
+@container (min-width: 26rem) {
+  .support-dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
