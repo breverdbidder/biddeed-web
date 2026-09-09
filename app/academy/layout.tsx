@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { DocsLayout } from 'fumadocs-ui/layouts/docs'
 import { RootProvider } from 'fumadocs-ui/provider'
 import { source } from '@/lib/source'
-import { Disclaimer } from '@/components/academy/Disclaimer'
+import { MobileAcademyNav } from '@/components/academy/MobileAcademyNav'
 
 import 'fumadocs-ui/style.css'
 import './academy.css'
@@ -19,17 +19,22 @@ import './academy.css'
  * palette (app/layout.tsx) and next-themes would inject an inline script
  * with no CSP nonce — refused by script-src 'strict-dynamic'. Search is
  * disabled for the first PR (no /api/search endpoint mounted yet).
+ *
+ * No layout-level disclaimer footer: rendered inside DocsLayout it becomes
+ * a GRID ITEM and paints as a third column (208px wide, full height) at
+ * every viewport — the crushed right panel in the 2026-09-09 mobile bug
+ * report. Every lesson page carries the same <Disclaimer /> inline at the
+ * end of its MDX instead.
  */
 export default function AcademyLayout({ children }: { children: ReactNode }) {
   return (
     <RootProvider theme={{ enabled: false }} search={{ enabled: false }}>
       <div className="academy-scope">
         <DocsLayout tree={source.pageTree} nav={{ enabled: false }}>
+          {/* Below md the docs sidebar has no trigger (the Fumadocs nav bar is
+              disabled), so the page tree gets its own disclosure. */}
+          <MobileAcademyNav />
           {children}
-          {/* Persistent investor-education disclaimer on every Academy page. */}
-          <footer className="mx-auto w-full max-w-[var(--fd-page-width,52rem)] px-6 pb-10">
-            <Disclaimer />
-          </footer>
         </DocsLayout>
       </div>
     </RootProvider>

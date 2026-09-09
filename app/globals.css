@@ -440,3 +440,17 @@ html[data-theme='light'] h1, html[data-theme='light'] h2, html[data-theme='light
    size. inline-flex + min-height pads the hit area without touching the
    vendor's required text or its 11px size. */
 .mapboxgl-map .mapboxgl-ctrl-attrib a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 2px; }
+
+/* 2026-09-09 rail-survival fix: /academy loads Fumadocs' compiled CSS as an
+   extra stylesheet, and its own `.hidden` lands AFTER ours in the utilities
+   layer -- a later `.hidden` beats the rail's `md:block`, so the desktop rail
+   wrapper (components/ui/sidebar.tsx: `group peer hidden ... md:block` and its
+   `fixed ... md:flex` child) computes to display:none on every /academy load
+   AND on any page reached client-side afterwards (visited-route stylesheets
+   persist). Measured live at 1280px: rail width 0 on /academy and on / after
+   an academy round-trip; with these unlayered rules (unlayered beats layered
+   utilities regardless of order) the rail holds 255px on both. */
+@media (min-width: 48rem) {
+  div.peer[data-side][data-state] { display: block; }
+  div.peer[data-side][data-state] > div.fixed { display: flex; }
+}
