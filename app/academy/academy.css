@@ -30,12 +30,24 @@ html:root {
 }
 
 .academy-scope {
-  /* AppShell renders a sticky h-14 (3.5rem) Topbar above this route; the
-     Fumadocs sidebar sticks --fd-nav-height from the top, so offset it by
-     exactly the Topbar height or the sidebar slides under it. */
-  --fd-nav-height: 3.5rem;
+  /* 2026-09-09 mobile fix: below md the only consumer of --fd-nav-height is
+     the mobile "On this page" tocnav bar, and fumadocs' sticky offset math
+     pushed it 56px down over the article H1 (measured live: bar at y=112
+     covering the title at y=125). Zeroing the variable puts the bar back at
+     the top of the content column (verified live: bar y=56, H1 y=125). */
+  --fd-nav-height: 0px;
 
   font-family: var(--font-inter), system-ui, sans-serif;
+}
+
+@media (min-width: 768px) {
+  .academy-scope {
+    /* md+ the docs sidebar is the consumer: AppShell renders a sticky h-14
+       (3.5rem) Topbar above this route, and the sidebar sticks
+       --fd-nav-height from the viewport top, so offset it by exactly the
+       Topbar height or it slides under the Topbar on scroll. */
+    --fd-nav-height: 3.5rem;
+  }
 }
 
 /* Headlines on the docs surface use the house display serif, same as the
