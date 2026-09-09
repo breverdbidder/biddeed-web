@@ -450,7 +450,10 @@ html[data-theme='light'] h1, html[data-theme='light'] h2, html[data-theme='light
    persist). Measured live at 1280px: rail width 0 on /academy and on / after
    an academy round-trip; with these unlayered rules (unlayered beats layered
    utilities regardless of order) the rail holds 255px on both. */
-@media (min-width: 48rem) {
+@media (min-width: 40rem) {
+  /* 40rem (640px), not the rail's original md:48rem: the tablet band
+     640-1024 renders the icon strip, so the pin must reach down to 640 or
+     the strip would be display:none exactly where Ariel browses. */
   div.peer[data-side][data-state] { display: block; }
   div.peer[data-side][data-state] > div.fixed { display: flex; }
 }
