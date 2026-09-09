@@ -12,7 +12,7 @@ export default function PricingTiers() {
   const [interval, setInterval] = useState<Interval>('monthly')
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 pb-28 pt-10 sm:px-6 sm:pb-16 lg:px-8">
+    <div className="tier-cq mx-auto w-full max-w-6xl px-4 pb-28 pt-10 sm:px-6 sm:pb-16 lg:px-8">
       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Plans</p>
       <h1 className="font-display mt-2 text-[1.9rem] font-medium leading-[1.15] tracking-tight text-foreground sm:text-4xl">
         Cheaper than one bad bid.
@@ -45,7 +45,7 @@ export default function PricingTiers() {
         ))}
       </div>
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+      <div className="tier-grid mt-8">
         {PLANS.map((p) => {
           const showAnnual = interval === 'annual' && p.annualPrice
           const price = showAnnual ? p.annualPrice : p.price

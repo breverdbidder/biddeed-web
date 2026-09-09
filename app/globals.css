@@ -454,3 +454,14 @@ html[data-theme='light'] h1, html[data-theme='light'] h2, html[data-theme='light
   div.peer[data-side][data-state] { display: block; }
   div.peer[data-side][data-state] > div.fixed { display: flex; }
 }
+
+/* 2026-09-09: same Deed-open crush as /support, on the plan cards. The tier
+   grid keyed column count off the VIEWPORT (xl:grid-cols-5), so opening the
+   26-30rem Deed panel at 1280-1536 left ~550-800px for five cards (measured
+   live: prices clipped, "Custom" cut to "Custo", mid-word wraps). Container
+   queries key the count off the column the page actually has. */
+.tier-cq { container-type: inline-size; }
+.tier-grid { display: grid; gap: 1rem; }
+@container (min-width: 26rem) { .tier-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@container (min-width: 44rem) { .tier-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@container (min-width: 68rem) { .tier-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
