@@ -18,8 +18,9 @@ export default function PricingTiers() {
         Cheaper than one bad bid.
       </h1>
       <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground">
-        Start free with every county visible. Upgrade when you want the exact ceiling. Or buy one report for one
-        property, one time.
+        Look first, no account needed: the auction calendar and the Academy 101s are open to everyone. The ladder
+        from there is free account, one $25 report, then Investor, Pro and Pro Plus. Every level includes the
+        Academy lessons written for it.
       </p>
 
       <div
@@ -112,9 +113,10 @@ export default function PricingTiers() {
 
       <div className="mt-10 flex flex-col items-start justify-between gap-4 rounded-2xl border border-border bg-secondary p-6 sm:flex-row sm:items-center">
         <div>
-          <h2 className="text-base font-semibold text-foreground">Not ready to subscribe?</h2>
+          <h2 className="text-base font-semibold text-foreground">The level between Free and Investor</h2>
           <p className="mt-1 text-base text-muted-foreground">
-            Buy one SIGNAL$ Property Report for a single auction — $25, no subscription.
+            One SIGNAL$ Property Report for a single auction, $25, no subscription. The Academy&apos;s free
+            How-to-use-BidDeed track shows you what is inside first.
           </p>
         </div>
         <a href={W.buyReport} className={cn(BTN_QUIET, 'shrink-0 bg-card')}>

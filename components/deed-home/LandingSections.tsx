@@ -418,6 +418,7 @@ export const PLANS: Plan[] = [
       'Max-bid range on every preview',
       'Daily email digest',
       'Ask Deed anything',
+      'Academy free level: the full How-to-use-BidDeed track and county playbook basics',
     ],
     cta: { label: 'Start free', href: '/sign-up' },
   },
@@ -434,6 +435,7 @@ export const PLANS: Plan[] = [
       'Plaintiff identity and max-bid intelligence',
       'Outcome scorecard after each sale',
       '3 skip traces a month · 1 county monitor',
+      'Academy investor level: case studies, lien priority and the wipe rule, max-bid math, ML verdict lessons',
     ],
     cta: { label: 'Start Investor', href: W.subscribeInvestor },
     featured: true,
@@ -495,8 +497,9 @@ export function Pricing({ onPrompt }: { onPrompt: (p: string) => void }) {
         <Eyebrow>Plans</Eyebrow>
         <H2>Cheaper than one bad bid.</H2>
         <p className="mt-4 text-base leading-7 text-muted-foreground">
-          Start free with every county visible. Upgrade when you want the exact ceiling. Or buy one report for one
-          property, one time.
+          Look first, no account needed: the auction calendar and the Academy 101s are open to everyone. The ladder
+          from there is free account, one $25 report, then Investor, Pro and Pro Plus. Every level includes the
+          Academy lessons written for it.
         </p>
       </div>
 
@@ -556,11 +559,12 @@ export function Pricing({ onPrompt }: { onPrompt: (p: string) => void }) {
           </span>
           <div>
             <h3 className="text-base font-semibold text-foreground">
-              One property, one report — SIGNAL$ Property Report, <span className="tabular">$25</span>
+              Between a free account and Investor: the SIGNAL$ Property Report, <span className="tabular">$25</span>
             </h3>
             <p className="mt-1 max-w-xl text-base text-muted-foreground">
               All 18 sections on a single property: value band, SIGNAL$ Max Bid ceiling, comparable sales, zoning read and
-              red flags. When the sale closes, you get the outcome scorecard re-issued free.
+              red flags. When the sale closes, you get the outcome scorecard re-issued free. New to the numbers? The
+              Academy&apos;s free How-to-use-BidDeed track walks through a report before you buy one.
             </p>
           </div>
         </div>
