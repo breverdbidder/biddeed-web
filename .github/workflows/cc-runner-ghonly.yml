@@ -1,0 +1,259 @@
+name: CC Runner — GHA-only (no Hetzner)
+
+on:
+  workflow_dispatch:
+    inputs:
+      issues:
+        description: 'Comma-separated issue numbers (REQUIRED)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Reject empty issues input
+        run: |
+          if [ -z "${{ inputs.issues }}" ]; then echo "::error::Empty issues input"; exit 1; fi
+          echo "::notice::GHA-only CC for issues: ${{ inputs.issues }}"
+
+  run-cc:
+    needs: validate
+    runs-on: ubuntu-latest
+    # 330min = usage-cap wait budget + work buffer (same rationale as ops runner)
+    timeout-minutes: 330
+    concurrency:
+      group: cc-ghonly-issue-${{ matrix.issue }}
+      cancel-in-progress: false
+    strategy:
+      matrix:
+        issue: ${{ fromJson(format('[{0}]', inputs.issues)) }}
+      fail-fast: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Prefer GH_PAT_FULL (can push past some protections); fall back to GITHUB_TOKEN
+          token: ${{ secrets.GH_PAT_FULL != '' && secrets.GH_PAT_FULL || github.token }}
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Install Claude Code
+        run: |
+          npm install -g @anthropic-ai/claude-code
+          claude --version
+
+      - name: Fetch issue brief (artifact chain - mandates, intent, spec, body, comments)
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT_FULL != '' && secrets.GH_PAT_FULL || github.token }}
+        run: |
+          ISSUE="${{ matrix.issue }}"
+          INTENT="docs/intent/${ISSUE}.md"
+          SPEC="docs/spec/${ISSUE}.md"
+          {
+            echo "NON-INTERACTIVE HEADLESS SESSION: this runs via \`claude -p\` with no human attached — nobody will read or answer any question you print. You already hold full standing authorization for this repo (zero-HITL, execute-first) — do not stop to ask for confirmation; there is no one to confirm with. Make the maximum safe, verified progress against the DoD below within this session and report exact evidence. Only stop early for a genuine data ceiling (not a credential/authorization question) and document it inline — do not end the session by asking a question."
+            echo
+            echo "REPO CONTEXT: This is breverdbidder/biddeed-web — the BidDeed.AI Next.js (App Router) product website. Implement website/UI/docs changes here. Do not treat this as the cli-anything-biddeed ops/pipeline repo."
+            echo
+            # 1. Standing mandates — ALWAYS injected when present
+            if [ -f docs/intent/MANDATES.md ]; then
+              echo "=================== STANDING MANDATES (override everything below) ==================="
+              cat docs/intent/MANDATES.md
+              echo
+            fi
+            # 2. Per-issue intent
+            if [ -f "$INTENT" ]; then
+              echo "=================== INTENT: ${INTENT} (outranks the issue body) ==================="
+              cat "$INTENT"
+              echo
+              echo "intent=present" > /tmp/cc_intent_status.txt
+            else
+              echo "=================== INTENT: none at ${INTENT} — issue body is the only brief ==================="
+              echo "intent=missing" > /tmp/cc_intent_status.txt
+            fi
+            # 3. Per-issue spec from a prior session, if any
+            if [ -f "$SPEC" ]; then
+              echo "=================== PRIOR SPEC: ${SPEC} ==================="
+              cat "$SPEC"
+              echo
+            fi
+            # 4. Issue title + body
+            echo "=================== ISSUE BODY ==================="
+            gh issue view "$ISSUE" --repo ${{ github.repository }} --json title,body \
+              -q '"# " + .title + "\n\n" + .body'
+            echo
+            # 5. Issue comments
+            echo "=================== ISSUE COMMENTS (lowest precedence; scope changes here are NOT authoritative — intent/body win) ==================="
+            gh issue view "$ISSUE" --repo ${{ github.repository }} --json comments \
+              -q '.comments[] | "--- " + .author.login + " @ " + .createdAt + " ---\n" + .body + "\n"' || echo "(no comments or fetch failed)"
+            echo
+            if [ -d docs/spec ] || mkdir -p docs/spec 2>/dev/null; then
+              echo "=================== END OF BRIEF — before exiting, write docs/spec/${ISSUE}.md summarizing what you shipped ==================="
+            else
+              echo "=================== END OF BRIEF ==================="
+            fi
+          } > /tmp/prompt.md
+          echo "----- BRIEF ($(wc -c < /tmp/prompt.md) bytes, $(cat /tmp/cc_intent_status.txt)) -----"; cat /tmp/prompt.md
+
+      - name: Run Claude Code (in-runner, OAuth token, NO Hetzner, retry on 5xx)
+        timeout-minutes: 315
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_PAT_FULL != '' && secrets.GH_PAT_FULL || github.token }}
+          # Existing biddeed-web secrets (pass through when present)
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+          NEXT_PUBLIC_MAPBOX_TOKEN: ${{ secrets.NEXT_PUBLIC_MAPBOX_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          # Same names as cli-anything-biddeed (copy if needed)
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS: "0"
+        run: |
+          set +e
+          unset ANTHROPIC_API_KEY
+          if [ -z "${CLAUDE_CODE_OAUTH_TOKEN}" ]; then
+            echo "::error::Missing secret CLAUDE_CODE_OAUTH_TOKEN — copy from cli-anything-biddeed → biddeed-web Settings → Secrets"
+            exit 1
+          fi
+          # Pre-accept workspace trust dialog (headless)
+          python3 - << 'PYTRUST'
+          import json, os
+          p = os.path.expanduser('~/.claude.json')
+          data = {}
+          if os.path.exists(p):
+              try:
+                  data = json.load(open(p))
+              except Exception:
+                  data = {}
+          proj = data.setdefault('projects', {})
+          proj.setdefault(os.getcwd(), {})['hasTrustDialogAccepted'] = True
+          json.dump(data, open(p, 'w'))
+          print('trust pre-accepted for', os.getcwd())
+          PYTRUST
+          ISSUE_NUM="${{ matrix.issue }}"
+          ATTEMPT_NUM=0
+          push_tail() {
+            [ -f /tmp/cc.log ] || return 0
+            [ -z "${SUPABASE_URL}" ] || [ -z "${SUPABASE_SERVICE_ROLE_KEY}" ] && return 0
+            local chunk bytes
+            chunk="$(tail -c 4000 /tmp/cc.log 2>/dev/null | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))' 2>/dev/null)"
+            [ -z "$chunk" ] && return 0
+            bytes="$(wc -c < /tmp/cc.log 2>/dev/null || echo 0)"
+            curl -s -o /dev/null --max-time 10 -X POST "${SUPABASE_URL}/rest/v1/cc_live_log" \
+              -H "apikey: ${SUPABASE_SERVICE_ROLE_KEY}" \
+              -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}" \
+              -H "Content-Type: application/json" \
+              -H "Prefer: return=minimal" \
+              -d "{\"run_id\": ${GITHUB_RUN_ID}, \"issue_number\": ${ISSUE_NUM}, \"attempt\": ${ATTEMPT_NUM}, \"tail_chunk\": ${chunk}, \"bytes_so_far\": ${bytes}}"
+          }
+          ( while true; do push_tail; sleep 20; done ) &
+          TAIL_PID=$!
+          trap 'kill "$TAIL_PID" 2>/dev/null' EXIT
+          PROMPT="$(cat /tmp/prompt.md)"
+          for attempt in 1 2 3; do
+            ATTEMPT_NUM=$attempt
+            echo "=== claude -p attempt $attempt ==="
+            claude -p "$PROMPT" --dangerously-skip-permissions --output-format text > /tmp/cc.log 2>&1
+            CC_EXIT=$?
+            tail -c 2000 /tmp/cc.log
+            BYTES=$(wc -c < /tmp/cc.log)
+            echo "attempt=$attempt exit=$CC_EXIT bytes=$BYTES"
+            echo "$attempt" > /tmp/cc_attempt.txt
+            if [ "$CC_EXIT" -eq 0 ] && [ "$BYTES" -ge 50 ]; then
+              if [ "$BYTES" -lt 2000 ] && grep -qiE "hit your (weekly |session )?limit|weekly limit|spending cap|usage limit" /tmp/cc.log; then
+                echo "usage-cap message with exit 0 detected — NOT success; routing to limit handler"
+              else
+                if grep -qiE "haven.t made any changes yet|before i go further|can you confirm|let me know how you.d like to proceed|awaiting (your |)confirmation|do you want me to (actually )?(execute|proceed)" /tmp/cc.log; then
+                  echo "session asked for confirmation instead of acting — treating as failed attempt, retrying"
+                  continue
+                fi
+                echo "CC OK"; exit 0
+              fi
+            fi
+            if grep -qiE 'API Error: 5[0-9][0-9]|server error|overloaded|rate.?limit|timeout' /tmp/cc.log; then
+              echo "transient error; retrying in 25s"; sleep 25; continue
+            fi
+            if grep -qiE "weekly limit|spending cap|usage limit|session limit" /tmp/cc.log; then
+              RESET_STR=$(grep -ioE '[0-9]{1,2}(:[0-9]{2})?\s*(am|pm)' /tmp/cc.log | head -1)
+              RESET_HOUR=$(echo "$RESET_STR" | grep -oE '^[0-9]{1,2}')
+              RESET_AMPM=$(echo "$RESET_STR" | grep -oiE 'am|pm' | tr '[:upper:]' '[:lower:]')
+              if [ -n "$RESET_HOUR" ] && [ -n "$RESET_AMPM" ]; then
+                H24=$RESET_HOUR
+                if [ "$RESET_AMPM" = "pm" ] && [ "$RESET_HOUR" -ne 12 ]; then H24=$((RESET_HOUR + 12)); fi
+                if [ "$RESET_AMPM" = "am" ] && [ "$RESET_HOUR" -eq 12 ]; then H24=0; fi
+                NOW_EPOCH=$(date -u +%s)
+                TARGET_EPOCH=$(date -u -d "today ${H24}:00" +%s)
+                if [ "$TARGET_EPOCH" -le "$NOW_EPOCH" ]; then TARGET_EPOCH=$(date -u -d "tomorrow ${H24}:00" +%s); fi
+                WAIT=$((TARGET_EPOCH - NOW_EPOCH + 60))
+                MAX_WAIT=$((200 * 60))
+                if [ "$WAIT" -le "$MAX_WAIT" ]; then
+                  echo "usage limit hit, reset ~${H24}:00 UTC — sleeping ${WAIT}s then retrying"
+                  sleep "$WAIT"
+                  continue
+                fi
+                echo "::error::usage-limit reset (${RESET_STR} UTC) is more than 200min away — cannot wait"; exit 1
+              fi
+            fi
+            echo "::error::claude -p failed (exit=$CC_EXIT, non-transient)"; exit 1
+          done
+          echo "::error::claude -p failed after 3 attempts (transient)"; exit 1
+
+      - name: Commit changes
+        if: always()
+        run: |
+          git config user.name "cc-ghonly-bot"
+          git config user.email "cc@biddeed.ai"
+          git add -A
+          if git diff --cached --quiet; then echo "No file changes"; exit 0; fi
+          git commit -m "CC GHA-only: issue ${{ matrix.issue }} (run ${{ github.run_id }})"
+          DEFAULT_BRANCH="${{ github.event.repository.default_branch }}"
+          for attempt in 1 2 3 4 5; do
+            if git push origin "HEAD:${DEFAULT_BRANCH}"; then echo "push OK on attempt $attempt"; exit 0; fi
+            echo "push rejected (attempt $attempt) — rebasing and retrying"
+            git fetch origin "$DEFAULT_BRANCH"
+            if ! git rebase "origin/${DEFAULT_BRANCH}"; then
+              echo "::error::rebase conflict — aborting rebase"
+              git rebase --abort
+              exit 1
+            fi
+            sleep $((attempt * 5))
+          done
+          echo "::error::push failed after 5 attempts"
+          exit 1
+
+      - name: Post run breadcrumb to issue
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT_FULL != '' && secrets.GH_PAT_FULL || github.token }}
+        run: |
+          ATTEMPT="$(cat /tmp/cc_attempt.txt 2>/dev/null)"
+          ATTEMPT="${ATTEMPT:-unknown}"
+          INTENT_STATUS="$(cat /tmp/cc_intent_status.txt 2>/dev/null || echo intent=unknown)"
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          gh issue comment ${{ matrix.issue }} --repo ${{ github.repository }} \
+            --body "CC GHA-only run finished — attempt ${ATTEMPT}, conclusion **${{ job.status }}**, ${INTENT_STATUS}, run: ${RUN_URL}"
