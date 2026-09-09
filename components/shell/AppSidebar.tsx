@@ -58,6 +58,8 @@ function isActiveItem(item: NavItem, pathname: string, view: string | null): boo
       return pathname.startsWith('/radar') && view !== 'calendar'
     case 'calendar':
       return pathname.startsWith('/radar') && view === 'calendar'
+    case 'academy':
+      return pathname.startsWith('/academy')
     default:
       return pathname === item.href
   }

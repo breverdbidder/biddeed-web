@@ -1,10 +1,17 @@
 import type { Config } from 'tailwindcss'
+import { createPreset } from 'fumadocs-ui/tailwind-plugin'
 
 const config: Config = {
   darkMode: ['class'],
+  presets: [createPreset()],
   content: [
     './app/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',
+    './content/**/*.{md,mdx}',
+    './mdx-components.tsx',
+    // Fumadocs UI ships precompiled JS with Tailwind class names; the classes
+    // only exist in the output if its files are scanned.
+    './node_modules/fumadocs-ui/dist/**/*.js',
   ],
   theme: {
   	extend: {

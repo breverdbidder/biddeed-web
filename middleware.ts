@@ -111,6 +111,11 @@ const isPublicRoute = createRouteMatcher([
   '/counties(.*)',
   '/help(.*)',
   '/docs(.*)',
+  // BidDeed Academy (#63) — public MDX education portal. Same reasoning as
+  // /counties above: a prospect must be able to read the 101s before there is
+  // an account to protect; gating (free/Investor tiers) comes later and will
+  // narrow this entry rather than move the portal.
+  '/academy(.*)',
   '/explore(.*)',
   '/explorer(.*)',
   '/discover(.*)',

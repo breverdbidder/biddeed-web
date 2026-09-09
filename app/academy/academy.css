@@ -1,0 +1,43 @@
+/*
+ * Academy route styles (#63).
+ *
+ * fumadocs-ui v14 themes itself off --fd-* HSL channels (set by its Tailwind
+ * preset on :root). Remap them onto the BidDeed canon palette (globals.css:
+ * white / #E6F0FA tint / #0A2540 navy / #D7E3F1 border / #005EB8 brand blue)
+ * so the docs surface reads as the same product, not a stock docs theme.
+ * `html:root` out-ranks the preset's own `:root` regardless of stylesheet
+ * order; scoping to .academy-scope alone would tie on specificity.
+ */
+html:root {
+  --fd-background: 0 0% 100%;
+  --fd-foreground: 0 0% 10%;
+  --fd-muted: 210 66.7% 94.1%;
+  --fd-muted-foreground: 210 73% 14.5%;
+  --fd-popover: 0 0% 100%;
+  --fd-popover-foreground: 0 0% 10%;
+  --fd-card: 0 0% 100%;
+  --fd-card-foreground: 0 0% 10%;
+  --fd-border: 212.3 48.1% 89.4%;
+  --fd-primary: 209.3 100% 36.1%;
+  --fd-primary-foreground: 0 0% 100%;
+  --fd-secondary: 210 66.7% 94.1%;
+  --fd-secondary-foreground: 210 73% 14.5%;
+  --fd-accent: 210 66.7% 94.1%;
+  --fd-accent-foreground: 210 73% 14.5%;
+  --fd-ring: 209.3 100% 36.1%;
+}
+
+.academy-scope {
+  /* AppShell renders a sticky h-14 (3.5rem) Topbar above this route; the
+     Fumadocs sidebar sticks --fd-nav-height from the top, so offset it by
+     exactly the Topbar height or the sidebar slides under it. */
+  --fd-nav-height: 3.5rem;
+
+  font-family: var(--font-inter), system-ui, sans-serif;
+}
+
+/* Headlines on the docs surface use the house display serif, same as the
+   rest of the site (app/layout.tsx). */
+.academy-scope article :is(h1, h2) {
+  font-family: var(--font-display), 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+}

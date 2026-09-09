@@ -44,3 +44,6 @@ cloudflare-env.d.ts
 
 # audit script run output
 artifacts/
+
+# fumadocs-mdx generated (postinstall)
+.source
