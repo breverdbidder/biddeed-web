@@ -45,13 +45,13 @@ export default function D4DLocked({ check }: { check: CapabilityCheck }) {
         <ol className="mt-4 divide-y divide-border">
           {EXAMPLE_STOPS.map((s) => (
             <li key={s.seq} className="flex flex-col gap-2 py-3 text-base sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-              <div className="flex min-w-0 items-center gap-3">
+              <div className="flex min-w-0 flex-1 items-center gap-3">
                 <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
                   {s.seq}
                 </span>
                 <span className="min-w-0 text-foreground">{s.address}</span>
               </div>
-              <div className="flex flex-wrap gap-x-4 gap-y-1 pl-10 font-mono text-xs text-muted-foreground sm:shrink-0 sm:pl-0">
+              <div className="flex min-w-0 flex-wrap gap-x-4 gap-y-1 pl-10 font-mono text-xs text-muted-foreground sm:pl-0">
                 <span>Judgment {s.judgment}</span>
                 <span className="text-primary">SIGNAL$ Max Bid {s.maxBid}</span>
               </div>

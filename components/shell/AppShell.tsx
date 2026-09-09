@@ -45,6 +45,11 @@ export default function AppShell({
   // button and the Topbar has the toggle, so the card is redundant there; on
   // the auth routes it must never sit over the form.
   const isAuthRoute = pathname.startsWith('/sign-in') || pathname.startsWith('/sign-up')
+  // Pages that carry their own inline Deed entry point (the "Ask Deed first"
+  // button on /support) don't need the floating "Talk to Deed" card as well;
+  // measured live, the fixed card covered the contact email lines at the
+  // bottom of /support at 1280px. Ariel call 2026-09-09: hide it there.
+  const hasOwnDeedEntry = pathname.startsWith('/support')
   const [deedOpen, setDeedOpen] = useState(false)
   const toggleDeed = () => setDeedOpen((v) => !v)
 
@@ -77,7 +82,7 @@ export default function AppShell({
           {!isHome ? (
             <>
               <DeedPanel open={deedOpen} onClose={() => setDeedOpen(false)} />
-              {!deedOpen && !isAuthRoute ? <StickyDeedCta open={deedOpen} onToggle={toggleDeed} /> : null}
+              {!deedOpen && !hasOwnDeedEntry ? <StickyDeedCta open={deedOpen} onToggle={toggleDeed} /> : null}
             </>
           ) : null}
         </div>
