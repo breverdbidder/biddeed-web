@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react'
-import { Bell, CalendarDays, FileText, FolderKanban, Gavel, HardHat, MapPinned, Route, Search } from 'lucide-react'
+import { Bell, CalendarDays, FileText, FolderKanban, Gavel, GraduationCap, HardHat, MapPinned, Route, Search } from 'lucide-react'
 
 /**
  * Primary navigation.
@@ -76,6 +76,13 @@ export const NAV_ITEMS: NavItem[] = [
     href: '/alerts',
     icon: Bell,
     description: 'Get told when a sale you watch changes',
+  },
+  {
+    key: 'academy',
+    label: 'Academy',
+    href: '/academy',
+    icon: GraduationCap,
+    description: 'Learn tax deeds, foreclosures and how to win with BidDeed',
   },
   {
     key: 'counties',
