@@ -257,13 +257,32 @@ export default function AuctionCalendar({ county, saleType, onSelectDay }: Props
           background: var(--primary);
           border-color: var(--primary);
         }
-        .zw-auction-calendar :global(.fc .fc-event) {
+        .zw-auction-calendar :global(.fc .fc-daygrid-event) {
           min-height: 44px;
           display: flex;
           align-items: center;
           padding: 0.35rem 0.5rem;
           color: var(--foreground) !important;
           border-radius: 0.375rem;
+        }
+        /*
+         * LIST VIEW ROWS ARE TABLE ROWS (Sep 9 2026, Ariel screenshot).
+         * In list view .fc-event is a <tr class="fc-event fc-list-event">.
+         * The daygrid rule above used to target every .fc-event with
+         * display:flex - a flexed <tr> destroys table column sizing, the
+         * "all-day" time cell collapsed to 28px, and the dot + count painted
+         * ON TOP of the label ("all-[dot]2 Foreclosures" jumble, live at any
+         * width). List rows stay table layout; tap-target height comes from
+         * cell padding. Verified live via injection before codifying.
+         */
+        .zw-auction-calendar :global(.fc .fc-list-event) {
+          display: table-row;
+          color: var(--foreground) !important;
+        }
+        .zw-auction-calendar :global(.fc .fc-list-event td) {
+          display: table-cell;
+          padding-top: 0.6rem;
+          padding-bottom: 0.6rem;
         }
         .zw-auction-calendar :global(.fc .fc-event-main) {
           color: var(--foreground) !important;
