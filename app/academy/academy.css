@@ -2,9 +2,11 @@
  * Academy route styles (#63).
  *
  * fumadocs-ui v14 themes itself off --fd-* HSL channels (set by its Tailwind
- * preset on :root). Remap them onto the BidDeed canon palette (globals.css:
- * white / #E6F0FA tint / #0A2540 navy / #D7E3F1 border / #005EB8 brand blue)
- * so the docs surface reads as the same product, not a stock docs theme.
+ * preset on :root). Remap them onto the BidDeed canon palette (the same HSL
+ * channels as the tokens in app/globals.css: white background, light-blue
+ * tint, navy ink, light border, brand blue) so the docs surface reads as the
+ * same product, not a stock docs theme. NOTE: no hex literals in this file —
+ * the palette gate (scripts/palette-gate.mjs) scans comments too.
  * `html:root` out-ranks the preset's own `:root` regardless of stylesheet
  * order; scoping to .academy-scope alone would tie on specificity.
  */
