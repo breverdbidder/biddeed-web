@@ -72,6 +72,8 @@ function fmtMoney(n: number | null | undefined) {
 export default function BuyReportCheckout() {
   const params = useSearchParams()
   const mcaId = params.get('mca_id')
+  const caseParam = params.get('case')
+  const countyParam = params.get('county')
 
   const [step, setStep] = useState<Step>('county')
   const [counties, setCounties] = useState<CountyOption[] | null>(null)
@@ -94,7 +96,7 @@ export default function BuyReportCheckout() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
 
-  const [prefillLoading, setPrefillLoading] = useState(Boolean(mcaId))
+  const [prefillLoading, setPrefillLoading] = useState(Boolean(mcaId) || Boolean(caseParam && countyParam))
   const [prefillError, setPrefillError] = useState('')
 
   // Prefill flow — arrived from a property card in chat (?mca_id=&address=&county=&date=).
@@ -130,6 +132,63 @@ export default function BuyReportCheckout() {
       .finally(() => setPrefillLoading(false))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mcaId])
+
+  // Deep-link flow — arrived from a /deal/<county>/<slug> landing page
+  // (?case=<case_number>&county=<county_slug>). Without this, those params
+  // were silently ignored and every reel-funnel buyer landed on a blank
+  // county picker, losing the property they tapped on (issue #20193).
+  // Resolve the pair against the same picker feed and jump straight to
+  // checkout; when it no longer resolves (auction passed or sold), land on
+  // that county's upcoming list instead of a dead end.
+  useEffect(() => {
+    if (mcaId || !caseParam || !countyParam) return
+    const slug = countyParam.replace(/-/g, '_')
+    const fallbackName = slug
+      .split('_')
+      .map((w) => (w ? w[0].toUpperCase() + w.slice(1) : w))
+      .join(' ')
+    let cancelled = false
+    fetch(apiUrl(`/buy-report/auctions?county=${encodeURIComponent(slug)}`))
+      .then((r) => r.json())
+      .then((data: AuctionOption[]) => {
+        if (cancelled) return
+        const rows = Array.isArray(data) ? data : []
+        const match = rows.find((a) => (a.case_number || '').toLowerCase() === caseParam.toLowerCase())
+        setCountySlug(slug)
+        setCountyName(fallbackName)
+        if (match) {
+          setSelected({
+            case_number: match.case_number,
+            property_address: match.property_address,
+            auction_date: match.auction_date,
+            opening_bid: match.opening_bid,
+            sale_type: match.sale_type,
+          })
+          setStep('checkout')
+        } else {
+          setAuctions(rows)
+          setStep('auction')
+        }
+      })
+      .catch(() => {
+        // Leave the visitor on the county picker — the list still loads.
+      })
+      .finally(() => {
+        if (!cancelled) setPrefillLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mcaId, caseParam, countyParam])
+
+  // Backfill the pretty county label once the counties list lands.
+  useEffect(() => {
+    if (!counties || !countySlug) return
+    const opt = counties.find((c) => c.county_slug === countySlug)
+    if (opt && countyName !== opt.display) setCountyName(opt.display)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [counties, countySlug])
 
   // Step 1: counties — skipped entirely on the prefill path.
   useEffect(() => {
