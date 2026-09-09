@@ -30,10 +30,14 @@ export default function AcademyLayout({ children }: { children: ReactNode }) {
   return (
     <RootProvider theme={{ enabled: false }} search={{ enabled: false }}>
       <div className="academy-scope">
+        {/* Below md the docs sidebar has no trigger (the Fumadocs nav bar is
+            disabled), so the page tree gets its own disclosure. It must live
+            OUTSIDE DocsLayout: children of DocsLayout are GRID ITEMS, so
+            inside it the nav paints as a narrow first column and crushes the
+            article to ~265px at 390px (measured live after the first
+            version shipped inside, 2026-09-09). */}
+        <MobileAcademyNav />
         <DocsLayout tree={source.pageTree} nav={{ enabled: false }}>
-          {/* Below md the docs sidebar has no trigger (the Fumadocs nav bar is
-              disabled), so the page tree gets its own disclosure. */}
-          <MobileAcademyNav />
           {children}
         </DocsLayout>
       </div>
