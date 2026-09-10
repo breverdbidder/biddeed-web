@@ -22,7 +22,7 @@ import StickyDeedCta from './StickyDeedCta'
  * Suspense boundary here hydrates after its parent, so SidebarProvider's
  * useIsMobile() effect fires first and flips the desktop/Sheet branch before
  * the boundary hydrates -- a guaranteed hydration mismatch at <768px
- * (measured: React #418 on every mobile route). Instead app/layout.tsx is
+ * (measured: React error 418 on every mobile route). Instead app/layout.tsx is
  * force-dynamic, so nothing prerenders and useSearchParams needs no boundary.
  *
  * Deed has ONE home. On '/' the page itself is the conversation, so the side

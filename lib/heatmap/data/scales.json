@@ -1,0 +1,21 @@
+{
+  "valueScale": [
+    "#eef2ff",
+    "#c7d2fe",
+    "#818cf8",
+    "#4f46e5",
+    "#312e81"
+  ],
+  "densityScale": [
+    "#fff7ed",
+    "#fed7aa",
+    "#fb923c",
+    "#ea580c",
+    "#7c2d12"
+  ],
+  "noDataFill": "#e5e7eb",
+  "countyLine": "#94a3b8",
+  "countySelectedLine": "#1d4ed8",
+  "pinFill": "#0f172a",
+  "pinHalo": "#ffffff"
+}
