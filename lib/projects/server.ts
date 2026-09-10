@@ -27,6 +27,12 @@ export async function ownerEmailForBudget(supabase: SupabaseClient, budgetId: st
   return data.owner_email ?? null
 }
 
+export async function projectIdForBudget(supabase: SupabaseClient, budgetId: string): Promise<string | null> {
+  const { data, error } = await supabase.from('cm_budgets').select('project_id').eq('id', budgetId).maybeSingle()
+  if (error || !data) return null
+  return data.project_id ?? null
+}
+
 export async function budgetIdForLine(supabase: SupabaseClient, lineId: string): Promise<string | null> {
   const { data, error } = await supabase.from('cm_budget_lines').select('budget_id').eq('id', lineId).maybeSingle()
   if (error || !data) return null

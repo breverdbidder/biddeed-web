@@ -47,6 +47,19 @@ const DENIED_BASE: Omit<CapabilityCheck, 'userId' | 'email'> = {
   upgradePrice: null,
 }
 
+const TIER_RANK: Record<string, number> = { free: 0, investor: 1, pro: 2, proplus: 3, enterprise: 4 }
+
+/**
+ * Compares resolved tier rank rather than calling requireCapability again —
+ * for sub-features gated stricter than the capability that gates their parent
+ * page (e.g. Due Diligence requires Pro Plus even though get_rehab_budget
+ * already resolved the caller's tier for the /projects page). Unknown tier
+ * ids rank as 'free' so an unrecognized value fails closed.
+ */
+export function tierAtLeast(tierId: string, minTierId: string): boolean {
+  return (TIER_RANK[tierId] ?? 0) >= (TIER_RANK[minTierId] ?? Infinity)
+}
+
 export async function requireCapability(cap: Capability): Promise<CapabilityCheck> {
   let userId: string | null = null
   let email: string | null = null
