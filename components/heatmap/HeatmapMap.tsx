@@ -4,7 +4,14 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import { apiUrl } from '@/lib/api'
-import { buildFillColorExpression, NO_DATA_FILL } from '@/lib/heatmap/colorScales'
+import {
+  buildFillColorExpression,
+  NO_DATA_FILL,
+  COUNTY_LINE,
+  COUNTY_SELECTED_LINE,
+  PIN_FILL,
+  PIN_HALO,
+} from '@/lib/heatmap/colorScales'
 
 const STREETS_STYLE = 'mapbox://styles/mapbox/streets-v12'
 const FL_CENTER: [number, number] = [-81.6, 27.9]
@@ -172,7 +179,7 @@ export default function HeatmapMap({
         id: 'county-outline',
         type: 'line',
         source: 'counties',
-        paint: { 'line-color': '#94a3b8', 'line-width': 0.75 },
+        paint: { 'line-color': COUNTY_LINE, 'line-width': 0.75 },
       },
       beforeId
     )
@@ -183,7 +190,7 @@ export default function HeatmapMap({
         type: 'line',
         source: 'counties',
         filter: ['==', ['get', 'fips'], selectedFips ?? '__none__'],
-        paint: { 'line-color': '#1d4ed8', 'line-width': 3 },
+        paint: { 'line-color': COUNTY_SELECTED_LINE, 'line-width': 3 },
       },
       beforeId
     )
@@ -238,10 +245,10 @@ export default function HeatmapMap({
       source: 'auction-pins',
       filter: ['has', 'point_count'],
       paint: {
-        'circle-color': '#0f172a',
+        'circle-color': PIN_FILL,
         'circle-radius': ['step', ['get', 'point_count'], 16, 10, 22, 50, 28],
         'circle-stroke-width': 3,
-        'circle-stroke-color': '#ffffff',
+        'circle-stroke-color': PIN_HALO,
       },
     })
 
@@ -256,7 +263,7 @@ export default function HeatmapMap({
         'text-size': 12,
         'text-allow-overlap': true,
       },
-      paint: { 'text-color': '#ffffff' },
+      paint: { 'text-color': PIN_HALO },
     })
 
     map.addLayer({
@@ -265,10 +272,10 @@ export default function HeatmapMap({
       source: 'auction-pins',
       filter: ['!', ['has', 'point_count']],
       paint: {
-        'circle-color': '#0f172a',
+        'circle-color': PIN_FILL,
         'circle-radius': 6,
         'circle-stroke-width': 2.5,
-        'circle-stroke-color': '#ffffff',
+        'circle-stroke-color': PIN_HALO,
       },
     })
 
@@ -318,7 +325,7 @@ export default function HeatmapMap({
       )}
       {!compact && (
         <div className="absolute bottom-3 left-3 z-20 flex items-center gap-2 rounded-md border border-border bg-card/90 px-2.5 py-1.5 text-[11px] text-muted-foreground shadow-sm backdrop-blur-sm">
-          <span className="inline-flex size-2.5 rounded-full border-2 border-white bg-[#0f172a]" />
+          <span className="inline-flex size-2.5 rounded-full border-2 border-white" style={{ backgroundColor: PIN_FILL }} />
           Live auction pins
           <span className="text-muted-foreground/60">·</span>
           <span
