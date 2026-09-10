@@ -34,7 +34,7 @@ import {
 import { ACCOUNT_LINKS, NAV_ITEMS, type NavItem } from './nav'
 import { formatCount, useAuctionCounts } from './useAuctionCounts'
 import DeedRobotMark from '@/components/deed/DeedRobotMark'
-import { deleteThread, loadThreads, subscribeThreads, type Thread } from '@/lib/deed/threads'
+import { CHAT_HISTORY_CONTAINED, deleteThread, loadThreads, subscribeThreads, type Thread } from '@/lib/deed/threads'
 
 interface Props {
   deedOpen: boolean
@@ -69,10 +69,15 @@ function isActiveItem(item: NavItem, pathname: string, view: string | null): boo
  * Recent conversations, read from the browser. Empty until the first message
  * is sent on this device; that is the intended first-run state, so the group
  * simply does not render rather than showing an empty list.
+ *
+ * issue #20226: while CHAT_HISTORY_CONTAINED, loadThreads() already always
+ * returns [] — this never subscribes/polls in that state, so the group is
+ * hidden by construction, not just by an empty list.
  */
 function useRecentThreads(): Thread[] {
   const [threads, setThreads] = useState<Thread[]>([])
   useEffect(() => {
+    if (CHAT_HISTORY_CONTAINED) return
     const refresh = () => setThreads(loadThreads().slice(0, 8))
     refresh()
     return subscribeThreads(refresh)

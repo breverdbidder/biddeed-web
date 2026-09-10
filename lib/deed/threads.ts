@@ -84,6 +84,19 @@ export interface Thread {
 const KEY = 'biddeed.deed.threads.v1'
 const MAX_THREADS = 30
 
+/**
+ * Privacy containment (issue #20226): saved chat history is a production
+ * privacy-boundary gap (see docs/spec/20226.md) — this thread's identity is
+ * whatever email a visitor typed, never verified. Contained by default in
+ * every build; set NEXT_PUBLIC_CHAT_HISTORY_CONTAINED=false only once the
+ * permanent verified-owner (Clerk) boundary has shipped and its
+ * account-isolation tests pass. While contained, loadThreads()/loadThread()
+ * always read as empty (no "Recent" list, no /?c=<id> reload) and
+ * saveThread() never writes — a conversation exists only in React state for
+ * the current tab, exactly like anonymous chat did before #19829 P1.
+ */
+export const CHAT_HISTORY_CONTAINED = process.env.NEXT_PUBLIC_CHAT_HISTORY_CONTAINED !== 'false'
+
 export function newId(): string {
   try {
     if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) return crypto.randomUUID().slice(0, 12)
@@ -94,6 +107,7 @@ export function newId(): string {
 }
 
 export function loadThreads(): Thread[] {
+  if (CHAT_HISTORY_CONTAINED) return []
   try {
     const raw = localStorage.getItem(KEY)
     if (!raw) return []
@@ -110,6 +124,7 @@ export function loadThread(id: string): Thread | null {
 }
 
 export function saveThread(thread: Thread): void {
+  if (CHAT_HISTORY_CONTAINED) return
   try {
     const rest = loadThreads().filter((t) => t.id !== thread.id)
     // A pending turn is a transport state, never something to reload into.
@@ -128,6 +143,7 @@ export function saveThread(thread: Thread): void {
 }
 
 export function deleteThread(id: string): void {
+  if (CHAT_HISTORY_CONTAINED) return
   try {
     const next = loadThreads().filter((t) => t.id !== id)
     localStorage.setItem(KEY, JSON.stringify(next))

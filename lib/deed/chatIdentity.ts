@@ -18,12 +18,33 @@ import { apiUrl } from '@/lib/api'
 const TOKEN_KEY = 'bd_chat_token'
 const EMAIL_KEY = 'bd_chat_email'
 
+/**
+ * Privacy containment (issue #20226) — same flag as lib/deed/threads.ts. This
+ * "claimed email" identity is tamper-evident but never inbox-verified (see
+ * the matching comment in src/worker.js), so while contained this app never
+ * issues, reads, or forwards it — the Worker rejects it with an explicit 503
+ * regardless, but the client stops even asking so a visitor is never shown a
+ * dead-end "enter your email" prompt for a feature that is off.
+ */
+const CONTAINED = process.env.NEXT_PUBLIC_CHAT_HISTORY_CONTAINED !== 'false'
+
 export interface ChatIdentity {
   token: string
   email: string
 }
 
+/** Wipes any identity left over from before containment. Called on load and on auth transitions. */
+export function clearChatIdentity(): void {
+  try {
+    localStorage.removeItem(TOKEN_KEY)
+    localStorage.removeItem(EMAIL_KEY)
+  } catch {
+    /* storage unavailable */
+  }
+}
+
 export function getChatIdentity(): ChatIdentity | null {
+  if (CONTAINED) return null
   try {
     const token = localStorage.getItem(TOKEN_KEY)
     const email = localStorage.getItem(EMAIL_KEY)
@@ -51,6 +72,7 @@ function setChatIdentity(identity: ChatIdentity): void {
  * anonymous chat rather than blocking the send.
  */
 export async function ensureChatIdentity(email: string): Promise<ChatIdentity | null> {
+  if (CONTAINED) return null
   const trimmed = email.trim().toLowerCase()
   if (!trimmed || !trimmed.includes('@')) return null
 

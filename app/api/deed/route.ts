@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 import { WORKER_MAX_CHARS, WORKER_MAX_MESSAGES, type DeedMessage } from '@/lib/deed/protocol'
+import { CHAT_HISTORY_CONTAINED } from '@/lib/deed/threads'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -108,7 +109,9 @@ export async function POST(req: NextRequest) {
   // Chat identity (issue #19829 P1) — passed straight through so the Worker
   // can attribute this turn, reuse/create the right conversation, and see
   // upload_id/project_id ownership. Anonymous chat (no token) is unaffected.
-  const chatToken = req.headers.get('x-chat-token')
+  // issue #20226: while contained, never forward this — the Worker ignores it
+  // anyway, but a client-supplied identity should not even leave this app.
+  const chatToken = CHAT_HISTORY_CONTAINED ? null : req.headers.get('x-chat-token')
   if (chatToken) headers['X-Chat-Token'] = chatToken
 
   let upstream: Response
