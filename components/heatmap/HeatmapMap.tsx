@@ -325,7 +325,7 @@ export default function HeatmapMap({
       )}
       {!compact && (
         <div className="absolute bottom-3 left-3 z-20 flex items-center gap-2 rounded-md border border-border bg-card/90 px-2.5 py-1.5 text-[11px] text-muted-foreground shadow-sm backdrop-blur-sm">
-          <span className="inline-flex size-2.5 rounded-full border-2 border-white" style={{ backgroundColor: PIN_FILL }} />
+          <span className="inline-flex size-2.5 rounded-full" style={{ backgroundColor: PIN_FILL }} />
           Live auction pins
           <span className="text-muted-foreground/60">·</span>
           <span
