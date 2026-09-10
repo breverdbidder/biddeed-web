@@ -82,11 +82,14 @@ export function Proof() {
       <div className="grid gap-8 rounded-3xl border border-border bg-card p-6 sm:p-10 lg:grid-cols-2 lg:items-center">
         <div>
           <Eyebrow className="text-base">Published before the sale. Checked after it.</Eyebrow>
-          <H2>Every US auction. One number. Zero guesswork.</H2>
+          <H2>Every auction. One number. Published before bidding starts.</H2>
           <p className="mt-4 max-w-lg text-base leading-7 text-muted-foreground">
-            For a Marion County foreclosure on 20 July 2026, BidDeed.AI published a maximum bid of $82,000
+            For a Marion County foreclosure on 20 July 2026, <a href="/maps" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80">biddeed.ai</a> published a maximum bid of $82,000
             before the sale. The property sold for $73,501. A bidder who held to the ceiling won the lot with
-            room to spare — and the report re-issued itself with the outcome the same day.
+            room to spare, and the report re-issued itself with the outcome the same day.
+          </p>
+          <p className="mt-4 max-w-lg text-base leading-7 text-muted-foreground">
+            Every <a href="/sign-up" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80">biddeed.ai</a> member - free included - gets the published number before bidding starts. Bidders who are not on <a href="/sign-up" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80">biddeed.ai</a> never see it.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <a href={W.sampleReport} className={BTN_QUIET}>
@@ -181,7 +184,7 @@ const STEPS = [
   {
     icon: Target,
     title: 'You get the ceiling',
-    body: 'A maximum allowable bid, the value band behind it and the flags that would make you walk away. Before you bid online or at the courthouse.',
+    body: 'A maximum bid, the value band behind it, and every flag on the record, so the bid you place is always one you meant to place, online or at the courthouse.',
   },
 ]
 
@@ -190,7 +193,7 @@ export function HowItWorks() {
     <section className="mx-auto max-w-5xl px-4 sm:px-6">
       <div className="max-w-2xl">
         <Eyebrow>How it works</Eyebrow>
-        <H2>OUTBID THE GUESSWORK.</H2>
+        <H2>Know the number before the auction.</H2>
         <p className="mt-4 text-base leading-7 text-muted-foreground">
           What&rsquo;s coming to auction, what to bid, and what the zoning allows &mdash; answered before you bid, in
           every Florida county, for foreclosure and tax deed sales alike.
@@ -227,7 +230,7 @@ const D4D_STEPS = [
   },
   {
     n: '2',
-    title: 'BidDeed.AI builds the route',
+    title: 'biddeed.ai builds the route',
     body: 'Stops are ordered from wherever you start and clustered so you are not crossing the county twice. You get the mileage and the drive time before you turn the key.',
   },
   {
@@ -251,7 +254,7 @@ export function FieldRoutes() {
         <p className="mt-4 text-base leading-7 text-muted-foreground">
           The report tells you what to bid. Driving the street tells you what the report cannot — whether
           anyone still lives there, what the roof looks like, and which house nobody has filed on yet.
-          Choose your properties off the auction calendar and BidDeed.AI turns them into a drive.
+          Choose your properties off the auction calendar and <a href="/maps" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80">biddeed.ai</a> turns them into a drive.
         </p>
       </div>
 
@@ -334,9 +337,9 @@ export function RehabProjects() {
         <Eyebrow>Projects</Eyebrow>
         <H2>Budget the rehab, price the scopes, track spend against budget.</H2>
         <p className="mt-4 text-base leading-7 text-muted-foreground">
-          Winning the auction is the easy part to measure. What happens between the gavel and the closing
-          table is where a deal actually makes or loses money — and that is usually tracked in a spreadsheet
-          nobody updates. BidDeed.AI turns the property you just won straight into a working budget.
+          Winning the auction is the start of the deal, not the end. Between the winning bid and the closing
+          table is where the profit gets built, and <a href="/projects" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80">biddeed.ai</a> tracks every dollar of it.
+          The 25-line rehab at 5400 Pina Vista Dr came in $60,140.61 under budget, $68,209.39 projected gross profit.
         </p>
       </div>
 
@@ -495,11 +498,12 @@ export function Pricing({ onPrompt }: { onPrompt: (p: string) => void }) {
     <section id="pricing" className="mx-auto max-w-6xl px-4 sm:px-6">
       <div className="max-w-2xl">
         <Eyebrow>Plans</Eyebrow>
-        <H2>Cheaper than one bad bid.</H2>
+        <H2>One below-market win pays for years of <a href="/pricing" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80">biddeed.ai</a>.</H2>
         <p className="mt-4 text-base leading-7 text-muted-foreground">
-          Look first, no account needed: the auction calendar and the Academy 101s are open to everyone. The ladder
-          from there is free account, one $25 report, then Investor, Pro and Pro Plus. Every level includes the
-          Academy lessons written for it.
+          Every Florida auction is free to browse, and free members see the published number on every property:
+          2,911 live right now across 60 counties, each with its own <a href="/maps" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80">deal page</a>.
+          Investor, Pro, and Pro Plus add the depth: reports, Due Diligence, and video property assessment with
+          360° Orbit on the properties you work, as available. Every level includes the Academy lessons written for it.
         </p>
       </div>
 
@@ -564,7 +568,7 @@ export function Pricing({ onPrompt }: { onPrompt: (p: string) => void }) {
             <p className="mt-1 max-w-xl text-base text-muted-foreground">
               All 18 sections on a single property: value band, SIGNAL$ Max Bid ceiling, comparable sales, zoning read and
               red flags. When the sale closes, you get the outcome scorecard re-issued free. New to the numbers? The
-              Academy&apos;s free How-to-use-BidDeed track walks through a report before you buy one.
+              Academy&apos;s free <a href="/academy" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80">How-to-use-BidDeed track</a> walks through a report before you buy one.
             </p>
           </div>
         </div>
@@ -579,7 +583,7 @@ export function Pricing({ onPrompt }: { onPrompt: (p: string) => void }) {
       </div>
 
       <p className="mt-6 text-center text-base text-muted-foreground">
-        Founding investors: the first 100 BidDeed.AI Pioneers set founding pricing.{' '}
+        Founding investors: the first 100 <a href="/pioneers" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80">biddeed.ai</a> Pioneers set founding pricing.{' '}
         <a href={W.pioneers} className="inline-flex items-center py-3.5 font-medium text-primary underline underline-offset-2">
           Join the Pioneer waitlist
         </a>
