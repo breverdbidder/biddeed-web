@@ -14,8 +14,8 @@ function clearLegacyChatData() {
 /**
  * Privacy containment (issue #20226).
  *
- * A returning visitor's browser may still hold saved threads or a claimed-
- * email chat token from before containment shipped. Neither one is read
+ * A returning visitor's browser may still hold saved threads or a legacy
+ * chat token from before containment shipped. Neither one is read
  * anywhere while CHAT_HISTORY_CONTAINED is on (see lib/deed/threads.ts and
  * lib/deed/chatIdentity.ts) — this component's job is to actively erase them
  * so a second person using the same browser/profile can't find them either,

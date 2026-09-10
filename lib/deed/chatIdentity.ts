@@ -6,7 +6,7 @@ import { apiUrl } from '@/lib/api'
  * Chat identity for the Worker's persistence layer (issue #19829 P1).
  *
  * The Worker's `/chat/api/upload` and `/chat/api/projects*` routes require an
- * `X-Chat-Token` — an HMAC-signed "claimed email" (not inbox-verified; see
+ * `X-Chat-Token` - the Worker's legacy chat identity token (see
  * docs/spec/19829-P1.md Deviation 6). This app reuses the exact same
  * localStorage keys the Worker's own `/chat` page writes
  * (`bd_chat_token`/`bd_chat_email`), so a visitor who already identified on
@@ -19,9 +19,9 @@ const TOKEN_KEY = 'bd_chat_token'
 const EMAIL_KEY = 'bd_chat_email'
 
 /**
- * Privacy containment (issue #20226) — same flag as lib/deed/threads.ts. This
- * "claimed email" identity is tamper-evident but never inbox-verified (see
- * the matching comment in src/worker.js), so while contained this app never
+ * Privacy containment (issue #20226) - same flag as lib/deed/threads.ts.
+ * The legacy identity predates the verified-owner boundary (see
+ * docs/spec/20226.md), so while contained this app never
  * issues, reads, or forwards it — the Worker rejects it with an explicit 503
  * regardless, but the client stops even asking so a visitor is never shown a
  * dead-end "enter your email" prompt for a feature that is off.

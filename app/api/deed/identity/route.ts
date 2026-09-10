@@ -22,8 +22,8 @@ function bad(status: number, error: string) {
 }
 
 export async function POST(req: NextRequest) {
-  // issue #20226 -- this identity is a claimed, never inbox-verified email
-  // (see the Worker's matching comment); stop issuing/relaying it here too,
+  // issue #20226 -- legacy identity issuance is contained (see
+  // docs/spec/20226.md); stop issuing/relaying it here too,
   // not just at the Worker, so this route never even makes the upstream call.
   if (CHAT_HISTORY_CONTAINED) return bad(503, 'Saved chat history is temporarily unavailable')
   let body: { email?: unknown }

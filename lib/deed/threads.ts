@@ -85,9 +85,8 @@ const KEY = 'biddeed.deed.threads.v1'
 const MAX_THREADS = 30
 
 /**
- * Privacy containment (issue #20226): saved chat history is a production
- * privacy-boundary gap (see docs/spec/20226.md) — this thread's identity is
- * whatever email a visitor typed, never verified. Contained by default in
+ * Privacy containment (issue #20226): saved chat history stays off until
+ * the permanent verified-owner boundary ships (docs/spec/20226.md). On by default in
  * every build; set NEXT_PUBLIC_CHAT_HISTORY_CONTAINED=false only once the
  * permanent verified-owner (Clerk) boundary has shipped and its
  * account-isolation tests pass. While contained, loadThreads()/loadThread()
