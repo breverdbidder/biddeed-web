@@ -11,6 +11,7 @@ import {
   COUNTY_SELECTED_LINE,
   PIN_FILL,
   PIN_HALO,
+  FILL_OPACITY,
 } from '@/lib/heatmap/colorScales'
 
 const STREETS_STYLE = 'mapbox://styles/mapbox/streets-v12'
@@ -166,9 +167,10 @@ export default function HeatmapMap({
         type: 'fill',
         source: 'counties',
         paint: {
-          // <=0.5 opacity (issue #75 B3): pins must read clearly over the fill.
+          // FILL_OPACITY (scales.json, issue #75 B3): pins must read clearly
+          // over the fill — the dark pin fill + white halo carries that.
           'fill-color': buildFillColorExpression('kpi_value', min, max, colorScaleRef.current) as any,
-          'fill-opacity': 0.5,
+          'fill-opacity': FILL_OPACITY,
         },
       },
       beforeId
