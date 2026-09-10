@@ -418,7 +418,7 @@ export const PLANS: Plan[] = [
     features: [
       '30-day snapshot, every county',
       '3 property previews per county',
-      'Max-bid range on every preview',
+      'The published number on every property',
       'Daily email digest',
       'Ask Deed anything',
       'Academy free level: the full How-to-use-BidDeed track and county playbook basics',
@@ -434,12 +434,14 @@ export const PLANS: Plan[] = [
     blurb: 'The exact ceiling on every lot in your counties.',
     features: [
       'Exact SIGNAL$ Max Bid',
+      '10 SIGNAL$ Property Reports a month',
       'Unlimited property cards',
       'Plaintiff identity and max-bid intelligence',
       'Outcome scorecard after each sale',
       '3 skip traces a month · 1 county monitor',
       'Academy investor level: case studies, lien priority and the wipe rule, max-bid math, ML verdict lessons',
     ],
+    soon: ['Add-on pack: 10 more SIGNAL$ reports for $100'],
     cta: { label: 'Start Investor', href: W.subscribeInvestor },
     featured: true,
   },
@@ -454,7 +456,7 @@ export const PLANS: Plan[] = [
       'Everything in Investor',
       'D4D field routes: pick lots off the calendar and drive them',
       'Full ZoneWise zoning per property: setbacks, parking, height, land use, units per acre, FAR, permitted uses, overlays',
-      '10 SIGNAL$ Property Reports a month',
+      '30 SIGNAL$ Property Reports a month',
       '15 skip traces · 3 county monitors',
     ],
     soon: ['Lien stack and title chain'],
@@ -471,12 +473,12 @@ export const PLANS: Plan[] = [
       'Everything in Pro',
       'Construction and property management: budgets, scopes of work, schedule and lender draws',
       'Books that match the job: bills, ledger and budget-vs-actual per property',
-      '25 SIGNAL$ Property Reports a month',
+      '50 statewide full SIGNAL$ Property Reports a month',
       'Entitlement feasibility',
       '50 skip traces · 10 county monitors',
     ],
-    soon: ['Due-diligence title report (pre-bid summary, not title insurance)'],
-    cta: { label: 'Start Pro Plus', href: W.subscribeProPlus },
+    soon: ['Due-diligence title report (pre-bid summary, not title insurance)', 'Weekly SIGNAL$ dossier for one chosen county, refreshed weekly'],
+    cta: { label: 'Coming soon' },
   },
   {
     name: 'Enterprise',
@@ -489,7 +491,7 @@ export const PLANS: Plan[] = [
       'Webhook push + custom county prioritization',
       'Team seats, close-and-fee via FL broker',
     ],
-    cta: { label: 'Contact us', href: W.support },
+    cta: { label: 'Coming soon' },
   },
 ]
 
@@ -547,10 +549,14 @@ export function Pricing({ onPrompt }: { onPrompt: (p: string) => void }) {
               <a href={p.cta.href} className={cn(p.featured ? BTN_PRIMARY : BTN_QUIET, 'mt-6 w-full')}>
                 {p.cta.label}
               </a>
-            ) : (
+            ) : p.cta.prompt ? (
               <button type="button" onClick={() => p.cta.prompt && onPrompt(p.cta.prompt)} className={cn(BTN_QUIET, 'mt-6 w-full')}>
                 {p.cta.label}
               </button>
+            ) : (
+              <span aria-disabled="true" className={cn(BTN_QUIET, 'mt-6 w-full cursor-not-allowed opacity-60')}>
+                {p.cta.label}
+              </span>
             )}
           </div>
         ))}
