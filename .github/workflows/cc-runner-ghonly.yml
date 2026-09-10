@@ -251,7 +251,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_PAT_FULL != '' && secrets.GH_PAT_FULL || github.token }}
         run: |
-          ATTEMPT="$(cat /tmp/cc_attempt.txt 2>/dev/null)"
+          ATTEMPT="$(cat /tmp/cc_attempt.txt 2>/dev/null || true)"
           ATTEMPT="${ATTEMPT:-unknown}"
           INTENT_STATUS="$(cat /tmp/cc_intent_status.txt 2>/dev/null || echo intent=unknown)"
           RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
