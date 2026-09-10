@@ -1,7 +1,7 @@
 {
   "valueScale": [
-    "#eef2ff",
     "#c7d2fe",
+    "#a5b4fc",
     "#818cf8",
     "#4f46e5",
     "#312e81"
@@ -17,5 +17,6 @@
   "countyLine": "#94a3b8",
   "countySelectedLine": "#1d4ed8",
   "pinFill": "#0f172a",
-  "pinHalo": "#ffffff"
+  "pinHalo": "#ffffff",
+  "fillOpacity": 0.55
 }

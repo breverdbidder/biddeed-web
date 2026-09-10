@@ -24,6 +24,11 @@ export const DENSITY_SCALE: string[] = scales.densityScale
 
 export const NO_DATA_FILL: string = scales.noDataFill
 
+// Choropleth fill opacity (issue #75 B3: pins must read clearly over the
+// fill). Lives in the data asset beside the ramps so a visual tuning pass
+// touches one file.
+export const FILL_OPACITY: number = scales.fillOpacity
+
 // Map-chrome constants (county outlines, selected outline, auction pins/halo).
 export const COUNTY_LINE: string = scales.countyLine
 export const COUNTY_SELECTED_LINE: string = scales.countySelectedLine
