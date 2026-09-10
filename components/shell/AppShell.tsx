@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import AppSidebar from './AppSidebar'
+import ChatContainmentGuard from './ChatContainmentGuard'
 import DeedPanel from './DeedPanel'
 import Topbar from './Topbar'
 import StickyDeedCta from './StickyDeedCta'
@@ -62,6 +63,7 @@ export default function AppShell({
   if (isAuthRoute) {
     return (
       <main id="main" className="min-h-screen bg-background text-foreground">
+        <ChatContainmentGuard authEnabled={authEnabled} />
         {children}
       </main>
     )
@@ -69,6 +71,7 @@ export default function AppShell({
 
   return (
     <SidebarProvider>
+      <ChatContainmentGuard authEnabled={authEnabled} />
       <AppSidebar deedOpen={deedOpen && !isHome} onToggleDeed={toggleDeed} authEnabled={authEnabled} showDeedToggle={!isHome} />
 
       {/*

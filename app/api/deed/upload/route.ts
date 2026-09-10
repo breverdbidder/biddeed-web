@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+import { CHAT_HISTORY_CONTAINED } from '@/lib/deed/threads'
+
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
@@ -23,6 +25,9 @@ function bad(status: number, error: string) {
 }
 
 export async function POST(req: NextRequest) {
+  // issue #20226 -- upload persistence is contained pending the verified-
+  // owner boundary; stop relaying it here, not just at the Worker.
+  if (CHAT_HISTORY_CONTAINED) return bad(503, 'Saved chat history is temporarily unavailable')
   const token = req.headers.get('x-chat-token')
   if (!token) return bad(401, 'Invalid or missing chat session')
 

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+import { CHAT_HISTORY_CONTAINED } from '@/lib/deed/threads'
+
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
@@ -20,6 +22,10 @@ function bad(status: number, error: string) {
 }
 
 export async function POST(req: NextRequest) {
+  // issue #20226 -- legacy identity issuance is contained (see
+  // docs/spec/20226.md); stop issuing/relaying it here too,
+  // not just at the Worker, so this route never even makes the upstream call.
+  if (CHAT_HISTORY_CONTAINED) return bad(503, 'Saved chat history is temporarily unavailable')
   let body: { email?: unknown }
   try {
     body = await req.json()
