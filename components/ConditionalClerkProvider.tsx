@@ -3,6 +3,7 @@
 import { ClerkProvider } from '@clerk/nextjs'
 import { useTheme } from '@/lib/theme-context'
 import { palette } from '@/lib/design-tokens'
+import ChatHistoryContainmentAuthWatcher from '@/components/shell/ChatHistoryContainmentAuthWatcher'
 
 // Ported from zonewise-web 2026-08-20 with one deliberate deviation: no
 // `@clerk/themes` import. Clerk's appearance API needs real colour strings (it
@@ -113,6 +114,10 @@ export default function ConditionalClerkProvider({
 
   return (
     <ClerkProvider appearance={clerkAppearance(theme)} localization={clerkLocalization} nonce={nonce}>
+      {/* Chat-history containment (#80): re-wipes local thread storage on
+          sign-in/out/switch. Requires an active ClerkProvider, hence mounted
+          here rather than unconditionally in layout.tsx. */}
+      <ChatHistoryContainmentAuthWatcher />
       {children}
     </ClerkProvider>
   )

@@ -1,5 +1,6 @@
 import type { DeedAction } from './protocol'
 import type { AuctionIntent } from './intent'
+import { chatHistoryContainmentEnabled } from './chatHistoryContainment'
 
 /**
  * Conversation history for the home surface, kept in the browser.
@@ -13,6 +14,12 @@ import type { AuctionIntent } from './intent'
  * Every read and write is wrapped: private windows, cleared site data and
  * some embedded browsers throw on access, and the home page must render
  * exactly the same with no history at all.
+ *
+ * Privacy containment (#80): while chatHistoryContainmentEnabled() is true,
+ * loadThreads()/saveThread() no-op — the home surface degrades to the same
+ * non-persistent chat the side panel (useDeedChat) already is, and nothing
+ * new is ever written or read back. deleteThread()/clearThreads() stay live
+ * since removing data is never a containment violation.
  */
 
 export interface AuctionCardData {
@@ -94,6 +101,7 @@ export function newId(): string {
 }
 
 export function loadThreads(): Thread[] {
+  if (chatHistoryContainmentEnabled()) return []
   try {
     const raw = localStorage.getItem(KEY)
     if (!raw) return []
@@ -110,6 +118,7 @@ export function loadThread(id: string): Thread | null {
 }
 
 export function saveThread(thread: Thread): void {
+  if (chatHistoryContainmentEnabled()) return
   try {
     const rest = loadThreads().filter((t) => t.id !== thread.id)
     // A pending turn is a transport state, never something to reload into.

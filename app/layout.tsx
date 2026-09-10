@@ -4,6 +4,7 @@ import { Inter, Source_Serif_4 } from 'next/font/google'
 import './globals.css'
 import AppShell from '@/components/shell/AppShell'
 import ChatwootWidget from '@/components/ChatwootWidget'
+import ChatHistoryContainmentGate from '@/components/shell/ChatHistoryContainmentGate'
 import ConditionalClerkProvider from '@/components/ConditionalClerkProvider'
 import SkipToContent from '@/components/shell/SkipToContent'
 import { isClerkHostAuthorized } from '@/lib/clerk-host'
@@ -154,6 +155,13 @@ export default async function RootLayout({
           env pair is configured, and the shell can use Clerk hooks once it is.
         */}
           <ThemeProvider>
+            {/*
+              Chat-history containment (#80): wipes local thread storage on
+              every app load, regardless of whether Clerk is configured. The
+              sign-in/out/switch half lives in ChatHistoryContainmentAuthWatcher,
+              mounted inside ConditionalClerkProvider since it needs Clerk.
+            */}
+            <ChatHistoryContainmentGate />
             <ConditionalClerkProvider nonce={nonce} hostAuthorized={clerkHostAuthorized} authEnabled={clerkAuthEnabled}>
               <AppShell
                 authEnabled={clerkAuthEnabled}

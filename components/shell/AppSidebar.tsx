@@ -35,6 +35,7 @@ import { ACCOUNT_LINKS, NAV_ITEMS, type NavItem } from './nav'
 import { formatCount, useAuctionCounts } from './useAuctionCounts'
 import DeedRobotMark from '@/components/deed/DeedRobotMark'
 import { deleteThread, loadThreads, subscribeThreads, type Thread } from '@/lib/deed/threads'
+import { chatHistoryContainmentEnabled } from '@/lib/deed/chatHistoryContainment'
 
 interface Props {
   deedOpen: boolean
@@ -69,10 +70,16 @@ function isActiveItem(item: NavItem, pathname: string, view: string | null): boo
  * Recent conversations, read from the browser. Empty until the first message
  * is sent on this device; that is the intended first-run state, so the group
  * simply does not render rather than showing an empty list.
+ *
+ * Privacy containment (#80): while active, this never reads or subscribes to
+ * storage at all — the group stays empty (and therefore hidden, see the
+ * `recent.length > 0` render guard below) by construction, not just by an
+ * empty list.
  */
 function useRecentThreads(): Thread[] {
   const [threads, setThreads] = useState<Thread[]>([])
   useEffect(() => {
+    if (chatHistoryContainmentEnabled()) return
     const refresh = () => setThreads(loadThreads().slice(0, 8))
     refresh()
     return subscribeThreads(refresh)
