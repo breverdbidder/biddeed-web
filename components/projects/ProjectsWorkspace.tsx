@@ -5,12 +5,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { apiUrl } from '@/lib/api'
 import BudgetTab from './BudgetTab'
 import ScopesTab from './ScopesTab'
+import DueDiligenceTab from './DueDiligenceTab'
 import ComingSoonPanel from './ComingSoonPanel'
 import type { CmBudgetDetail, CmBudgetSummary } from './types'
 
-type Tab = 'budget' | 'scopes' | 'schedule' | 'draws' | 'exit'
+type Tab = 'diligence' | 'budget' | 'scopes' | 'schedule' | 'draws' | 'exit'
 
-export default function ProjectsWorkspace() {
+interface Props {
+  dueDiligenceAllowed: boolean
+  dueDiligenceTierId: string
+}
+
+export default function ProjectsWorkspace({ dueDiligenceAllowed, dueDiligenceTierId }: Props) {
   const [tab, setTab] = useState<Tab>('budget')
   const [budgets, setBudgets] = useState<CmBudgetSummary[]>([])
   const [budgetsLoading, setBudgetsLoading] = useState(true)
@@ -87,12 +93,22 @@ export default function ProjectsWorkspace() {
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="mt-6">
         <TabsList>
+          <TabsTrigger value="diligence">Due Diligence</TabsTrigger>
           <TabsTrigger value="budget">Budget</TabsTrigger>
           <TabsTrigger value="scopes">Scopes</TabsTrigger>
           <TabsTrigger value="schedule">Schedule</TabsTrigger>
           <TabsTrigger value="draws">Draws</TabsTrigger>
           <TabsTrigger value="exit">Exit pack</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="diligence">
+          <DueDiligenceTab
+            detail={detail}
+            detailLoading={detailLoading}
+            access={dueDiligenceAllowed}
+            tierId={dueDiligenceTierId}
+          />
+        </TabsContent>
 
         <TabsContent value="budget">
           <BudgetTab

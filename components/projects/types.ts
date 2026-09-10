@@ -104,3 +104,27 @@ export interface CmScopeDetail {
   lines: CmScopeLine[]
   budgeted_total: number
 }
+
+export interface GevAssessment {
+  roof: string | null
+  structure: string | null
+  lot: string | null
+  visible_defects: string[] | null
+  imagery_stale: boolean
+}
+
+// Written by the capture+assessment pipeline (cli-anything-biddeed#20214),
+// not this app — the row shape here is the contract that pipeline targets.
+export interface GevCapture {
+  id: string
+  video_url: string | null
+  framing: string | null
+  capture_status: string
+  captured_at: string | null
+  assessment: GevAssessment | null
+  mapillary_image_id: string | null
+  mapillary_captured_at: string | null
+  mapillary_thumb_url: string | null
+  street_view_url: string | null
+  street_view_captured_at: string | null
+}
