@@ -1,7 +1,7 @@
 'use client'
 
 import { FormEvent, useEffect, useMemo, useState } from 'react'
-import { Search, MapPinned, CalendarDays, ShieldCheck } from 'lucide-react'
+import { Search, MapPinned, CalendarDays, ShieldCheck, Map } from 'lucide-react'
 import { apiUrl } from '@/lib/api'
 import EmptyState from '@/components/ui/empty-state'
 
@@ -122,6 +122,13 @@ export default function DiscoveryPage() {
           <div className="flex items-start gap-3"><MapPinned className="mt-0.5 h-5 w-5 text-primary" aria-hidden="true" /><div><p className="text-sm font-bold">Coverage</p><p className="mt-1 text-base text-muted-foreground">{coverageLabel}</p></div></div>
           <div className="flex items-start gap-3"><CalendarDays className="mt-0.5 h-5 w-5 text-primary" aria-hidden="true" /><div><p className="text-sm font-bold">Upcoming scope</p><p className="mt-1 text-base text-muted-foreground">{summary?.upcoming?.toLocaleString('en-US') ?? '—'} scheduled records</p></div></div>
           <div className="flex items-start gap-3"><ShieldCheck className="mt-0.5 h-5 w-5 text-primary" aria-hidden="true" /><div><p className="text-sm font-bold">Evidence rule</p><p className="mt-1 text-base text-muted-foreground">Every result retains its source link.</p></div></div>
+        </div>
+
+        <div className="border-b border-border py-4">
+          <a href="/maps" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary-hover">
+            <Map className="h-4 w-4" aria-hidden="true" />
+            See this inventory on the Florida Auction Intelligence Map
+          </a>
         </div>
 
         {searched && rows.length > 0 && (
