@@ -91,8 +91,12 @@ export default function DeedHome() {
             <span className="flex size-9 items-center justify-center rounded-xl border border-border bg-card">
               <DeedRobotMark size={24} decorative={false} />
             </span>
-            <span className="text-sm font-medium text-muted-foreground">Deed · the BidDeed.AI agent</span>
+            <span className="text-sm font-medium text-muted-foreground">Deed · the <a href="/academy" className="underline underline-offset-2 transition-colors hover:text-foreground">biddeed.ai</a> agent</span>
           </div>
+
+          <p className="mt-6 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+            DATA IS THE MOAT.
+          </p>
 
           <h1 className="font-display mx-auto mt-6 max-w-2xl text-[2.1rem] font-medium leading-[1.12] tracking-tight text-foreground sm:text-[2.75rem] lg:text-[3.1rem]">
             THE BEST PRICES IN US REAL ESTATE ARE SET AT FORECLOSURE AND TAX DEED AUCTIONS.
@@ -101,7 +105,7 @@ export default function DeedHome() {
             Our data is your unfair advantage at every US county auction.
           </p>
           <p className="mx-auto mt-2 max-w-xl text-base leading-7 text-muted-foreground sm:text-[17px]">
-            We fought in the trenches for over two decades so you don&rsquo;t have to.
+            <a href="/maps" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80">biddeed.ai</a> is the moat for real estate auction intelligence and bidding in the USA. All the rest are wrappers.
           </p>
 
           <div className="mt-8 text-left">

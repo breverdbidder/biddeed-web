@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic'
 export const metadata: Metadata = {
   title: 'Florida Auction Intelligence Map — BidDeed.AI',
   description:
-    'Live Florida foreclosure and tax deed auction pins over county market-direction layers. Free county view; accounts unlock ZIP-level and premium KPIs.',
+    'Florida\'s live foreclosure and tax deed auctions on one map: a deal page for every property, market direction, and live counts per county.',
   alternates: {
     canonical: 'https://biddeed.ai/maps',
   },

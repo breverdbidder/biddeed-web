@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { ArrowRight } from 'lucide-react'
-import { formatCurrency } from '@/lib/scoring'
 import { trackHeatmapEvent } from '@/lib/analytics/track'
 import acsData from '@/lib/heatmap/data/fl-county-acs-2024.json'
 import type { CountyAcsDataset } from '@/lib/heatmap/types'
@@ -62,8 +61,8 @@ export default function HomepageMapModule() {
         </a>
       </div>
       <p className="mt-1.5 text-sm text-muted-foreground">
-        Live foreclosure and tax deed auction pins over county market direction — {ACS.counties.length} Florida
-        counties, median home value {formatCurrency(ACS.statewide.median_home_value)} statewide.{' '}
+        Every pin is a live below-market opportunity with its own <a href="/maps" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80">deal page</a>: 2,911 upcoming auctions across {ACS.counties.length} Florida
+        counties, over a map of where each county&apos;s market is heading.{' '}
         <span className="text-muted-foreground/70">{ACS.vintage_label}, {ACS.tables['B25077']}.</span>
       </p>
 
