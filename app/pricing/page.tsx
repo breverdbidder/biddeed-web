@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic'
 export const metadata: Metadata = {
   title: 'Pricing — BidDeed.AI',
   description:
-    'BidDeed.AI plans and pricing: look free with no account, then Free, $25 SIGNAL$ reports, Investor, Pro, Pro Plus and Enterprise. Property intelligence, win-probability prediction, and PM tools for FL auctions.',
+    'BidDeed.AI pricing: look free with no account, then $25 SIGNAL$ reports, Investor, Pro, Pro Plus and Enterprise plans for Florida auctions.',
   alternates: {
     canonical: 'https://biddeed.ai/pricing',
   },
