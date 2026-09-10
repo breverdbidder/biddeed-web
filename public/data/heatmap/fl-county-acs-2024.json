@@ -1,0 +1,696 @@
+{
+ "source": "Census Reporter API (api.censusreporter.org) \u2014 U.S. Census Bureau American Community Survey",
+ "tables": {
+  "B25077": "Median value (dollars) for owner-occupied housing units",
+  "B19013": "Median household income in the past 12 months",
+  "B01003": "Total population"
+ },
+ "release_id": "acs2024_5yr",
+ "release_name": "ACS 2024 5-year",
+ "vintage": "2020-2024",
+ "vintage_label": "ACS 2020-2024 (ACS 2024 5-year)",
+ "fetched_at": "2026-09-10",
+ "geography_level": "county",
+ "state": "FL",
+ "counties": [
+  {
+   "geo_id": "05000US12001",
+   "county_fips": "001",
+   "name": "Alachua",
+   "median_home_value": 288800.0,
+   "median_home_value_moe": 7665.0,
+   "median_household_income": 61949.0,
+   "median_household_income_moe": 1676.0,
+   "population": 285492.0
+  },
+  {
+   "geo_id": "05000US12003",
+   "county_fips": "003",
+   "name": "Baker",
+   "median_home_value": 256700.0,
+   "median_home_value_moe": 21454.0,
+   "median_household_income": 79836.0,
+   "median_household_income_moe": 10214.0,
+   "population": 28430.0
+  },
+  {
+   "geo_id": "05000US12005",
+   "county_fips": "005",
+   "name": "Bay",
+   "median_home_value": 310500.0,
+   "median_home_value_moe": 6825.0,
+   "median_household_income": 73533.0,
+   "median_household_income_moe": 2046.0,
+   "population": 186393.0
+  },
+  {
+   "geo_id": "05000US12007",
+   "county_fips": "007",
+   "name": "Bradford",
+   "median_home_value": 212500.0,
+   "median_home_value_moe": 16000.0,
+   "median_household_income": 63050.0,
+   "median_household_income_moe": 5645.0,
+   "population": 27885.0
+  },
+  {
+   "geo_id": "05000US12009",
+   "county_fips": "009",
+   "name": "Brevard",
+   "median_home_value": 339600.0,
+   "median_home_value_moe": 3715.0,
+   "median_household_income": 78476.0,
+   "median_household_income_moe": 1054.0,
+   "population": 632780.0
+  },
+  {
+   "geo_id": "05000US12011",
+   "county_fips": "011",
+   "name": "Broward",
+   "median_home_value": 414600.0,
+   "median_home_value_moe": 3256.0,
+   "median_household_income": 77633.0,
+   "median_household_income_moe": 979.0,
+   "population": 1977129.0
+  },
+  {
+   "geo_id": "05000US12013",
+   "county_fips": "013",
+   "name": "Calhoun",
+   "median_home_value": 145300.0,
+   "median_home_value_moe": 18385.0,
+   "median_household_income": 50517.0,
+   "median_household_income_moe": 5263.0,
+   "population": 13492.0
+  },
+  {
+   "geo_id": "05000US12015",
+   "county_fips": "015",
+   "name": "Charlotte",
+   "median_home_value": 328900.0,
+   "median_home_value_moe": 7140.0,
+   "median_household_income": 69952.0,
+   "median_household_income_moe": 1682.0,
+   "population": 201064.0
+  },
+  {
+   "geo_id": "05000US12017",
+   "county_fips": "017",
+   "name": "Citrus",
+   "median_home_value": 245500.0,
+   "median_home_value_moe": 4889.0,
+   "median_household_income": 56546.0,
+   "median_household_income_moe": 1701.0,
+   "population": 162472.0
+  },
+  {
+   "geo_id": "05000US12019",
+   "county_fips": "019",
+   "name": "Clay",
+   "median_home_value": 312500.0,
+   "median_home_value_moe": 7375.0,
+   "median_household_income": 87820.0,
+   "median_household_income_moe": 2783.0,
+   "population": 227584.0
+  },
+  {
+   "geo_id": "05000US12021",
+   "county_fips": "021",
+   "name": "Collier",
+   "median_home_value": 540700.0,
+   "median_home_value_moe": 13462.0,
+   "median_household_income": 90045.0,
+   "median_household_income_moe": 2224.0,
+   "population": 398291.0
+  },
+  {
+   "geo_id": "05000US12023",
+   "county_fips": "023",
+   "name": "Columbia",
+   "median_home_value": 194900.0,
+   "median_home_value_moe": 13582.0,
+   "median_household_income": 59205.0,
+   "median_household_income_moe": 3290.0,
+   "population": 71789.0
+  },
+  {
+   "geo_id": "05000US12027",
+   "county_fips": "027",
+   "name": "DeSoto",
+   "median_home_value": 174100.0,
+   "median_home_value_moe": 12130.0,
+   "median_household_income": 54417.0,
+   "median_household_income_moe": 3888.0,
+   "population": 35386.0
+  },
+  {
+   "geo_id": "05000US12029",
+   "county_fips": "029",
+   "name": "Dixie",
+   "median_home_value": 132000.0,
+   "median_home_value_moe": 22528.0,
+   "median_household_income": 50110.0,
+   "median_household_income_moe": 5316.0,
+   "population": 17058.0
+  },
+  {
+   "geo_id": "05000US12031",
+   "county_fips": "031",
+   "name": "Duval",
+   "median_home_value": 303500.0,
+   "median_home_value_moe": 4345.0,
+   "median_household_income": 71277.0,
+   "median_household_income_moe": 1146.0,
+   "population": 1023153.0
+  },
+  {
+   "geo_id": "05000US12033",
+   "county_fips": "033",
+   "name": "Escambia",
+   "median_home_value": 257200.0,
+   "median_home_value_moe": 5839.0,
+   "median_household_income": 67500.0,
+   "median_household_income_moe": 1848.0,
+   "population": 325923.0
+  },
+  {
+   "geo_id": "05000US12035",
+   "county_fips": "035",
+   "name": "Flagler",
+   "median_home_value": 364900.0,
+   "median_home_value_moe": 6504.0,
+   "median_household_income": 77363.0,
+   "median_household_income_moe": 3357.0,
+   "population": 126528.0
+  },
+  {
+   "geo_id": "05000US12037",
+   "county_fips": "037",
+   "name": "Franklin",
+   "median_home_value": 273300.0,
+   "median_home_value_moe": 46511.0,
+   "median_household_income": 64105.0,
+   "median_household_income_moe": 5989.0,
+   "population": 12553.0
+  },
+  {
+   "geo_id": "05000US12039",
+   "county_fips": "039",
+   "name": "Gadsden",
+   "median_home_value": 174900.0,
+   "median_home_value_moe": 15770.0,
+   "median_household_income": 48801.0,
+   "median_household_income_moe": 4163.0,
+   "population": 43710.0
+  },
+  {
+   "geo_id": "05000US12041",
+   "county_fips": "041",
+   "name": "Gilchrist",
+   "median_home_value": 199900.0,
+   "median_home_value_moe": 14091.0,
+   "median_household_income": 63523.0,
+   "median_household_income_moe": 8592.0,
+   "population": 19040.0
+  },
+  {
+   "geo_id": "05000US12043",
+   "county_fips": "043",
+   "name": "Glades",
+   "median_home_value": 137000.0,
+   "median_home_value_moe": 17468.0,
+   "median_household_income": 45870.0,
+   "median_household_income_moe": 9869.0,
+   "population": 12563.0
+  },
+  {
+   "geo_id": "05000US12045",
+   "county_fips": "045",
+   "name": "Gulf",
+   "median_home_value": 250000.0,
+   "median_home_value_moe": 29223.0,
+   "median_household_income": 61179.0,
+   "median_household_income_moe": 5548.0,
+   "population": 15131.0
+  },
+  {
+   "geo_id": "05000US12047",
+   "county_fips": "047",
+   "name": "Hamilton",
+   "median_home_value": 111200.0,
+   "median_home_value_moe": 12072.0,
+   "median_household_income": 50144.0,
+   "median_household_income_moe": 7418.0,
+   "population": 13616.0
+  },
+  {
+   "geo_id": "05000US12049",
+   "county_fips": "049",
+   "name": "Hardee",
+   "median_home_value": 153600.0,
+   "median_home_value_moe": 26119.0,
+   "median_household_income": 60489.0,
+   "median_household_income_moe": 6151.0,
+   "population": 25675.0
+  },
+  {
+   "geo_id": "05000US12051",
+   "county_fips": "051",
+   "name": "Hendry",
+   "median_home_value": 219200.0,
+   "median_home_value_moe": 14899.0,
+   "median_household_income": 56393.0,
+   "median_household_income_moe": 6381.0,
+   "population": 42382.0
+  },
+  {
+   "geo_id": "05000US12053",
+   "county_fips": "053",
+   "name": "Hernando",
+   "median_home_value": 276000.0,
+   "median_home_value_moe": 5212.0,
+   "median_household_income": 66058.0,
+   "median_household_income_moe": 1730.0,
+   "population": 207018.0
+  },
+  {
+   "geo_id": "05000US12055",
+   "county_fips": "055",
+   "name": "Highlands",
+   "median_home_value": 187900.0,
+   "median_home_value_moe": 8429.0,
+   "median_household_income": 54897.0,
+   "median_household_income_moe": 2416.0,
+   "population": 105702.0
+  },
+  {
+   "geo_id": "05000US12057",
+   "county_fips": "057",
+   "name": "Hillsborough",
+   "median_home_value": 371500.0,
+   "median_home_value_moe": 2764.0,
+   "median_household_income": 79540.0,
+   "median_household_income_moe": 1237.0,
+   "population": 1522748.0
+  },
+  {
+   "geo_id": "05000US12059",
+   "county_fips": "059",
+   "name": "Holmes",
+   "median_home_value": 110200.0,
+   "median_home_value_moe": 15120.0,
+   "median_household_income": 49343.0,
+   "median_household_income_moe": 2104.0,
+   "population": 19513.0
+  },
+  {
+   "geo_id": "05000US12061",
+   "county_fips": "061",
+   "name": "Indian River",
+   "median_home_value": 351500.0,
+   "median_home_value_moe": 7643.0,
+   "median_household_income": 73491.0,
+   "median_household_income_moe": 1900.0,
+   "population": 166936.0
+  },
+  {
+   "geo_id": "05000US12063",
+   "county_fips": "063",
+   "name": "Jackson",
+   "median_home_value": 120800.0,
+   "median_home_value_moe": 6668.0,
+   "median_household_income": 49149.0,
+   "median_household_income_moe": 2764.0,
+   "population": 48250.0
+  },
+  {
+   "geo_id": "05000US12065",
+   "county_fips": "065",
+   "name": "Jefferson",
+   "median_home_value": 232600.0,
+   "median_home_value_moe": 26645.0,
+   "median_household_income": 61212.0,
+   "median_household_income_moe": 4158.0,
+   "population": 15091.0
+  },
+  {
+   "geo_id": "05000US12067",
+   "county_fips": "067",
+   "name": "Lafayette",
+   "median_home_value": 157200.0,
+   "median_home_value_moe": 19379.0,
+   "median_household_income": 62757.0,
+   "median_household_income_moe": 7041.0,
+   "population": 8161.0
+  },
+  {
+   "geo_id": "05000US12069",
+   "county_fips": "069",
+   "name": "Lake",
+   "median_home_value": 318400.0,
+   "median_home_value_moe": 5107.0,
+   "median_household_income": 73161.0,
+   "median_household_income_moe": 1462.0,
+   "population": 412924.0
+  },
+  {
+   "geo_id": "05000US12071",
+   "county_fips": "071",
+   "name": "Lee",
+   "median_home_value": 362200.0,
+   "median_home_value_moe": 3248.0,
+   "median_household_income": 76107.0,
+   "median_household_income_moe": 1463.0,
+   "population": 817666.0
+  },
+  {
+   "geo_id": "05000US12073",
+   "county_fips": "073",
+   "name": "Leon",
+   "median_home_value": 301800.0,
+   "median_home_value_moe": 5943.0,
+   "median_household_income": 66287.0,
+   "median_household_income_moe": 1595.0,
+   "population": 297542.0
+  },
+  {
+   "geo_id": "05000US12075",
+   "county_fips": "075",
+   "name": "Levy",
+   "median_home_value": 190600.0,
+   "median_home_value_moe": 14840.0,
+   "median_household_income": 56750.0,
+   "median_household_income_moe": 4509.0,
+   "population": 45391.0
+  },
+  {
+   "geo_id": "05000US12077",
+   "county_fips": "077",
+   "name": "Liberty",
+   "median_home_value": 127300.0,
+   "median_home_value_moe": 29356.0,
+   "median_household_income": 58671.0,
+   "median_household_income_moe": 8215.0,
+   "population": 7687.0
+  },
+  {
+   "geo_id": "05000US12079",
+   "county_fips": "079",
+   "name": "Madison",
+   "median_home_value": 116200.0,
+   "median_home_value_moe": 17507.0,
+   "median_household_income": 48485.0,
+   "median_household_income_moe": 6886.0,
+   "population": 18089.0
+  },
+  {
+   "geo_id": "05000US12081",
+   "county_fips": "081",
+   "name": "Manatee",
+   "median_home_value": 391400.0,
+   "median_home_value_moe": 5943.0,
+   "median_household_income": 78457.0,
+   "median_household_income_moe": 1393.0,
+   "population": 429792.0
+  },
+  {
+   "geo_id": "05000US12083",
+   "county_fips": "083",
+   "name": "Marion",
+   "median_home_value": 243100.0,
+   "median_home_value_moe": 4168.0,
+   "median_household_income": 61010.0,
+   "median_household_income_moe": 1361.0,
+   "population": 400078.0
+  },
+  {
+   "geo_id": "05000US12085",
+   "county_fips": "085",
+   "name": "Martin",
+   "median_home_value": 432200.0,
+   "median_home_value_moe": 10447.0,
+   "median_household_income": 82943.0,
+   "median_household_income_moe": 2984.0,
+   "population": 162176.0
+  },
+  {
+   "geo_id": "05000US12086",
+   "county_fips": "086",
+   "name": "Miami-Dade",
+   "median_home_value": 463000.0,
+   "median_home_value_moe": 2523.0,
+   "median_household_income": 71753.0,
+   "median_household_income_moe": 708.0,
+   "population": 2738356.0
+  },
+  {
+   "geo_id": "05000US12087",
+   "county_fips": "087",
+   "name": "Monroe",
+   "median_home_value": 780600.0,
+   "median_home_value_moe": 26820.0,
+   "median_household_income": 87738.0,
+   "median_household_income_moe": 4111.0,
+   "population": 81860.0
+  },
+  {
+   "geo_id": "05000US12089",
+   "county_fips": "089",
+   "name": "Nassau",
+   "median_home_value": 382800.0,
+   "median_home_value_moe": 9501.0,
+   "median_household_income": 89804.0,
+   "median_household_income_moe": 4034.0,
+   "population": 97859.0
+  },
+  {
+   "geo_id": "05000US12091",
+   "county_fips": "091",
+   "name": "Okaloosa",
+   "median_home_value": 351200.0,
+   "median_home_value_moe": 6014.0,
+   "median_household_income": 81998.0,
+   "median_household_income_moe": 2764.0,
+   "population": 216599.0
+  },
+  {
+   "geo_id": "05000US12093",
+   "county_fips": "093",
+   "name": "Okeechobee",
+   "median_home_value": 193000.0,
+   "median_home_value_moe": 12668.0,
+   "median_household_income": 57984.0,
+   "median_household_income_moe": 4108.0,
+   "population": 40816.0
+  },
+  {
+   "geo_id": "05000US12095",
+   "county_fips": "095",
+   "name": "Orange",
+   "median_home_value": 390100.0,
+   "median_home_value_moe": 3665.0,
+   "median_household_income": 79719.0,
+   "median_household_income_moe": 1200.0,
+   "population": 1471937.0
+  },
+  {
+   "geo_id": "05000US12097",
+   "county_fips": "097",
+   "name": "Osceola",
+   "median_home_value": 353300.0,
+   "median_home_value_moe": 4410.0,
+   "median_household_income": 72637.0,
+   "median_household_income_moe": 1876.0,
+   "population": 427415.0
+  },
+  {
+   "geo_id": "05000US12099",
+   "county_fips": "099",
+   "name": "Palm Beach",
+   "median_home_value": 447300.0,
+   "median_home_value_moe": 4180.0,
+   "median_household_income": 83581.0,
+   "median_household_income_moe": 1022.0,
+   "population": 1533806.0
+  },
+  {
+   "geo_id": "05000US12101",
+   "county_fips": "101",
+   "name": "Pasco",
+   "median_home_value": 300900.0,
+   "median_home_value_moe": 4799.0,
+   "median_household_income": 70492.0,
+   "median_household_income_moe": 1570.0,
+   "population": 611444.0
+  },
+  {
+   "geo_id": "05000US12103",
+   "county_fips": "103",
+   "name": "Pinellas",
+   "median_home_value": 355100.0,
+   "median_home_value_moe": 3488.0,
+   "median_household_income": 72646.0,
+   "median_household_income_moe": 1000.0,
+   "population": 963481.0
+  },
+  {
+   "geo_id": "05000US12105",
+   "county_fips": "105",
+   "name": "Polk",
+   "median_home_value": 266500.0,
+   "median_home_value_moe": 3458.0,
+   "median_household_income": 65978.0,
+   "median_household_income_moe": 1143.0,
+   "population": 790694.0
+  },
+  {
+   "geo_id": "05000US12107",
+   "county_fips": "107",
+   "name": "Putnam",
+   "median_home_value": 160300.0,
+   "median_home_value_moe": 5600.0,
+   "median_household_income": 47934.0,
+   "median_household_income_moe": 2163.0,
+   "population": 75164.0
+  },
+  {
+   "geo_id": "05000US12113",
+   "county_fips": "113",
+   "name": "Santa Rosa",
+   "median_home_value": 329800.0,
+   "median_home_value_moe": 6113.0,
+   "median_household_income": 91922.0,
+   "median_household_income_moe": 2448.0,
+   "population": 198472.0
+  },
+  {
+   "geo_id": "05000US12115",
+   "county_fips": "115",
+   "name": "Sarasota",
+   "median_home_value": 411800.0,
+   "median_home_value_moe": 4642.0,
+   "median_household_income": 83416.0,
+   "median_household_income_moe": 1422.0,
+   "population": 459547.0
+  },
+  {
+   "geo_id": "05000US12117",
+   "county_fips": "117",
+   "name": "Seminole",
+   "median_home_value": 386900.0,
+   "median_home_value_moe": 3956.0,
+   "median_household_income": 85761.0,
+   "median_household_income_moe": 2077.0,
+   "population": 481470.0
+  },
+  {
+   "geo_id": "05000US12109",
+   "county_fips": "109",
+   "name": "St. Johns",
+   "median_home_value": 489200.0,
+   "median_home_value_moe": 7570.0,
+   "median_household_income": 109839.0,
+   "median_household_income_moe": 3407.0,
+   "population": 306934.0
+  },
+  {
+   "geo_id": "05000US12111",
+   "county_fips": "111",
+   "name": "St. Lucie",
+   "median_home_value": 347300.0,
+   "median_home_value_moe": 4773.0,
+   "median_household_income": 71457.0,
+   "median_household_income_moe": 2290.0,
+   "population": 360500.0
+  },
+  {
+   "geo_id": "05000US12119",
+   "county_fips": "119",
+   "name": "Sumter",
+   "median_home_value": 385400.0,
+   "median_home_value_moe": 9118.0,
+   "median_household_income": 76508.0,
+   "median_household_income_moe": 3168.0,
+   "population": 143408.0
+  },
+  {
+   "geo_id": "05000US12121",
+   "county_fips": "121",
+   "name": "Suwannee",
+   "median_home_value": 171600.0,
+   "median_home_value_moe": 7529.0,
+   "median_household_income": 56658.0,
+   "median_household_income_moe": 4147.0,
+   "population": 45342.0
+  },
+  {
+   "geo_id": "05000US12123",
+   "county_fips": "123",
+   "name": "Taylor",
+   "median_home_value": 114600.0,
+   "median_home_value_moe": 21265.0,
+   "median_household_income": 49073.0,
+   "median_household_income_moe": 7315.0,
+   "population": 21503.0
+  },
+  {
+   "geo_id": "05000US12125",
+   "county_fips": "125",
+   "name": "Union",
+   "median_home_value": 169500.0,
+   "median_home_value_moe": 17769.0,
+   "median_household_income": 64146.0,
+   "median_household_income_moe": 6434.0,
+   "population": 15701.0
+  },
+  {
+   "geo_id": "05000US12127",
+   "county_fips": "127",
+   "name": "Volusia",
+   "median_home_value": 313000.0,
+   "median_home_value_moe": 3772.0,
+   "median_household_income": 70044.0,
+   "median_household_income_moe": 1237.0,
+   "population": 579622.0
+  },
+  {
+   "geo_id": "05000US12129",
+   "county_fips": "129",
+   "name": "Wakulla",
+   "median_home_value": 258300.0,
+   "median_home_value_moe": 19098.0,
+   "median_household_income": 81895.0,
+   "median_household_income_moe": 7842.0,
+   "population": 35387.0
+  },
+  {
+   "geo_id": "05000US12131",
+   "county_fips": "131",
+   "name": "Walton",
+   "median_home_value": 425100.0,
+   "median_home_value_moe": 23282.0,
+   "median_household_income": 81986.0,
+   "median_household_income_moe": 3439.0,
+   "population": 82948.0
+  },
+  {
+   "geo_id": "05000US12133",
+   "county_fips": "133",
+   "name": "Washington",
+   "median_home_value": 171000.0,
+   "median_home_value_moe": 13730.0,
+   "median_household_income": 58210.0,
+   "median_household_income_moe": 6699.0,
+   "population": 25529.0
+  }
+ ],
+ "statewide": {
+  "geo_id": "04000US12",
+  "name": "Florida",
+  "median_home_value": 359000.0,
+  "median_home_value_moe": 930.0,
+  "median_household_income": 74568.0,
+  "median_household_income_moe": 284.0,
+  "population": 22416076.0
+ }
+}

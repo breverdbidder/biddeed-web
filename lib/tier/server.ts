@@ -28,6 +28,13 @@ export type Capability =
   | 'log_rehab_actual'
   | 'build_scope_of_work'
   | 'get_cost_catalog'
+  // Added for issue #75 (heatmap premium KPI layers: foreclosure density,
+  // price-cut %, DOM, forecast). The RPC-side row for this capability is a
+  // Supabase-side entitlement registration, out of scope for this repo (see
+  // docs/spec/75.md) — until it exists, requireCapability's own
+  // error-means-denied fallback keeps this capability closed rather than
+  // failing open.
+  | 'view_premium_heatmap_layers'
 
 export interface CapabilityCheck {
   allowed: boolean

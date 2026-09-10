@@ -50,6 +50,15 @@ const isPublicRoute = createRouteMatcher([
   '/api/watchlist(.*)', // API enforces its own Clerk account scope and JSON 401 responses
   '/api/d4d(.*)', // API enforces its own capability gate via requireCapability(), returns 402 not a Clerk redirect
   '/api/projects(.*)', // API enforces its own capability gate via requireCapability(), returns 402 not a Clerk redirect
+  // Heatmap KPI funnel (#75). /api/heatmap/premium enforces its own capability
+  // gate via requireCapability() (402, not a Clerk redirect) same as d4d/projects
+  // above; /api/heatmap/scorecard is intentionally public (live auction count +
+  // top parcel is the free funnel hook, not a gated KPI).
+  '/api/heatmap(.*)',
+  // Anonymous funnel events — most of the funnel (view, gate_shown,
+  // signup_started) happens before a Clerk account exists by definition, same
+  // reasoning as /api/support-ticket above.
+  '/api/analytics(.*)',
   '/api/csp-report(.*)',
   // Deed's same-origin SSE proxy to the Worker's /chat/api. Public for the
   // same reason /chat is on the Worker: the conversational surface is how a
@@ -153,6 +162,10 @@ const isPublicRoute = createRouteMatcher([
   // Same reasoning as /d4d above: /projects' locked panel is the Pro-to-Pro-Plus
   // upgrade trigger (issue #20106).
   '/projects(.*)',
+  // /maps must be reachable signed-out (#75): the free county KPI layer +
+  // live auction pins ARE the SEO-indexable lead-gen surface; the in-map
+  // signup/paid gates are the upgrade trigger, same reasoning as /d4d.
+  '/maps(.*)',
   '/privacy(.*)',
   '/terms(.*)',
   '/disclaimer(.*)',

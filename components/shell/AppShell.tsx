@@ -49,7 +49,9 @@ export default function AppShell({
   // button on /support) don't need the floating "Talk to Deed" card as well;
   // measured live, the fixed card covered the contact email lines at the
   // bottom of /support at 1280px. Ariel call 2026-09-09: hide it there.
-  const hasOwnDeedEntry = pathname.startsWith('/support')
+  // /maps (#75): same collision, measured live at 390x844 — the fixed card
+  // sits directly over the scorecard bottom sheet's peek row and toggle.
+  const hasOwnDeedEntry = pathname.startsWith('/support') || pathname.startsWith('/maps')
   const [deedOpen, setDeedOpen] = useState(false)
   const toggleDeed = () => setDeedOpen((v) => !v)
 

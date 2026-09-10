@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import DeedRobotMark from '@/components/deed/DeedRobotMark'
 import { cn } from '@/lib/utils'
 import Composer from './Composer'
+import HomepageMapModule from './HomepageMapModule'
 import { FieldRoutes, Footer, Founder, HowItWorks, Pricing, Proof, RehabProjects, TrustStrip } from './LandingSections'
 import PromptStarters from './PromptStarters'
 import ThreadView from './ThreadView'
@@ -122,8 +123,15 @@ export default function DeedHome() {
         </div>
       </section>
 
+      {/* ── Florida Auction Intelligence Map (issue #75) ─────────────────
+          Below the hero, before the proof/story sections — the hero itself
+          is untouched, no full control stack lives here (Amendment 2). */}
+      <div className="pt-10 sm:pt-14">
+        <HomepageMapModule />
+      </div>
+
       {/* ── Evidence ──────────────────────────────────────────────────── */}
-      <div className="space-y-20 pb-20 pt-4 sm:space-y-28">
+      <div className="space-y-20 pb-20 pt-10 sm:space-y-28 sm:pt-14">
         <Proof />
         <Founder />
         <HowItWorks />
