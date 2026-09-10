@@ -22,26 +22,40 @@ function isTierSlug(v: string | null): v is TierSlug {
   return v === 'investor' || v === 'pro' || v === 'proplus'
 }
 
-// Enterprise has no Stripe price — it is a sales-assisted quote, never a
-// checkout. Before this, ?tier=enterprise fell through to the 'pro' default
-// and silently sold the wrong plan (#20120).
-function EnterpriseContact() {
+// Pro Plus and Enterprise are locked as Coming Soon (Ariel, 2026-09-10):
+// neither has a self-serve checkout. Pro Plus reopens with 50 statewide
+// reports and the weekly county dossier; Enterprise stays custom/unlimited.
+// Both render this screen instead of a checkout form. ?tier=enterprise used
+// to fall through to the 'pro' default and silently sold the wrong plan
+// (#20120) - the explicit screens below keep that class of bug closed.
+function ComingSoon({ tier }: { tier: 'proplus' | 'enterprise' }) {
+  const copy =
+    tier === 'proplus'
+      ? {
+          eyebrow: 'biddeed.ai Pro Plus',
+          title: 'Pro Plus opens soon.',
+          body: 'Everything you need from the auction calendar to the closing table: 50 statewide full SIGNAL$ reports a month, a weekly SIGNAL$ dossier for one chosen county, budgets, scopes of work, and books that match the job. Pro is live today with 30 reports a month.',
+          href: '/subscribe?tier=pro',
+          cta: 'Start Pro today',
+        }
+      : {
+          eyebrow: 'biddeed.ai Enterprise',
+          title: 'Enterprise opens soon.',
+          body: 'White-label, unlimited, broker B2B - priced to your county footprint and seat count. Custom contracts only, never a self-serve checkout. Tell us what you need and we will follow up first.',
+          href: '/support',
+          cta: 'Contact us',
+        }
   return (
     <div className="mx-auto flex min-h-[70vh] w-full max-w-lg flex-col justify-center px-4 py-10 sm:px-6">
       <div className="rounded-2xl border border-border bg-card p-6 sm:p-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">BidDeed.AI Enterprise</p>
-        <h1 className="font-display mt-2 text-2xl font-medium tracking-tight text-foreground">
-          Let&apos;s talk about your team.
-        </h1>
-        <p className="mt-4 text-sm leading-6 text-muted-foreground">
-          Enterprise is white-label, unlimited, and priced to your county footprint and seat count — it is not
-          a self-serve checkout. Tell us what you need and we will follow up with a custom contract.
-        </p>
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">{copy.eyebrow}</p>
+        <h1 className="font-display mt-2 text-2xl font-medium tracking-tight text-foreground">{copy.title}</h1>
+        <p className="mt-4 text-sm leading-6 text-muted-foreground">{copy.body}</p>
         <a
-          href="/support"
+          href={copy.href}
           className="mt-6 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground outline-none transition-colors hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
-          Contact us
+          {copy.cta}
         </a>
       </div>
     </div>
@@ -59,8 +73,8 @@ export default function SubscribeCheckout() {
   const params = useSearchParams()
   const rawTier = params.get('tier')
 
-  if (rawTier === 'enterprise') {
-    return <EnterpriseContact />
+  if (rawTier === 'enterprise' || rawTier === 'proplus') {
+    return <ComingSoon tier={rawTier} />
   }
 
   const tier: TierSlug = isTierSlug(rawTier) ? (rawTier as TierSlug) : 'pro'

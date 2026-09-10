@@ -103,9 +103,15 @@ export default function PricingTiers() {
                   </li>
                 ))}
               </ul>
-              <a href={href} className={cn(BTN_PRIMARY, 'mt-6 w-full')}>
-                {p.cta.label}
-              </a>
+              {href ? (
+                <a href={href} className={cn(BTN_PRIMARY, 'mt-6 w-full')}>
+                  {p.cta.label}
+                </a>
+              ) : (
+                <span aria-disabled="true" className={cn(BTN_QUIET, 'mt-6 w-full cursor-not-allowed opacity-60')}>
+                  {p.cta.label}
+                </span>
+              )}
             </div>
           )
         })}
