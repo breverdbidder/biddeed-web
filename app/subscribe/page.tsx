@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'Subscribe — BidDeed.AI',
-  description: 'Start your BidDeed.AI subscription — Investor, Pro, or Pro Plus. Secure checkout via Stripe.',
+  description: 'Start your BidDeed.AI subscription — Investor or Pro. Secure checkout via Stripe.',
   alternates: {
     canonical: 'https://biddeed.ai/subscribe',
   },
