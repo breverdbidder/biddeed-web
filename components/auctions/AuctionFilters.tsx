@@ -60,12 +60,13 @@ export default function AuctionFilters({
         <option value="tax_deed">Tax Deed</option>
       </select>
 
-      {/* w-full + overflow-x-auto: at 320-393px the four labels (esp. "Spreadsheet")
-          don't fit bg-muted's fixed padding, and this pill wraps onto its own
-          flex-wrap line with nothing to shrink against - it was clipping "Spreadsheet"
-          off the right edge of the screen with no way to reach it (measured: 59px
-          past a 288px container). Scrolling beats clipping when there's truly no room. */}
-      <div className="w-full sm:w-auto sm:ml-auto flex items-center gap-0.5 bg-muted dark:bg-card rounded-md p-0.5 overflow-x-auto">
+      {/* P1-5 (2026-09-11 audit): at 320-393px five labels ("Spreadsheet" worst)
+          overflowed the strip and horizontal scrolling had no affordance, so tabs
+          past the edge were effectively missing. flex-wrap below sm puts every tab
+          on-canvas (two short rows); sm+ keeps the single-row segmented strip, and
+          overflow-x-auto stays as the safety net at ultra-narrow widths. */}
+
+      <div className="w-full sm:w-auto sm:ml-auto flex flex-wrap sm:flex-nowrap items-center gap-0.5 bg-muted dark:bg-card rounded-md p-0.5 overflow-x-auto">
         {(['split', 'table', 'map', 'calendar', 'spreadsheet'] as const).map((mode) => (
           <button
             key={mode}
