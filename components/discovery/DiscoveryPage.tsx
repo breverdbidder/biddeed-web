@@ -99,15 +99,15 @@ export default function DiscoveryPage() {
             <label className="flex min-w-0 flex-1 items-center gap-3 border border-input bg-card px-4 py-3 focus-within:border-primary">
               <Search className="h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
               <span className="sr-only">Search auctions</span>
-              <input value={query} onChange={(e) => setQuery(e.target.value)} maxLength={80} className="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-muted-foreground" placeholder="Address, city, ZIP, parcel, case number…" />
+              <input value={query} onChange={(e) => setQuery(e.target.value)} maxLength={80} className="min-w-0 min-h-11 flex-1 bg-transparent text-base text-ellipsis outline-none placeholder:text-muted-foreground" placeholder="Address, city, ZIP, parcel, case number…" />
             </label>
             <label className="border border-input bg-card px-3 py-2 text-sm lg:w-48">
               <span className="block text-xs font-bold uppercase tracking-wider text-muted-foreground">County slug</span>
-              <input value={county} onChange={(e) => setCounty(e.target.value)} maxLength={40} className="mt-1 w-full bg-transparent outline-none" placeholder="miami_dade" />
+              <input value={county} onChange={(e) => setCounty(e.target.value)} maxLength={40} className="mt-1 min-h-11 w-full bg-transparent outline-none" placeholder="miami_dade" />
             </label>
             <label className="border border-input bg-card px-3 py-2 text-sm lg:w-48">
               <span className="block text-xs font-bold uppercase tracking-wider text-muted-foreground">Sale type</span>
-              <select value={saleType} onChange={(e) => setSaleType(e.target.value)} className="mt-1 w-full bg-transparent outline-none">
+              <select value={saleType} onChange={(e) => setSaleType(e.target.value)} className="mt-1 min-h-11 w-full bg-transparent outline-none">
                 <option value="">All sale types</option>
                 <option value="foreclosure">Foreclosure</option>
                 <option value="tax_deed">Tax deed</option>
