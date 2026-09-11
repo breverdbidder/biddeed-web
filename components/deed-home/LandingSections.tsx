@@ -28,8 +28,13 @@ export const W = {
   security: '/security',
   disclaimer: '/disclaimer',
   support: '/support',
-  // Published by the Worker as a public sample. Not a customer credential.
-  sampleReport: '/report/cad5d07a-b9c7-433d-b365-3165637b7cbe?key=bd_live_S9KLXyeH9fV1epdliLz731n1',
+  // The Worker's canonical public sample pair (SAMPLE_MCA_ID/SAMPLE_REPORT_KEY in
+  // cli-anything-biddeed src/worker.js): composed live by the report engine,
+  // gated through applySampleGate, no expiry. The previous id (cad5d07a) was an
+  // expired pre-sample-pair report whose key died - the CTA 401'd (P0-2,
+  // 2026-09-11 audit). A blocking smoke check in cloudflare-production.yml now
+  // fails the deploy if this URL stops returning 200.
+  sampleReport: '/report/04a30c35-6cef-486d-8599-ce0eb20dd79c?key=bd_live_S9KLXyeH9fV1epdliLz731n1',
 }
 
 export const BTN =

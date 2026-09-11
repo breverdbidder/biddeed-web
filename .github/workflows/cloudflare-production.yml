@@ -188,6 +188,10 @@ jobs:
           check "/deal/lee/2026000141" 200
           check "/deal/broward/cace-24-008115" 200
           check "/subscribe" 200
+          # P0-2 (2026-09-11): the homepage sample CTAs died silently when the old
+          # sample report key expired. This is the funnel's front door - block the
+          # deploy if the canonical public sample pair stops rendering.
+          check "/report/04a30c35-6cef-486d-8599-ce0eb20dd79c?key=bd_live_S9KLXyeH9fV1epdliLz731n1" 200
           code=$(curl -sS -o /tmp/canon_response -D /tmp/canon_headers --max-time 30 -w '%{http_code}' "https://biddeed.ai/r/F5oeMD")
           echo "/r/F5oeMD -> $code (want 302)"
           [[ "$code" == "302" ]] || { echo "Canonical smoke check FAILED for /r/F5oeMD: got $code, want 302" >&2; cat /tmp/canon_headers >&2; exit 1; }
