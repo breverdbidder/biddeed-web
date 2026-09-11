@@ -177,6 +177,18 @@ export default function AuctionCalendar({ county, saleType, onSelectDay }: Props
       })
   })
 
+  // Phones land on List, not the month grid (Sep 11 2026, Ariel screenshot at
+  // ~390px): 7 columns cannot carry 2-3 stacked count badges per cell at ~50px
+  // column width - chips wrapped to 3 lines, painted over the next row, and
+  // the 44px tap-target minimums pushed the scrollgrid wider than its
+  // container, clipping Saturday entirely. Month stays one tap away, and the
+  // compact-grid media query below makes it usable when a phone user taps in.
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches) {
+      calendarRef.current?.getApi()?.changeView('listWeek')
+    }
+  }, [])
+
   useEffect(() => {
     const el = shellRef.current
     if (!el || typeof ResizeObserver === 'undefined') return
@@ -316,6 +328,45 @@ export default function AuctionCalendar({ county, saleType, onSelectDay }: Props
           min-width: 44px;
           min-height: 44px;
           padding: 0 0.4rem;
+        }
+        /*
+         * PHONE GRID COMPACTION (Sep 11 2026, Ariel 390px screenshot).
+         * The 44px tap-target minimums above were written for pointer comfort,
+         * but 7 columns x 44px of header cushion is 308px of min-content before
+         * any padding - wider than a ~350px phone content box on its own, so
+         * the scrollgrid outgrew its container and FullCalendar clipped the
+         * right edge (Saturday gone) with no scroll affordance. Stacked 44px
+         * badges did the same vertically and overlapped neighbouring rows.
+         * Below 768px the minimums relax to 32px, badges become single-line
+         * ellipsis chips that can never outgrow their column, and the shell
+         * gains overflow-x as a last-resort scroll instead of a silent clip.
+         */
+        @media (max-width: 767px) {
+          .zw-auction-calendar :global(.fc .fc-daygrid-event) {
+            min-height: 32px;
+            padding: 0.15rem 0.3rem;
+          }
+          .zw-auction-calendar :global(.fc .fc-daygrid-event .fc-event-main) {
+            font-size: 0.72rem;
+            line-height: 1.2;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+          .zw-auction-calendar :global(.fc .fc-daygrid-day-number) {
+            min-width: 32px;
+            min-height: 32px;
+            font-size: 0.75rem;
+          }
+          .zw-auction-calendar :global(.fc .fc-col-header-cell-cushion) {
+            min-width: 0;
+            min-height: 32px;
+            padding: 0 0.1rem;
+            font-size: 0.7rem;
+          }
+          .zw-auction-calendar {
+            overflow-x: auto;
+          }
         }
         @media (min-width: 768px) {
           .zw-auction-calendar :global(.fc .fc-toolbar.fc-header-toolbar) {
