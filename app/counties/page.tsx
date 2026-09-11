@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
-import { MapPin } from 'lucide-react'
 import { getRetryingSupabaseClient } from '@/lib/supabase-retry'
+import CountyGrid from '@/components/counties/CountyGrid'
 
 // force-dynamic: middleware mints a per-request CSP nonce (see middleware.ts) —
 // same reasoning as every other route in this app (app/d4d/page.tsx et al).
@@ -33,10 +33,6 @@ async function fetchCounties(): Promise<CountyRow[]> {
   return data as CountyRow[]
 }
 
-function slugify(county: string): string {
-  return county.toLowerCase().replace(/\s+/g, '-')
-}
-
 export default async function CountiesPage() {
   const counties = await fetchCounties()
   const sorted = [...counties].sort((a, b) => b.upcoming - a.upcoming)
@@ -66,40 +62,7 @@ export default async function CountiesPage() {
           County coverage is temporarily unavailable. Please retry shortly.
         </div>
       ) : (
-        <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {sorted.map((c) => (
-            <li key={c.county}>
-              <a
-                href={`/county/${slugify(c.county)}`}
-                className="flex h-full flex-col rounded-2xl border border-border bg-card p-5 transition-colors hover:border-primary/60"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                    <MapPin className="size-4 shrink-0 text-primary" aria-hidden />
-                    {c.county_display}
-                  </span>
-                  {c.is_gold_standard ? (
-                    <span className="rounded-full bg-secondary px-2.5 py-0.5 text-xs font-semibold text-primary">
-                      Gold Standard
-                    </span>
-                  ) : null}
-                </div>
-                <p className="mt-4 flex items-baseline gap-1">
-                  <span className="tabular font-display text-2xl font-medium tracking-tight text-foreground">
-                    {c.upcoming}
-                  </span>
-                  <span className="text-sm text-muted-foreground">upcoming</span>
-                </p>
-                <p className="mt-2 text-base text-muted-foreground">
-                  {c.next_auction ? `Next sale ${c.next_auction}` : 'No sale currently scheduled'}
-                </p>
-                <p className="mt-1 text-base capitalize text-muted-foreground">
-                  {c.sale_types.replace(/\+/g, ' + ').replace(/_/g, ' ')}
-                </p>
-              </a>
-            </li>
-          ))}
-        </ul>
+        <CountyGrid counties={sorted} />
       )}
     </div>
   )
