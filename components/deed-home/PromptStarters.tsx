@@ -43,6 +43,9 @@ export const STARTERS: Starter[] = [
   },
 ]
 
+// Audit P2-12: pills previously scrolled off-canvas on mobile with no scroll
+// affordance (hidden scrollbar, no fade) - wrap to two lines instead, same as
+// the desktop treatment.
 export default function PromptStarters({
   onPick,
   className,
@@ -54,15 +57,14 @@ export default function PromptStarters({
     <ul
       aria-label="Suggested questions"
       className={cn(
-        '-mx-4 flex snap-x gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:justify-center sm:overflow-visible sm:px-0',
-        '[&::-webkit-scrollbar]:hidden',
+        'flex flex-wrap justify-center gap-2 pb-1',
         className
       )}
     >
       {STARTERS.map((s) => {
         const Icon = s.icon
         return (
-          <li key={s.label} className="snap-start">
+          <li key={s.label}>
             <button
               type="button"
               onClick={() => onPick(s.prompt)}
