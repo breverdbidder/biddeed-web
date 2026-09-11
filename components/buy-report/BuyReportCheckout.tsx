@@ -99,6 +99,7 @@ export default function BuyReportCheckout() {
   const [countyName, setCountyName] = useState('')
 
   const [auctions, setAuctions] = useState<AuctionOption[] | null>(null)
+  const [auctionQuery, setAuctionQuery] = useState('')
 
   const [selected, setSelected] = useState<{
     case_number: string | null
@@ -221,6 +222,7 @@ export default function BuyReportCheckout() {
     setCountySlug(slug)
     setCountyName(name)
     setAuctions(null)
+    setAuctionQuery('')
     setStep('auction')
     fetch(apiUrl(`/buy-report/auctions?county=${encodeURIComponent(slug)}`))
       .then((r) => r.json())
@@ -238,6 +240,22 @@ export default function BuyReportCheckout() {
     })
     setStep('checkout')
   }
+
+  // Audit P1-3: filterable list, and rows with no usable address demoted to
+  // the bottom (still selectable - fmtAddress shows the case label).
+  const visibleAuctions = useMemo(() => {
+    if (!auctions) return null
+    const hasAddress = (a: AuctionOption) =>
+      Boolean(a.property_address && !UNASSIGNED_LOCATION_RE.test(a.property_address.trim()))
+    const demoted = [...auctions.filter(hasAddress), ...auctions.filter((a) => !hasAddress(a))]
+    const q = auctionQuery.trim().toLowerCase()
+    if (!q) return demoted
+    return demoted.filter(
+      (a) =>
+        (a.property_address || '').toLowerCase().includes(q) ||
+        (a.case_number || '').toLowerCase().includes(q)
+    )
+  }, [auctions, auctionQuery])
 
   const mcaIdForSubmit = useMemo(() => (mcaId ? mcaId : null), [mcaId])
 
@@ -280,23 +298,7 @@ export default function BuyReportCheckout() {
         ZoneWise zoning, comps, value band, and red flags for one auction. Max-bid and ML figures are labeled Withheld until the rebuilt model is validated. One-time $25, no subscription.
       </p>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <div className="rounded-2xl border border-border bg-card p-5 sm:p-6">
-          <p className="text-base font-semibold text-foreground">What your report includes</p>
-          <ol className="mt-4 grid gap-x-8 gap-y-2 sm:grid-cols-2">
-            {REPORT_SECTIONS.map((section, index) => (
-              <li key={section} className="flex gap-3 text-base">
-                <span className="font-mono text-xs font-bold text-primary">{String(index + 1).padStart(2, '0')}</span>
-                <span className="text-foreground">{section}</span>
-              </li>
-            ))}
-          </ol>
-          <p className="mt-4 border-t border-border pt-4 text-base leading-5 text-muted-foreground">
-            Included intelligence overlays: the Shapira third-party-purchase model and ZoneWise.AI land/zoning
-            intelligence.
-          </p>
-        </div>
-
+      <div className="mt-8 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
         <div className="rounded-2xl border border-border bg-card p-5 sm:p-6">
           <div className="flex gap-1.5" aria-hidden>
             {(['county', 'auction', 'checkout'] as const).map((s, i) => (
@@ -380,8 +382,27 @@ export default function BuyReportCheckout() {
                 </p>
               ) : null}
 
+              {auctions && auctions.length > 5 ? (
+                <label className="mt-3 block">
+                  <span className="sr-only">Filter auctions</span>
+                  <input
+                    type="search"
+                    value={auctionQuery}
+                    onChange={(e) => setAuctionQuery(e.target.value)}
+                    placeholder="Filter by address or case number"
+                    className="flex h-11 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  />
+                </label>
+              ) : null}
+
+              {visibleAuctions && visibleAuctions.length === 0 && auctions && auctions.length > 0 ? (
+                <p className="mt-4 text-base text-muted-foreground">
+                  No auctions match &ldquo;{auctionQuery.trim()}&rdquo; in {countyName}.
+                </p>
+              ) : null}
+
               <div className="mt-4 flex max-h-[340px] flex-col gap-2 overflow-y-auto">
-                {auctions?.map((a) => (
+                {visibleAuctions?.map((a) => (
                   <button
                     key={a.case_number}
                     type="button"
@@ -474,6 +495,22 @@ export default function BuyReportCheckout() {
             .
           </p>
         </div>
+        <div className="rounded-2xl border border-border bg-card p-5 sm:p-6">
+          <p className="text-base font-semibold text-foreground">What your report includes</p>
+          <ol className="mt-4 grid gap-x-8 gap-y-2 sm:grid-cols-2">
+            {REPORT_SECTIONS.map((section, index) => (
+              <li key={section} className="flex gap-3 text-base">
+                <span className="font-mono text-xs font-bold text-primary">{String(index + 1).padStart(2, '0')}</span>
+                <span className="text-foreground">{section}</span>
+              </li>
+            ))}
+          </ol>
+          <p className="mt-4 border-t border-border pt-4 text-base leading-5 text-muted-foreground">
+            Included intelligence overlays: the Shapira third-party-purchase model and ZoneWise.AI land/zoning
+            intelligence.
+          </p>
+        </div>
+
       </div>
     </div>
   )
