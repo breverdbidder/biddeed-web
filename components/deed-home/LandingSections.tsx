@@ -103,7 +103,7 @@ export function Proof() {
           </div>
         </div>
         {/*
-          Three tiles, one baseline. "Max bid published" wraps to two lines at
+          Three tiles, one baseline. "Bid limit set" wraps to two lines at
           the 3-column width while the other labels stay on one, and a tile
           that centres its own contents then drops its value ~14 px below its
           neighbours (Ariel, 2026-09-06 15:04 ET: "$82,000 not centered"). The
@@ -112,7 +112,7 @@ export function Proof() {
         */}
         <dl className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
           <div className="flex items-baseline justify-between gap-3 rounded-2xl border border-border bg-background p-4 sm:flex sm:min-h-[128px] sm:flex-col sm:items-center sm:justify-center sm:text-center">
-            <dt className="text-xs uppercase leading-snug tracking-wide text-muted-foreground sm:flex sm:h-9 sm:items-end sm:justify-center">Max bid published</dt>
+            <dt className="text-xs uppercase leading-snug tracking-wide text-muted-foreground sm:flex sm:h-9 sm:items-end sm:justify-center">Bid limit set</dt>
             <dd className="tabular whitespace-nowrap text-lg font-semibold text-foreground sm:mt-2 sm:text-2xl">$82,000</dd>
           </div>
           <div className="flex items-baseline justify-between gap-3 rounded-2xl border border-border bg-background p-4 sm:flex sm:min-h-[128px] sm:flex-col sm:items-center sm:justify-center sm:text-center">
@@ -241,7 +241,7 @@ const D4D_STEPS = [
   {
     n: '3',
     title: 'Drive it without touching the phone',
-    body: 'Deed reads out the next stop with its judgment and its SIGNAL$ Max Bid. Say what you see — vacant, overgrown, no plates — and it lands on that lot.',
+    body: 'Deed reads out the next stop with its judgment on the lot. Say what you see — vacant, overgrown, no plates — and it lands on that lot.',
   },
   {
     n: '4',
@@ -316,7 +316,7 @@ const CM_STEPS = [
   {
     n: '1',
     title: 'Win the auction',
-    body: 'The report told you the max bid. You held it, and the property is now yours.',
+    body: 'The report framed what the lot was worth. You held your number, and the property is now yours.',
   },
   {
     n: '2',
@@ -436,9 +436,9 @@ export const PLANS: Plan[] = [
     per: '/month',
     annualPrice: '$990',
     annualPer: '/year',
-    blurb: 'The exact ceiling on every lot in your counties.',
+    blurb: 'The signal read on every lot in your counties.',
     features: [
-      'Exact SIGNAL$ Max Bid',
+      'SIGNAL$ max-bid analysis (figures Withheld until the model is revalidated)',
       '10 SIGNAL$ Property Reports a month',
       'Unlimited property cards',
       'Plaintiff identity and max-bid intelligence',
@@ -577,8 +577,8 @@ export function Pricing({ onPrompt }: { onPrompt: (p: string) => void }) {
               Between a free account and Investor: the SIGNAL$ Property Report, <span className="tabular">$25</span>
             </h3>
             <p className="mt-1 max-w-xl text-base text-muted-foreground">
-              All 18 sections on a single property: value band, SIGNAL$ Max Bid ceiling, comparable sales, zoning read and
-              red flags. When the sale closes, you get the outcome scorecard re-issued free. New to the numbers? The
+              All 18 sections on a single property: value band, comparable sales, zoning read, red flags, and the SIGNAL$
+              Max Bid section, with max-bid figures labeled Withheld until the rebuilt model is validated. When the sale closes, you get the outcome scorecard re-issued free. New to the numbers? The
               Academy&apos;s free <a href="/academy" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80">How-to-use-BidDeed track</a> walks through a report before you buy one.
             </p>
           </div>

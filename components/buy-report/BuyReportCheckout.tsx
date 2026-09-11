@@ -260,7 +260,7 @@ export default function BuyReportCheckout() {
         One SIGNAL$ Property Report — $25
       </h1>
       <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground">
-        Exact SIGNAL$ Max Bid, ZoneWise zoning, and ML prediction for one auction. One-time $25, no subscription.
+        ZoneWise zoning, comps, value band, and red flags for one auction. Max-bid and ML figures are labeled Withheld until the rebuilt model is validated. One-time $25, no subscription.
       </p>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
@@ -299,8 +299,8 @@ export default function BuyReportCheckout() {
             <div className="mt-5">
               <h2 className="text-lg font-semibold text-foreground">Pick your county</h2>
               <p className="mt-1 text-base text-muted-foreground">
-                Gold Standard counties include full CMA, ZoneWise zoning, and ML prediction. All counties include
-                SIGNAL$ Max Bid and opening bid analysis.
+                Gold Standard counties include full CMA and ZoneWise zoning. All counties include opening bid
+                analysis and the SIGNAL$ Max Bid section, with figures labeled Withheld until the rebuilt model is validated.
               </p>
 
               {counties === null && !countiesError ? (
