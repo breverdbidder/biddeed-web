@@ -69,6 +69,23 @@ function fmtMoney(n: number | null | undefined) {
   return `$${Number(n).toLocaleString('en-US', { maximumFractionDigits: 0 })}`
 }
 
+// Audit P2-15: never show machine strings on a paid surface. DB sale_type
+// values are snake_case ('tax_deed'); render customer-facing labels.
+function fmtSaleType(t: string | null | undefined) {
+  if (!t) return ''
+  const known: Record<string, string> = { tax_deed: 'Tax deed', foreclosure: 'Foreclosure' }
+  return known[t] || t.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())
+}
+
+// Audit P2-15: rows whose address was never assigned arrive as
+// '00 UNASSIGNED LOCATION RE...' - present a clear availability label with
+// the case number instead of leaking the placeholder.
+const UNASSIGNED_LOCATION_RE = /^0+\s*UNASSIGNED LOCATION\b/i
+function fmtAddress(addr: string | null | undefined, caseNumber: string | null | undefined) {
+  if (addr && !UNASSIGNED_LOCATION_RE.test(addr.trim())) return addr
+  return caseNumber ? `Address not yet on file - Case ${caseNumber}` : 'Address not yet on file'
+}
+
 export default function BuyReportCheckout() {
   const params = useSearchParams()
   const mcaId = params.get('mca_id')
@@ -371,11 +388,11 @@ export default function BuyReportCheckout() {
                     onClick={() => pickAuction(a)}
                     className="rounded-lg border border-input bg-background p-3 text-left text-sm transition-colors hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                   >
-                    <div className="font-semibold text-foreground">{a.property_address || 'Address pending'}</div>
+                    <div className="font-semibold text-foreground">{fmtAddress(a.property_address, a.case_number)}</div>
                     <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 font-mono text-xs text-muted-foreground">
                       <span>{fmtDate(a.auction_date)}</span>
                       <span>Opening bid: {fmtMoney(a.opening_bid)}</span>
-                      <span>{a.sale_type || ''}</span>
+                      <span>{fmtSaleType(a.sale_type)}</span>
                     </div>
                   </button>
                 ))}
@@ -397,13 +414,13 @@ export default function BuyReportCheckout() {
               <h2 className="mt-3 text-lg font-semibold text-foreground">One SIGNAL$ Property Report — $25</h2>
 
               <div className="mt-4 rounded-lg border border-input bg-background p-3 text-sm text-muted-foreground">
-                <div className="font-semibold text-foreground">{selected.property_address || 'Address pending'}</div>
+                <div className="font-semibold text-foreground">{fmtAddress(selected.property_address, selected.case_number)}</div>
                 <div className="mt-1">
                   {selected.case_number ? `Case ${selected.case_number} · ` : ''}
                   {countyName} County · {fmtDate(selected.auction_date)}
                 </div>
                 <div className="mt-1">
-                  Opening bid: {fmtMoney(selected.opening_bid)} · {selected.sale_type || ''}
+                  Opening bid: {fmtMoney(selected.opening_bid)} · {fmtSaleType(selected.sale_type)}
                 </div>
               </div>
 
