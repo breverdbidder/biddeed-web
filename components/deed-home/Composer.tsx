@@ -349,7 +349,7 @@ export default function Composer({
             type="button"
             onClick={() => setPendingUpload(null)}
             aria-label={`Remove ${pendingUpload.filename}`}
-            className="inline-flex size-6 shrink-0 items-center justify-center rounded text-muted-foreground outline-none hover:bg-secondary hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+            className="inline-flex size-11 shrink-0 items-center justify-center rounded text-muted-foreground outline-none hover:bg-secondary hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
           >
             <X className="size-3.5" aria-hidden />
           </button>
@@ -369,9 +369,9 @@ export default function Composer({
             value={identityEmail}
             onChange={(e) => setIdentityEmail(e.target.value)}
             placeholder="you@email.com"
-            className="h-8 max-w-[200px] text-xs"
+            className="h-11 max-w-[200px] text-sm"
           />
-          <Button type="submit" size="sm" disabled={identityBusy} className="h-8">
+          <Button type="submit" size="sm" disabled={identityBusy} className="h-11">
             {identityBusy ? 'Signing in…' : 'Continue'}
           </Button>
           <button
@@ -380,7 +380,7 @@ export default function Composer({
               setIdentityGate(null)
               setIdentityError(null)
             }}
-            className="text-xs text-muted-foreground underline-offset-2 hover:underline"
+            className="inline-flex min-h-11 items-center px-1 text-sm text-muted-foreground underline-offset-2 hover:underline"
           >
             Cancel
           </button>
@@ -434,15 +434,17 @@ export default function Composer({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem
+              className="min-h-11"
               onSelect={() =>
                 requireIdentity(() => fileRef.current?.click(), 'Sign in to upload documents')
               }
             >
               <Paperclip className="mr-2 size-4" aria-hidden />
               Upload documents
-              <span className="ml-auto text-[10px] text-muted-foreground">PDF · CSV · DOCX · XLSX · images</span>
+              <span className="ml-auto text-xs text-muted-foreground">PDF · CSV · DOCX · XLSX · images</span>
             </DropdownMenuItem>
             <DropdownMenuItem
+              className="min-h-11"
               onSelect={() =>
                 requireIdentity(() => {
                   setNotice('Paste your screenshot now (Ctrl/Cmd+V) — it will attach to your next message.')
@@ -458,6 +460,7 @@ export default function Composer({
               Public-records search
             </DropdownMenuCheckboxItem>
             <DropdownMenuItem
+              className="min-h-11"
               onSelect={() =>
                 requireIdentity(
                   () =>
@@ -489,13 +492,15 @@ export default function Composer({
                 ) : (
                   <>
                     {projectId ? (
-                      <DropdownMenuItem onSelect={() => setProjectId(null)}>
+                      <DropdownMenuItem
+              className="min-h-11" onSelect={() => setProjectId(null)}>
                         <X className="mr-2 size-4" aria-hidden />
                         Clear project scope
                       </DropdownMenuItem>
                     ) : null}
                     {(projects ?? []).map((p) => (
-                      <DropdownMenuItem key={p.id} onSelect={() => setProjectId(p.id)}>
+                      <DropdownMenuItem
+              className="min-h-11" key={p.id} onSelect={() => setProjectId(p.id)}>
                         {p.id === projectId ? <Check className="mr-2 size-4" aria-hidden /> : <FolderKanban className="mr-2 size-4" aria-hidden />}
                         {p.name}
                       </DropdownMenuItem>
@@ -506,7 +511,8 @@ export default function Composer({
                       </DropdownMenuLabel>
                     ) : null}
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onSelect={() => requireIdentity(createProject, 'Sign in to create a project')}>
+                    <DropdownMenuItem
+              className="min-h-11" onSelect={() => requireIdentity(createProject, 'Sign in to create a project')}>
                       <Plus className="mr-2 size-4" aria-hidden />
                       New project
                     </DropdownMenuItem>
