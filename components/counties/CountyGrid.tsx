@@ -18,8 +18,10 @@ function slugify(county: string): string {
 
 /**
  * Audit P2-14: /counties rendered all 67 cards with no way to scan. The grid
- * now carries a sticky filter (sticks under the 56px topbar while scrolling)
- * matching on county name.
+ * now carries a filter matching on county name. (First cut tried sticky
+ * positioning; AppShell's site-wide overflow-x-hidden wrapper neutralizes
+ * position:sticky everywhere, so the filter sits at the top of the grid -
+ * the audit's core need is filtering before scrolling through 67 cards.)
  */
 export default function CountyGrid({ counties }: { counties: CountyCardRow[] }) {
   const [query, setQuery] = useState('')
@@ -31,7 +33,7 @@ export default function CountyGrid({ counties }: { counties: CountyCardRow[] }) 
 
   return (
     <>
-      <div className="sticky top-14 z-10 mt-8 bg-background py-3">
+      <div className="mt-8">
         <label className="relative block">
           <Search
             className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
