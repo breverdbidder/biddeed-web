@@ -27,8 +27,8 @@ function clerkAppearance(theme: 'light' | 'dark') {
       fontFamily: 'Inter, system-ui, sans-serif',
     },
     elements: {
-      // min-h-11: Clerk's own buttons/links render at their stock ~32px
-      // (buttons) / ~18px (footer link) heights — under the 44px tap-target
+      // min-h-11: Clerk's own inputs/buttons/links render at their stock ~32px
+      // (buttons) / ~32px (inputs) / ~18px (footer link) heights — under the 44px tap-target
       // floor the rest of the app ships. inline-flex+items-center on the
       // footer link for the same reason the prose links elsewhere in this
       // app needed it: a bare line-height bump does not inflate an inline
@@ -39,7 +39,11 @@ function clerkAppearance(theme: 'light' | 'dark') {
       headerSubtitle: 'text-base text-muted-foreground',
       socialButtonsBlockButton: 'min-h-11 border-border text-foreground hover:bg-secondary',
       formFieldLabel: 'text-foreground',
-      formFieldInput: 'bg-background border-border text-foreground placeholder:text-muted-foreground',
+      formFieldInput:
+        'min-h-11 bg-background border-border text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary',
+      // P1-9: the password-reveal toggle renders ~26px tall; give the icon
+      // button a 44px box without visually enlarging the glyph.
+      formFieldInputShowPasswordButton: 'min-h-11 min-w-[44px] text-muted-foreground hover:text-foreground',
       formFieldErrorText: 'text-primary',
       formFieldSuccessText: 'text-primary',
       footerActionText: 'text-muted-foreground',
