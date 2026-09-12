@@ -103,7 +103,7 @@ export default function DiscoveryPage() {
             </label>
             <label className="border border-input bg-card px-3 py-2 text-sm lg:w-48">
               <span className="block text-xs font-bold uppercase tracking-wider text-muted-foreground">County slug</span>
-              <input value={county} onChange={(e) => setCounty(e.target.value)} maxLength={40} className="mt-1 min-h-11 w-full bg-transparent outline-none" placeholder="miami_dade" />
+              <input value={county} onChange={(e) => setCounty(e.target.value)} maxLength={40} className="mt-1 min-h-11 w-full bg-transparent outline-none" placeholder="e.g. Miami-Dade" />
             </label>
             <label className="border border-input bg-card px-3 py-2 text-sm lg:w-48">
               <span className="block text-xs font-bold uppercase tracking-wider text-muted-foreground">Sale type</span>

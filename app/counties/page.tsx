@@ -49,11 +49,11 @@ export default async function CountiesPage() {
         {goldCount > 0 ? (
           <>
             <span className="font-semibold text-foreground">{goldCount} Gold Standard {goldCount === 1 ? 'county' : 'counties'}</span> carry
-            the full CMA, ZoneWise zoning, and win-probability prediction — every other county gets the auction
-            calendar and max-bid range today, with the full build rolling out county by county.
+            the full CMA, ZoneWise zoning, and the max-bid range — every other county gets the auction
+            calendar today, with the full build rolling out county by county.
           </>
         ) : (
-          'Gold Standard counties carry the full CMA, ZoneWise zoning, and win-probability prediction.'
+          'Gold Standard counties carry the full CMA, ZoneWise zoning, and the max-bid range.'
         )}
       </p>
 
