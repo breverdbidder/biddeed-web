@@ -85,6 +85,8 @@ export interface AuctionDetail extends Auction {
   bcpao_photo_url: string | null
   zoning: ZoningInfo | null
   recommendation: 'BID' | 'REVIEW' | 'SKIP' | 'UNKNOWN'
+  /** true when the caller's tier is below investor - score fields stripped server-side. */
+  score_locked?: boolean
   recommendation_color: string
   max_bid: number | null
   bid_ratio: number | null

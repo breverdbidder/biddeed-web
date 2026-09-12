@@ -63,6 +63,49 @@ const TIER_RANK: Record<string, number> = { free: 0, investor: 1, pro: 2, proplu
  * already resolved the caller's tier for the /projects page). Unknown tier
  * ids rank as 'free' so an unrecognized value fails closed.
  */
+/**
+ * Resolves the caller's tier straight from resolve_user_tier (the same single
+ * source of truth requireCapability maps through). Use when a route gates on a
+ * tier RANK, not a named capability - e.g. the Investment Score is investor+,
+ * not a tool entitlement. Fails closed to 'free' signed-out or on any error;
+ * a paywall that locks paid users out on a transient error is the safer
+ * failure mode than leaking the number.
+ */
+export async function getCallerTierId(): Promise<string> {
+  let userId: string | null = null
+  let email: string | null = null
+  try {
+    const session = await auth()
+    userId = session.userId
+    if (userId) {
+      const user = await currentUser()
+      email =
+        user?.primaryEmailAddress?.emailAddress ??
+        user?.emailAddresses?.[0]?.emailAddress ??
+        null
+    }
+  } catch {
+    return 'free'
+  }
+  if (!userId) return 'free'
+
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!url || !key) return 'free'
+
+  try {
+    const supabase = getRetryingSupabaseClient(key, { retryMode: 'full' })
+    const { data, error } = await supabase.rpc('resolve_user_tier', {
+      p_clerk_user_id: userId,
+      p_email: email,
+    })
+    if (error || typeof data !== 'string') return 'free'
+    return data
+  } catch {
+    return 'free'
+  }
+}
+
 export function tierAtLeast(tierId: string, minTierId: string): boolean {
   return (TIER_RANK[tierId] ?? 0) >= (TIER_RANK[minTierId] ?? Infinity)
 }
