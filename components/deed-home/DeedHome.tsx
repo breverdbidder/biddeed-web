@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import DeedRobotMark from '@/components/deed/DeedRobotMark'
 import { cn } from '@/lib/utils'
 import Composer from './Composer'
+import { DEED_SEEDS } from './deedSeeds'
 import HomepageMapModule from './HomepageMapModule'
 import { FieldRoutes, Footer, Founder, HowItWorks, Pricing, Proof, RehabProjects, TrustStrip } from './LandingSections'
 import PromptStarters from './PromptStarters'
@@ -31,6 +32,21 @@ export default function DeedHome() {
   const threadId = params.get('c')
   const { thread, status, streaming, send, stop } = useDeedThread(threadId)
   const [seed, setSeed] = useState<string | null>(null)
+
+  // ?deed=<key> deep link: prefill the composer from the fixed seed map
+  // (unknown keys are ignored), bring the composer into view, and strip the
+  // param so a reload does not re-seed.
+  const deedKey = params.get('deed')
+  useEffect(() => {
+    if (!deedKey) return
+    const prompt = DEED_SEEDS[deedKey]
+    if (prompt) {
+      setSeed(prompt)
+      if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+    router.replace(threadId ? `/?c=${encodeURIComponent(threadId)}` : '/', { scroll: false })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deedKey])
 
   // First send on a fresh page: put the thread id in the URL without a
   // navigation, so back/forward and reload behave like a real page.
