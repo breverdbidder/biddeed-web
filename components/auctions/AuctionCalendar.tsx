@@ -49,10 +49,10 @@ interface Props {
   onSelectDay?: (date: string, saleType?: string) => void
 }
 
-const TYPE_STYLE: Record<string, { bg: string; border: string; label: string }> = {
-  foreclosure: { bg: C.tint, border: C.brand, label: 'Foreclosures' },
-  tax_deed: { bg: C.card, border: C.ink, label: 'Tax Deeds' },
-  other: { bg: C.card, border: C.border, label: 'Other' },
+const TYPE_STYLE: Record<string, { bg: string; border: string; label: string; token: string }> = {
+  foreclosure: { bg: C.tint, border: C.brand, label: 'Foreclosures', token: 'FC' },
+  tax_deed: { bg: C.card, border: C.ink, label: 'Tax Deeds', token: 'TD' },
+  other: { bg: C.card, border: C.border, label: 'Other', token: 'OT' },
 }
 
 function plural(n: number, label: string) {
@@ -167,7 +167,11 @@ export default function AuctionCalendar({ county, saleType, onSelectDay }: Props
         const style = TYPE_STYLE[p.type]
         return {
           id: `${d.date}:${p.type}`,
-          title: plural(p.count, style.label),
+          // Chip label = short token + count (owner decision Sep 12 2026:
+          // "Us only initials"). Fixed-width tokens ("FC 7", "TD 54") fit any
+          // column, so chips never truncate - the full words live in the
+          // legend and the hover/tap title instead.
+          title: `${style.token} ${p.count}`,
           start: d.date,
           allDay: true,
           backgroundColor: style.bg,
@@ -350,8 +354,9 @@ export default function AuctionCalendar({ county, saleType, onSelectDay }: Props
             font-size: 0.72rem;
             line-height: 1.2;
             white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            /* No overflow/ellipsis here on purpose: chip labels are fixed
+             * tokens ("FC 7", "TD 54") that always fit the column. Clipping
+             * full words was the T/Ta/Tax soup Ariel flagged Sep 12 2026. */
           }
           .zw-auction-calendar :global(.fc .fc-daygrid-day-number) {
             min-width: 32px;
@@ -381,11 +386,11 @@ export default function AuctionCalendar({ county, saleType, onSelectDay }: Props
       <div className="flex flex-wrap items-center gap-4 mb-4">
         <div className="flex items-center gap-1.5">
           <span className="w-3 h-3 rounded-full bg-primary" />
-          <span className="text-sm text-muted-foreground dark:text-muted-foreground">Foreclosure</span>
+          <span className="text-sm text-muted-foreground dark:text-muted-foreground">FC = Foreclosures</span>
         </div>
         <div className="flex items-center gap-1.5">
           <span className="w-3 h-3 rounded-full bg-foreground" />
-          <span className="text-sm text-muted-foreground dark:text-muted-foreground">Tax Deed</span>
+          <span className="text-sm text-muted-foreground dark:text-muted-foreground">TD = Tax Deeds</span>
         </div>
 
         <div className="ml-auto flex flex-wrap items-center gap-3 text-sm">
