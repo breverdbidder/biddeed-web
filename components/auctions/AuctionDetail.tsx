@@ -369,6 +369,34 @@ export default function AuctionDetail({ auctionId }: Props) {
               </div>
             )}
 
+            {/* Investment Score locked cell - shown when the API stripped the
+                score for a free/anonymous caller (paywall, owner decision
+                2026-09-12). Case/property/zoning above stay visible; only the
+                number we charge for locks. */}
+            {auction.score_locked && (
+              <div className="bg-card dark:bg-card border border-border dark:border-border rounded-lg p-4 text-center">
+                <p className="text-xs text-muted-foreground dark:text-muted-foreground uppercase mb-3">Investment Score</p>
+                <p className="text-xl font-bold text-foreground mb-1">Locked</p>
+                <p className="text-xs text-muted-foreground dark:text-muted-foreground mb-4">
+                  The verdict, Max Bid, and bid-to-value ratio are on the paid tiers.
+                </p>
+                <div className="flex flex-col gap-2">
+                  <a
+                    href="/buy-report"
+                    className="block px-4 py-2 rounded-lg text-sm font-semibold bg-primary text-white hover:opacity-90"
+                  >
+                    Get the full report - $25
+                  </a>
+                  <a
+                    href="/subscribe?tier=investor"
+                    className="block px-4 py-2 rounded-lg text-sm font-semibold border border-border dark:border-border text-primary hover:underline"
+                  >
+                    Investor - $99/mo
+                  </a>
+                </div>
+              </div>
+            )}
+
             {/* Mini Map */}
             {hasCoords && (
               <div className="bg-card dark:bg-card border border-border dark:border-border rounded-lg overflow-hidden">
