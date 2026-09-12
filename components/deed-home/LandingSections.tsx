@@ -41,6 +41,7 @@ export const BTN =
   'inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background'
 export const BTN_PRIMARY = cn(BTN, 'bg-primary text-primary-foreground hover:bg-primary/90')
 export const BTN_QUIET = cn(BTN, 'border border-border bg-card text-foreground hover:border-primary/60 hover:text-primary')
+export const BTN_DISABLED = cn(BTN, 'bg-primary/50 text-primary-foreground cursor-not-allowed')
 
 function Eyebrow({ children, className }: { children: React.ReactNode; className?: string }) {
   return <p className={cn('text-xs font-semibold uppercase tracking-[0.18em] text-primary', className)}>{children}</p>
@@ -551,7 +552,7 @@ export function Pricing({ onPrompt }: { onPrompt: (p: string) => void }) {
               ))}
             </ul>
             {p.cta.href ? (
-              <a href={p.cta.href} className={cn(p.featured ? BTN_PRIMARY : BTN_QUIET, 'mt-6 w-full')}>
+              <a href={p.cta.href} className={cn(BTN_PRIMARY, 'mt-6 w-full')}>
                 {p.cta.label}
               </a>
             ) : p.cta.prompt ? (
@@ -559,7 +560,7 @@ export function Pricing({ onPrompt }: { onPrompt: (p: string) => void }) {
                 {p.cta.label}
               </button>
             ) : (
-              <span aria-disabled="true" className={cn(BTN_QUIET, 'mt-6 w-full cursor-not-allowed opacity-60')}>
+              <span aria-disabled="true" className={cn(BTN_DISABLED, 'mt-6 w-full')}>
                 {p.cta.label}
               </span>
             )}
