@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { resolveBcpaoPhotoUrl } from '@/lib/bcpao'
 import { LIGHT as C } from '@/lib/design-tokens'
 import { getRetryingSupabaseClient } from '@/lib/supabase-retry'
+import { getCallerTierId, tierAtLeast } from '@/lib/tier/server'
 
 export const dynamic = 'force-dynamic'
 
@@ -265,9 +266,30 @@ export async function GET(
     source_url: auction.source_url,
   }
 
+  // Paywall (owner decision 2026-09-12, "max bid gated to paid users only"):
+  // the Investment Score - verdict, Max Bid, bid-to-value ratio - is
+  // investor+. Free/anonymous callers get everything else on this page (case,
+  // property, zoning) with the score stripped server-side and score_locked set
+  // so the client renders the locked cell instead. Stripping (not just
+  // hiding) matters: this JSON is directly fetchable. 'UNKNOWN' also hides the
+  // header verdict pill via the component's existing UNKNOWN guard.
+  //
+  // The response is per-user now, so public CDN caching is off - a paid
+  // user's unlocked payload must never be served to an anonymous visitor from
+  // the edge cache.
+  const tierId = await getCallerTierId()
+  if (!tierAtLeast(tierId, 'investor')) {
+    response.max_bid = null
+    response.bid_ratio = null
+    response.recommendation = 'UNKNOWN'
+    response.recommendation_color = `${C.border}`
+    ;(response as Record<string, unknown>).score_locked = true
+  }
+
   return NextResponse.json(response, {
     headers: {
-      'Cache-Control': 'public, s-maxage=120, stale-while-revalidate=600',
+      'Cache-Control': 'private, no-store',
     },
   })
 }
+
