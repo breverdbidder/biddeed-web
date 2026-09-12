@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Check } from 'lucide-react'
 
-import { PLANS, W, BTN_PRIMARY, BTN_QUIET } from '@/components/deed-home/LandingSections'
+import { PLANS, W, BTN_PRIMARY, BTN_QUIET, BTN_DISABLED } from '@/components/deed-home/LandingSections'
 import { cn } from '@/lib/utils'
 
 type Interval = 'monthly' | 'annual'
@@ -109,7 +109,7 @@ export default function PricingTiers() {
                   {p.cta.label}
                 </a>
               ) : (
-                <span aria-disabled="true" className={cn(BTN_QUIET, 'mt-6 w-full cursor-not-allowed opacity-60')}>
+                <span aria-disabled="true" className={cn(BTN_DISABLED, 'mt-6 w-full')}>
                   {p.cta.label}
                 </span>
               )}
