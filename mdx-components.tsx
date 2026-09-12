@@ -4,6 +4,7 @@ import { BidDeedCTA } from '@/components/academy/BidDeedCTA'
 import { SaleTypeCallout } from '@/components/academy/SaleTypeCallout'
 import { Disclaimer } from '@/components/academy/Disclaimer'
 import { Checklist } from '@/components/academy/Checklist'
+import { EducationMap } from '@/components/academy/education-map/EducationMap'
 
 /**
  * MDX components available to every Academy page (#63). The four BidDeed
@@ -17,6 +18,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     SaleTypeCallout,
     Disclaimer,
     Checklist,
+    EducationMap,
     ...components,
   }
 }
