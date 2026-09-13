@@ -1,4 +1,12 @@
 {
   "title": "Academy",
-  "pages": ["index", "tax-deeds-101", "foreclosures-101", "how-to-use-biddeed", "case-studies", "county-playbooks"]
+  "pages": [
+    "index",
+    "tax-deeds-101",
+    "foreclosures-101",
+    "how-to-use-biddeed",
+    "competitors",
+    "case-studies",
+    "county-playbooks"
+  ]
 }
