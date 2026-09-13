@@ -8,23 +8,27 @@ on:
         required: true
         type: string
 
-permissions:
-  contents: write
-  issues: write
-  pull-requests: write
+permissions: {}
 
 jobs:
   validate:
     runs-on: ubuntu-latest
+    permissions: {}
     steps:
       - name: Reject empty issues input
+        env:
+          ISSUES_INPUT: ${{ inputs.issues }}
         run: |
-          if [ -z "${{ inputs.issues }}" ]; then echo "::error::Empty issues input"; exit 1; fi
-          echo "::notice::GHA-only CC for issues: ${{ inputs.issues }}"
+          if [ -z "$ISSUES_INPUT" ]; then echo "::error::Empty issues input"; exit 1; fi
+          echo "::notice::GHA-only CC for issues: $ISSUES_INPUT"
 
   run-cc:
     needs: validate
     runs-on: ubuntu-latest
+    permissions:
+      contents: write        # pushes CC commits
+      issues: read           # gh issue view for the brief
+      pull-requests: write   # CC may open PRs with GITHUB_TOKEN fallback
     # 330min = usage-cap wait budget + work buffer (same rationale as ops runner)
     timeout-minutes: 330
     concurrency:
@@ -36,14 +40,14 @@ jobs:
       fail-fast: false
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           # Prefer GH_PAT_FULL (can push past some protections); fall back to GITHUB_TOKEN
           token: ${{ secrets.GH_PAT_FULL != '' && secrets.GH_PAT_FULL || github.token }}
           fetch-depth: 0
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '22'
           cache: 'npm'
@@ -225,13 +229,17 @@ jobs:
 
       - name: Commit changes
         if: always()
+        env:
+          MATRIX_ISSUE: ${{ matrix.issue }}
+          RUN_ID: ${{ github.run_id }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
           git config user.name "cc-ghonly-bot"
           git config user.email "cc@biddeed.ai"
           git add -A
           if git diff --cached --quiet; then echo "No file changes"; exit 0; fi
-          git commit -m "CC GHA-only: issue ${{ matrix.issue }} (run ${{ github.run_id }})"
-          DEFAULT_BRANCH="${{ github.event.repository.default_branch }}"
+          git commit -m "CC GHA-only: issue $MATRIX_ISSUE (run $RUN_ID)"
+          DEFAULT_BRANCH="$DEFAULT_BRANCH"
           for attempt in 1 2 3 4 5; do
             if git push origin "HEAD:${DEFAULT_BRANCH}"; then echo "push OK on attempt $attempt"; exit 0; fi
             echo "push rejected (attempt $attempt) — rebasing and retrying"
