@@ -18,6 +18,7 @@ export default async function SignInCatchAllPage() {
   return (
     <div style={{ minHeight: '100vh', backgroundColor: C.background, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
       <div style={{ width: '100%', maxWidth: '440px' }}>
+        <h1 style={{ position: 'absolute', width: '1px', height: '1px', padding: 0, margin: '-1px', overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap', border: 0 }}>Sign in to BidDeed.AI</h1>
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
             <div style={{ width: '40px', height: '40px', backgroundColor: C.brand, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
