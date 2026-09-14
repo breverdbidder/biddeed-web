@@ -1,0 +1,6 @@
+# Gitleaks baseline 2026-09-13 - pre-existing findings triaged as dead/placeholder by trufflehog verified sweep.
+# Remove an entry only when the underlying file/history is cleaned. New secrets still fail the gate.
+307059f53aa47f23684bab60fa8bb60145c75b28:components/deed-home/LandingSections.tsx:generic-api-key:30
+44bbe22b7a7179a7d4136b3290268da0e9223563:.github/workflows/cloudflare-production.yml:generic-api-key:194
+44bbe22b7a7179a7d4136b3290268da0e9223563:components/deed-home/LandingSections.tsx:generic-api-key:37
+ada6a84290de5b1e4471434cb85288e065095602:components/home/Landing.tsx:generic-api-key:53
