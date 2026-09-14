@@ -4,6 +4,8 @@ import { BidDeedCTA } from '@/components/academy/BidDeedCTA'
 import { SaleTypeCallout } from '@/components/academy/SaleTypeCallout'
 import { Disclaimer } from '@/components/academy/Disclaimer'
 import { Checklist } from '@/components/academy/Checklist'
+import { InvestorPathGrid } from '@/components/academy/InvestorPathGrid'
+import { EducationalWorkbooks } from '@/components/academy/EducationalWorkbooks'
 import { EducationMap } from '@/components/academy/education-map/EducationMap'
 
 /**
@@ -18,6 +20,8 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     SaleTypeCallout,
     Disclaimer,
     Checklist,
+    InvestorPathGrid,
+    EducationalWorkbooks,
     EducationMap,
     ...components,
   }

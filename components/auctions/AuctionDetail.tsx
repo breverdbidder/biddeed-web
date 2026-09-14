@@ -461,6 +461,12 @@ export default function AuctionDetail({ auctionId }: Props) {
               )}
             </div>
 
+            <div className="rounded-lg border border-border bg-card p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-primary">Your assumptions</p>
+              <p className="mt-2 text-sm leading-5 text-muted-foreground">Use the educational workbooks to test a flip, rental, land, certificate, or possession scenario. Nothing here changes this auction record.</p>
+              <a href="/academy/workbooks" className="mt-3 inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline">Open deal workbooks</a>
+            </div>
+
             {/* Data Freshness */}
             {auction.enriched_at && (
               <p className="text-xs text-muted-foreground dark:text-muted-foreground text-center">
