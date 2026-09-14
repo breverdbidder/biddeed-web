@@ -61,7 +61,7 @@ jobs:
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.3.0
         with:
           repository: breverdbidder/cli-anything-biddeed
-          token: ${{ secrets.GH_PAT_FULL }}
+          token: ${{ secrets.CLI_ANYTHING_BIDDEED_READ_TOKEN }}
           persist-credentials: false
           sparse-checkout: scripts/ui-audit
           sparse-checkout-cone-mode: true

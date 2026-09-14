@@ -216,7 +216,7 @@ jobs:
           repository: breverdbidder/cli-anything-biddeed
           # The canon repository is private. The default GITHUB_TOKEN is scoped
           # to biddeed-web and cannot read a sibling private repository.
-          token: ${{ secrets.GH_PAT_FULL }}
+          token: ${{ secrets.CLI_ANYTHING_BIDDEED_READ_TOKEN }}
           persist-credentials: false
           sparse-checkout: scripts/ui-audit
           sparse-checkout-cone-mode: true
