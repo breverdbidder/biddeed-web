@@ -118,7 +118,7 @@ export default function Topbar({ deedOpen, onToggleDeed, showDeedToggle = true }
           type="button"
           onClick={toggleTheme}
           aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-          className="mr-1 inline-flex min-h-11 items-center gap-1.5 rounded-md border border-input px-2.5 text-xs font-semibold text-muted-foreground outline-none transition-colors hover:border-primary hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+          className="mr-1 inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-md border border-input px-2.5 text-xs font-semibold text-muted-foreground outline-none transition-colors hover:border-primary hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
         >
           <span aria-hidden>{theme === 'dark' ? '☼' : '☾'}</span>
           <span className={isMobile ? 'sr-only' : undefined}>{theme === 'dark' ? 'Light' : 'Dark'}</span>
