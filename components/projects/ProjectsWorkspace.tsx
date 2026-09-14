@@ -91,6 +91,11 @@ export default function ProjectsWorkspace({ dueDiligenceAllowed, dueDiligenceTie
         Budget the rehab, price the scopes, track spend against budget.
       </h1>
 
+      <aside className="mt-6 flex flex-col gap-3 rounded-xl border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between" aria-label="Deal workbooks">
+        <div><p className="text-sm font-semibold text-foreground">Pressure-test the exit before you build the budget</p><p className="mt-1 text-sm text-muted-foreground">Run a user-entered rental, flip, land, or wholesale worksheet in the Academy.</p></div>
+        <a href="/academy/workbooks" className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-lg border border-border px-4 text-sm font-semibold text-primary hover:bg-secondary">Open workbooks</a>
+      </aside>
+
       <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="mt-6">
         <TabsList>
           <TabsTrigger value="diligence">Due Diligence</TabsTrigger>
