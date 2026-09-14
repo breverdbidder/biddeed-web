@@ -52,7 +52,10 @@ export default function AppShell({
   // bottom of /support at 1280px. Ariel call 2026-09-09: hide it there.
   // /maps (#75): same collision, measured live at 390x844 — the fixed card
   // sits directly over the scorecard bottom sheet's peek row and toggle.
-  const hasOwnDeedEntry = pathname.startsWith('/support') || pathname.startsWith('/maps')
+  // /academy: Fumadocs renders previous/next navigation at the page's bottom
+  // edge. At 390px the 56px launcher overlaps the Next card's lower-right
+  // hit area, so Academy uses the persistent Topbar Ask Deed entry instead.
+  const hasOwnDeedEntry = pathname.startsWith('/support') || pathname.startsWith('/maps') || pathname.startsWith('/academy')
   const [deedOpen, setDeedOpen] = useState(false)
   const toggleDeed = () => setDeedOpen((v) => !v)
 
