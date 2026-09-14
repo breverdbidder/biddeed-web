@@ -621,7 +621,7 @@ export function Footer() {
     <footer className="mx-auto max-w-6xl border-t border-border px-4 py-10 sm:px-6">
       <nav aria-label="Footer" className="flex flex-wrap gap-x-6 gap-y-2">
         {links.map((l) => (
-          <a key={l.href} href={l.href} className="inline-flex min-w-8 items-center py-3.5 text-sm text-muted-foreground transition-colors hover:text-foreground">
+          <a key={l.href} href={l.href} className="inline-flex min-w-11 items-center py-3.5 text-sm text-muted-foreground transition-colors hover:text-foreground">
             {l.label}
           </a>
         ))}

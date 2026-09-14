@@ -45,7 +45,7 @@ export function MobileAcademyNav() {
                         <li key={j}>
                           <Link
                             href={leaf.url}
-                            className="block rounded-md px-2 py-2 text-sm text-foreground hover:bg-secondary"
+                            className="flex min-h-11 items-center rounded-md px-2 text-sm text-foreground hover:bg-secondary"
                           >
                             {leaf.name}
                           </Link>
@@ -60,7 +60,7 @@ export function MobileAcademyNav() {
               <li key={i}>
                 <Link
                   href={node.url}
-                  className="block rounded-md px-2 py-2 text-sm text-foreground hover:bg-secondary"
+                  className="flex min-h-11 items-center rounded-md px-2 text-sm text-foreground hover:bg-secondary"
                 >
                   {node.name}
                 </Link>
