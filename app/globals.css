@@ -484,3 +484,9 @@ html[data-theme='light'] h1, html[data-theme='light'] h2, html[data-theme='light
 @container (min-width: 36rem) {
   .d4d-stop { flex-direction: row; align-items: center; justify-content: space-between; gap: 1rem; }
 }
+
+/* A1 audit fix (2026-09-13): visible focus indicator - WCAG 2.4.7 */
+:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+}
