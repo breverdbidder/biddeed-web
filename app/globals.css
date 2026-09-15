@@ -416,6 +416,21 @@ html[data-theme='light'] h1, html[data-theme='light'] h2, html[data-theme='light
 .fc .fc-button-primary:disabled { background: hsl(var(--secondary)); border-color: hsl(var(--border)); color: hsl(var(--muted-foreground)); opacity: 1; }
 .fc .fc-daygrid-day-number, .fc .fc-col-header-cell-cushion, .fc .fc-list-day-text, .fc .fc-list-day-side-text, .fc .fc-toolbar-title { color: hsl(var(--muted-foreground)); }
 .fc .fc-list-day-cushion { background: hsl(var(--secondary)); }
+
+/* 44px touch baseline (WCAG 2.2 SC 2.5.5, repo standard) for the FullCalendar
+   list view on mobile: the day-header links (.fc-list-day-text /
+   .fc-list-day-side-text) and the per-event title links render at ~20-24px
+   high by default - measured live 2026-09-15 at 390px (ui-audit smallTap:
+   a.fc-list-day-text@65x24, a.fc-list-day-side-text@159x24, title a@47x20).
+   Desktop rows stay compact; the enlargement is scoped to the mobile band. */
+@media (max-width: 768px) {
+  .fc .fc-list-day-text, .fc .fc-list-day-side-text {
+    display: inline-flex; align-items: center; min-height: 44px; padding-top: 0; padding-bottom: 0;
+  }
+  .fc .fc-list-event-title a {
+    display: inline-flex; align-items: center; min-height: 44px; margin: -10px 0; padding-top: 10px; padding-bottom: 10px;
+  }
+}
 .fc .fc-daygrid-more-link { color: hsl(var(--primary-hover)); }
 
 /* mapbox-gl.css is imported by AuctionMap.tsx and lands AFTER this file in the
