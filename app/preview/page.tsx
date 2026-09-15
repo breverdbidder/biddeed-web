@@ -5,12 +5,20 @@ import { getRetryingSupabaseClient } from '@/lib/supabase-retry'
 import { formatCountyLabel } from '@/lib/counties'
 
 /**
- * Auction-day evidence preview — /preview/2026-09-16
+ * Auction-day evidence preview — /preview?date=2026-09-16
  *
  * Built for the live-shopping land grab: one linkable page per auction day
  * that walks the evidence on a small set of specific, disputable deals and
  * hands the viewer a prefilled $25 SIGNAL$ report checkout. It is the page a
  * YouTube/Shorts/live stream pins while the host talks.
+ *
+ * This is a static route with a ?date= search param, NOT a /preview/[date]
+ * dynamic segment: this OpenNext-on-Cloudflare deploy 404s dynamic page
+ * segments that are not in the prerender manifest (route handlers are fine,
+ * which is why /api/auctions/[id] works). /radar?view= proves the
+ * static-route + search-param pattern in production. Verified live
+ * 2026-09-15: /preview/2026-09-16 404'd on a green deploy while
+ * /api/auctions/<uuid> returned 200.
  *
  * Data discipline (same rules as the rest of the app):
  * - Every figure shown comes from multi_county_auctions at request time.
@@ -246,32 +254,48 @@ async function fetchDayAuctions(date: string): Promise<PreviewRow[]> {
   return data as unknown as PreviewRow[]
 }
 
+/**
+ * No valid ?date= -> land on the nearest upcoming auction day instead of a
+ * bare 404, so the pinned link keeps working after the day it names passes.
+ */
+async function nearestAuctionDate(): Promise<string | null> {
+  const supabase = getRetryingSupabaseClient(undefined, { retryMode: 'full' })
+  const today = new Date().toISOString().slice(0, 10)
+  const { data, error } = await supabase
+    .from('multi_county_auctions')
+    .select('auction_date')
+    .gte('auction_date', today)
+    .order('auction_date', { ascending: true, nullsFirst: false })
+    .limit(1)
+  if (error || !Array.isArray(data) || data.length === 0) return null
+  const row = data[0] as unknown as { auction_date: string | null }
+  return row.auction_date
+}
+
 export async function generateMetadata({
-  params,
+  searchParams,
 }: {
-  params: Promise<{ date: string }>
+  searchParams: Promise<{ date?: string }>
 }): Promise<Metadata> {
-  const { date } = await params
-  const valid = ISO_DATE.test(date)
+  const { date } = await searchParams
+  const valid = Boolean(date && ISO_DATE.test(date))
   return {
     title: valid
-      ? `Florida Auction Preview — ${fmtLongDate(date)} | BidDeed.AI`
-      : 'Auction Preview | BidDeed.AI',
+      ? `Florida Auction Preview — ${fmtLongDate(date!)} | BidDeed.AI`
+      : 'Florida Auction Preview | BidDeed.AI',
     description:
       'The evidence on the specific Florida auction deals worth arguing about: bank ask vs. recorded market estimate, lien and zoning evidence in the $25 SIGNAL$ Property Report.',
-    alternates: valid
-      ? { canonical: `https://biddeed.ai/preview/${date}` }
-      : undefined,
   }
 }
 
 export default async function AuctionPreviewPage({
-  params,
+  searchParams,
 }: {
-  params: Promise<{ date: string }>
+  searchParams: Promise<{ date?: string }>
 }) {
-  const { date } = await params
-  if (!ISO_DATE.test(date)) notFound()
+  const { date: rawDate } = await searchParams
+  const date = rawDate && ISO_DATE.test(rawDate) ? rawDate : await nearestAuctionDate()
+  if (!date) notFound()
 
   const rows = dedupe(await fetchDayAuctions(date))
   if (rows.length === 0) notFound()
