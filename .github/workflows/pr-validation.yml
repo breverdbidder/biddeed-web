@@ -57,14 +57,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - name: Checkout the canon harness
+      - name: Checkout the vendored canon harness
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.3.0
         with:
-          repository: breverdbidder/cli-anything-biddeed
-          token: ${{ secrets.CLI_ANYTHING_BIDDEED_READ_TOKEN }}
           persist-credentials: false
-          sparse-checkout: scripts/ui-audit
-          sparse-checkout-cone-mode: true
 
       - name: Setup Python
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
