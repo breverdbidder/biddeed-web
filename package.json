@@ -16,7 +16,8 @@
     "cf:typegen": "wrangler types --config wrangler.staging.jsonc --env-interface CloudflareEnv cloudflare-env.d.ts",
     "test:e2e:rls": "playwright test tests/e2e/rls-isolation.spec.ts",
     "postinstall": "fumadocs-mdx",
-    "test:report-release": "node scripts/validate-report-field-release.mjs"
+    "test:report-release": "node scripts/validate-report-field-release.mjs",
+    "test:auction-detail-gate": "node scripts/validate-auction-detail-gate.mjs"
   },
   "dependencies": {
     "@assistant-ui/react": "0.15.15",

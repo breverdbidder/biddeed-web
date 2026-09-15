@@ -94,13 +94,18 @@ export default function AuctionDetail({ auctionId }: Props) {
   const [auction, setAuction] = useState<AuctionDetailType | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [paidGate, setPaidGate] = useState(false)
   const [photoError, setPhotoError] = useState(false)
 
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch(apiUrl(`/api/auctions/${auctionId}`))
+        const res = await fetch(apiUrl(`/api/auctions/${auctionId}`), { cache: 'no-store' })
         if (!res.ok) {
+          if (res.status === 403) {
+            setPaidGate(true)
+            return
+          }
           setError(res.status === 404 ? 'Auction not found' : 'Failed to load auction')
           return
         }
@@ -121,6 +126,32 @@ export default function AuctionDetail({ auctionId }: Props) {
         <div className="flex flex-col items-center gap-4">
           <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
           <p className="text-muted-foreground dark:text-muted-foreground text-sm">Loading auction...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (paidGate) {
+    return (
+      <div className="min-h-[70vh] bg-background px-4 py-16">
+        <div className="mx-auto max-w-xl rounded-2xl border border-border bg-card p-6 text-center sm:p-8">
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-primary">Paid report</p>
+          <h1 className="font-display mt-2 text-3xl font-semibold text-foreground">Auction detail is for paid tiers</h1>
+          <p className="mt-3 text-base leading-7 text-muted-foreground">
+            Case, property, zoning, map, and auction analysis are available with Investor or higher.
+          </p>
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
+            <a href="/subscribe?tier=investor" className="min-h-11 rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground">
+              See paid plans
+            </a>
+            <a href="/buy-report" className="min-h-11 rounded-lg border border-border px-5 py-3 text-sm font-semibold text-primary">
+              Buy one source-backed report - $25
+            </a>
+          </div>
+          <p className="mt-5 text-sm leading-6 text-muted-foreground">
+            The $25 purchase delivers one keyed report for the selected property. It does not unlock the paid workspace or other auction-detail URLs.
+          </p>
+          <p className="mt-2 text-sm font-semibold text-foreground">Pro Plus model fields: Withheld - validation in progress</p>
         </div>
       </div>
     )

@@ -72,6 +72,9 @@ jobs:
       - name: Validate SIGNAL$ field release policy
         run: npm run test:report-release
 
+      - name: Validate auction-detail paid gate
+        run: npm run test:auction-detail-gate
+
       - name: Validate Cloudflare credentials are present
         shell: bash
         run: |

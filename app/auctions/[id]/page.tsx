@@ -1,11 +1,8 @@
 import AuctionDetail from '@/components/auctions/AuctionDetail'
 
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params
-  return {
-    title: `Auction #${id} — BidDeed.AI`,
-    description: 'Auction detail — property info, parcel data, zoning, and map.',
-  }
+export const metadata = {
+  title: 'Paid Auction Detail — BidDeed.AI',
+  description: 'Paid auction intelligence for BidDeed.AI subscribers.',
 }
 
 export default async function AuctionDetailPage({ params }: { params: Promise<{ id: string }> }) {
