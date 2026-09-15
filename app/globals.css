@@ -505,3 +505,17 @@ html[data-theme='light'] h1, html[data-theme='light'] h2, html[data-theme='light
   outline: 2px solid hsl(var(--primary));
   outline-offset: 2px;
 }
+
+/* The Deed home composer is ONE composite control: focus indication already
+   lives on the container (focus-within:border-primary/60 + 4px primary/12
+   ring in Composer.tsx). The global :focus-visible rule above is unlayered,
+   so it beats the textarea's Tailwind outline-none and draws a second 2px
+   ring around just the textarea; its 2px offset lands on the toolbar row and
+   the send button sits on the ring (measured live at 390px, 2026-09-15).
+   Suppress the duplicate on the inner textarea only - the composite control
+   keeps its visible focus, WCAG 2.4.7 unaffected. ID beats the global
+   pseudo-class on specificity; no outline removed from any other element. */
+#deed-home-input:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 0;
+}
