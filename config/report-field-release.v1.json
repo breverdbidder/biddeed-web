@@ -1,0 +1,36 @@
+{
+  "policy_version": "signals-field-release-v1",
+  "approved_at": "2026-09-14T21:22:21-04:00",
+  "report_offer": {
+    "name": "SIGNAL$ Property Report",
+    "price_usd": 25,
+    "state": "live",
+    "promise": "If we match the wrong property, misstate a cited source, or fail to deliver a readable report, we will correct it or refund the $25."
+  },
+  "states": ["live", "beta", "withheld", "unavailable", "needs_review"],
+  "fields": {
+    "source_backed_evidence": {
+      "tier": "one_time_report",
+      "state": "live",
+      "requires": ["exact_property_or_case_match", "source_reference", "effective_or_retrieved_at", "type_and_range_validation"]
+    },
+    "third_party_purchase_probability": {
+      "tier": "pro_plus",
+      "state": "withheld",
+      "public_value_enabled": false,
+      "label": "Withheld - validation in progress"
+    },
+    "predicted_final_sale_price": {
+      "tier": "pro_plus",
+      "state": "withheld",
+      "public_value_enabled": false,
+      "label": "Withheld - validation in progress"
+    },
+    "signals_max_bid": {
+      "tier": "pro_plus",
+      "state": "withheld",
+      "public_value_enabled": false,
+      "label": "Withheld - validation in progress"
+    }
+  }
+}
