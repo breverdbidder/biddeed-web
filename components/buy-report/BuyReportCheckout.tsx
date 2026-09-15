@@ -8,6 +8,7 @@ import { apiUrl } from '@/lib/api'
 import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { REPORT_FIELD_RELEASE_POLICY } from '@/lib/report-field-release'
 
 const REPORT_SECTIONS = [
   'Subject property identification',
@@ -295,7 +296,7 @@ export default function BuyReportCheckout() {
         One SIGNAL$ Property Report — $25
       </h1>
       <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground">
-        ZoneWise zoning, comps, value band, and red flags for one auction. Max-bid and ML figures are labeled Withheld until the rebuilt model is validated. One-time $25, no subscription.
+        A source-backed snapshot for one auction: official auction facts, parcel and assessment data, comps, zoning, and red flags when their source and exact property match are verified. One-time $25, no subscription.
       </p>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
@@ -319,7 +320,7 @@ export default function BuyReportCheckout() {
               <h2 className="text-lg font-semibold text-foreground">Pick your county</h2>
               <p className="mt-1 text-base text-muted-foreground">
                 Gold Standard counties include full CMA and ZoneWise zoning. All counties include opening bid
-                analysis and the SIGNAL$ Max Bid section, with figures labeled Withheld until the rebuilt model is validated.
+                analysis and the source-backed evidence sections. Probability, predicted sale price, and SIGNAL$ Max Bid belong to Pro Plus and remain Withheld - validation in progress.
               </p>
 
               {counties === null && !countiesError ? (
@@ -448,6 +449,17 @@ export default function BuyReportCheckout() {
               {prefillLoading ? <p className="mt-4 text-sm text-muted-foreground">Loading property…</p> : null}
               {prefillError ? <p className="mt-4 text-base text-destructive">{prefillError}</p> : null}
 
+              <div className="mt-4 rounded-lg border border-border bg-secondary p-3 text-sm leading-5 text-foreground">
+                <p className="font-semibold">Source-backed evidence report</p>
+                <p className="mt-1 text-muted-foreground">Missing or unverified fields are marked Unavailable, Needs review, or Withheld. No model estimate is substituted.</p>
+                <p className="mt-2 text-muted-foreground">{REPORT_FIELD_RELEASE_POLICY.report_offer.promise}</p>
+              </div>
+
+              <div className="mt-3 rounded-lg border border-border bg-background p-3 text-sm text-muted-foreground">
+                <p><span className="font-semibold text-foreground">Pro Plus model fields:</span> Withheld - validation in progress</p>
+                <p className="mt-1">Third-party purchase probability · Predicted sale price · SIGNAL$ Max Bid</p>
+              </div>
+
               <form onSubmit={handleSubmit} className="mt-5 flex flex-col gap-3">
                 <label htmlFor="br-email" className="text-sm font-medium text-foreground">
                   Email address (report delivered here)
@@ -506,8 +518,7 @@ export default function BuyReportCheckout() {
             ))}
           </ol>
           <p className="mt-4 border-t border-border pt-4 text-base leading-5 text-muted-foreground">
-            Included intelligence overlays: the Shapira third-party-purchase model and ZoneWise.AI land/zoning
-            intelligence.
+            Source-backed evidence includes its source and effective date. Probability, predicted sale price, and SIGNAL$ Max Bid are Pro Plus fields and currently show Withheld - validation in progress.
           </p>
         </div>
 

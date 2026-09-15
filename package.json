@@ -15,7 +15,8 @@
     "cf:deploy:production": "opennextjs-cloudflare build --config wrangler.production.jsonc --env production && wrangler deploy --config wrangler.production.jsonc --env production",
     "cf:typegen": "wrangler types --config wrangler.staging.jsonc --env-interface CloudflareEnv cloudflare-env.d.ts",
     "test:e2e:rls": "playwright test tests/e2e/rls-isolation.spec.ts",
-    "postinstall": "fumadocs-mdx"
+    "postinstall": "fumadocs-mdx",
+    "test:report-release": "node scripts/validate-report-field-release.mjs"
   },
   "dependencies": {
     "@assistant-ui/react": "0.15.15",

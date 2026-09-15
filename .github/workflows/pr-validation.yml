@@ -48,5 +48,8 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      - name: Validate SIGNAL$ field release policy
+        run: npm run test:report-release
+
       - name: Build production OpenNext Worker
         run: npx opennextjs-cloudflare build --config wrangler.production.jsonc
