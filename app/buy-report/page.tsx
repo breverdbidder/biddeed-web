@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic'
 export const metadata: Metadata = {
   title: 'Buy One SIGNAL$ Property Report — $25 | BidDeed.AI',
   description:
-    'ZoneWise zoning, comps, value band, and red flags for one auction. Max-bid and ML figures stay Withheld until the rebuilt model is validated. One-time $25, no subscription.',
+    'ZoneWise zoning, comps, value band, and red flags for one auction. Model figures stay Withheld until validation completes. One-time $25, no subscription.',
   alternates: {
     canonical: 'https://biddeed.ai/buy-report',
   },

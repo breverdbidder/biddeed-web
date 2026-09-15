@@ -107,7 +107,7 @@ export default function DeedHome() {
             <span className="flex size-9 items-center justify-center rounded-xl border border-border bg-card">
               <DeedRobotMark size={24} decorative={false} />
             </span>
-            <span className="text-sm font-medium text-muted-foreground">Deed · the <a href="/academy" className="underline underline-offset-2 transition-colors hover:text-foreground">biddeed.ai</a> agent</span>
+            <span className="text-sm font-medium text-muted-foreground">Deed · the <a href="/academy" className="underline underline-offset-2 transition-colors hover:text-foreground -my-2 py-2">biddeed.ai</a> agent</span>
           </div>
 
           <p className="mt-6 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
@@ -121,7 +121,7 @@ export default function DeedHome() {
             Our data is your unfair advantage at every US county auction.
           </p>
           <p className="mx-auto mt-2 max-w-xl text-base leading-7 text-muted-foreground sm:text-[17px]">
-            <a href="/maps" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80">biddeed.ai</a> is the moat for real estate auction intelligence and bidding in the USA. All the rest are wrappers.
+            <a href="/maps" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80 -my-2 py-2">biddeed.ai</a> is the moat for real estate auction intelligence and bidding in the USA. All the rest are wrappers.
           </p>
 
           <div className="mt-8 text-left">

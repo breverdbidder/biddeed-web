@@ -15,11 +15,11 @@ export default function PricingTiers() {
     <div className="tier-cq mx-auto w-full max-w-6xl px-4 pb-28 pt-10 sm:px-6 sm:pb-16 lg:px-8">
       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Plans</p>
       <h1 className="font-display mt-2 text-[1.9rem] font-medium leading-[1.15] tracking-tight text-foreground sm:text-4xl">
-        One below-market win pays for years of <a href="/maps" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80">biddeed.ai</a>.
+        One below-market win pays for years of <a href="/maps" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80 -my-2 py-2">biddeed.ai</a>.
       </h1>
       <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground">
         Every Florida auction is free to browse, and free members see the published number on every property:
-        2,911 live right now across 60 counties, each with its own <a href="/maps" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80">deal page</a>.
+        2,911 live right now across 60 counties, each with its own <a href="/maps" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80 -my-2 py-2">deal page</a>.
         Investor, Pro, and Pro Plus add the depth: reports, Due Diligence, and video property assessment with
         360° Orbit on the properties you work, as available. Every level includes the Academy lessons written for it.
       </p>

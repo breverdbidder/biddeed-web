@@ -55,13 +55,13 @@ export default function HomepageMapModule() {
         <a
           href="/maps"
           onClick={() => trackHeatmapEvent('homepage_to_maps_click', { surface: 'homepage' })}
-          className="hidden shrink-0 items-center gap-1 text-sm font-semibold text-primary hover:text-primary/80 sm:flex"
+          className="hidden shrink-0 items-center gap-1 text-sm font-semibold text-primary hover:text-primary/80 sm:flex -my-2 py-2"
         >
           Full map <ArrowRight className="size-3.5" aria-hidden />
         </a>
       </div>
-      <p className="mt-1.5 text-sm text-muted-foreground">
-        Every pin is a live below-market opportunity with its own <a href="/maps" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80">deal page</a>: 2,911 upcoming auctions across {ACS.counties.length} Florida
+      <p className="mt-1.5 text-base text-muted-foreground">
+        Every pin is a live below-market opportunity with its own <a href="/maps" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80 -my-2 py-2">deal page</a>: 2,911 upcoming auctions across {ACS.counties.length} Florida
         counties, over a map of where each county&apos;s market is heading.{' '}
         <span className="text-muted-foreground/70">{ACS.vintage_label}, {ACS.tables['B25077']}.</span>
       </p>

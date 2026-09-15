@@ -42,13 +42,16 @@ JS_SWEEP = r"""() => {
   const ld=[...document.querySelectorAll('script[type="application/ld+json"]')].map(s=>{try{const d=JSON.parse(s.textContent);return (Array.isArray(d)?d:[d]).map(x=>x['@type'])}catch(e){return ['UNPARSABLE']}}).flat();
   return {total,bad,colors,h1,ld,meta:(document.querySelector('meta[name=description]')||{}).content||'',canonical:(document.querySelector('link[rel=canonical]')||{}).href||'',robots:(document.querySelector('meta[name=robots]')||{}).content||'',text:document.body.innerText,layout:{docOverflow,textOverflow,offscreen,smallTap,tiny,misaligned,misalignedWhere:misalignedWhere.slice(0,3),offscreenWhere,smallTapWhere,tinyWhere},fams:[...fams]}}"""
 DISPLAY={}
-async def run(base, routes, out, fail_on_red):
-    rows=[]; red=0
+async def run(base, routes, out, fail_on_red, skipped=None, skip_why=None):
+    rows=[]; red=0; skipped=skipped or set(); skip_why=skip_why or {}
     async with async_playwright() as p:
         b=await p.chromium.launch(args=["--no-sandbox","--ignore-certificate-errors"])
         for vw,vh in ((1440,900),(390,844)):
             ctx=await b.new_context(viewport={"width":vw,"height":vh}, ignore_https_errors=True, user_agent="Mozilla/5.0 (biddeed-ui-audit)")
             for route in routes:
+                if route in skipped:
+                    rows.append((route, vw, "SKIP", None, 0, [], [], "SKIPPED: required audit env empty (" + skip_why.get(route, "?") + ") - coverage missing, NOT a pass"))
+                    continue
                 pg=await ctx.new_page(); status="ERR"; r={}; err=""
                 try:
                     # Use DOM readiness, not networkidle: Next/Cloudflare streams and analytics can keep
@@ -73,21 +76,40 @@ async def run(base, routes, out, fail_on_red):
                  "LAYOUT": (lambda L: bool(L) and not L["docOverflow"] and L["textOverflow"]==0 and L["offscreen"]==0 and L["smallTap"]==0 and L.get("misaligned",0)==0)(r.get("layout")),
                  "TYPE": (lambda L,F: bool(L) and L["tiny"]==0 and set(F) <= {"Inter","Inter Fallback","Source Serif 4","Source Serif 4 Fallback","JetBrains Mono","system-ui","serif","sans-serif","monospace","Iowan Old Style","ui-monospace","Segoe UI Emoji"})(r.get("layout"), r.get("fams",[])),
                 }
+                copy_why=[]
+                if not gates["COPY"]:
+                    hits=[x for x in RETIRED+BUZZ+CONTEMPT+COMPET if x in low]
+                    if hits: copy_why.append("terms=" + ",".join(hits[:4]))
+                    if low.count("!")>1: copy_why.append("bangs=" + str(low.count("!")))
+                    if re.search(r"\bS5\b", r.get("text","")): copy_why.append("S5")
                 red+=sum(1 for v in gates.values() if not v)
-                rows.append((route,vw,status,gates,len(r.get("bad",[])),offpal[:6],r.get("ld",[]),err+(" L="+str(r.get("layout")) if r.get("layout") and not gates["LAYOUT"] else "")+(" F="+",".join([f for f in r.get("fams",[]) if f not in {"Inter","Inter Fallback","Source Serif 4","Source Serif 4 Fallback","JetBrains Mono","system-ui"}]) if not gates["TYPE"] else "")))
+                rows.append((route,vw,status,gates,len(r.get("bad",[])),offpal[:6],r.get("ld",[]),err+(" COPY:" + ";".join(copy_why) if copy_why else "")+(" L="+str(r.get("layout")) if r.get("layout") and not gates["LAYOUT"] else "")+(" F="+",".join([f for f in r.get("fams",[]) if f not in {"Inter","Inter Fallback","Source Serif 4","Source Serif 4 Fallback","JetBrains Mono","system-ui"}]) if not gates["TYPE"] else "")))
                 await pg.close()
             await ctx.close()
         await b.close()
     lines=["| Route | VP | HTTP | RENDER | PALETTE | CONTRAST | COPY | SEO | LAYOUT | TYPE | <4.5:1 | off-palette | JSON-LD / notes |","|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
     for route,vw,st,g,nb,op,ld,err in rows:
+        if g is None:
+            lines.append(f"| {DISPLAY.get(route, route)} | {vw} | {st} | - | - | - | - | - | - | - | - | {err} |")
+            continue
         f=lambda k: "✅" if g[k] else "❌"
         lines.append(f"| {DISPLAY.get(route, route)} | {vw} | {st} | {f('RENDER')} | {f('PALETTE')} | {f('CONTRAST')} | {f('COPY')} | {f('SEO')} | {f('LAYOUT')} | {f('TYPE')} | {nb} | {' '.join(op)} | {' '.join(map(str,ld))} {err} |")
     md="\n".join(lines)+f"\n\nRed gates: **{red}**\n"; print(md)
     if out: open(out,"w").write(md)
+    if skipped:
+        names=sorted({skip_why[r] for r in skipped})
+        print(f"::error::CONFIG: required audit env empty ({', '.join(names)}) - {len(skipped)} route(s) SKIPPED; audit coverage is missing and this run is NOT green")
+        if fail_on_red: sys.exit(2)
     if fail_on_red and red: sys.exit(1)
 if __name__=="__main__":
     ap=argparse.ArgumentParser(); ap.add_argument("--base",default="https://biddeed.ai"); ap.add_argument("--routes",default="scripts/ui-audit/routes.json"); ap.add_argument("--out"); ap.add_argument("--fail-on-red",action="store_true")
     a=ap.parse_args(); RAW=json.load(open(a.routes)); routes=[os.path.expandvars(r) for r in RAW]  # ${SAMPLE_REPORT_KEY} etc. come from the environment, never from git
     DISPLAY.update({os.path.expandvars(r): r for r in RAW})  # never print an expanded secret
-    asyncio.run(run(a.base, routes, a.out, a.fail_on_red))
+    VAR_RE=re.compile(r"\$\{(\w+)\}|\$(\w+)")
+    skipped=set(); skip_why={}
+    for raw, exp in zip(RAW, routes):
+        missing=[n for n in (m.group(1) or m.group(2) for m in VAR_RE.finditer(raw)) if not os.environ.get(n)]
+        if missing:
+            skipped.add(exp); skip_why[exp]=", ".join(sorted(missing))
+    asyncio.run(run(a.base, routes, a.out, a.fail_on_red, skipped, skip_why))
 

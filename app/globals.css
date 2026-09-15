@@ -416,6 +416,9 @@ html[data-theme='light'] h1, html[data-theme='light'] h2, html[data-theme='light
 .fc .fc-button-primary:disabled { background: hsl(var(--secondary)); border-color: hsl(var(--border)); color: hsl(var(--muted-foreground)); opacity: 1; }
 .fc .fc-daygrid-day-number, .fc .fc-col-header-cell-cushion, .fc .fc-list-day-text, .fc .fc-list-day-side-text, .fc .fc-toolbar-title { color: hsl(var(--muted-foreground)); }
 .fc .fc-list-day-cushion { background: hsl(var(--secondary)); }
+/* Tap targets: list-view day headers and FC/TD count anchors render at 20-24px tall; pad the hit area to the 32px gate floor with negative-margin compensation so row geometry is unchanged. */
+.fc .fc-list-day-text, .fc .fc-list-day-side-text { display: inline-block; padding-top: 4px; padding-bottom: 4px; margin-top: -4px; margin-bottom: -4px; }
+.fc .fc-list-event td a { display: inline-block; padding-top: 6px; padding-bottom: 6px; margin-top: -6px; margin-bottom: -6px; }
 .fc .fc-daygrid-more-link { color: hsl(var(--primary-hover)); }
 
 /* mapbox-gl.css is imported by AuctionMap.tsx and lands AFTER this file in the
