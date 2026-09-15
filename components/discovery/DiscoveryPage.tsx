@@ -125,7 +125,7 @@ export default function DiscoveryPage() {
         </div>
 
         <div className="border-b border-border py-4">
-          <a href="/maps" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary-hover">
+          <a href="/maps" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary-hover -my-2 py-2">
             <Map className="h-4 w-4" aria-hidden="true" />
             See this inventory on the Florida Auction Intelligence Map
           </a>

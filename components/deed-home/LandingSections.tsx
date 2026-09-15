@@ -41,7 +41,7 @@ export const BTN =
   'inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background'
 export const BTN_PRIMARY = cn(BTN, 'bg-primary text-primary-foreground hover:bg-primary/90')
 export const BTN_QUIET = cn(BTN, 'border border-border bg-card text-foreground hover:border-primary/60 hover:text-primary')
-export const BTN_DISABLED = cn(BTN, 'bg-primary/50 text-primary-foreground cursor-not-allowed')
+export const BTN_DISABLED = cn(BTN, 'bg-muted text-muted-foreground cursor-not-allowed')
 
 function Eyebrow({ children, className }: { children: React.ReactNode; className?: string }) {
   return <p className={cn('text-xs font-semibold uppercase tracking-[0.18em] text-primary', className)}>{children}</p>
@@ -90,12 +90,12 @@ export function Proof() {
           <Eyebrow className="text-base">Published before the sale. Checked after it.</Eyebrow>
           <H2>Every auction. One number. Published before bidding starts.</H2>
           <p className="mt-4 max-w-lg text-base leading-7 text-muted-foreground">
-            For a Marion County foreclosure on 20 July 2026, <a href="/maps" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80">biddeed.ai</a> published a maximum bid of $82,000
+            For a Marion County foreclosure on 20 July 2026, <a href="/maps" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80 -my-2 py-2">biddeed.ai</a> published a maximum bid of $82,000
             before the sale. The property sold for $73,501. A bidder who held to the ceiling won the lot with
             room to spare, and the report re-issued itself with the outcome the same day.
           </p>
           <p className="mt-4 max-w-lg text-base leading-7 text-muted-foreground">
-            Every <a href="/sign-up" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80">biddeed.ai</a> member - free included - gets the published number before bidding starts. Bidders who are not on <a href="/sign-up" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80">biddeed.ai</a> never see it.
+            Every <a href="/sign-up" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80 -my-2 py-2">biddeed.ai</a> member - free included - gets the published number before bidding starts. Bidders who are not on <a href="/sign-up" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80 -my-2 py-2">biddeed.ai</a> never see it.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <a href={W.sampleReport} className={BTN_QUIET}>
@@ -260,7 +260,7 @@ export function FieldRoutes() {
         <p className="mt-4 text-base leading-7 text-muted-foreground">
           The report tells you what to bid. Driving the street tells you what the report cannot — whether
           anyone still lives there, what the roof looks like, and which house nobody has filed on yet.
-          Choose your properties off the auction calendar and <a href="/maps" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80">biddeed.ai</a> turns them into a drive.
+          Choose your properties off the auction calendar and <a href="/maps" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80 -my-2 py-2">biddeed.ai</a> turns them into a drive.
         </p>
       </div>
 
@@ -344,7 +344,7 @@ export function RehabProjects() {
         <H2>Budget the rehab, price the scopes, track spend against budget.</H2>
         <p className="mt-4 text-base leading-7 text-muted-foreground">
           Winning the auction is the start of the deal, not the end. Between the winning bid and the closing
-          table is where the profit gets built, and <a href="/projects" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80">biddeed.ai</a> tracks every dollar of it.
+          table is where the profit gets built, and <a href="/projects" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80 -my-2 py-2">biddeed.ai</a> tracks every dollar of it.
           The 25-line rehab at 5400 Pina Vista Dr came in $60,140.61 under budget, $68,209.39 projected gross profit.
         </p>
       </div>
@@ -506,10 +506,10 @@ export function Pricing({ onPrompt }: { onPrompt: (p: string) => void }) {
     <section id="pricing" className="mx-auto max-w-6xl px-4 sm:px-6">
       <div className="max-w-2xl">
         <Eyebrow>Plans</Eyebrow>
-        <H2>One below-market win pays for years of <a href="/pricing" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80">biddeed.ai</a>.</H2>
+        <H2>One below-market win pays for years of <a href="/pricing" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80 -my-2 py-2">biddeed.ai</a>.</H2>
         <p className="mt-4 text-base leading-7 text-muted-foreground">
           Every Florida auction is free to browse, and free members see the published number on every property:
-          2,911 live right now across 60 counties, each with its own <a href="/maps" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80">deal page</a>.
+          2,911 live right now across 60 counties, each with its own <a href="/maps" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80 -my-2 py-2">deal page</a>.
           Investor, Pro, and Pro Plus add the depth: reports, Due Diligence, and video property assessment with
           360° Orbit on the properties you work, as available. Every level includes the Academy lessons written for it.
         </p>
@@ -580,7 +580,7 @@ export function Pricing({ onPrompt }: { onPrompt: (p: string) => void }) {
             <p className="mt-1 max-w-xl text-base text-muted-foreground">
               All 18 sections on a single property: value band, comparable sales, zoning read, red flags, and the SIGNAL$
               Max Bid section, with max-bid figures labeled Withheld until the rebuilt model is validated. When the sale closes, you get the outcome scorecard re-issued free. New to the numbers? The
-              Academy&apos;s free <a href="/academy" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80">How-to-use-BidDeed track</a> walks through a report before you buy one.
+              Academy&apos;s free <a href="/academy" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80 -my-2 py-2">How-to-use-BidDeed track</a> walks through a report before you buy one.
             </p>
           </div>
         </div>
@@ -595,7 +595,7 @@ export function Pricing({ onPrompt }: { onPrompt: (p: string) => void }) {
       </div>
 
       <p className="mt-6 text-center text-base text-muted-foreground">
-        Founding investors: the first 100 <a href="/pioneers" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80">biddeed.ai</a> Pioneers set founding pricing.{' '}
+        Founding investors: the first 100 <a href="/pioneers" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80 -my-2 py-2">biddeed.ai</a> Pioneers set founding pricing.{' '}
         <a href={W.pioneers} className="inline-flex items-center py-3.5 font-medium text-primary underline underline-offset-2">
           Join the Pioneer waitlist
         </a>

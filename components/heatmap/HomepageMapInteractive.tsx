@@ -68,7 +68,7 @@ export default function HomepageMapInteractive() {
           {selected && scorecard ? (
             <>
               <p className="mt-1 font-display text-lg font-medium text-foreground">{selected.name} County</p>
-              <p className="mt-1 text-sm text-muted-foreground">
+              <p className="mt-1 text-base text-muted-foreground">
                 {scorecard.market?.value != null ? formatCurrency(scorecard.market.value) : 'No data'} median home
                 value · {scorecard.live_auction_count} live auctions
               </p>
@@ -77,7 +77,7 @@ export default function HomepageMapInteractive() {
               </p>
             </>
           ) : (
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p className="mt-1 text-base text-muted-foreground">
               {loading ? 'Loading county…' : 'Tap a county to see market direction and live auction count.'}
             </p>
           )}
