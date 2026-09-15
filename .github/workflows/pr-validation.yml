@@ -52,6 +52,9 @@ jobs:
       - name: Validate SIGNAL$ field release policy
         run: npm run test:report-release
 
+      - name: Validate auction-detail paid gate
+        run: npm run test:auction-detail-gate
+
       - name: Build production OpenNext Worker
         run: npx opennextjs-cloudflare build --config wrangler.production.jsonc
 

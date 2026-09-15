@@ -94,6 +94,25 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
+
+  // Auction detail is a paid subscription surface. Resolve entitlement before
+  // touching Supabase so signed-out and Free callers cannot recover any report
+  // contents from this JSON endpoint. The separate $25 one-time product is
+  // delivered through its keyed /report route; it does not unlock this
+  // workspace endpoint.
+  const tierId = await getCallerTierId()
+  if (!tierAtLeast(tierId, 'investor')) {
+    return NextResponse.json(
+      {
+        error: 'Paid tier required',
+        code: 'PAID_TIER_REQUIRED',
+        upgrade_url: '/subscribe?tier=investor',
+        one_time_report_url: '/buy-report',
+      },
+      { status: 403, headers: { 'Cache-Control': 'private, no-store' } }
+    )
+  }
+
   const supabase = getSupabase()
 
   // auction_detail_enriched returns every multi_county_auctions column PLUS a
@@ -266,25 +285,13 @@ export async function GET(
     source_url: auction.source_url,
   }
 
-  // Paywall (owner decision 2026-09-12, "max bid gated to paid users only"):
-  // the Investment Score - verdict, Max Bid, bid-to-value ratio - is
-  // investor+. Free/anonymous callers get everything else on this page (case,
-  // property, zoning) with the score stripped server-side and score_locked set
-  // so the client renders the locked cell instead. Stripping (not just
-  // hiding) matters: this JSON is directly fetchable. 'UNKNOWN' also hides the
-  // header verdict pill via the component's existing UNKNOWN guard.
-  //
-  // The response is per-user now, so public CDN caching is off - a paid
-  // user's unlocked payload must never be served to an anonymous visitor from
-  // the edge cache.
-  const tierId = await getCallerTierId()
-  if (!tierAtLeast(tierId, 'investor')) {
-    response.max_bid = null
-    response.bid_ratio = null
-    response.recommendation = 'UNKNOWN'
-    response.recommendation_color = `${C.border}`
-    ;(response as Record<string, unknown>).score_locked = true
-  }
+  // Unvalidated model fields stay unavailable on every tier. Pro Plus owns
+  // their future release, but the v1 field-release policy remains hard-off.
+  response.max_bid = null
+  response.bid_ratio = null
+  response.recommendation = 'UNKNOWN'
+  response.recommendation_color = `${C.border}`
+  ;(response as Record<string, unknown>).score_locked = true
 
   return NextResponse.json(response, {
     headers: {
