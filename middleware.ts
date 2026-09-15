@@ -155,6 +155,12 @@ const isPublicRoute = createRouteMatcher([
   // instead of their paid confirmation page.
   '/success(.*)',
   '/radar(.*)',
+  // /preview must be reachable signed-out: it is the auction-day landing page
+  // every live stream and Short pins, and the pinned audience has no account.
+  // Omitting it here produced the documented Clerk protect-rewrite 404 on
+  // 2026-09-15 within minutes of the #122 merge — same failure mode as
+  // /counties, /success and the deal pages (#20053).
+  '/preview(.*)',
   // /d4d must be reachable signed-out: the locked panel IS the Investor-to-Pro
   // upgrade trigger (issue #20100), so a Clerk redirect here loses the sale
   // instead of showing it. requireCapability() gates the actual data.
