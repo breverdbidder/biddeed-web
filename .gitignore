@@ -49,3 +49,7 @@ artifacts/
 
 # fumadocs-mdx generated (postinstall)
 .source
+
+# python audit harness artifacts
+__pycache__/
+*.pyc

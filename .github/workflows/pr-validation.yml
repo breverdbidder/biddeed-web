@@ -15,6 +15,7 @@ on:
       - 'package.json'
       - 'package-lock.json'
       - '.github/workflows/pr-validation.yml'
+      - 'scripts/ui-audit/**'
 
 permissions:
   contents: read
@@ -53,3 +54,33 @@ jobs:
 
       - name: Build production OpenNext Worker
         run: npx opennextjs-cloudflare build --config wrangler.production.jsonc
+
+  ui-parity-audit:
+    needs: production-build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout the vendored canon harness
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.3.0
+        with:
+          persist-credentials: false
+
+      - name: Setup Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Chromium audit runtime
+        run: pip install --quiet playwright && python -m playwright install --with-deps chromium
+
+      - name: Run the eight-gate audit against production
+        env:
+          SAMPLE_REPORT_KEY: ${{ vars.SAMPLE_REPORT_KEY }}
+        run: python3 scripts/ui-audit/audit.py --base https://biddeed.ai --routes scripts/ui-audit/routes.json --out ui-audit.md --fail-on-red
+
+      - name: Upload audit evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ui-audit
+          path: ui-audit.md
