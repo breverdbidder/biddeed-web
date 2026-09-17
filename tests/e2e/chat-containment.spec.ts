@@ -64,12 +64,16 @@ test.describe('Chat history privacy containment', () => {
     })
     await page.reload({ waitUntil: 'domcontentloaded' })
 
-    const storage = await page.evaluate(() => ({
-      threads: localStorage.getItem('biddeed.deed.threads.v1'),
-      chatToken: localStorage.getItem('bd_chat_token'),
-      chatEmail: localStorage.getItem('bd_chat_email'),
-    }))
-    expect(storage.threads).toBeNull()
+    // The guard runs in an effect after hydration — a beat after
+    // DOMContentLoaded, not at it — so poll rather than read once.
+    const readStorage = () =>
+      page.evaluate(() => ({
+        threads: localStorage.getItem('biddeed.deed.threads.v1'),
+        chatToken: localStorage.getItem('bd_chat_token'),
+        chatEmail: localStorage.getItem('bd_chat_email'),
+      }))
+    await expect.poll(async () => (await readStorage()).threads, { timeout: 10_000 }).toBeNull()
+    const storage = await readStorage()
     expect(storage.chatToken).toBeNull()
     expect(storage.chatEmail).toBeNull()
   })
@@ -82,24 +86,24 @@ test.describe('Chat history privacy containment', () => {
     await expect(page.getByText('THE BEST PRICES IN US REAL ESTATE', { exact: false })).toBeVisible()
   })
 
-  test('POST /api/deed/identity returns an explicit unavailable response, never a token', async ({ page }) => {
+  test('POST /api/deed/identity no longer exists — the email-claim identity was removed (PARITY CP-3)', async ({ page }) => {
     await page.goto('/', { waitUntil: 'domcontentloaded' })
     const res = await apiJson(page, '/api/deed/identity', {
       method: 'POST',
       body: JSON.stringify({ email: 'visitor@example.com' }),
     })
-    expect(res.status).toBe(503)
-    expect((res.body as { token?: string }).token).toBeUndefined()
+    expect(res.status).toBe(404)
+    expect((res.body as { token?: string })?.token).toBeUndefined()
   })
 
-  test('POST /api/deed/upload returns unavailable even with a well-formed-looking legacy token', async ({ page }) => {
+  test('POST /api/deed/upload with a legacy token is 401 — only the Clerk session is an identity', async ({ page }) => {
     await page.goto('/', { waitUntil: 'domcontentloaded' })
     const res = await apiJson(page, '/api/deed/upload', {
       method: 'POST',
       headers: { 'x-chat-token': 'not-a-real-but-well-formed.token' },
       body: JSON.stringify({ filename: 'a.txt', data_base64: 'aGk=' }),
     })
-    expect(res.status).toBe(503)
+    expect(res.status).toBe(401)
   })
 
   test('GET and POST /api/deed/projects return unavailable, never an empty-but-200 list', async ({ page }) => {

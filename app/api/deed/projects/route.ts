@@ -1,81 +1,23 @@
-import { NextRequest, NextResponse } from 'next/server'
-
-import { CHAT_HISTORY_CONTAINED } from '@/lib/deed/threads'
+import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 /**
- * Same-origin proxy to the Worker's GET/POST /chat/api/projects (issue #19847
- * C3). Same CSP reasoning as ../route.ts and ../identity/route.ts. Only the
- * list + create routes are proxied here — the composer's project selector
- * only needs to list projects and create a new one; per-project files/reports
- * management stays on the Worker's own /chat surface until a Next page for it
- * exists (see the issue body).
+ * Projects (Claude.ai Projects parity, C3) land with PARITY CP-4, keyed on the
+ * Clerk `sub` like app/api/deed/threads. Until then this route answers 503
+ * without reading anything: the previous proxy relayed the Worker's
+ * email-claim identity (issue #20226), and CP-3's rule is that no route under
+ * app/api/deed reads an email-claim token — this one included.
  */
-const WORKER_PROJECTS_URL =
-  process.env.DEED_WORKER_CHAT_URL?.replace(/\/chat\/api$/, '/chat/api/projects') ||
-  'https://biddeed.ai/chat/api/projects'
-
-function bad(status: number, error: string) {
-  return NextResponse.json({ error }, { status })
+function coming() {
+  return NextResponse.json({ error: 'Saved projects are coming with the next release.' }, { status: 503 })
 }
 
-export async function GET(req: NextRequest) {
-  // issue #20226 -- project persistence is contained pending the verified-
-  // owner boundary; stop relaying it here, not just at the Worker.
-  if (CHAT_HISTORY_CONTAINED) return bad(503, 'Saved chat history is temporarily unavailable')
-  const token = req.headers.get('x-chat-token')
-  if (!token) return bad(401, 'Invalid or missing chat session')
-
-  let upstream: Response
-  try {
-    upstream = await fetch(WORKER_PROJECTS_URL, {
-      headers: { 'X-Chat-Token': token, 'User-Agent': 'BidDeed.AI-Deed/1.0 (+https://biddeed.ai)' },
-      signal: AbortSignal.timeout(15_000),
-    })
-  } catch (err) {
-    // Upstream detail (host, status, adapter message) stays server-side.
-    console.error(JSON.stringify({ level: 'error', scope: 'deed.projects', detail: (err as Error).message, ts: new Date().toISOString() }))
-    return bad(502, 'Could not reach the chat service. Please retry shortly.')
-  }
-
-  const text = await upstream.text()
-  return new NextResponse(text, { status: upstream.status, headers: { 'Content-Type': 'application/json' } })
+export async function GET() {
+  return coming()
 }
 
-export async function POST(req: NextRequest) {
-  // issue #20226 -- project persistence is contained pending the verified-
-  // owner boundary; stop relaying it here, not just at the Worker.
-  if (CHAT_HISTORY_CONTAINED) return bad(503, 'Saved chat history is temporarily unavailable')
-  const token = req.headers.get('x-chat-token')
-  if (!token) return bad(401, 'Invalid or missing chat session')
-
-  let bodyText: string
-  try {
-    bodyText = await req.text()
-  } catch {
-    return bad(400, 'Invalid request body')
-  }
-
-  let upstream: Response
-  try {
-    upstream = await fetch(WORKER_PROJECTS_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Chat-Token': token,
-        'User-Agent': 'BidDeed.AI-Deed/1.0 (+https://biddeed.ai)',
-      },
-      body: bodyText,
-      signal: AbortSignal.timeout(15_000),
-    })
-  } catch (err) {
-    // Upstream detail (host, status, adapter message) stays server-side.
-    console.error(JSON.stringify({ level: 'error', scope: 'deed.projects', detail: (err as Error).message, ts: new Date().toISOString() }))
-    return bad(502, 'Could not reach the chat service. Please retry shortly.')
-  }
-
-  const text = await upstream.text()
-  return new NextResponse(text, { status: upstream.status, headers: { 'Content-Type': 'application/json' } })
+export async function POST() {
+  return coming()
 }

@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Show, UserButton } from '@clerk/nextjs'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { CalendarClock, ChevronsUpDown, FolderKanban, LifeBuoy, MessageSquarePlus, MessagesSquare, Trash2, UserRound, Wand2 } from 'lucide-react'
+import { CalendarClock, ChevronsUpDown, FolderKanban, LifeBuoy, MessageSquarePlus, MessagesSquare, Search, Trash2, UserRound, Wand2 } from 'lucide-react'
 
 import {
   Sidebar,
@@ -34,7 +34,9 @@ import {
 import { ACCOUNT_LINKS, NAV_ITEMS, type NavItem } from './nav'
 import { formatCount, useAuctionCounts } from './useAuctionCounts'
 import DeedRobotMark from '@/components/deed/DeedRobotMark'
-import { CHAT_HISTORY_CONTAINED, deleteThread, loadThreads, subscribeThreads, type Thread } from '@/lib/deed/threads'
+import { useDeedAuth } from '@/lib/deed/deedAuth'
+import { CHAT_HISTORY_CONTAINED, deleteThread, loadThreads, subscribeThreads } from '@/lib/deed/threads'
+import { deleteThreadRemote, listThreads, notifyThreadsChanged, type ThreadSummary } from '@/lib/deed/threadsRemote'
 
 /** NAV_ITEMS rendered in the Deed group instead of under Workspace. */
 const DEED_GROUP_KEYS = new Set(['projects'])
@@ -72,23 +74,53 @@ function isActiveItem(item: NavItem, pathname: string, view: string | null): boo
 }
 
 /**
- * Recent conversations, read from the browser. Empty until the first message
- * is sent on this device; that is the intended first-run state, so the group
- * simply does not render rather than showing an empty list.
+ * Recent conversations (PARITY CP-3).
  *
- * issue #20226: while CHAT_HISTORY_CONTAINED, loadThreads() already always
- * returns [] — this never subscribes/polls in that state, so the group is
- * hidden by construction, not just by an empty list.
+ * Signed in: the account's threads from /api/deed/threads — recents, and a
+ * search box that runs the same route with ?q= — refreshed whenever the
+ * thread hook saves (the `biddeed:threads` event). Signed out: the browser
+ * store, which is empty by design while CHAT_HISTORY_CONTAINED (issue
+ * #20226) — the group simply does not render.
  */
-function useRecentThreads(): Thread[] {
-  const [threads, setThreads] = useState<Thread[]>([])
+interface RecentItem {
+  id: string
+  title: string
+}
+
+function useRecentThreads(query: string): { recent: RecentItem[]; remove: (id: string) => void; searchable: boolean } {
+  const auth = useDeedAuth()
+  const signedIn = auth.loaded && auth.signedIn
+  const [threads, setThreads] = useState<RecentItem[]>([])
+
+  const refresh = useCallback(() => {
+    if (signedIn) {
+      void listThreads(query).then((rows: ThreadSummary[] | null) => setThreads((rows ?? []).slice(0, 30).map((r) => ({ id: r.id, title: r.title }))))
+      return
+    }
+    if (CHAT_HISTORY_CONTAINED) {
+      setThreads([])
+      return
+    }
+    setThreads(loadThreads().slice(0, 8).map((t) => ({ id: t.id, title: t.title })))
+  }, [signedIn, query])
+
   useEffect(() => {
-    if (CHAT_HISTORY_CONTAINED) return
-    const refresh = () => setThreads(loadThreads().slice(0, 8))
     refresh()
     return subscribeThreads(refresh)
-  }, [])
-  return threads
+  }, [refresh])
+
+  const remove = useCallback(
+    (id: string) => {
+      if (signedIn) {
+        void deleteThreadRemote(id).then(() => notifyThreadsChanged())
+        return
+      }
+      deleteThread(id)
+    },
+    [signedIn]
+  )
+
+  return { recent: threads, remove, searchable: signedIn }
 }
 
 export default function AppSidebar({ deedOpen, onToggleDeed, authEnabled = false, showDeedToggle = true }: Props) {
@@ -102,7 +134,8 @@ export default function AppSidebar({ deedOpen, onToggleDeed, authEnabled = false
   const activeThread = isConversation ? searchParams.get('c') : null
   const counts = useAuctionCounts()
   const { isMobile, setOpenMobile } = useSidebar()
-  const recent = useRecentThreads()
+  const [query, setQuery] = useState('')
+  const { recent, remove, searchable } = useRecentThreads(query)
 
   // On mobile the nav lives in a Sheet; tapping a link has to close it, or the
   // user lands on the new page with the overlay still covering it.
@@ -161,10 +194,29 @@ export default function AppSidebar({ deedOpen, onToggleDeed, authEnabled = false
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {recent.length > 0 ? (
+        {recent.length > 0 || (searchable && query) ? (
           <SidebarGroup className="group-data-[collapsible=icon]:hidden">
             <SidebarGroupLabel>Recent</SidebarGroupLabel>
             <SidebarGroupContent>
+              {searchable ? (
+                <div className="relative mb-1 px-1">
+                  <label htmlFor="deed-thread-search" className="sr-only">
+                    Search your chats
+                  </label>
+                  <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+                  <input
+                    id="deed-thread-search"
+                    type="search"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Search chats"
+                    className="h-9 w-full rounded-md border border-input bg-background pl-8 pr-2 text-sm text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
+                  />
+                </div>
+              ) : null}
+              {recent.length === 0 && query ? (
+                <p className="px-2 py-1 text-sm text-muted-foreground">No chats match “{query}”.</p>
+              ) : null}
               <SidebarMenu>
                 {recent.map((t) => {
                   const active = activeThread === t.id
@@ -184,7 +236,7 @@ export default function AppSidebar({ deedOpen, onToggleDeed, authEnabled = false
                         showOnHover
                         aria-label={`Delete conversation “${t.title}”`}
                         onClick={() => {
-                          deleteThread(t.id)
+                          remove(t.id)
                           if (active) router.push('/chat')
                         }}
                       >

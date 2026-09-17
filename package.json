@@ -14,7 +14,8 @@
     "cf:build:production": "opennextjs-cloudflare build --config wrangler.production.jsonc --env production",
     "cf:deploy:production": "opennextjs-cloudflare build --config wrangler.production.jsonc --env production && wrangler deploy --config wrangler.production.jsonc --env production",
     "cf:typegen": "wrangler types --config wrangler.staging.jsonc --env-interface CloudflareEnv cloudflare-env.d.ts",
-    "test:e2e:rls": "playwright test tests/e2e/rls-isolation.spec.ts",
+    "test:e2e:rls": "playwright test tests/e2e/rls-isolation.spec.ts tests/e2e/chat-identity.spec.ts",
+    "test:e2e:chat-identity": "playwright test tests/e2e/chat-identity.spec.ts --grep \"anon:|unverified email:\"",
     "postinstall": "fumadocs-mdx",
     "test:report-release": "node scripts/validate-report-field-release.mjs",
     "test:auction-detail-gate": "node scripts/validate-auction-detail-gate.mjs"
