@@ -666,12 +666,12 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
           {colorMode === 'type' ? (
             <>
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                <span className="uppercase tracking-wide text-[10px] opacity-70 w-[68px] shrink-0">Pin type</span>
+                <span className="uppercase tracking-wide text-xs opacity-70 w-[68px] shrink-0">Pin type</span>
                 <span><span className="inline-block w-2 h-2 rounded-full bg-primary mr-1" /> Foreclosure</span>
                 <span><span className="inline-block w-2 h-2 rounded-full bg-foreground mr-1" /> Tax Deed</span>
               </div>
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 pt-1 border-t border-border dark:border-border">
-                <span className="uppercase tracking-wide text-[10px] opacity-70 w-[68px] shrink-0">Cluster size</span>
+                <span className="uppercase tracking-wide text-xs opacity-70 w-[68px] shrink-0">Cluster size</span>
                 <span><span className="inline-block w-3 h-3 rounded-full bg-primary mr-1 text-xs text-primary-foreground text-center leading-3">n</span> &lt;10</span>
                 <span><span className="inline-block w-3 h-3 rounded-full bg-primary-hover mr-1 text-xs text-primary-foreground text-center leading-3">n</span> 10-49</span>
                 <span><span className="inline-block w-3 h-3 rounded-full bg-muted-foreground mr-1 text-xs text-primary-foreground text-center leading-3">n</span> 50+</span>
