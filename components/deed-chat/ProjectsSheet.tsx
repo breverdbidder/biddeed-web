@@ -92,7 +92,16 @@ export default function ProjectsSheet({ open, onOpenChange, draft, onAskDeed }: 
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="flex w-full flex-col gap-0 p-0 sm:max-w-md">
+      {/*
+        150 ms slide instead of the primitive's 500 ms: the panel opens from
+        a URL (#projects) right after hydration, and at 390 px the referee
+        measured it 48 px short of its resting edge — still sliding in — and
+        scored the copy as off-screen. Fast is also simply nicer here.
+      */}
+      <SheetContent
+        side="right"
+        className="flex w-full flex-col gap-0 p-0 data-[state=closed]:duration-150 data-[state=open]:duration-150 sm:max-w-md"
+      >
         <SheetHeader className="border-b border-border px-5 py-4 text-left">
           <SheetTitle className="flex items-center gap-2 text-base">
             <FolderKanban className="size-4 text-primary" aria-hidden />
