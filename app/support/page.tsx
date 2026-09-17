@@ -1,6 +1,7 @@
 import './support.css'
 import SupportForm from '@/components/support/SupportForm'
 import TicketLookup from '@/components/support/TicketLookup'
+import { Sparkles } from 'lucide-react'
 
 /**
  * biddeed.ai/support — public support tickets.
@@ -43,7 +44,7 @@ export default function SupportPage() {
             href="/chat"
             className="inline-flex min-h-11 items-center gap-2 rounded-md border border-border bg-card px-5 text-sm font-semibold text-foreground hover:border-primary/60 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            <span aria-hidden="true">✦</span> Ask Deed first
+            <Sparkles className="size-4" aria-hidden /> Ask Deed first
           </a>
           <p className="text-base leading-7 text-muted-foreground">
             Security issue? Email{' '}

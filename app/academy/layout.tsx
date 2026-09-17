@@ -37,7 +37,11 @@ export default function AcademyLayout({ children }: { children: ReactNode }) {
             article to ~265px at 390px (measured live after the first
             version shipped inside, 2026-09-09). */}
         <MobileAcademyNav />
-        <DocsLayout tree={source.pageTree} nav={{ enabled: false }}>
+        {/* disableThemeSwitch: with RootProvider theme disabled the sidebar footer still
+            rendered Fumadocs' own <button data-theme-toggle> — no accessible name (axe
+            button-name critical on /academy at 1440) and no effect, since the site forces
+            its own light palette. */}
+        <DocsLayout tree={source.pageTree} nav={{ enabled: false }} disableThemeSwitch>
           {children}
         </DocsLayout>
       </div>
