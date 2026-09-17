@@ -72,17 +72,17 @@ export default function AuctionSidebarList({
           const type = (a.sale_type || '').toLowerCase()
           return (
             <li key={a.id}>
-              {/* One control, two actions: a click highlights the property on
-                  the map beside it, and the explicit button opens the full
-                  report. Making the whole card navigate away would make the
-                  map pane useless - you would never stay long enough to look. */}
+              {/* One card, three controls, none nested (axe nested-interactive,
+                  WCAG 4.1.2): the card itself is a plain container whose pointer
+                  click highlights the property on the map beside it; the ADDRESS
+                  is the keyboard-reachable highlight button (Enter/Space); "Add to
+                  project" and "Full report" are sibling controls. Making the whole
+                  card navigate away would make the map pane useless - you would
+                  never stay long enough to look. PARITY CP-1 (2026-09-17): this
+                  row was 200 of the 406 serious axe nodes on /auctions. */}
               <div
-                role="button"
-                tabIndex={0}
                 onClick={() => onHighlight(a)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onHighlight(a) }
-                }}
+                aria-current={isSelected ? 'true' : undefined}
                 className={`w-full text-left px-3 py-3 cursor-pointer transition-colors ${
                   isSelected
                     ? 'bg-secondary dark:bg-primary/20'
@@ -90,9 +90,14 @@ export default function AuctionSidebarList({
                 }`}
               >
                 <div className="flex items-start justify-between gap-2">
-                  <p className="text-base font-semibold text-foreground dark:text-white leading-snug">
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); onHighlight(a) }}
+                    aria-pressed={isSelected}
+                    className="min-h-11 text-left text-base font-semibold text-foreground dark:text-white leading-snug outline-none rounded-sm focus-visible:ring-2 focus-visible:ring-ring"
+                  >
                     {a.property_address || 'Address not published'}
-                  </p>
+                  </button>
                   {type && (
                     <span className={`shrink-0 px-1.5 py-0.5 rounded text-xs font-bold uppercase tracking-wide border ${
                       TYPE_BADGE[type] || 'bg-muted0/15 text-muted-foreground dark:text-muted-foreground border-border/30'
