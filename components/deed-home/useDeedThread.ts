@@ -3,8 +3,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { apiUrl } from '@/lib/api'
-import { getChatIdentity } from '@/lib/deed/chatIdentity'
 import { contextPreamble, type DeedContext } from '@/lib/deed/context'
+import { useDeedAuth } from '@/lib/deed/deedAuth'
+import { getThread, notifyThreadsChanged, putThread } from '@/lib/deed/threadsRemote'
 import { intentToQuery, parseAuctionIntent, type AuctionIntent } from '@/lib/deed/intent'
 import {
   extractAction,
@@ -59,8 +60,11 @@ const HOME_CONTEXT: DeedContext = {
  *  2. The message goes to the Worker through /api/deed (same contract as the
  *     side panel) and the answer streams into the same assistant turn.
  *
- * Persistence is a side effect: every settled turn is written to localStorage
- * so the sidebar's "Recent" list and /?c=<id> reloads work.
+ * Persistence is a side effect (PARITY CP-3): for a signed-in customer every
+ * settled turn is PUT to /api/deed/threads under their Clerk sub, so the
+ * sidebar's "Recent" list, search and /chat?c=<id> reloads work on any
+ * device. Signed out, nothing is stored anywhere (issue #20226) — the thread
+ * lives in this tab's React state and no longer.
  */
 export function useDeedThread(initialId: string | null) {
   const [thread, setThread] = useState<Thread | null>(null)
@@ -68,6 +72,8 @@ export function useDeedThread(initialId: string | null) {
   const [streaming, setStreaming] = useState('')
   const abortRef = useRef<AbortController | null>(null)
   const counts = useAuctionCounts()
+  const auth = useDeedAuth()
+  const signedIn = auth.loaded && auth.signedIn
 
   // Load (or fail to load) the thread named in the URL. Runs on the client
   // only; the server renders the empty hero, which is also what a new visitor
@@ -89,25 +95,50 @@ export function useDeedThread(initialId: string | null) {
     // router.replace) is not a reload: the live state, with its pending turn,
     // is the truth. Only a thread we do not hold yet is read from storage.
     if (threadRef.current?.id === initialId) return
-    const found = loadThread(initialId)
-    setThread(found)
-    // Card rows in a reopened thread are re-fetched so a sale that has since
-    // been cancelled does not render as biddable.
-    if (found) {
-      found.turns.forEach((t) => {
-        if (t.cards) void refreshCards(found.id, t.id, t.cards.intent)
-      })
+    // Wait for Clerk's first answer so a signed-in reload is not first read
+    // as anonymous (which would find nothing and paint the empty state).
+    if (!auth.loaded) return
+    let cancelled = false
+    const apply = (found: Thread | null) => {
+      if (cancelled) return
+      setThread(found)
+      // Card rows in a reopened thread are re-fetched so a sale that has since
+      // been cancelled does not render as biddable.
+      if (found) {
+        found.turns.forEach((t) => {
+          if (t.cards) void refreshCards(found.id, t.id, t.cards.intent)
+        })
+      }
+    }
+    if (signedIn) void getThread(initialId).then(apply)
+    else apply(loadThread(initialId))
+    return () => {
+      cancelled = true
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialId])
+  }, [initialId, auth.loaded, signedIn])
 
   // Persistence is an effect, never a call inside a state updater: React runs
   // updater functions during render, and saveThread() dispatches the event the
   // sidebar listens to, so writing from inside one would set the sidebar's
   // state while this component is still rendering.
+  //
+  // Signed in: PUT the thread once no turn is pending (debounced, so a burst
+  // of card patches is one write). The sidebar refreshes on the notify.
   useEffect(() => {
-    if (thread && thread.turns.length > 0) saveThread(thread)
-  }, [thread])
+    if (!thread || thread.turns.length === 0) return
+    if (!signedIn) {
+      saveThread(thread)
+      return
+    }
+    if (thread.turns.some((t) => t.pending)) return
+    const handle = setTimeout(() => {
+      void putThread(thread).then((ok) => {
+        if (ok) notifyThreadsChanged()
+      })
+    }, 400)
+    return () => clearTimeout(handle)
+  }, [thread, signedIn])
 
   const patchTurn = useCallback((threadId: string, turnId: string, patch: Partial<ThreadTurn>) => {
     setThread((prev) => {
@@ -243,7 +274,7 @@ export function useDeedThread(initialId: string | null) {
         },
       ])
 
-      void run(next.id, assistantTurn.id, wire, intent, next, opts)
+      void run(next.id, assistantTurn.id, wire, intent, opts)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [thread, status, counts]
@@ -258,7 +289,6 @@ export function useDeedThread(initialId: string | null) {
     turnId: string,
     wire: DeedMessage[],
     intent: AuctionIntent | null,
-    threadSnapshot: Thread,
     opts: DeedSendOptions
   ) {
     setStatus('streaming')
@@ -268,20 +298,17 @@ export function useDeedThread(initialId: string | null) {
     let acc = ''
 
     try {
-      const identity = getChatIdentity()
-      const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-      if (identity) headers['X-Chat-Token'] = identity.token
+      // No identity header: /api/deed verifies the Clerk session itself when
+      // an upload is cited, and the Worker never receives one (CP-3).
       const res = await fetch(apiUrl('/api/deed'), {
         method: 'POST',
-        headers,
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: wire,
           county: intent?.county ?? null,
           hook: 'home',
-          conversation_id: threadSnapshot.workerConversationId,
           upload_id: opts.uploadId,
           public_records: opts.publicRecords || undefined,
-          project_id: threadSnapshot.projectId ?? undefined,
         }),
         signal: controller.signal,
       })

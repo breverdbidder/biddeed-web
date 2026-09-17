@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 import { WORKER_MAX_CHARS, WORKER_MAX_MESSAGES, type DeedMessage } from '@/lib/deed/protocol'
-import { CHAT_HISTORY_CONTAINED } from '@/lib/deed/threads'
+import { requireDeedContext } from '@/lib/deed/server'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -47,6 +47,32 @@ export const runtime = 'nodejs'
 
 const WORKER_CHAT_URL = process.env.DEED_WORKER_CHAT_URL || 'https://biddeed.ai/chat/api'
 
+// An attached document is cited by prepending its extracted text to the
+// message that references it (PARITY CP-3). The Worker never sees an upload
+// id or an identity: the row is read here, for the Clerk `sub` that owns it,
+// and the text travels as ordinary message content — so the model answers
+// from the document without any email-claim lookup on either side.
+const MAX_CITED_CHARS = 12_000
+const UPLOAD_ID_RE = /^[0-9a-f-]{36}$/i
+
+async function citedDocument(uploadId: string): Promise<{ text: string } | { error: string; status: number }> {
+  const auth = await requireDeedContext()
+  if (!auth.ok) return { error: 'Sign in to attach documents.', status: 401 }
+  const { data, error } = await auth.ctx.supabase
+    .from('deed_uploads')
+    .select('filename,extracted_text,extraction_status')
+    .eq('owner_user_id', auth.ctx.userId)
+    .eq('id', uploadId)
+    .maybeSingle()
+  if (error) return { error: 'Could not read the attached document.', status: error.code === '42P01' ? 503 : 502 }
+  if (!data) return { error: 'That attachment is not available.', status: 404 }
+  if (data.extraction_status !== 'ok' || !data.extracted_text) {
+    return { text: `(The attached file "${data.filename}" could not be read as text; say so and answer from what the customer wrote.)` }
+  }
+  const body = data.extracted_text.length > MAX_CITED_CHARS ? data.extracted_text.slice(0, MAX_CITED_CHARS) + '\n[document truncated]' : data.extracted_text
+  return { text: `Attached document "${data.filename}" — cite it by name when you use it:\n-----\n${body}\n-----` }
+}
+
 function clientIp(req: NextRequest): string | null {
   // x-forwarded-for is a list; the client is the first entry. x-real-ip is the
   // single-value fallback some edges send instead.
@@ -67,10 +93,8 @@ export async function POST(req: NextRequest) {
     messages?: unknown
     county?: unknown
     hook?: unknown
-    conversation_id?: unknown
     upload_id?: unknown
     public_records?: unknown
-    project_id?: unknown
   }
   try {
     body = await req.json()
@@ -97,6 +121,17 @@ export async function POST(req: NextRequest) {
   }
   if (chars > WORKER_MAX_CHARS) return bad(400, 'Messages too long')
 
+  // Attachment (CP-3): resolve it for the signed-in owner and fold the text
+  // into the last user message. upload_id itself is never forwarded.
+  if (typeof body.upload_id === 'string') {
+    if (!UPLOAD_ID_RE.test(body.upload_id)) return bad(400, 'Invalid upload id')
+    const doc = await citedDocument(body.upload_id)
+    if ('error' in doc) return bad(doc.status, doc.error)
+    const last = clean[clean.length - 1]
+    if (last.role !== 'user') return bad(400, 'An attachment needs a user message')
+    last.content = `${doc.text}\n\n${last.content}`
+  }
+
   const ip = clientIp(req)
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -106,13 +141,10 @@ export async function POST(req: NextRequest) {
   }
   // NEVER set CF-Connecting-IP here — see the note above; the edge 403s it.
   if (ip) headers['X-Deed-Client-IP'] = ip
-  // Chat identity (issue #19829 P1) — passed straight through so the Worker
-  // can attribute this turn, reuse/create the right conversation, and see
-  // upload_id/project_id ownership. Anonymous chat (no token) is unaffected.
-  // issue #20226: while contained, never forward this — the Worker ignores it
-  // anyway, but a client-supplied identity should not even leave this app.
-  const chatToken = CHAT_HISTORY_CONTAINED ? null : req.headers.get('x-chat-token')
-  if (chatToken) headers['X-Chat-Token'] = chatToken
+  // No identity of any kind goes to the Worker (PARITY CP-3). Persistence is
+  // this app's, keyed on the Clerk sub (app/api/deed/threads); the Worker is
+  // the model path only. The legacy X-Chat-Token (issue #20226) is neither
+  // read nor forwarded here.
 
   let upstream: Response
   try {
@@ -123,10 +155,7 @@ export async function POST(req: NextRequest) {
         messages: clean,
         county: typeof body.county === 'string' ? body.county : null,
         hook: typeof body.hook === 'string' ? body.hook : 'radar',
-        conversation_id: typeof body.conversation_id === 'string' ? body.conversation_id : undefined,
-        upload_id: typeof body.upload_id === 'string' ? body.upload_id : undefined,
         public_records: body.public_records === true ? true : undefined,
-        project_id: typeof body.project_id === 'string' ? body.project_id : undefined,
       }),
       // The Worker heartbeats every 5s, so a stall longer than this is a real
       // failure rather than a slow model.

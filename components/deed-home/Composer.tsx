@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from 'react'
 import {
   ArrowUp,
-  Check,
   FolderKanban,
+  LogIn,
   Mic,
   MicOff,
   Paperclip,
@@ -15,6 +15,9 @@ import {
   Square,
   X,
 } from 'lucide-react'
+
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -29,9 +32,8 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Input } from '@/components/ui/input'
 import { apiUrl } from '@/lib/api'
-import { ensureChatIdentity, getChatIdentity } from '@/lib/deed/chatIdentity'
+import { useDeedAuth } from '@/lib/deed/deedAuth'
 import { cn } from '@/lib/utils'
 import type { DeedSendOptions } from './useDeedThread'
 import VoiceStrip from './VoiceStrip'
@@ -54,12 +56,6 @@ function formatBytes(n: number): string {
   return `${(n / (1024 * 1024)).toFixed(1)} MB`
 }
 
-interface Project {
-  id: string
-  name: string
-  county?: string | null
-}
-
 interface PendingUpload {
   /** null while the upload is still in flight. */
   id: string | null
@@ -67,9 +63,8 @@ interface PendingUpload {
   status: 'uploading' | 'ready' | 'unsupported' | 'failed'
 }
 
-interface IdentityGate {
+interface SignInGate {
   reason: string
-  run: () => void
 }
 
 interface Props {
@@ -95,13 +90,11 @@ interface Props {
  * composition is respected so a Japanese or Hebrew input commit is never
  * mistaken for a send.
  *
- * The "+" menu (upload, screenshot, public-records, deep research) and the
- * Project selector are parity with the Worker's own /chat composer
- * (src/worker.js buildChatPage) — same endpoints, same identity token, issue
- * #19934. Upload/screenshot/research require a chat identity token first
- * (POST /api/deed/upload and /api/deed/projects both 401 without one); the
- * inline email row below the box is this surface's equivalent of the
- * Worker's sign-in drawer, gated the same way (`requireIdentityThen`).
+ * The "+" menu (upload, screenshot, public-records, deep research) is parity
+ * with the Worker's own /chat composer (issue #19934). Upload, screenshot and
+ * Deep Research need a verified identity (PARITY CP-3): the Clerk session,
+ * never an email typed into a box. Signed out, the row under the box offers
+ * the real sign-in with a return to this page — a door, not a locked wall.
  */
 export default function Composer({
   onSend,
@@ -117,13 +110,11 @@ export default function Composer({
   const [pendingUpload, setPendingUpload] = useState<PendingUpload | null>(null)
   const [publicRecords, setPublicRecords] = useState(false)
   const [projectId, setProjectId] = useState<string | null>(initialProjectId)
-  const [projects, setProjects] = useState<Project[] | null>(null)
-  const [projectsLoading, setProjectsLoading] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
-  const [identityGate, setIdentityGate] = useState<IdentityGate | null>(null)
-  const [identityEmail, setIdentityEmail] = useState('')
-  const [identityBusy, setIdentityBusy] = useState(false)
-  const [identityError, setIdentityError] = useState<string | null>(null)
+  const [signInGate, setSignInGate] = useState<SignInGate | null>(null)
+  const auth = useDeedAuth()
+  const signedIn = auth.loaded && auth.signedIn
+  const pathname = usePathname()
   // Set after mount, so an automated visitor (tests/e2e) can tell the
   // server-rendered box from the interactive one: on the live site a click
   // that lands before hydration is a click on nothing, and that is not a
@@ -175,29 +166,11 @@ export default function Composer({
   }, [notice])
 
   function requireIdentity(run: () => void, reason: string) {
-    if (getChatIdentity()) {
+    if (signedIn) {
       run()
       return
     }
-    setIdentityError(null)
-    setIdentityGate({ reason, run })
-  }
-
-  async function submitIdentity(e: React.FormEvent) {
-    e.preventDefault()
-    if (!identityGate) return
-    setIdentityBusy(true)
-    setIdentityError(null)
-    const identity = await ensureChatIdentity(identityEmail)
-    setIdentityBusy(false)
-    if (!identity) {
-      setIdentityError('Could not sign in — check the address and try again.')
-      return
-    }
-    const { run } = identityGate
-    setIdentityGate(null)
-    setIdentityEmail('')
-    run()
+    setSignInGate({ reason })
   }
 
   function uploadFile(file: File) {
@@ -209,16 +182,12 @@ export default function Composer({
     const reader = new FileReader()
     reader.onerror = () => setPendingUpload({ id: null, filename: file.name, status: 'failed' })
     reader.onload = async () => {
-      const identity = getChatIdentity()
-      if (!identity) {
-        setPendingUpload({ id: null, filename: file.name, status: 'failed' })
-        return
-      }
       const b64 = String(reader.result).split(',')[1] || ''
       try {
+        // The Clerk session cookie is the identity; the route answers 401 without it.
         const res = await fetch(apiUrl('/api/deed/upload'), {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'X-Chat-Token': identity.token },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ filename: file.name, mime_type: file.type, data_base64: b64 }),
         })
         const data = (await res.json().catch(() => null)) as
@@ -242,43 +211,9 @@ export default function Composer({
     reader.readAsDataURL(file)
   }
 
-  function loadProjects() {
-    const identity = getChatIdentity()
-    if (!identity) {
-      setProjects([])
-      return
-    }
-    setProjectsLoading(true)
-    fetch(apiUrl('/api/deed/projects'), { headers: { 'X-Chat-Token': identity.token } })
-      .then((r) => (r.ok ? r.json() : { projects: [] }))
-      .then((d: { projects?: Project[] }) => setProjects(d.projects ?? []))
-      .catch(() => setProjects([]))
-      .finally(() => setProjectsLoading(false))
-  }
-
-  function createProject() {
-    // Mirrors the Worker's own new-project prompt (src/worker.js
-    // createProjectThen) — a second, richer creation form is a Next-page
-    // concern (see the issue's "until the Next pages exist" scope note), not
-    // this composer's.
-    const name = typeof window !== 'undefined' ? window.prompt('Name this project (e.g. "Brevard tax deed — 123 Main St"):') : null
-    if (!name) return
-    const identity = getChatIdentity()
-    if (!identity) return
-    fetch(apiUrl('/api/deed/projects'), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Chat-Token': identity.token },
-      body: JSON.stringify({ name, source: 'home_composer' }),
-    })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d: { project?: Project } | null) => {
-        if (!d?.project) return
-        setProjectId(d.project.id)
-        setProjects((prev) => [d.project as Project, ...(prev ?? [])])
-      })
-      .catch(() => setNotice('Could not create the project — try again.'))
-  }
-
+  // Projects (C3) arrive with PARITY CP-4, keyed on the Clerk sub. Until
+  // then the selector says so — labelled coming, never locked — and a thread
+  // reopened with a project id keeps it.
   const submit = () => {
     if (streaming) return
     const t = value.trim()
@@ -319,7 +254,6 @@ export default function Composer({
     }
   }
 
-  const activeProject = projectId ? projects?.find((p) => p.id === projectId) : null
   const canSend = (value.trim().length > 0 || Boolean(pendingUpload?.id)) && !streaming
   const menuActive = publicRecords || Boolean(projectId) || Boolean(pendingUpload)
 
@@ -362,36 +296,24 @@ export default function Composer({
         </div>
       ) : null}
 
-      {identityGate ? (
-        <form
-          onSubmit={submitIdentity}
-          className="mx-3 mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-border bg-secondary/40 px-3 py-2"
-        >
-          <span className="text-xs text-muted-foreground">{identityGate.reason} —</span>
-          <Input
-            type="email"
-            required
-            autoFocus
-            value={identityEmail}
-            onChange={(e) => setIdentityEmail(e.target.value)}
-            placeholder="you@email.com"
-            className="h-11 max-w-[200px] text-sm"
-          />
-          <Button type="submit" size="sm" disabled={identityBusy} className="h-11">
-            {identityBusy ? 'Signing in…' : 'Continue'}
-          </Button>
+      {signInGate ? (
+        <div className="mx-3 mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-border bg-secondary/40 px-3 py-2">
+          <span className="text-xs text-muted-foreground">{signInGate.reason} — your chats and documents stay with your account.</span>
+          <Link
+            href={`/sign-in?redirect_url=${encodeURIComponent(pathname || '/chat')}`}
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-input bg-card px-3 text-sm font-semibold text-primary transition-colors hover:bg-secondary"
+          >
+            <LogIn className="size-4" aria-hidden />
+            Sign in
+          </Link>
           <button
             type="button"
-            onClick={() => {
-              setIdentityGate(null)
-              setIdentityError(null)
-            }}
+            onClick={() => setSignInGate(null)}
             className="inline-flex min-h-11 items-center px-1 text-sm text-muted-foreground underline-offset-2 hover:underline"
           >
-            Cancel
+            Not now
           </button>
-          {identityError ? <span className="w-full text-xs text-destructive">{identityError}</span> : null}
-        </form>
+        </div>
       ) : null}
 
       <VoiceStrip
@@ -491,47 +413,24 @@ export default function Composer({
             </DropdownMenuItem>
 
             <DropdownMenuSeparator />
-            <DropdownMenuSub onOpenChange={(open) => open && projects === null && loadProjects()}>
+            <DropdownMenuSub>
               <DropdownMenuSubTrigger>
                 <FolderKanban className="mr-2 size-4" aria-hidden />
-                {activeProject ? `Project: ${activeProject.name}` : 'Project: none'}
+                {projectId ? 'Project: scoped' : 'Project: none'}
               </DropdownMenuSubTrigger>
               <DropdownMenuSubContent className="w-64">
-                {!getChatIdentity() ? (
-                  <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
-                    Sign in above to scope this chat to a Project.
-                  </DropdownMenuLabel>
-                ) : projectsLoading ? (
-                  <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">Loading…</DropdownMenuLabel>
-                ) : (
+                <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
+                  Saved projects are coming with the next release — one per property, with its files and this chat.
+                </DropdownMenuLabel>
+                {projectId ? (
                   <>
-                    {projectId ? (
-                      <DropdownMenuItem
-              className="min-h-11" onSelect={() => setProjectId(null)}>
-                        <X className="mr-2 size-4" aria-hidden />
-                        Clear project scope
-                      </DropdownMenuItem>
-                    ) : null}
-                    {(projects ?? []).map((p) => (
-                      <DropdownMenuItem
-              className="min-h-11" key={p.id} onSelect={() => setProjectId(p.id)}>
-                        {p.id === projectId ? <Check className="mr-2 size-4" aria-hidden /> : <FolderKanban className="mr-2 size-4" aria-hidden />}
-                        {p.name}
-                      </DropdownMenuItem>
-                    ))}
-                    {(projects ?? []).length === 0 ? (
-                      <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
-                        No projects yet.
-                      </DropdownMenuLabel>
-                    ) : null}
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem
-              className="min-h-11" onSelect={() => requireIdentity(createProject, 'Sign in to create a project')}>
-                      <Plus className="mr-2 size-4" aria-hidden />
-                      New project
+                    <DropdownMenuItem className="min-h-11" onSelect={() => setProjectId(null)}>
+                      <X className="mr-2 size-4" aria-hidden />
+                      Clear project scope
                     </DropdownMenuItem>
                   </>
-                )}
+                ) : null}
               </DropdownMenuSubContent>
             </DropdownMenuSub>
           </DropdownMenuContent>

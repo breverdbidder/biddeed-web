@@ -172,6 +172,33 @@ jobs:
           done
         id: smoke
 
+      # PARITY CP-3 (gate D10): the two credential-free identity negatives,
+      # against the build that just deployed. Anonymous and legacy-token
+      # callers must get 401 from every Deed persistence route, and the
+      # email-claim identity issuer must not exist. The two-account negative
+      # (other user -> 0 rows) needs Clerk identities and runs in
+      # playwright-rls.yml; this step is the deploy-time floor.
+      - name: Deed identity negatives (anon 401 / legacy token 401 / issuer gone)
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="${{ steps.smoke.outputs.base }}"
+          expect() {
+            local want="$1"; shift
+            local code
+            code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 30 "$@")
+            echo "$* -> $code (want $want)"
+            [[ "$code" == "$want" ]] || { echo "Deed identity negative FAILED: got $code, want $want" >&2; exit 1; }
+          }
+          expect 401 "$base/api/deed/threads"
+          expect 401 -X PUT -H 'Content-Type: application/json' -d '{"id":"deploy000001","turns":[{"id":"u","role":"user","content":"x"}]}' "$base/api/deed/threads"
+          expect 401 "$base/api/deed/threads/deploy000001"
+          expect 401 -X DELETE "$base/api/deed/threads/deploy000001"
+          expect 401 -X POST -H 'Content-Type: application/json' -d '{"filename":"a.txt","mime_type":"text/plain","data_base64":"aGk="}' "$base/api/deed/upload"
+          expect 401 -H 'x-chat-token: someone@example.com.legacy' "$base/api/deed/threads"
+          expect 401 -H 'x-chat-token: someone@example.com.legacy' -X POST -H 'Content-Type: application/json' -d '{"filename":"a.txt","mime_type":"text/plain","data_base64":"aGk="}' "$base/api/deed/upload"
+          expect 404 -X POST -H 'Content-Type: application/json' -d '{"email":"someone@example.com"}' "$base/api/deed/identity"
+
       # #20053 P0: the workers.dev checks above cannot catch this bug class --
       # the regression was a Cloudflare zone-route ownership change, which
       # only shows up against the real biddeed.ai domain. This is the

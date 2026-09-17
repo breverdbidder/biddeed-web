@@ -1,13 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { FolderKanban, FolderPlus, MessageSquareText } from 'lucide-react'
+import { FolderKanban, MessageSquareText } from 'lucide-react'
 
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
-import { apiUrl } from '@/lib/api'
-import { getChatIdentity } from '@/lib/deed/chatIdentity'
 import { countyLabel } from '@/lib/deed/context'
-import { CHAT_HISTORY_CONTAINED } from '@/lib/deed/threads'
 import { cn } from '@/lib/utils'
 
 export interface ProjectDraft {
@@ -15,12 +11,6 @@ export interface ProjectDraft {
   caseNumber: string | null
   source: string | null
   intent: string | null
-}
-
-interface Project {
-  id: string
-  name: string
-  county?: string | null
 }
 
 interface Props {
@@ -42,48 +32,14 @@ const itemClass =
 /**
  * Projects (Claude.ai Projects parity, C3) as a side panel on /chat.
  *
- * Persistence is contained until the verified-owner boundary ships (issue
- * #20226 → PARITY-3), so while contained the panel says exactly that —
- * labelled "coming", never a locked wall (meta prompt CP-2 §1) — and still
- * does the one thing that works today: turning the sale the customer arrived
- * from into a first question for Deed. Once containment lifts, the same
- * panel lists the account's projects from /api/deed/projects and can create
- * one, matching the Worker drawer it replaces.
+ * Saved projects land with PARITY CP-4, keyed on the Clerk sub like threads
+ * are since CP-3 — the Worker's email-keyed project rows (issue #20226) are
+ * not read from here. Until CP-4 the panel says so, labelled "coming" and
+ * never a locked wall (meta prompt CP-2 §1), and still does the one thing
+ * that works today: turning the sale the customer arrived from into a first
+ * question for Deed.
  */
 export default function ProjectsSheet({ open, onOpenChange, draft, onAskDeed }: Props) {
-  const [projects, setProjects] = useState<Project[] | null>(null)
-  const [loading, setLoading] = useState(false)
-  const identity = !CHAT_HISTORY_CONTAINED ? getChatIdentity() : null
-
-  useEffect(() => {
-    if (!open || CHAT_HISTORY_CONTAINED || !identity || projects !== null) return
-    setLoading(true)
-    fetch(apiUrl('/api/deed/projects'), { headers: { 'X-Chat-Token': identity.token } })
-      .then((r) => (r.ok ? r.json() : { projects: [] }))
-      .then((d: { projects?: Project[] }) => setProjects(d.projects ?? []))
-      .catch(() => setProjects([]))
-      .finally(() => setLoading(false))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open])
-
-  function createProject() {
-    if (!identity) return
-    const name = typeof window !== 'undefined' ? window.prompt('Name this project (e.g. "Brevard tax deed — 123 Main St"):') : null
-    if (!name) return
-    fetch(apiUrl('/api/deed/projects'), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Chat-Token': identity.token },
-      body: JSON.stringify({ name, county: draft?.county ?? undefined, case_number: draft?.caseNumber ?? undefined, source: draft?.source ?? 'chat_projects' }),
-    })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d: { project?: Project } | null) => {
-        if (d?.project) setProjects((prev) => [d.project as Project, ...(prev ?? [])])
-      })
-      .catch(() => {
-        /* the panel stays; the customer can retry */
-      })
-  }
-
   const draftPrompt = draft
     ? draft.caseNumber
       ? `I'm starting a project for case ${draft.caseNumber} in ${countyLabel(draft.county)} County. What should I check first before I bid, and what would a SIGNAL$ Property Report add?`
@@ -128,41 +84,13 @@ export default function ProjectsSheet({ open, onOpenChange, draft, onAskDeed }: 
             </div>
           ) : null}
 
-          {CHAT_HISTORY_CONTAINED || !identity ? (
-            <div className="rounded-lg border border-dashed border-border p-4">
-              <p className={cn(bodyText, 'font-medium text-foreground')}>Saved projects are coming with verified sign-in.</p>
-              <p className={cn(bodyText, 'mt-1 text-muted-foreground')}>
-                Until then, every chat with Deed works without an account. When projects land, a signed-in account keeps
-                its files, notes and threads together — and nobody else can read them.
-              </p>
-            </div>
-          ) : loading ? (
-            <p className={cn(bodyText, 'text-muted-foreground')}>Loading your projects…</p>
-          ) : (
-            <ul className="space-y-1" aria-label="Your projects">
-              {(projects ?? []).map((p) => (
-                <li key={p.id}>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      onAskDeed(`Continue my project "${p.name}"${p.county ? ` in ${countyLabel(p.county)} County` : ''} — what is the next step?`)
-                    }
-                    className={itemClass}
-                  >
-                    <FolderKanban className="size-4 text-muted-foreground" aria-hidden />
-                    <span className="truncate">{p.name}</span>
-                  </button>
-                </li>
-              ))}
-              {(projects ?? []).length === 0 ? <li className={cn(bodyText, 'px-2 text-muted-foreground')}>No projects yet.</li> : null}
-              <li className="pt-2">
-                <button type="button" onClick={createProject} className={cn(itemClass, 'font-medium text-primary')}>
-                  <FolderPlus className="size-4" aria-hidden />
-                  New project
-                </button>
-              </li>
-            </ul>
-          )}
+          <div className="rounded-lg border border-dashed border-border p-4">
+            <p className={cn(bodyText, 'font-medium text-foreground')}>Saved projects are coming with the next release.</p>
+            <p className={cn(bodyText, 'mt-1 text-muted-foreground')}>
+              One project per property, with its files, notes and this chat — kept with your account, so nobody else can
+              read them. Until then, every chat with Deed already saves to your account when you are signed in.
+            </p>
+          </div>
         </div>
       </SheetContent>
     </Sheet>

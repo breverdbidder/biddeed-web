@@ -85,14 +85,18 @@ const KEY = 'biddeed.deed.threads.v1'
 const MAX_THREADS = 30
 
 /**
- * Privacy containment (issue #20226): saved chat history stays off until
- * the permanent verified-owner boundary ships (docs/spec/20226.md). On by default in
- * every build; set NEXT_PUBLIC_CHAT_HISTORY_CONTAINED=false only once the
- * permanent verified-owner (Clerk) boundary has shipped and its
- * account-isolation tests pass. While contained, loadThreads()/loadThread()
- * always read as empty (no "Recent" list, no /?c=<id> reload) and
- * saveThread() never writes — a conversation exists only in React state for
- * the current tab, exactly like anonymous chat did before #19829 P1.
+ * Privacy containment (issue #20226) for THIS store — the browser one.
+ *
+ * PARITY CP-3 put the verified-owner boundary in place: a signed-in
+ * customer's threads are saved server-side under their Clerk sub
+ * (lib/deed/threadsRemote.ts → app/api/deed/threads), so the sidebar's
+ * "Recent" list, search and /chat?c=<id> reloads work for them on any
+ * device. This localStorage store is what an anonymous visitor would get,
+ * and it stays contained: on by default in every build, so loadThreads() /
+ * loadThread() read as empty and saveThread() never writes — a signed-out
+ * conversation exists only in React state for the current tab. Set
+ * NEXT_PUBLIC_CHAT_HISTORY_CONTAINED=false only if per-device anonymous
+ * history is ever wanted again (a shared-computer decision, not a default).
  */
 export const CHAT_HISTORY_CONTAINED = process.env.NEXT_PUBLIC_CHAT_HISTORY_CONTAINED !== 'false'
 

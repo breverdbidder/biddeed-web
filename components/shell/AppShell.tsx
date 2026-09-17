@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
+import { DeedAuthProvider } from '@/lib/deed/deedAuth'
 import AppSidebar from './AppSidebar'
 import ChatContainmentGuard from './ChatContainmentGuard'
 import DeedPanel from './DeedPanel'
@@ -102,6 +103,7 @@ export default function AppShell({
   }
 
   return (
+    <DeedAuthProvider authEnabled={authEnabled}>
     <SidebarProvider open={sidebarOpen} onOpenChange={onSidebarOpenChange}>
       <ChatContainmentGuard authEnabled={authEnabled} />
       <AppSidebar deedOpen={deedOpen && !isHome} onToggleDeed={toggleDeed} authEnabled={authEnabled} showDeedToggle={!isHome} />
@@ -125,5 +127,6 @@ export default function AppShell({
         </div>
       </SidebarInset>
     </SidebarProvider>
+    </DeedAuthProvider>
   )
 }

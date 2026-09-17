@@ -1,67 +1,77 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-import { CHAT_HISTORY_CONTAINED } from '@/lib/deed/threads'
+import { extractUploadText } from '@/lib/deed/extract'
+import { dbErrorResponse, requireDeedContext } from '@/lib/deed/server'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 /**
- * Same-origin proxy to the Worker's POST /chat/api/upload (issue #19829 P1).
- * Body and auth pass straight through — this route never inspects file
- * contents, it only exists to get past `connect-src 'self'` (see
- * ../route.ts's header comment for the full CSP reasoning).
+ * Document upload for a signed-in customer (PARITY CP-3).
+ *
+ * Replaces the proxy to the Worker's /chat/api/upload, which keyed the row on
+ * an email the visitor typed (issue #20226). The file never leaves this app:
+ * its text is extracted here (lib/deed/extract.ts, the Worker's own parser
+ * ported) and stored under the Clerk `sub`; /api/deed then cites it by id for
+ * the same owner. Bytes are not retained — Deed cites text, and files as
+ * files are CP-4's Projects layer.
+ *
+ * Body: { filename, mime_type, data_base64 }  (same contract the composer
+ * already sends). 8 MB raw cap, matching the Worker. The row is not tied to a
+ * thread at upload time — the thread may not exist yet (it is saved after the
+ * first turn); the turn that cites the upload carries its label.
  */
-const WORKER_UPLOAD_URL =
-  process.env.DEED_WORKER_CHAT_URL?.replace(/\/chat\/api$/, '/chat/api/upload') ||
-  'https://biddeed.ai/chat/api/upload'
 
-// Matches the Worker's own MAX_UPLOAD_BYTES (8MB raw) * 1.4 base64 overhead
-// allowance — reject oversize bodies here too so a slow client doesn't tie up
-// this route's request for a file the Worker would refuse anyway.
-const MAX_CONTENT_LENGTH = 8 * 1024 * 1024 * 1.4
+const MAX_UPLOAD_BYTES = 8 * 1024 * 1024
+const MAX_CONTENT_LENGTH = Math.ceil(MAX_UPLOAD_BYTES * 1.4) + 4096
+const FILENAME_RE = /^[^\\/]{1,255}$/
 
 function bad(status: number, error: string) {
   return NextResponse.json({ error }, { status })
 }
 
 export async function POST(req: NextRequest) {
-  // issue #20226 -- upload persistence is contained pending the verified-
-  // owner boundary; stop relaying it here, not just at the Worker.
-  if (CHAT_HISTORY_CONTAINED) return bad(503, 'Saved chat history is temporarily unavailable')
-  const token = req.headers.get('x-chat-token')
-  if (!token) return bad(401, 'Invalid or missing chat session')
+  const auth = await requireDeedContext()
+  if (!auth.ok) return auth.response
+  const { userId, supabase } = auth.ctx
 
   const cl = parseInt(req.headers.get('content-length') || '0', 10)
   if (cl > MAX_CONTENT_LENGTH) return bad(413, 'File too large (8MB max)')
 
-  let bodyText: string
+  let body: { filename?: unknown; mime_type?: unknown; data_base64?: unknown }
   try {
-    bodyText = await req.text()
+    body = await req.json()
   } catch {
     return bad(400, 'Invalid request body')
   }
+  const filename = typeof body.filename === 'string' ? body.filename.trim() : ''
+  if (!FILENAME_RE.test(filename)) return bad(400, 'A file name is required')
+  const mimeType = typeof body.mime_type === 'string' ? body.mime_type.slice(0, 120) : null
+  if (typeof body.data_base64 !== 'string' || !body.data_base64) return bad(400, 'File data is required')
 
-  let upstream: Response
+  let bytes: Uint8Array
   try {
-    upstream = await fetch(WORKER_UPLOAD_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Chat-Token': token,
-        'User-Agent': 'BidDeed.AI-Deed/1.0 (+https://biddeed.ai)',
-      },
-      body: bodyText,
-      signal: AbortSignal.timeout(60_000),
-    })
-  } catch (err) {
-    // Upstream detail (host, status, adapter message) stays server-side.
-    console.error(JSON.stringify({ level: 'error', scope: 'deed.upload', detail: (err as Error).message, ts: new Date().toISOString() }))
-    return bad(502, 'Could not reach the chat service. Please retry shortly.')
+    bytes = new Uint8Array(Buffer.from(body.data_base64, 'base64'))
+  } catch {
+    return bad(400, 'File data is not valid base64')
   }
+  if (bytes.byteLength === 0) return bad(400, 'The file is empty')
+  if (bytes.byteLength > MAX_UPLOAD_BYTES) return bad(413, 'File too large (8MB max)')
 
-  const text = await upstream.text()
-  return new NextResponse(text, {
-    status: upstream.status,
-    headers: { 'Content-Type': 'application/json' },
-  })
+  const extraction = await extractUploadText(mimeType, filename, bytes)
+
+  const { data, error } = await supabase
+    .from('deed_uploads')
+    .insert({
+      owner_user_id: userId,
+      filename,
+      mime_type: mimeType,
+      size_bytes: bytes.byteLength,
+      extracted_text: extraction.text,
+      extraction_status: extraction.status,
+    })
+    .select('id,filename,extraction_status')
+    .single()
+  if (error) return dbErrorResponse(error, 'Unable to store this upload.')
+  return NextResponse.json({ id: data.id, filename: data.filename, extraction_status: data.extraction_status })
 }

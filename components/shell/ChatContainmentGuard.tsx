@@ -4,11 +4,21 @@ import { useEffect, useRef } from 'react'
 import { useAuth } from '@clerk/nextjs'
 
 import { CHAT_HISTORY_CONTAINED, clearThreads } from '@/lib/deed/threads'
-import { clearChatIdentity } from '@/lib/deed/chatIdentity'
+
+/**
+ * The legacy email-claim identity keys the Worker's /chat page wrote
+ * (PARITY CP-3 removed the module that read them; the keys may still sit in
+ * a returning browser and are erased here, never read).
+ */
+const LEGACY_IDENTITY_KEYS = ['bd_chat_token', 'bd_chat_email']
 
 function clearLegacyChatData() {
   clearThreads()
-  clearChatIdentity()
+  try {
+    for (const key of LEGACY_IDENTITY_KEYS) localStorage.removeItem(key)
+  } catch {
+    /* storage unavailable */
+  }
 }
 
 /**
@@ -16,8 +26,8 @@ function clearLegacyChatData() {
  *
  * A returning visitor's browser may still hold saved threads or a legacy
  * chat token from before containment shipped. Neither one is read
- * anywhere while CHAT_HISTORY_CONTAINED is on (see lib/deed/threads.ts and
- * lib/deed/chatIdentity.ts) — this component's job is to actively erase them
+ * anywhere while CHAT_HISTORY_CONTAINED is on (see lib/deed/threads.ts) —
+ * this component's job is to actively erase them
  * so a second person using the same browser/profile can't find them either,
  * not just stop the app from showing them.
  *
