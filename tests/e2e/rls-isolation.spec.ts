@@ -29,8 +29,26 @@ async function signIn(page: Page, email: string, _password: string) {
   // Dynamic import: @clerk/testing is installed CI-only (see playwright-rls.yml),
   // and credential-free tests in this file must run without it.
   const { clerk } = await import('@clerk/testing/playwright')
+  // setupClerkTestingToken (inside clerk.signIn) needs the Clerk Frontend API
+  // URL to bypass bot protection; this CI suite has no clerkSetup() project to
+  // provide it, so derive the FAPI host from the publishable key (it
+  // base64-encodes "<host>$") and pass it explicitly per Clerk's docs
+  // (setupClerkTestingTokenOptions.frontendApiUrl).
+  const pk = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ?? ''
+  const fapiHost = Buffer.from(pk.replace(/^pk_(?:test|live)_/, ''), 'base64')
+    .toString('utf8')
+    .replace(/\$$/, '')
+  if (!fapiHost) {
+    throw new Error(
+      'Cannot derive Clerk Frontend API host from NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY',
+    )
+  }
   await page.goto('/', { waitUntil: 'domcontentloaded' })
-  await clerk.signIn({ page, emailAddress: email })
+  await clerk.signIn({
+    page,
+    emailAddress: email,
+    setupClerkTestingTokenOptions: { frontendApiUrl: fapiHost },
+  })
   // The session now lives in this browser context; a protected page must not
   // bounce back to /sign-in.
   await page.goto('/radar', { waitUntil: 'domcontentloaded' })
