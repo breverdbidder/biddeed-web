@@ -32,8 +32,12 @@ interface Props {
   onAskDeed: (prompt: string) => void
 }
 
+// Body copy in the panel sits on the audit.py TYPE floor (P/LI ≥ 16 px on a
+// phone, ≥ 15 px on desktop) — the hosted run 35264942602 measured the
+// sheet's 14 px paragraphs as red on /chat#projects.
+const bodyText = 'text-base leading-6 sm:text-[15px]'
 const itemClass =
-  'flex w-full min-h-11 items-center gap-2 rounded-md px-2 text-left text-sm text-foreground outline-none transition-colors hover:bg-secondary focus-visible:ring-2 focus-visible:ring-ring'
+  'flex w-full min-h-11 items-center gap-2 rounded-md px-2 text-left text-base text-foreground outline-none transition-colors hover:bg-secondary focus-visible:ring-2 focus-visible:ring-ring sm:text-[15px]'
 
 /**
  * Projects (Claude.ai Projects parity, C3) as a side panel on /chat.
@@ -94,14 +98,16 @@ export default function ProjectsSheet({ open, onOpenChange, draft, onAskDeed }: 
             <FolderKanban className="size-4 text-primary" aria-hidden />
             Projects
           </SheetTitle>
-          <SheetDescription>One project per property you intend to win — files, notes and a chat that remembers.</SheetDescription>
+          <SheetDescription className={bodyText}>
+            One project per property you intend to win — files, notes and a chat that remembers.
+          </SheetDescription>
         </SheetHeader>
 
         <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
           {draft ? (
             <div className="mb-4 rounded-lg border border-border bg-card p-4">
               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">From Auctions</p>
-              <p className="mt-1 text-sm font-medium text-foreground">
+              <p className={cn(bodyText, 'mt-1 font-medium text-foreground')}>
                 {countyLabel(draft.county)} County{draft.caseNumber ? ` · case ${draft.caseNumber}` : ''}
               </p>
               {draftPrompt ? (
@@ -115,14 +121,14 @@ export default function ProjectsSheet({ open, onOpenChange, draft, onAskDeed }: 
 
           {CHAT_HISTORY_CONTAINED || !identity ? (
             <div className="rounded-lg border border-dashed border-border p-4">
-              <p className="text-sm font-medium text-foreground">Saved projects are coming with verified sign-in.</p>
-              <p className="mt-1 text-sm leading-6 text-muted-foreground">
+              <p className={cn(bodyText, 'font-medium text-foreground')}>Saved projects are coming with verified sign-in.</p>
+              <p className={cn(bodyText, 'mt-1 text-muted-foreground')}>
                 Until then, every chat with Deed works without an account. When projects land, a signed-in account keeps
                 its files, notes and threads together — and nobody else can read them.
               </p>
             </div>
           ) : loading ? (
-            <p className="text-sm text-muted-foreground">Loading your projects…</p>
+            <p className={cn(bodyText, 'text-muted-foreground')}>Loading your projects…</p>
           ) : (
             <ul className="space-y-1" aria-label="Your projects">
               {(projects ?? []).map((p) => (
@@ -139,7 +145,7 @@ export default function ProjectsSheet({ open, onOpenChange, draft, onAskDeed }: 
                   </button>
                 </li>
               ))}
-              {(projects ?? []).length === 0 ? <li className="px-2 text-sm text-muted-foreground">No projects yet.</li> : null}
+              {(projects ?? []).length === 0 ? <li className={cn(bodyText, 'px-2 text-muted-foreground')}>No projects yet.</li> : null}
               <li className="pt-2">
                 <button type="button" onClick={createProject} className={cn(itemClass, 'font-medium text-primary')}>
                   <FolderPlus className="size-4" aria-hidden />
