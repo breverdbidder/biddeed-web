@@ -19,6 +19,10 @@ jobs:
       E2E_USER_A_PASSWORD: ${{ secrets.E2E_USER_A_PASSWORD }}
       E2E_USER_B_EMAIL: ${{ secrets.E2E_USER_B_EMAIL }}
       E2E_USER_B_PASSWORD: ${{ secrets.E2E_USER_B_PASSWORD }}
+      # clerk.signIn (server-side sign-in tokens) and the ephemeral-provisioning
+      # fallback both authenticate to the Clerk Backend API with these.
+      CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
     steps:
       - name: Checkout
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -29,6 +33,13 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm ci
+
+      # @clerk/testing is CI-only: it signs the E2E users in through Clerk's
+      # server-side sign-in tokens (the UI password flow dead-ends on Client
+      # Trust new-device email verification for fresh CI identities). Kept out
+      # of package.json/lockfile intentionally; installed fresh every run.
+      - name: Install Clerk testing helpers (CI only)
+        run: npm install --no-save @clerk/testing
 
       # PARITY CP-3 (D10): the two-account isolation proof needs two Clerk
       # identities. When the dedicated E2E_USER_* secrets are not configured,
@@ -53,10 +64,11 @@ jobs:
             local email="e2e-${tag}-${GITHUB_RUN_ID}@e2e.biddeed.ai"
             local pass; pass="E2e!$(openssl rand -hex 12)Aa1"
             local uid
+            # The instance requires email_address at creation time (422
+            # 'form_data_missing' otherwise); addresses created this way come
+            # back verified + primary, so no separate email_addresses call.
             uid=$(curl -fsS -X POST "$api/users" "${auth[@]}" \
-              -d "$(jq -cn --arg p "$pass" --arg f "E2E" --arg l "$tag" '{password:$p, first_name:$f, last_name:$l, skip_password_checks:true, skip_password_requirement:false}')" | jq -er '.id')
-            curl -fsS -X POST "$api/email_addresses" "${auth[@]}" \
-              -d "$(jq -cn --arg u "$uid" --arg e "$email" '{user_id:$u, email_address:$e, verified:true, primary:true}')" >/dev/null
+              -d "$(jq -cn --arg e "$email" --arg p "$pass" --arg f "E2E" --arg l "$tag" '{email_address:[$e], password:$p, first_name:$f, last_name:$l, skip_password_checks:true, skip_password_requirement:false}')" | jq -er '.id')
             echo "::add-mask::$pass"
             echo "${tag^^}_ID=$uid" >> "$GITHUB_OUTPUT"
             echo "E2E_USER_${tag^^}_EMAIL=$email" >> "$GITHUB_ENV"

@@ -20,19 +20,21 @@ function requireCredentials() {
   }
 }
 
-async function signIn(page: Page, email: string, password: string) {
-  await page.goto('/sign-in', { waitUntil: 'domcontentloaded' })
-  const identifier = page.locator('#identifier-field')
-  await expect(identifier).toBeVisible()
-  await identifier.fill(email)
-  await page.getByRole('button', { name: 'Continue' }).click()
-
-  const passwordField = page.locator('#password-field')
-  await expect(passwordField).toBeVisible()
-  await passwordField.fill(password)
-  await page.getByRole('button', { name: 'Continue' }).click()
-
-  await expect(page).toHaveURL(/\/(radar|discover|alerts|counties)(\?|$)/, { timeout: 30_000 })
+async function signIn(page: Page, email: string, _password: string) {
+  // The UI password flow dead-ends on Clerk Client Trust (new-device email
+  // verification) for fresh CI identities - observed 2026-09-17 against
+  // https://biddeed.ai (sign-in stalls at /sign-in/client-trust). Clerk's
+  // supported production-safe route is a server-side sign-in token, which
+  // bypasses verification steps without weakening instance security.
+  // Dynamic import: @clerk/testing is installed CI-only (see playwright-rls.yml),
+  // and credential-free tests in this file must run without it.
+  const { clerk } = await import('@clerk/testing/playwright')
+  await page.goto('/', { waitUntil: 'domcontentloaded' })
+  await clerk.signIn({ page, emailAddress: email })
+  // The session now lives in this browser context; a protected page must not
+  // bounce back to /sign-in.
+  await page.goto('/radar', { waitUntil: 'domcontentloaded' })
+  await expect(page).not.toHaveURL(/\/sign-in/, { timeout: 15_000 })
 }
 
 async function apiJson(page: Page, path: string, init: RequestInit = {}) {
