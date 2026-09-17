@@ -58,7 +58,7 @@ export default function ScorecardPanel({ loading, data, error, onJumpToCounty }:
     <div className="flex flex-col gap-4 p-4">
       <div>
         <p className="text-xs font-semibold uppercase tracking-wide text-primary">{data.county_name} County</p>
-        <p className="mt-1 text-[11px] text-muted-foreground">As of {new Date(data.as_of).toLocaleString()}</p>
+        <p className="mt-1 text-xs text-muted-foreground">As of {new Date(data.as_of).toLocaleString()}</p>
       </div>
 
       <div className="rounded-lg border border-border bg-secondary/40 p-3">
@@ -70,7 +70,7 @@ export default function ScorecardPanel({ loading, data, error, onJumpToCounty }:
           {data.market ? formatMarketValue(data.market.value, data.market.unit) : 'No data'}
         </p>
         {data.market && (
-          <p className="mt-1 text-[11px] leading-4 text-muted-foreground">
+          <p className="mt-1 text-xs leading-4 text-muted-foreground">
             {layer?.label ?? data.market.layer} · {data.market.source} · {data.market.vintage}
           </p>
         )}
@@ -82,14 +82,14 @@ export default function ScorecardPanel({ loading, data, error, onJumpToCounty }:
           Live auction inventory
         </p>
         <p className="mt-1 font-display text-xl font-medium text-foreground">{data.live_auction_count}</p>
-        <p className="mt-1 text-[11px] text-muted-foreground">upcoming, this county, as of {new Date(data.as_of).toLocaleDateString()}</p>
+        <p className="mt-1 text-xs text-muted-foreground">upcoming, this county, as of {new Date(data.as_of).toLocaleDateString()}</p>
       </div>
 
       {data.top_parcel ? (
         <div className="rounded-lg border border-primary/40 bg-card p-3">
           <p className="text-xs font-semibold text-foreground">Strongest actionable parcel</p>
           <p className="mt-1 truncate text-sm text-foreground">{data.top_parcel.property_address || 'Address pending'}</p>
-          <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 font-mono text-[11px] text-muted-foreground">
+          <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 font-mono text-xs text-muted-foreground">
             {data.top_parcel.opening_bid != null && <span>Opening bid {formatCurrency(data.top_parcel.opening_bid)}</span>}
             {data.top_parcel.auction_date && <span>Sale {data.top_parcel.auction_date}</span>}
             <span className="font-semibold text-primary">{data.top_parcel.recommendation}</span>
