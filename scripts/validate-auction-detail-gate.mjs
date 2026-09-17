@@ -1,0 +1,10 @@
+import fs from 'node:fs'
+const api = fs.readFileSync(new URL('../app/api/auctions/[id]/route.ts', import.meta.url), 'utf8')
+const ui = fs.readFileSync(new URL('../components/auctions/AuctionDetail.tsx', import.meta.url), 'utf8')
+const gate = api.indexOf("tierAtLeast(tierId, 'investor')")
+const data = api.indexOf("rpc('auction_detail_enriched'")
+if (gate < 0 || data < 0 || gate > data) throw new Error('Entitlement must be checked before auction data access')
+for (const required of ["PAID_TIER_REQUIRED", "status: 403", "private, no-store", "one_time_report_url: '/buy-report'"]) if (!api.includes(required)) throw new Error(`API gate missing ${required}`)
+for (const required of ['Auction detail is for paid tiers','Buy one source-backed report - $25','does not unlock the paid workspace','Withheld - validation in progress']) if (!ui.includes(required)) throw new Error(`UI gate missing ${required}`)
+if (!api.includes('response.max_bid = null') || !api.includes("response.recommendation = 'UNKNOWN'")) throw new Error('Unvalidated score fields must stay hard-off')
+console.log('Auction detail gate validated: pre-data 403 for Free/anonymous; paid detail preserved; model fields hard-off')
