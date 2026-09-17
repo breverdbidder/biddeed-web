@@ -43,6 +43,7 @@ export default function AuctionFilters({
         value={selectedCounty}
         onChange={(e) => onCountyChange(e.target.value)}
         className={selectClass}
+        aria-label="County"
       >
         <option value="">All Counties</option>
         {counties.map((c) => (
@@ -54,6 +55,7 @@ export default function AuctionFilters({
         value={selectedType}
         onChange={(e) => onTypeChange(e.target.value)}
         className={selectClass}
+        aria-label="Sale type"
       >
         <option value="">All Types</option>
         <option value="foreclosure">Foreclosure</option>
