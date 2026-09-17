@@ -21,6 +21,16 @@ const SSE_ANSWER =
   'data: {"text":"Check the opening bid, the title search and what survives the sale before you bid."}\n\n' +
   'data: [DONE]\n\n'
 
+/**
+ * The composer marks itself data-hydrated once React owns it. Against the
+ * live site hydration lands a beat after DOMContentLoaded (Clerk, PostHog and
+ * the sidebar all boot first); a click before that is a click on nothing.
+ */
+async function open(page: Page, url: string) {
+  await page.goto(url, { waitUntil: 'domcontentloaded' })
+  await page.locator('[data-hydrated="true"]').first().waitFor()
+}
+
 async function mockDeed(page: Page) {
   await page.route('**/api/deed', async (route) => {
     if (route.request().method() !== 'POST') return route.continue()
@@ -34,7 +44,7 @@ async function mockDeed(page: Page) {
 
 test.describe('/chat on the AppShell (PARITY CP-2)', () => {
   test('renders the shell, the serif greeting, four Lucide chips and a labelled composer', async ({ page }) => {
-    await page.goto('/chat', { waitUntil: 'domcontentloaded' })
+    await open(page, '/chat')
 
     // nextcss=1 — served by biddeed-web, not the Worker shell.
     await expect(page.locator('link[rel="stylesheet"][href*="/_next/static/css/"]').first()).toBeAttached()
@@ -64,7 +74,7 @@ test.describe('/chat on the AppShell (PARITY CP-2)', () => {
 
   test('a chip seeds the composer; sending renders the turn, streams the answer and puts ?c= in the URL', async ({ page }) => {
     await mockDeed(page)
-    await page.goto('/chat', { waitUntil: 'domcontentloaded' })
+    await open(page, '/chat')
 
     await page.getByRole('button', { name: 'How the max bid works' }).click()
     const box = page.getByRole('textbox', { name: /Ask Deed about Florida/ })
@@ -81,7 +91,7 @@ test.describe('/chat on the AppShell (PARITY CP-2)', () => {
 
   test('recents survive a reload (only asserted when chat history is not contained)', async ({ page }) => {
     await mockDeed(page)
-    await page.goto('/chat', { waitUntil: 'domcontentloaded' })
+    await open(page, '/chat')
     await page.getByRole('textbox', { name: /Ask Deed about Florida/ }).fill('What is selling in Brevard this week?')
     await page.getByRole('button', { name: 'Send message' }).click()
     await expect(page.getByText('Check the opening bid, the title search')).toBeVisible()
@@ -107,7 +117,7 @@ test.describe('/chat on the AppShell (PARITY CP-2)', () => {
   })
 
   test('#projects opens the Projects panel; ?new=1 starts clean', async ({ page }) => {
-    await page.goto('/chat#projects', { waitUntil: 'domcontentloaded' })
+    await open(page, '/chat#projects')
     const dialog = page.getByRole('dialog')
     await expect(dialog).toBeVisible()
     await expect(dialog.getByRole('heading', { name: 'Projects' })).toBeVisible()
@@ -116,15 +126,13 @@ test.describe('/chat on the AppShell (PARITY CP-2)', () => {
     await page.keyboard.press('Escape')
     await expect(dialog).toBeHidden()
 
-    await page.goto('/chat?new=1', { waitUntil: 'domcontentloaded' })
+    await open(page, '/chat?new=1')
     await expect(page).toHaveURL(/\/chat$/)
     await expect(page.getByRole('heading', { level: 1, name: 'What are we bidding on?' })).toBeVisible()
   })
 
   test('the Auctions "start a project" link lands in the panel with the sale, and can seed the composer', async ({ page }) => {
-    await page.goto('/chat?new_project_county=brevard&case=05-2026-CA-000123&source=radar_modal', {
-      waitUntil: 'domcontentloaded',
-    })
+    await open(page, '/chat?new_project_county=brevard&case=05-2026-CA-000123&source=radar_modal')
     const dialog = page.getByRole('dialog')
     await expect(dialog).toBeVisible()
     await expect(dialog.getByText('Brevard County · case 05-2026-CA-000123')).toBeVisible()
@@ -135,7 +143,7 @@ test.describe('/chat on the AppShell (PARITY CP-2)', () => {
   })
 
   test('the mic is voice, not a link: one press opens the email gate, no navigation', async ({ page }) => {
-    await page.goto('/chat', { waitUntil: 'domcontentloaded' })
+    await open(page, '/chat')
     const mic = page.getByRole('button', { name: /Talk to Deed/ })
     await mic.click()
     await expect(page).toHaveURL(/\/chat$/)
