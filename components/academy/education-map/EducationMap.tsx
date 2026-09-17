@@ -131,7 +131,7 @@ export async function EducationMap() {
         <h2 className="mt-1 text-2xl font-extrabold text-secondary-foreground">
           Schools that teach building vs schools that teach buying.
         </h2>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+        <p className="mt-2 max-w-2xl text-base leading-6 text-muted-foreground">
           We ranked the offers auction operators actually run into — Cashflow Developer Academy,
           Rookie Redeveloper, Bright Build, SubTo, FortuneBuilders, BiggerPockets — on proof, price,
           and complaint load.
@@ -160,7 +160,7 @@ export async function EducationMap() {
           <GraduationCap aria-hidden className="size-5 text-primary" />
           How we grade
         </h3>
-        <p className="mb-3 text-sm text-muted-foreground">
+        <p className="mb-3 text-base text-muted-foreground">
           Weighted for BidDeed&apos;s actual user — the auction and distressed-property operator who
           might later develop or rehab. Satisfaction grades are composite analyst grades, not a
           single official score; public review sources conflict. Treat them as directional.
@@ -188,7 +188,7 @@ export async function EducationMap() {
       {/* Ranked candidate table (C2) */}
       <section>
         <h3 className="mb-1 text-lg font-bold text-foreground">The ranking</h3>
-        <p className="mb-3 text-sm text-muted-foreground">
+        <p className="mb-3 text-base text-muted-foreground">
           #1 is not the biggest brand. #1 is the best-run offer for someone who wants to build.
         </p>
         <RankTable rows={rows} takeByName={takeByName} />
@@ -300,7 +300,7 @@ export async function EducationMap() {
       {/* Platform rank (C3) */}
       <section>
         <h3 className="mb-1 text-lg font-bold text-foreground">Where these schools actually acquire buyers</h3>
-        <p className="mb-3 text-sm text-muted-foreground">
+        <p className="mb-3 text-base text-muted-foreground">
           Platforms ranked as acquisition channels for a $3k-$20k education buyer, not by vanity
           reach.
         </p>
