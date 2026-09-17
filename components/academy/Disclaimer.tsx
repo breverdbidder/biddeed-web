@@ -7,7 +7,7 @@ import { Scale } from 'lucide-react'
  */
 export function Disclaimer() {
   return (
-    <p className="my-6 flex gap-3 rounded-xl border border-border bg-muted p-4 text-xs leading-5 text-muted-foreground not-prose">
+    <p className="my-6 flex gap-3 rounded-xl border border-border bg-muted p-4 text-base leading-6 text-muted-foreground not-prose">
       <Scale aria-hidden className="mt-0.5 size-4 shrink-0" />
       <span>
         BidDeed Academy is investor education for Florida foreclosure and tax deed auctions. It is not
