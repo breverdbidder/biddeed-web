@@ -35,7 +35,7 @@ export default function BottomSheet({ peek, children, defaultOpen = false }: Pro
         <span className="min-w-0 flex-1 truncate text-sm">{peek}</span>
         <ChevronUp className={cn('size-4 shrink-0 text-muted-foreground transition-transform', open && 'rotate-180')} aria-hidden />
       </button>
-      <div className="min-h-0 flex-1 overflow-y-auto border-t border-border">{children}</div>
+      <div className="min-h-0 flex-1 overflow-y-auto border-t border-border" tabIndex={0} role="region" aria-label="County details">{children}</div>
     </div>
   )
 }
