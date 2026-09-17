@@ -124,6 +124,12 @@ export default function Composer({
   const [identityEmail, setIdentityEmail] = useState('')
   const [identityBusy, setIdentityBusy] = useState(false)
   const [identityError, setIdentityError] = useState<string | null>(null)
+  // Set after mount, so an automated visitor (tests/e2e) can tell the
+  // server-rendered box from the interactive one: on the live site a click
+  // that lands before hydration is a click on nothing, and that is not a
+  // product defect worth a retry loop — it is a wait for this attribute.
+  const [hydrated, setHydrated] = useState(false)
+  useEffect(() => setHydrated(true), [])
 
   const ref = useRef<HTMLTextAreaElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
@@ -319,6 +325,7 @@ export default function Composer({
 
   return (
     <div
+      data-hydrated={hydrated ? 'true' : undefined}
       className={cn(
         'relative rounded-2xl border bg-card text-card-foreground transition-shadow',
         'shadow-[0_1px_2px_rgba(31,27,22,0.06),0_8px_24px_-12px_rgba(31,27,22,0.18)]',
