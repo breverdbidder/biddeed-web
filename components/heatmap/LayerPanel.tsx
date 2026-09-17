@@ -92,7 +92,7 @@ export default function LayerPanel({
                     <span className="min-w-0 truncate">{layer.label}</span>
                     {!unlocked && <Lock className="size-3.5 shrink-0 text-primary" aria-hidden />}
                     {unlocked && !layer.hasData && (
-                      <span className="shrink-0 text-[10px] uppercase tracking-wide text-muted-foreground">
+                      <span className="shrink-0 text-xs uppercase tracking-wide text-muted-foreground">
                         No data
                       </span>
                     )}
