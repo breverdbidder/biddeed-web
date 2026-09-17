@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Show, UserButton } from '@clerk/nextjs'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { ChevronsUpDown, LifeBuoy, MessageSquarePlus, MessagesSquare, Trash2, UserRound } from 'lucide-react'
+import { CalendarClock, ChevronsUpDown, FolderKanban, LifeBuoy, MessageSquarePlus, MessagesSquare, Trash2, UserRound, Wand2 } from 'lucide-react'
 
 import {
   Sidebar,
@@ -36,6 +36,9 @@ import { formatCount, useAuctionCounts } from './useAuctionCounts'
 import DeedRobotMark from '@/components/deed/DeedRobotMark'
 import { CHAT_HISTORY_CONTAINED, deleteThread, loadThreads, subscribeThreads, type Thread } from '@/lib/deed/threads'
 
+/** NAV_ITEMS rendered in the Deed group instead of under Workspace. */
+const DEED_GROUP_KEYS = new Set(['projects'])
+
 interface Props {
   deedOpen: boolean
   onToggleDeed: () => void
@@ -54,6 +57,9 @@ interface Props {
 function isActiveItem(item: NavItem, pathname: string, view: string | null): boolean {
   if (item.external) return false
   switch (item.key) {
+    case 'projects':
+      // A hash link; the panel it opens has no route of its own.
+      return false
     case 'auctions':
       return pathname.startsWith('/radar') && view !== 'calendar'
     case 'calendar':
@@ -90,7 +96,10 @@ export default function AppSidebar({ deedOpen, onToggleDeed, authEnabled = false
   const router = useRouter()
   const searchParams = useSearchParams()
   const view = searchParams.get('view')
-  const activeThread = pathname === '/' ? searchParams.get('c') : null
+  // The conversation lives on '/' (the home page becomes the thread) and on
+  // '/chat' (PARITY CP-2). Both read ?c=<id>.
+  const isConversation = pathname === '/' || pathname === '/chat'
+  const activeThread = isConversation ? searchParams.get('c') : null
   const counts = useAuctionCounts()
   const { isMobile, setOpenMobile } = useSidebar()
   const recent = useRecentThreads()
@@ -101,7 +110,10 @@ export default function AppSidebar({ deedOpen, onToggleDeed, authEnabled = false
     if (isMobile) setOpenMobile(false)
   }
 
-  const newChatActive = pathname === '/' && !activeThread
+  const newChatActive = pathname === '/chat' && !activeThread
+  // Workspace nav = every item except the ones the Deed group renders above it.
+  const workspaceItems = NAV_ITEMS.filter((item) => !DEED_GROUP_KEYS.has(item.key))
+  const projectsItem = NAV_ITEMS.find((item) => item.key === 'projects')
 
   return (
     <Sidebar collapsible="icon" className="border-sidebar-border bg-sidebar text-sidebar-foreground">
@@ -139,7 +151,7 @@ export default function AppSidebar({ deedOpen, onToggleDeed, authEnabled = false
                   tooltip="New chat — ask Deed"
                   className="font-medium"
                 >
-                  <Link href="/" aria-current={newChatActive ? 'page' : undefined} onClick={closeOnMobile}>
+                  <Link href="/chat" aria-current={newChatActive ? 'page' : undefined} onClick={closeOnMobile}>
                     <MessageSquarePlus />
                     <span>New chat</span>
                   </Link>
@@ -160,7 +172,7 @@ export default function AppSidebar({ deedOpen, onToggleDeed, authEnabled = false
                     <SidebarMenuItem key={t.id}>
                       <SidebarMenuButton asChild isActive={active} tooltip={t.title}>
                         <Link
-                          href={`/?c=${encodeURIComponent(t.id)}`}
+                          href={`/chat?c=${encodeURIComponent(t.id)}`}
                           aria-current={active ? 'page' : undefined}
                           onClick={closeOnMobile}
                         >
@@ -173,7 +185,7 @@ export default function AppSidebar({ deedOpen, onToggleDeed, authEnabled = false
                         aria-label={`Delete conversation “${t.title}”`}
                         onClick={() => {
                           deleteThread(t.id)
-                          if (active) router.push('/')
+                          if (active) router.push('/chat')
                         }}
                       >
                         <Trash2 />
@@ -186,11 +198,59 @@ export default function AppSidebar({ deedOpen, onToggleDeed, authEnabled = false
           </SidebarGroup>
         ) : null}
 
+        {/*
+          Deed's own rows (PARITY CP-2 §2: New chat · Recents · Projects ·
+          Skills · Scheduled). Projects opens the panel on /chat; Skills is a
+          labelled "coming" row, never a locked wall (meta prompt CP-2 §1),
+          until PARITY-6 ships it; Scheduled is the Deed Watches layer, which
+          today is the Alerts page (PARITY-5 grows it).
+        */}
+        <SidebarGroup>
+          <SidebarGroupLabel>Deed</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {projectsItem ? (
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild tooltip={`${projectsItem.label} — ${projectsItem.description}`}>
+                    <Link href={projectsItem.href} onClick={closeOnMobile}>
+                      <FolderKanban />
+                      <span>{projectsItem.label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ) : null}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  aria-disabled="true"
+                  tooltip="Skills — coming: system skills that run live county queries from a slash command"
+                  className="cursor-default text-muted-foreground hover:bg-transparent hover:text-muted-foreground"
+                >
+                  <Wand2 />
+                  <span>Skills</span>
+                </SidebarMenuButton>
+                <SidebarMenuBadge className="text-muted-foreground">Coming</SidebarMenuBadge>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === '/alerts'}
+                  tooltip="Scheduled — Deed Watches: get told when a sale you watch changes"
+                >
+                  <Link href="/alerts" aria-current={pathname === '/alerts' ? 'page' : undefined} onClick={closeOnMobile}>
+                    <CalendarClock />
+                    <span>Scheduled</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
         <SidebarGroup>
           <SidebarGroupLabel>Workspace</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {NAV_ITEMS.map((item) => {
+              {workspaceItems.map((item) => {
                 const active = isActiveItem(item, pathname, view)
                 const Icon = item.icon
                 const count = item.counter === 'upcoming' ? formatCount(counts.upcoming) : null
