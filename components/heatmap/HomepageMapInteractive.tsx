@@ -72,7 +72,7 @@ export default function HomepageMapInteractive() {
                 {scorecard.market?.value != null ? formatCurrency(scorecard.market.value) : 'No data'} median home
                 value · {scorecard.live_auction_count} live auctions
               </p>
-              <p className="mt-1 text-[11px] text-muted-foreground">
+              <p className="mt-1 text-xs text-muted-foreground">
                 {FREE_LAYER.source} · {FREE_LAYER.vintage}
               </p>
             </>
