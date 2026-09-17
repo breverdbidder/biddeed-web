@@ -55,3 +55,7 @@ html:root {
 .academy-scope article :is(h1, h2) {
   font-family: var(--font-display), 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
 }
+
+/* PARITY CP-1 (2026-09-17): Fumadocs page-tree links render 26 px tall (py-1.5) — under the 32 px
+   A/BUTTON floor audit.py enforces (LAYOUT smallTap on /academy at 1440). Same links, taller hit area. */
+.academy-scope a.py-1\.5 { min-height: 2rem; display: flex; align-items: center; }
