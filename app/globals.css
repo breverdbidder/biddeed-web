@@ -519,3 +519,13 @@ html[data-theme='light'] h1, html[data-theme='light'] h2, html[data-theme='light
   outline: 2px solid transparent;
   outline-offset: 0;
 }
+
+/* PARITY CP-1 (2026-09-17): FullCalendar dims other-month day numbers to 30% opacity, which lands
+   hsl(var(--muted-foreground)) at #bababa on white — 1.94:1, axe color-contrast serious ×3 on
+   /radar?view=calendar at 1440. Keep them muted by weight, not by opacity. */
+.fc .fc-day-other .fc-daygrid-day-top { opacity: 1; }
+.fc .fc-day-other .fc-daygrid-day-number { color: hsl(var(--muted-foreground)); font-weight: 400; }
+
+/* Clerk's mandatory "Secured by Clerk" badge link renders 48×14 on /sign-in and /sign-up (WCAG 2.5.8
+   24 px floor, craft G-TAP). The badge cannot be removed on this plan; give the link a 24 px hit area. */
+a[href^="https://go.clerk.com"] { display: inline-flex; align-items: center; min-height: 24px; }
