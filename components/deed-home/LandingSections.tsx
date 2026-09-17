@@ -125,10 +125,11 @@ export function Proof() {
             <dt className="text-xs uppercase leading-snug tracking-wide text-muted-foreground sm:flex sm:h-9 sm:items-end sm:justify-center">Outcome</dt>
             <dd className="whitespace-nowrap text-lg font-semibold text-foreground sm:mt-2 sm:text-2xl">Held</dd>
           </div>
-          <p className="text-base text-muted-foreground sm:col-span-3">
-            Marion County foreclosure, July 2026. Figures from the published report and the clerk&rsquo;s recorded sale.
-          </p>
         </dl>
+        {/* Caption lives outside the <dl>: a <dl> may only contain dt/dd groups (axe definition-list, WCAG 1.3.1). */}
+        <p className="mt-3 text-base text-muted-foreground">
+          Marion County foreclosure, July 2026. Figures from the published report and the clerk&rsquo;s recorded sale.
+        </p>
       </div>
     </section>
   )
