@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
@@ -13,10 +13,13 @@ import StickyDeedCta from './StickyDeedCta'
 /**
  * The application shell: persistent nav rail + topbar wrapping every route.
  *
- * State lives in React and nowhere else. No localStorage, no sessionStorage,
- * and the upstream shadcn sidebar cookie has been removed (see the note in
- * components/ui/sidebar.tsx). A reload starts expanded on desktop, collapsed
- * into a Sheet under 768px; that is the intended behaviour, not a gap.
+ * The desktop rail's expanded/collapsed choice is remembered per device
+ * (PARITY CP-2 §2, "collapsible, remembered"): read from localStorage after
+ * mount inside try/catch — the server always renders expanded, so there is no
+ * hydration mismatch, and a blocked store simply means "expanded" every
+ * visit. No cookie: the upstream shadcn sidebar cookie was removed on
+ * purpose (see the note in components/ui/sidebar.tsx). Under 768px the nav is
+ * a Sheet and this state is not consulted.
  *
  * The nav reads useSearchParams (it has to distinguish /radar from
  * /radar?view=calendar). That is deliberately NOT wrapped in Suspense: a
@@ -26,11 +29,14 @@ import StickyDeedCta from './StickyDeedCta'
  * (measured: React error 418 on every mobile route). Instead app/layout.tsx is
  * force-dynamic, so nothing prerenders and useSearchParams needs no boundary.
  *
- * Deed has ONE home. On '/' the page itself is the conversation, so the side
- * panel and the floating "Talk to Deed" card are not mounted there — three
- * doors into the same room read as clutter, and the customer already has the
- * room. Every other route keeps the panel as a companion to the workspace.
+ * Deed has ONE home. On '/' and on '/chat' the page itself is the
+ * conversation, so the side panel and the floating "Talk to Deed" card are not
+ * mounted there — three doors into the same room read as clutter, and the
+ * customer already has the room. Every other route keeps the panel as a
+ * companion to the workspace.
  */
+const SIDEBAR_KEY = 'biddeed.shell.sidebar.v1'
+
 export default function AppShell({
   children,
   authEnabled = false,
@@ -39,7 +45,30 @@ export default function AppShell({
   authEnabled?: boolean
 }) {
   const pathname = usePathname()
-  const isHome = pathname === '/'
+  // '/' and '/chat' ARE the conversation (PARITY CP-2); the Deed side panel
+  // and floating card stay off them. `isHome` keeps its name for the diff.
+  const isHome = pathname === '/' || pathname === '/chat'
+  const [sidebarOpen, setSidebarOpen] = useState(true)
+  useEffect(() => {
+    try {
+      if (localStorage.getItem(SIDEBAR_KEY) === 'collapsed') setSidebarOpen(false)
+    } catch {
+      /* storage unavailable — stays expanded */
+    }
+  }, [])
+  const onSidebarOpenChange = useCallback((open: boolean) => {
+    setSidebarOpen(open)
+    try {
+      // Only a desktop choice is a preference. The 640–1023px band collapses
+      // the rail by itself (components/ui/sidebar.tsx) and must not be
+      // recorded as "the customer wants it collapsed".
+      if (window.matchMedia('(min-width: 1024px)').matches) {
+        localStorage.setItem(SIDEBAR_KEY, open ? 'expanded' : 'collapsed')
+      }
+    } catch {
+      /* storage unavailable — the choice lasts for this page only */
+    }
+  }, [])
   // Measured live at 390x844 (#20060): the fixed "Talk to Deed" card covered the
   // composer Send button while Deed was open, and the Continue button / sign-in
   // link on the Clerk forms. Once Deed is open the panel has its own close
@@ -73,7 +102,7 @@ export default function AppShell({
   }
 
   return (
-    <SidebarProvider>
+    <SidebarProvider open={sidebarOpen} onOpenChange={onSidebarOpenChange}>
       <ChatContainmentGuard authEnabled={authEnabled} />
       <AppSidebar deedOpen={deedOpen && !isHome} onToggleDeed={toggleDeed} authEnabled={authEnabled} showDeedToggle={!isHome} />
 

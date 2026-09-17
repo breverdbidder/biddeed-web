@@ -90,9 +90,14 @@ const SidebarProvider = React.forwardRef<
     // strip (collapsible="icon" renders the 3rem variant). The toggle still
     // works inside the band, so the full rail is one click away. Below 640
     // the Sheet takes over via isMobile; at 1024+ nothing changes.
+    // Applies to a controlled provider too (AppShell controls `open` to
+    // remember the desktop choice): the band collapse is a viewport fact, not
+    // a preference, and AppShell only records changes made at ≥ 1024px.
     React.useEffect(() => {
-      if (isTablet) _setOpen(false)
-    }, [isTablet])
+      if (!isTablet) return
+      if (setOpenProp) setOpenProp(false)
+      else _setOpen(false)
+    }, [isTablet, setOpenProp])
     const setOpen = React.useCallback(
       (value: boolean | ((value: boolean) => boolean)) => {
         const openState = typeof value === "function" ? value(open) : value

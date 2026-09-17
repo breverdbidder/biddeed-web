@@ -23,8 +23,9 @@ import { useDeedThread, type DeedSendOptions } from './useDeedThread'
  * marketing leaves, and the URL gains ?c=<id> so a reload or the sidebar's
  * "Recent" list brings the conversation back.
  *
- * There is no separate /chat app route because the Cloudflare Worker in front
- * of this app forwards only a fixed set of paths to it (see docs/UX_SPEC).
+ * /chat (app/chat, PARITY CP-2) is the same conversation without the
+ * marketing below the fold — same engine, same composer, same thread store.
+ * The Cloudflare Worker in front of this app proxies both paths to it.
  */
 export default function DeedHome() {
   const router = useRouter()

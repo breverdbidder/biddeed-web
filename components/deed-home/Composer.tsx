@@ -6,6 +6,7 @@ import {
   Check,
   FolderKanban,
   Mic,
+  MicOff,
   Paperclip,
   Plus,
   ScanLine,
@@ -33,14 +34,8 @@ import { apiUrl } from '@/lib/api'
 import { ensureChatIdentity, getChatIdentity } from '@/lib/deed/chatIdentity'
 import { cn } from '@/lib/utils'
 import type { DeedSendOptions } from './useDeedThread'
-
-// The live ElevenLabs voice session (WebSocket + audio worklet, ~400 lines)
-// is only implemented in the Cloudflare Worker's vanilla-JS /chat page
-// (src/worker.js) -- porting that real-time audio pipeline into this React
-// composer is a separate, substantial piece of work (see issue #19828 spec).
-// Until it's ported, this button takes the visitor to where voice already
-// works end-to-end, rather than shipping a dead disabled control.
-const VOICE_HREF = '/chat'
+import VoiceStrip from './VoiceStrip'
+import { useDeedVoice } from './useDeedVoice'
 
 const MAX_LEN = 4000
 // Matches the Worker's own MAX_UPLOAD_BYTES (src/worker.js) — checked client
@@ -133,6 +128,10 @@ export default function Composer({
   const ref = useRef<HTMLTextAreaElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   const hero = variant === 'hero'
+  // PARITY CP-2 §3: the mic in the composer IS voice — the ElevenLabs session
+  // ported from the Worker's /chat page (lib/deed/voice.ts), not a link to it.
+  const voice = useDeedVoice()
+  const inputId = hero ? 'deed-home-input' : 'deed-thread-input'
 
   useEffect(() => {
     const el = ref.current
@@ -388,11 +387,19 @@ export default function Composer({
         </form>
       ) : null}
 
-      <label htmlFor="deed-home-input" className="sr-only">
+      <VoiceStrip
+        state={voice.state}
+        onStop={voice.stop}
+        onSubmitGate={voice.submitGate}
+        onCloseGate={voice.closeGate}
+        onDismiss={voice.dismiss}
+      />
+
+      <label htmlFor={inputId} className="sr-only">
         Ask Deed about Florida foreclosure and tax deed auctions
       </label>
       <textarea
-        id="deed-home-input"
+        id={inputId}
         ref={ref}
         rows={hero ? 2 : 1}
         value={value}
@@ -534,14 +541,22 @@ export default function Composer({
           }}
         />
 
-        <a
-          href={VOICE_HREF}
-          title="Talk to Deed · Voice AI · 70+ languages"
-          className="inline-flex size-11 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+        <button
+          type="button"
+          onClick={voice.toggle}
+          aria-pressed={voice.state.active}
+          aria-label={voice.state.active ? 'Stop talking to Deed' : 'Talk to Deed — voice, 70+ languages'}
+          title={voice.state.active ? 'Stop voice session' : 'Talk to Deed · voice · 70+ languages'}
+          className={cn(
+            'inline-flex size-11 items-center justify-center rounded-xl outline-none transition-colors',
+            'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card',
+            voice.state.active
+              ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+              : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+          )}
         >
-          <Mic className="size-[18px]" aria-hidden />
-          <span className="sr-only">Talk to Deed — voice AI in 70+ languages</span>
-        </a>
+          {voice.state.active ? <MicOff className="size-[18px]" aria-hidden /> : <Mic className="size-[18px]" aria-hidden />}
+        </button>
 
         <span className="ml-1 hidden text-xs text-muted-foreground sm:inline">
           {hero ? 'Deed reads the live county calendars · answers cite the record' : 'Enter to send · Shift+Enter for a new line'}

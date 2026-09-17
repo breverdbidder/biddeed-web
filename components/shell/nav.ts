@@ -23,12 +23,14 @@ export interface NavItem {
 export const NAV_ITEMS: NavItem[] = [
   {
     // Claude.ai Projects parity (C3): one project per property you intend to win.
-    // The panel lives in the Worker /chat drawer; the hash opens it.
+    // PARITY CP-2 (2026-09-17): /chat is this app's route now, and the hash
+    // opens the Projects panel on it (components/deed-chat/ProjectsSheet).
+    // Rendered in the sidebar's Deed group, not under Workspace — see
+    // AppSidebar's DEED_GROUP_KEYS.
     key: 'projects',
     label: 'Projects',
     href: '/chat#projects',
     icon: FolderKanban,
-    external: true,
     description: 'One project per property - files, notes and a chat that remembers',
   },
   {

@@ -41,7 +41,7 @@ interface Props {
  */
 
 function routeLabel(pathname: string, view: string | null): string {
-  if (pathname === '/') return 'Deed'
+  if (pathname === '/' || pathname === '/chat') return 'Deed'
   if (pathname === '/radar') return view === 'calendar' ? 'Auction calendar' : 'AuctionRadar'
   if (pathname.startsWith('/radar/')) return 'Auction detail'
   if (pathname.startsWith('/order')) return 'Order'
