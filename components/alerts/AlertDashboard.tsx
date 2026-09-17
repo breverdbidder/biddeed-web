@@ -178,7 +178,7 @@ export default function AlertDashboard() {
           <fieldset>
             <legend className="text-sm font-semibold text-foreground">Notify me about</legend>
             <div className="mt-3 space-y-3">
-              {ALERT_TYPES.map(([value, label]) => <label key={value} className="flex items-start gap-3 text-sm text-foreground"><input type="checkbox" checked={draft.alert_types.includes(value)} onChange={() => toggleAlertType(value)} className="mt-1 size-4 accent-[hsl(var(--primary))]" />{label}</label>)}
+              {ALERT_TYPES.map(([value, label]) => <label key={value} className="flex min-h-6 items-start gap-3 text-sm text-foreground"><input type="checkbox" checked={draft.alert_types.includes(value)} onChange={() => toggleAlertType(value)} className="mt-1 size-4 accent-[hsl(var(--primary))]" />{label}</label>)}
             </div>
           </fieldset>
           <label className="block text-sm font-semibold text-foreground">Timezone<select value={draft.timezone} onChange={(event) => setDraft({ ...draft, timezone: event.target.value })} className="mt-2 min-h-11 w-full border border-input bg-background px-3 text-foreground outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"><option>America/New_York</option><option>UTC</option></select></label>
