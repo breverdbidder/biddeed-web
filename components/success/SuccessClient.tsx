@@ -184,9 +184,9 @@ const S: Record<string, React.CSSProperties> = {
   item: { display: 'flex', flexDirection: 'column', gap: 3 },
   itemName: { fontSize: 14, color: C.ink, fontWeight: 600 },
   itemNote: { fontSize: 14, color: C.navy },
-  next: { fontSize: 14, lineHeight: 1.6, margin: 0, color: C.navy },
+  next: { fontSize: 16, lineHeight: 1.6, margin: 0, color: C.navy },
   nextLabel: { color: C.brand, fontWeight: 600 },
-  detail: { fontSize: 12, color: C.navy, marginTop: 18, marginBottom: 0 },
+  detail: { fontSize: 16, color: C.navy, marginTop: 18, marginBottom: 0 },
   footer: { display: 'flex', gap: 20, marginTop: 30, paddingTop: 20, borderTop: `1px solid ${C.border}` },
-  link: { fontSize: 14, color: C.brand, textDecoration: 'none', fontWeight: 500, display: 'inline-flex', alignItems: 'center', minHeight: 24 },
+  link: { fontSize: 14, color: C.brand, textDecoration: 'none', fontWeight: 500, display: 'inline-flex', alignItems: 'center', minHeight: 44 },
 }
