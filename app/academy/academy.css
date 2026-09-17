@@ -59,3 +59,8 @@ html:root {
 /* PARITY CP-1 (2026-09-17): Fumadocs page-tree links render 26 px tall (py-1.5) — under the 32 px
    A/BUTTON floor audit.py enforces (LAYOUT smallTap on /academy at 1440). Same links, taller hit area. */
 .academy-scope a.py-1\.5 { min-height: 2rem; display: flex; align-items: center; }
+
+/* PARITY CP-1 (2026-09-17): Fumadocs <Card> descriptions render as 14 px paragraphs on the Academy
+   index (audit.py TYPE referee: P ≥ 15 px desktop / 16 px mobile, 6 nodes). Body paragraphs on the
+   docs surface read at the site's 16 px; Fumadocs' own prose paragraphs already do. */
+.academy-scope article p { font-size: 1rem; line-height: 1.6; }
