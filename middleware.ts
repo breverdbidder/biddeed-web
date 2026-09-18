@@ -34,6 +34,12 @@ const isPublicRoute = createRouteMatcher([
   '/api/parcels/search(.*)', // public: look up any address before paying
   '/api/kpis(.*)',
   '/api/auctions(.*)',
+  // Presentation-only viewer state for the pin card's tier-aware field
+  // release (#164). Anonymous callers must reach it so the card can render
+  // "Unlock with Free" instead of failing closed on a /sign-in redirect; the
+  // endpoint itself resolves anonymous vs signed-in and never leaks tier
+  // data (the data-level gate is server-side redaction in the auction feeds).
+  '/api/viewer/tier(.*)',
   '/api/bcpao-lookup(.*)',
   '/api/bcpao-photo(.*)',
   '/api/explorer(.*)',
