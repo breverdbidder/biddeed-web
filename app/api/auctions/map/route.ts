@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getRetryingSupabaseClient } from '@/lib/supabase-retry'
-import { AUCTION_PIN_COLUMNS } from '@/lib/auctions/pin-contract'
+import { AUCTION_PIN_COLUMNS, redactPinForViewer, type PinViewerClass } from '@/lib/auctions/pin-contract'
+import { getCallerViewer } from '@/lib/tier/server'
+import { tierAtLeast } from '@/lib/tier/rank'
 import { serverError } from '@/lib/api-errors'
 
 export const dynamic = 'force-dynamic'
@@ -136,6 +138,17 @@ export async function GET(request: NextRequest) {
 
   const filters: Filters = { county, saleType, from, to, upcoming, statusScope }
 
+  // Tier-aware field release (owner decision 2026-09-18): the pin feed is a
+  // conversion surface, so gated property facts are nulled at the data layer
+  // for viewers below their field class - the card's "Unlock with Free" /
+  // "Unlock with Investor" CTAs are never a veil over a full payload.
+  const caller = await getCallerViewer()
+  const viewer: PinViewerClass = tierAtLeast(caller.tierId, 'investor')
+    ? 'investor'
+    : caller.signedIn
+      ? 'free_member'
+      : 'anonymous'
+
   const matchingCountQuery = applyFilters(
     supabase.from('multi_county_auctions').select('id', { count: 'exact', head: true }),
     filters
@@ -155,7 +168,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(
       {
-        data: mappable.rows,
+        data: mappable.rows.map((r) => redactPinForViewer(r, viewer)),
         returned: mappable.rows.length,
         total_mappable: mappable.total,
         total_matching: matchingResult.count ?? 0,
@@ -164,10 +177,14 @@ export async function GET(request: NextRequest) {
         county,
         sale_type: saleType,
         status_scope: statusScope,
+        viewer_fields_released: viewer,
       },
       {
         headers: {
-          'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+          // The payload now varies by viewer tier; a shared edge cache would
+          // serve an anonymous-redacted page to an Investor or leak Investor
+          // fields to anonymous. Per-viewer, never shared.
+          'Cache-Control': 'private, no-store',
         },
       }
     )
