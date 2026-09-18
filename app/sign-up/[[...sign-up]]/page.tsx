@@ -26,7 +26,21 @@ export default async function SignUpCatchAllPage() {
   // before that path executes; auth() resolves null for pending 2FA sessions,
   // so in-progress factor challenges are not bounced.
   if (clerkLive) {
-    const { userId } = await auth()
+    // auth() THROWS instead of resolving null while the session cookie is
+    // mid-handshake right after an in-place factor completion. Measured on
+    // production 2026-09-18: the post-password RSC refresh of this route
+    // answers 500 (flight digest 54830976@E80), the client surfaces React
+    // #441, and the dead transition leaves a correctly-signed-in user stuck
+    // on the password form until a manual reload. A thrown auth() proves
+    // nothing about the visitor, so treat it as signed-out and render the
+    // form: the page is public either way, and ClerkJS completes its own
+    // navigation to fallbackRedirectUrl once the session lands.
+    let userId: string | null = null
+    try {
+      userId = (await auth()).userId
+    } catch {
+      userId = null
+    }
     if (userId) redirect('/radar')
   }
 
@@ -56,9 +70,10 @@ export default async function SignUpCatchAllPage() {
   )
 }
 
-export const dynamic = 'force-dynamic'
 export const metadata: Metadata = {
   title: 'Create account · BidDeed.AI',
   description: 'Create a BidDeed.AI account to save searches, receive alerts, and access source-backed auction reports.',
   alternates: { canonical: 'https://biddeed.ai/sign-up' },
 }
+
+export const dynamic = 'force-dynamic'
