@@ -57,7 +57,14 @@ function promise(id: string, pass: boolean, evidence: string) {
 }
 
 test.describe('Pioneer promise walk — signed in at Pro', () => {
-  test.describe.configure({ mode: 'serial' })
+  // Default mode, deliberately NOT serial. Serial was the first instinct
+  // because every check shares one signed-in page, but serial SKIPS the rest
+  // of the block after the first failure: run 35356567768 stopped at check 5
+  // of 13 the moment the zoning promise went red, and the eight checks behind
+  // it never ran. The whole point of this suite is a complete matrix, so one
+  // red promise must never hide the ones after it. Default mode keeps the
+  // shared page and the declared order, and runs every check.
+  test.describe.configure({ retries: 0 })
 
   let page: Page
 
