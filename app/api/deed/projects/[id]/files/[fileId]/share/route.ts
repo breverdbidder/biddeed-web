@@ -3,6 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 
 import { FILE_ID_RE, PROJECT_ID_RE, SHARE_FIELDS, newShareToken, type ShareRow } from '@/lib/deed/projects'
 import { dbErrorResponse, requireDeedContext } from '@/lib/deed/server'
+import { publicOrigin } from '@/lib/public-origin'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -21,8 +22,9 @@ function notFound() {
 }
 
 function shareUrl(req: NextRequest, token: string): string {
-  const origin = new URL(req.url).origin
-  return `${origin}/projects/shared/${token}`
+  // Not new URL(req.url).origin: behind the router that is the internal
+  // workers.dev host (see lib/public-origin.ts for the live catch).
+  return `${publicOrigin(req)}/projects/shared/${token}`
 }
 
 async function ownedFile(supabase: SupabaseClient, userId: string, projectId: string, fileId: string) {
