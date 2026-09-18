@@ -1,0 +1,142 @@
+name: Pioneer Promise Walk (Pro tier)
+
+# PIONEER PROMISE PARITY, the signed-in half. Walks every line the pricing
+# page prints for Free, Investor and Pro as a signed-in Pro subscriber — which
+# is what a $990/yr Pioneer buys — against real properties that are on the
+# auction calendar right now.
+#
+# Its own workflow, not a job inside playwright-rls.yml, for two reasons: a red
+# promise must not mask an RLS red, and this one grants and revokes a tier,
+# which nothing else in CI does.
+#
+# The tier grant runs here, with the service key that is already a repo secret,
+# never from a developer machine and never printed. It records the account's
+# prior tier first and puts it back in an always() step, whatever the suite did.
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: 'Base URL under test (the apex for a production proof)'
+        required: false
+        default: 'https://biddeed.ai'
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  promise-walk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      E2E_BASE_URL: ${{ inputs.base_url || 'https://biddeed.ai' }}
+      E2E_USER_A_EMAIL: ${{ secrets.E2E_USER_A_EMAIL }}
+      E2E_USER_A_PASSWORD: ${{ secrets.E2E_USER_A_PASSWORD }}
+      E2E_USER_B_EMAIL: ${{ secrets.E2E_USER_B_EMAIL }}
+      E2E_USER_B_PASSWORD: ${{ secrets.E2E_USER_B_PASSWORD }}
+      CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Install Clerk testing helpers (CI only)
+        run: npm install --no-save @clerk/testing
+
+      - name: Validate test identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$E2E_USER_A_EMAIL" || { echo 'Missing E2E_USER_A_EMAIL — this suite needs the dedicated E2E account, not an ephemeral one' >&2; exit 1; }
+          test -n "$E2E_USER_A_PASSWORD" || { echo 'Missing E2E_USER_A_PASSWORD' >&2; exit 1; }
+
+      # A Pioneer is tier `pro`. Grant it for the duration of the run against
+      # the same single source of truth the app reads (mcp_customers ->
+      # resolve_user_tier), so the suite exercises the real gate rather than a
+      # test-only bypass. Prior state is captured for the revert below:
+      # PRIOR_TIER is the tier to put back, or the literal ABSENT when this run
+      # created the row, in which case the revert deletes it.
+      - name: Grant the test identity Pro tier
+        id: grant
+        shell: bash
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          set -euo pipefail
+          test -n "$SUPABASE_URL" && test -n "$SUPABASE_SERVICE_ROLE_KEY" || { echo 'Supabase service credentials are not configured' >&2; exit 1; }
+          api="$SUPABASE_URL/rest/v1"
+          hdr=(-H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" -H 'Content-Type: application/json')
+          email_enc=$(jq -rn --arg e "$E2E_USER_A_EMAIL" '$e|@uri')
+          existing=$(curl -fsS "${hdr[@]}" "$api/mcp_customers?email=eq.$email_enc&select=customer_id,tier_id")
+          prior=$(echo "$existing" | jq -r 'if length > 0 then .[0].tier_id else "ABSENT" end')
+          echo "prior tier for the test identity: $prior"
+          echo "PRIOR_TIER=$prior" >> "$GITHUB_OUTPUT"
+          if [ "$prior" = "ABSENT" ]; then
+            curl -fsS -X POST "${hdr[@]}" -H 'Prefer: return=minimal' "$api/mcp_customers" \
+              -d "$(jq -cn --arg e "$E2E_USER_A_EMAIL" '{email:$e, customer_type:"human", tier_id:"pro", active:true}')"
+            echo 'created the customer row at tier pro'
+          else
+            curl -fsS -X PATCH "${hdr[@]}" -H 'Prefer: return=minimal' "$api/mcp_customers?email=eq.$email_enc" \
+              -d '{"tier_id":"pro"}'
+            echo 'patched the existing customer row to tier pro'
+          fi
+          now=$(curl -fsS "${hdr[@]}" "$api/mcp_customers?email=eq.$email_enc&select=tier_id" | jq -r '.[0].tier_id')
+          test "$now" = "pro" || { echo "tier grant did not stick (got $now)" >&2; exit 1; }
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Walk the Pro promises
+        run: npx playwright test tests/e2e/pioneer-promise.spec.ts --reporter=list
+
+      # The run log is the report: every check prints one
+      # "PROMISE <id> PASS|FAIL — <numbers>" line.
+      - name: Upload Playwright evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: pioneer-promise-${{ github.run_id }}
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Revert the test identity's tier
+        if: always()
+        shell: bash
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          PRIOR_TIER: ${{ steps.grant.outputs.PRIOR_TIER }}
+        run: |
+          set -uo pipefail
+          [ -n "${PRIOR_TIER:-}" ] || { echo 'no prior tier recorded — the grant step never ran, nothing to revert'; exit 0; }
+          api="$SUPABASE_URL/rest/v1"
+          hdr=(-H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" -H 'Content-Type: application/json')
+          email_enc=$(jq -rn --arg e "$E2E_USER_A_EMAIL" '$e|@uri')
+          if [ "$PRIOR_TIER" = "ABSENT" ]; then
+            code=$(curl -sS -o /dev/null -w '%{http_code}' -X DELETE "${hdr[@]}" "$api/mcp_customers?email=eq.$email_enc")
+            echo "removed the row this run created -> $code"
+          else
+            code=$(curl -sS -o /dev/null -w '%{http_code}' -X PATCH "${hdr[@]}" -H 'Prefer: return=minimal' "$api/mcp_customers?email=eq.$email_enc" -d "$(jq -cn --arg t "$PRIOR_TIER" '{tier_id:$t}')")
+            echo "restored tier $PRIOR_TIER -> $code"
+          fi
+          now=$(curl -sS "${hdr[@]}" "$api/mcp_customers?email=eq.$email_enc&select=tier_id" | jq -r 'if length > 0 then .[0].tier_id else "ABSENT" end')
+          echo "tier after revert: $now"
+
+      # The walk creates alert rows and a D4D route under the test identity.
+      # Left in place on purpose: they belong to a test account, they are named
+      # PROMISE9-*, and deleting rows on the way out has burned this repo
+      # before. The suite is idempotent against them.
+      - name: Summary
+        if: always()
+        run: echo "Pioneer promise walk finished against $E2E_BASE_URL" >> "$GITHUB_STEP_SUMMARY"
