@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Link2 } from 'lucide-react'
 import HeatmapMap from './HeatmapMap'
+import AuctionPinCard from '@/components/auctions/AuctionPinCard'
 import LayerPanel from './LayerPanel'
 import ScorecardPanel from './ScorecardPanel'
 import BottomSheet from './BottomSheet'
@@ -14,6 +15,7 @@ import { getLayer, GRANULARITY_GATE, type Granularity } from '@/lib/heatmap/conf
 import { VALUE_SCALE, DENSITY_SCALE } from '@/lib/heatmap/colorScales'
 import { buildHeatmapSearchParams } from '@/lib/heatmap/url-state'
 import type { HeatmapUrlState, ScorecardResponse } from '@/lib/heatmap/types'
+import type { Auction } from '@/types/auctions'
 import acsData from '@/lib/heatmap/data/fl-county-acs-2024.json'
 import type { CountyAcsDataset } from '@/lib/heatmap/types'
 
@@ -34,6 +36,7 @@ export default function MapsPageClient({ initialState, signedIn, paidEntitled }:
   const [activeLayerId, setActiveLayerId] = useState(initialState.layer)
   const [granularity, setGranularity] = useState<Granularity>(initialState.granularity)
   const [selectedFips, setSelectedFips] = useState<string | null>(initialState.selected)
+  const [selectedPin, setSelectedPin] = useState<Auction | null>(null)
   const [gateMessage, setGateMessage] = useState<{ kind: 'signup' | 'paid'; label: string } | null>(null)
   const [premiumValues, setPremiumValues] = useState<Record<string, number | null> | null>(null)
   const [premiumBlocked, setPremiumBlocked] = useState(false)
@@ -218,6 +221,7 @@ export default function MapsPageClient({ initialState, signedIn, paidEntitled }:
             colorScale={scaleForLayer(activeLayerId)}
             selectedFips={selectedFips}
             onSelectCounty={handleSelectCounty}
+            onSelectPin={setSelectedPin}
             className="h-[46vh] sm:h-[60vh] lg:h-[70vh]"
           />
           {premiumGateActive && (
@@ -236,6 +240,10 @@ export default function MapsPageClient({ initialState, signedIn, paidEntitled }:
           />
         </div>
       </div>
+
+      {selectedPin && (
+        <AuctionPinCard auction={selectedPin} onClose={() => setSelectedPin(null)} />
+      )}
 
       <div className="sm:hidden">
         <BottomSheet

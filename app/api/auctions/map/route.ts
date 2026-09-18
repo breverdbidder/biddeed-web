@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getRetryingSupabaseClient } from '@/lib/supabase-retry'
+import { AUCTION_PIN_COLUMNS } from '@/lib/auctions/pin-contract'
 import { serverError } from '@/lib/api-errors'
 
 export const dynamic = 'force-dynamic'
@@ -20,24 +21,17 @@ const MAP_ROW_CAP = 5000
 // single limit() to be honored.
 const PAGE_SIZE = 1000
 
-// Coordinates-only payload. This route exists because AuctionMap was plotting
-// whatever the browse page last fetched at limit=200 - a silent slice of
-// 2,709 upcoming rows with no indication 2,509 of them were never drawn.
-// latitude/longitude are the real columns; centroid_lat/centroid_lng (still
-// referenced by the phantom type in types/auctions.ts) do not exist on
-// multi_county_auctions.
-const SELECT_COLUMNS = [
-  'id',
-  'latitude',
-  'longitude',
-  'sale_type',
-  'county',
-  'property_address',
-  'auction_date',
-  'opening_bid',
-  'assessed_value',
-  'market_value',
-].join(',')
+// Minimum-contract payload (lib/auctions/pin-contract.ts). This route exists
+// because AuctionMap was plotting whatever the browse page last fetched at
+// limit=200 - a silent slice of 2,709 upcoming rows with no indication 2,509
+// of them were never drawn. It started coordinates-only; the pin card then
+// showed Parcel ID, Year Built, Living Area and Plaintiff blank on every pin
+// click even when the row had them (2026-09-18, 130 Cypress Club Dr). Every
+// column is a real column on multi_county_auctions - the same contract the
+// browse list selects - and latitude/longitude are the real coordinate
+// columns; centroid_lat/centroid_lng (still referenced by the phantom type in
+// types/auctions.ts) do not exist on multi_county_auctions.
+const SELECT_COLUMNS = AUCTION_PIN_COLUMNS
 
 interface Filters {
   county: string | null

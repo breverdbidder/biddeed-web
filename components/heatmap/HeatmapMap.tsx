@@ -4,6 +4,8 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import { apiUrl } from '@/lib/api'
+import { pinToAuction, type AuctionPin } from '@/lib/auctions/pin-contract'
+import type { Auction } from '@/types/auctions'
 import {
   buildFillColorExpression,
   NO_DATA_FILL,
@@ -17,16 +19,6 @@ import {
 const STREETS_STYLE = 'mapbox://styles/mapbox/streets-v12'
 const FL_CENTER: [number, number] = [-81.6, 27.9]
 
-interface AuctionPin {
-  id: string
-  latitude: number
-  longitude: number
-  county: string
-  property_address: string | null
-  auction_date: string | null
-  sale_type: string | null
-}
-
 interface CountyGeoFeature {
   type: 'Feature'
   properties: { GEO_ID: string; STATE: string; COUNTY: string; NAME: string; LSAD: string }
@@ -38,6 +30,8 @@ export interface HeatmapMapProps {
   colorScale: string[]
   selectedFips: string | null
   onSelectCounty: (fips: string, name: string) => void
+  /** Fired when a single (unclustered) auction pin is tapped. */
+  onSelectPin?: (auction: Auction) => void
   onPinsLoaded?: (count: number, asOf: string) => void
   compact?: boolean
   className?: string
@@ -55,6 +49,7 @@ export default function HeatmapMap({
   colorScale,
   selectedFips,
   onSelectCounty,
+  onSelectPin,
   onPinsLoaded,
   compact,
   className,
@@ -65,6 +60,9 @@ export default function HeatmapMap({
   const [mapError, setMapError] = useState<string | null>(null)
   const [countyGeo, setCountyGeo] = useState<CountyGeoFeature[] | null>(null)
   const [pinsError, setPinsError] = useState<string | null>(null)
+  const pinLookup = useRef<Map<string, AuctionPin>>(new Map())
+  const selectPinRef = useRef(onSelectPin)
+  selectPinRef.current = onSelectPin
   const countyValuesRef = useRef(countyValues)
   const colorScaleRef = useRef(colorScale)
   const selectRef = useRef(onSelectCounty)
@@ -93,6 +91,7 @@ export default function HeatmapMap({
       })
       .then((json: { data: AuctionPin[]; total_matching: number }) => {
         setPinsError(null)
+        pinLookup.current = new Map(json.data.map((p) => [p.id, p]))
         onPinsLoaded?.(json.total_matching, new Date().toISOString())
         if (mapRef.current && mapLoaded) renderPins(json.data)
       })
@@ -291,6 +290,13 @@ export default function HeatmapMap({
     })
     map.on('mouseenter', 'auction-clusters', () => (map.getCanvas().style.cursor = 'pointer'))
     map.on('mouseleave', 'auction-clusters', () => (map.getCanvas().style.cursor = ''))
+    map.on('click', 'auction-points', (e: any) => {
+      // Open the same minimum-contract card /radar opens - a pin tap must
+      // never dead-end (owner decision 2026-09-18).
+      const id = e.features?.[0]?.properties?.id
+      const pin = id != null ? pinLookup.current.get(String(id)) : undefined
+      if (pin && selectPinRef.current) selectPinRef.current(pinToAuction(pin))
+    })
     map.on('mouseenter', 'auction-points', () => (map.getCanvas().style.cursor = 'pointer'))
     map.on('mouseleave', 'auction-points', () => (map.getCanvas().style.cursor = ''))
   }

@@ -3,6 +3,7 @@
 import { useCallback, useState } from 'react'
 import { ArrowRight } from 'lucide-react'
 import HeatmapMap from './HeatmapMap'
+import AuctionPinCard from '@/components/auctions/AuctionPinCard'
 import { apiUrl } from '@/lib/api'
 import { formatCurrency } from '@/lib/scoring'
 import { trackHeatmapEvent } from '@/lib/analytics/track'
@@ -11,6 +12,7 @@ import { VALUE_SCALE } from '@/lib/heatmap/colorScales'
 import { buildHeatmapSearchParams } from '@/lib/heatmap/url-state'
 import acsData from '@/lib/heatmap/data/fl-county-acs-2024.json'
 import type { CountyAcsDataset, ScorecardResponse } from '@/lib/heatmap/types'
+import type { Auction } from '@/types/auctions'
 
 const ACS = acsData as unknown as CountyAcsDataset
 const FREE_LAYER = KPI_LAYERS.find((l) => l.id === FREE_LAYER_ID)!
@@ -28,6 +30,7 @@ const countyValues: Record<string, number | null> = Object.fromEntries(
  */
 export default function HomepageMapInteractive() {
   const [selected, setSelected] = useState<{ fips: string; name: string } | null>(null)
+  const [selectedPin, setSelectedPin] = useState<Auction | null>(null)
   const [scorecard, setScorecard] = useState<ScorecardResponse | null>(null)
   const [loading, setLoading] = useState(false)
 
@@ -58,9 +61,13 @@ export default function HomepageMapInteractive() {
         colorScale={VALUE_SCALE}
         selectedFips={selected?.fips ?? null}
         onSelectCounty={handleSelect}
+        onSelectPin={setSelectedPin}
         compact
         className="h-[42vh] sm:h-[360px]"
       />
+      {selectedPin && (
+        <AuctionPinCard auction={selectedPin} onClose={() => setSelectedPin(null)} />
+      )}
 
       <div className="flex flex-col justify-between gap-3 rounded-lg border border-border bg-card p-3">
         <div>

@@ -96,3 +96,20 @@ export function formatCountyLabel(raw: string | null | undefined): string {
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
     .join(' ')
 }
+
+/**
+ * The form multi_county_auctions.county is stored in: lowercase, underscores
+ * ('st_lucie', 'indian_river', 'miami_dade'). Accepts a FL_COUNTIES slug
+ * ('st-lucie') or a display name ('St. Lucie') and returns the stored form.
+ *
+ * formatCountyLabel normalizes both forms for DISPLAY; this is the inverse,
+ * for QUERY time. Measured 2026-09-18: /api/heatmap/scorecard matched
+ * ilike('county', 'St. Lucie') against rows stored as 'st_lucie', so every
+ * multi-word county reported 0 live auctions on /maps and the homepage while
+ * its pins plotted normally - St. Lucie showed "0 live auctions" beside 51
+ * live st_lucie pins. Single-word counties only worked by accident of
+ * case-insensitive matching.
+ */
+export function countyDbKey(slugOrName: string): string {
+  return slugOrName.trim().toLowerCase().replace(/[-\s.]+/g, '_')
+}
