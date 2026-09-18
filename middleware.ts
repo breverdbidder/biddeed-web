@@ -139,10 +139,6 @@ const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
   '/sign-up(.*)',
   '/report(.*)',
-  // Shared project files (PARITY CP-4 PR B): the token in the URL is the
-  // whole credential — whoever holds the link gets that one file version, so
-  // the route must never bounce to sign-in. Unknown/revoked tokens are 404.
-  '/r/(.*)',
   '/buy-report(.*)', // paid-report preview/checkout entry must be reachable before sign-in
   '/free-report(.*)', // lead-capture report entry is also public before entitlement
   '/auctions(.*)',

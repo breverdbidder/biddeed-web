@@ -3,12 +3,12 @@
 --
 -- PROPOSAL, not applied: schema changes are signed by the owner (meta prompt
 -- 0.10). Apply against mocerqjnksmhcjzxrewo with the service role; until then
--- the share routes answer 503 "not configured" and /r/{token} answers 404 —
+-- the share routes answer 503 "not configured" and /projects/shared/{token} answers 404 —
 -- nothing else in Projects changes (the file columns below are selected only
 -- by the share code, never by the file list).
 --
 -- MODEL. A share is a property of ONE stored file version: the owner mints a
--- random token (43 chars, 256 bits), /r/{token} serves that version's bytes
+-- random token (43 chars, 256 bits), /projects/shared/{token} serves that version's bytes
 -- to anyone who holds the link, and revoking sets share_revoked_at so the
 -- same link answers 404 from then on. The token stays on the row after a
 -- revoke (audit); a new share mints a new token. No identity, project id or
@@ -27,6 +27,6 @@ alter table public.deed_project_files
 create unique index if not exists deed_project_files_share_token_idx
   on public.deed_project_files (share_token) where share_token is not null;
 
-comment on column public.deed_project_files.share_token is 'Public share token for /r/{token} (PARITY CP-4 PR B). Random, 43 chars. Kept after revoke; a new share mints a new token.';
-comment on column public.deed_project_files.share_revoked_at is 'Set when the owner revokes the share; /r/{token} answers 404 from then on.';
-comment on column public.deed_project_files.share_views is 'Times /r/{token} served the bytes.';
+comment on column public.deed_project_files.share_token is 'Public share token for /projects/shared/{token} (PARITY CP-4 PR B). Random, 43 chars. Kept after revoke; a new share mints a new token.';
+comment on column public.deed_project_files.share_revoked_at is 'Set when the owner revokes the share; /projects/shared/{token} answers 404 from then on.';
+comment on column public.deed_project_files.share_views is 'Times /projects/shared/{token} served the bytes.';

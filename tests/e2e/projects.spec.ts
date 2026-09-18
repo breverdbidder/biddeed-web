@@ -13,7 +13,7 @@ import { A, B, apiJson, haveCreds, signIn } from './helpers/clerk'
  *      10-minute wait; runs only when E2E_S1_WAIT=1, i.e. in playwright-rls.yml)
  *   4. PR B — generated reports (PDF / CSV / JSON as real files, versioned),
  *      the SIGNAL$ disclosure state (18 section names, locked for a sale the
- *      account has not bought), share links (/r/{token} 200 with the exact
+ *      account has not bought), share links (/projects/shared/{token} 200 with the exact
  *      bytes → revoke → 404; account B cannot share or revoke A's file)
  *
  * 2–4 need the two Clerk E2E accounts and skip loudly without them; a 503
@@ -53,8 +53,8 @@ test.describe('Deed Projects (PARITY CP-4)', () => {
     expect((await apiJson(page, `${PROJECTS}/${ZERO_UUID}/reports`, { method: 'POST', body: JSON.stringify({ format: 'pdf' }) })).status).toBe(401)
     expect((await apiJson(page, `${PROJECTS}/${ZERO_UUID}/files/${ZERO_UUID}/share`, { method: 'POST' })).status).toBe(401)
     expect((await apiJson(page, `${PROJECTS}/${ZERO_UUID}/files/${ZERO_UUID}/share`, { method: 'DELETE' })).status).toBe(401)
-    expect((await page.request.get('/r/not-a-token')).status()).toBe(404)
-    expect((await page.request.get('/r/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')).status()).toBe(404)
+    expect((await page.request.get('/projects/shared/not-a-token')).status()).toBe(404)
+    expect((await page.request.get('/projects/shared/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')).status()).toBe(404)
   })
 
   test('create → upload → cite → download → other user sees nothing', async ({ browser }) => {
@@ -259,13 +259,13 @@ test.describe('Deed Projects (PARITY CP-4)', () => {
       const items = ((await apiJson(pageA, `${PROJECTS}/${pid}?peek=1`)).body as { items: Array<{ kind: string; ref_id: string }> }).items
       expect(items.filter((i) => i.kind === 'report').map((i) => i.ref_id)).toContain(pdfFile.id)
 
-      // Share: mint → /r/{token} serves the exact PDF bytes to a signed-out browser → revoke → 404.
+      // Share: mint → /projects/shared/{token} serves the exact PDF bytes to a signed-out browser → revoke → 404.
       const shared = await apiJson(pageA, `${PROJECTS}/${pid}/files/${pdfFile.id}/share`, { method: 'POST' })
       test.skip(shared.status === 503, 'PR B share migration (20260918070000_deed_project_share) not applied on this environment yet')
       expect(shared.status).toBe(201)
       const { token, url } = shared.body as { token: string; url: string }
       expect(token).toMatch(/^[A-Za-z0-9_-]{43}$/)
-      expect(url).toBe(`${new URL(pageA.url()).origin}/r/${token}`)
+      expect(url).toBe(`${new URL(pageA.url()).origin}/projects/shared/${token}`)
       expect(url).not.toContain(pid)
       expect(url).not.toContain(pdfFile.id)
       // Idempotent while active.
@@ -275,7 +275,7 @@ test.describe('Deed Projects (PARITY CP-4)', () => {
 
       const anon = await (browser as Browser).newContext()
       const anonPage = await anon.newPage()
-      const pub = await anonPage.request.get(`/r/${token}`)
+      const pub = await anonPage.request.get(`/projects/shared/${token}`)
       expect(pub.status()).toBe(200)
       expect(pub.headers()['content-type']).toContain('application/pdf')
       expect(pub.headers()['x-robots-tag']).toContain('noindex')
@@ -308,13 +308,13 @@ test.describe('Deed Projects (PARITY CP-4)', () => {
       // Revoke: the same link is 404 from now on; revoking twice is 404 too.
       const revoked = await apiJson(pageA, `${PROJECTS}/${pid}/files/${pdfFile.id}/share`, { method: 'DELETE' })
       expect(revoked.status).toBe(200)
-      expect((await anonPage.request.get(`/r/${token}`)).status()).toBe(404)
+      expect((await anonPage.request.get(`/projects/shared/${token}`)).status()).toBe(404)
       expect((await apiJson(pageA, `${PROJECTS}/${pid}/files/${pdfFile.id}/share`, { method: 'DELETE' })).status).toBe(404)
       // A new share is a new token.
       const reshared = await apiJson(pageA, `${PROJECTS}/${pid}/files/${pdfFile.id}/share`, { method: 'POST' })
       expect(reshared.status).toBe(201)
       expect((reshared.body as { token: string }).token).not.toBe(token)
-      expect((await anonPage.request.get(`/r/${token}`)).status()).toBe(404)
+      expect((await anonPage.request.get(`/projects/shared/${token}`)).status()).toBe(404)
       await anon.close()
       test.info().annotations.push({ type: 'pr-b', description: `pdf v1 ${pdfFile.size_bytes} B; share ${token.slice(0, 6)}… 200 → revoke → 404` })
     } finally {

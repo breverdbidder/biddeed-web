@@ -10,7 +10,7 @@ export const runtime = 'nodejs'
 /**
  * Share link for one stored file version (PARITY CP-4 PR B, #19847 DoD 3).
  *   POST   …/files/:fileId/share   mint (or return the active) token → {token, url}
- *   DELETE …/files/:fileId/share   revoke → /r/{token} answers 404 from now on
+ *   DELETE …/files/:fileId/share   revoke → /projects/shared/{token} answers 404 from now on
  * The public URL carries the token only — no project id, file id or identity.
  * 401 signed out · 404 unless the caller owns the file · 503 until the PR B
  * migration adds the share columns.
@@ -22,7 +22,7 @@ function notFound() {
 
 function shareUrl(req: NextRequest, token: string): string {
   const origin = new URL(req.url).origin
-  return `${origin}/r/${token}`
+  return `${origin}/projects/shared/${token}`
 }
 
 async function ownedFile(supabase: SupabaseClient, userId: string, projectId: string, fileId: string) {

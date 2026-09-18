@@ -228,5 +228,5 @@ export function revokeShare(id: string, fileId: string) {
 }
 
 export function shareUrlFor(token: string): string {
-  return `${window.location.origin}/r/${token}`
+  return `${window.location.origin}/projects/shared/${token}`
 }

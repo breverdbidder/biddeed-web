@@ -59,7 +59,7 @@ function groupVersions(files: ProjectFile[]) {
  * "attachment and download abilities" of #19847). PARITY CP-4.
  *
  * PR B adds three things: generated reports (a JSON / CSV / PDF snapshot of
- * the project, versioned like any file), share links (/r/{token}, revocable)
+ * the project, versioned like any file), share links (/projects/shared/{token}, revocable)
  * on every file, and the SIGNAL$ card — the report's 18 section names with
  * their values locked until this account has bought the report for this sale
  * (S3 progressive disclosure), unlocking in place.

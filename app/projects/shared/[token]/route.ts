@@ -7,8 +7,14 @@ export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 /**
- * GET /r/{token} — a shared project file (PARITY CP-4 PR B, #19847 DoD 3:
- * "share link 200 then 404 after revoke").
+ * GET /projects/shared/{token} — a shared project file (PARITY CP-4 PR B,
+ * #19847 DoD 3: "share link 200 then 404 after revoke").
+ *
+ * Why this path and not /r/{token}: biddeed.ai is fronted by the router Worker
+ * (cli-anything-biddeed src/worker.js), which owns /r/<code> for the reel
+ * short-links and only proxies an allowlist of prefixes to this app.
+ * /projects/* is on that allowlist; /r/* is not, so a share link under /r
+ * answered the router's own 404 on the canonical domain (PR C, 2026-09-18).
  *
  * Public by design: whoever holds the link gets the bytes of that one file
  * version, served through this route (never a storage URL) with the owner's
