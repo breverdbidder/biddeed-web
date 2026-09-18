@@ -208,8 +208,8 @@ jobs:
           # the public share route is 404 for any token it does not know.
           expect 401 -X POST -H 'Content-Type: application/json' -d '{"format":"pdf"}' "$base/api/deed/projects/00000000-0000-4000-8000-000000000000/reports"
           expect 401 -X POST "$base/api/deed/projects/00000000-0000-4000-8000-000000000000/files/00000000-0000-4000-8000-000000000000/share"
-          expect 404 "$base/r/not-a-token"
-          expect 404 "$base/r/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+          expect 404 "$base/projects/shared/not-a-token"
+          expect 404 "$base/projects/shared/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
 
       # #20053 P0: the workers.dev checks above cannot catch this bug class --
       # the regression was a Cloudflare zone-route ownership change, which
@@ -240,6 +240,16 @@ jobs:
           code=$(curl -sS -o /tmp/canon_response -D /tmp/canon_headers --max-time 30 -w '%{http_code}' "https://biddeed.ai/r/F5oeMD")
           echo "/r/F5oeMD -> $code (want 302)"
           [[ "$code" == "302" ]] || { echo "Canonical smoke check FAILED for /r/F5oeMD: got $code, want 302" >&2; cat /tmp/canon_headers >&2; exit 1; }
+          # PARITY CP-4 PR C (2026-09-18): the share route first shipped as /r/{token}
+          # and every workers.dev negative passed while biddeed.ai answered the
+          # router's own /r/<code> 404 -- exactly the bug class this step exists
+          # for. A plain 404 cannot tell the two apart, so assert the header only
+          # THIS app's handler sets: the router's serveNotFound never adds
+          # X-Robots-Tag. If this fails, the router stopped proxying /projects/*.
+          code=$(curl -sS -o /tmp/canon_response -D /tmp/canon_headers --max-time 30 -w '%{http_code}' "https://biddeed.ai/projects/shared/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+          echo "/projects/shared/<unknown token> -> $code (want 404 from the app, with X-Robots-Tag)"
+          [[ "$code" == "404" ]] || { echo "Canonical smoke check FAILED for /projects/shared/<token>: got $code, want 404" >&2; cat /tmp/canon_headers >&2; exit 1; }
+          grep -qi '^x-robots-tag: *noindex' /tmp/canon_headers || { echo "Canonical smoke check FAILED for /projects/shared/<token>: 404 came from the router, not the app (no X-Robots-Tag)" >&2; cat /tmp/canon_headers >&2; exit 1; }
 
   # Rendered parity audit after every production deploy (PARITY_PRD.md §3.2).
   # ui-audit.yml in cli-anything-biddeed only fires on Worker deploys, so a

@@ -318,7 +318,7 @@ export async function projectChatContext(
 }
 
 // ---------------------------------------------------------------------------
-// PR B — share links (/r/{token}) and generated reports.
+// PR B — share links (/projects/shared/{token}) and generated reports.
 
 /** 32 random bytes as base64url = 43 chars; the column check allows 32–64. */
 export const SHARE_TOKEN_RE = /^[A-Za-z0-9_-]{32,64}$/
