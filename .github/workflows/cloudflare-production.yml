@@ -253,11 +253,18 @@ jobs:
 
   # Rendered parity audit after every production deploy (PARITY_PRD.md §3.2).
   # ui-audit.yml in cli-anything-biddeed only fires on Worker deploys, so a
-  # biddeed-web deploy was never audited; this job runs the SAME harness (checked
-  # out from the public canon repo, never copied) against the live apex. The
-  # table lands in the run summary + artifact. continue-on-error until D11
-  # (0 red gates) is met, so a red table records the truth without painting
-  # the deploy itself red; flip it to blocking when the board reaches D11.
+  # biddeed-web deploy was never audited; this job runs the same harness against
+  # the live apex. The table lands in the run summary + artifact.
+  # continue-on-error until D11 (0 red gates) is met, so a red table records the
+  # truth without painting the deploy itself red; flip it to blocking when the
+  # board reaches D11.
+  #
+  # 2026-09-18 (Ariel: "no token"): this job used to sparse-checkout the harness
+  # from cli-anything-biddeed, which is PRIVATE, with the default GITHUB_TOKEN --
+  # "Not Found" on every deploy since CP-3 (35277382568 ... 35333998965), so the
+  # post-deploy audit never actually ran. The harness is vendored in this repo
+  # (scripts/ui-audit, see PROVENANCE.md) and pr-validation.yml already audits
+  # from it. Same files, no cross-repo credential.
   ui-parity-audit:
     needs: deploy-production
     if: ${{ always() && needs.deploy-production.result == 'success' }}
@@ -265,10 +272,10 @@ jobs:
     timeout-minutes: 20
     continue-on-error: true
     steps:
-      - name: Checkout the canon harness (cli-anything-biddeed/scripts/ui-audit)
+      - name: Checkout the vendored canon harness (scripts/ui-audit)
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.3.0
         with:
-          repository: breverdbidder/cli-anything-biddeed
+          persist-credentials: false
           sparse-checkout: scripts/ui-audit
           sparse-checkout-cone-mode: true
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
