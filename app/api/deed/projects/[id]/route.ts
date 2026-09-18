@@ -6,13 +6,15 @@ import {
   ITEM_FIELDS,
   PROJECT_FIELDS,
   PROJECT_ID_RE,
+  activeShares,
   cleanProjectInput,
   ownedProject,
   projectGreeting,
   type ProjectFileRow,
   type ProjectRow,
 } from '@/lib/deed/projects'
-import { dbErrorResponse, requireDeedContext } from '@/lib/deed/server'
+import { signalReportAccess } from '@/lib/deed/reports'
+import { dbErrorResponse, deedEmail, requireDeedContext } from '@/lib/deed/server'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -20,6 +22,7 @@ export const runtime = 'nodejs'
 /**
  * One project (PARITY CP-4).
  *   GET    /api/deed/projects/:id   the project, its files (every version), its
+ *                                    SIGNAL$ disclosure state (S3) and share tokens (PR B),
  *                                   items, its chat threads, and the S1 greeting
  *                                   (what changed since last visit) — then
  *                                   last_viewed_at is touched (S5 last-seen)
@@ -46,11 +49,16 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
   if (error) return dbErrorResponse(error, 'Unable to load this project.')
   if (!project) return notFound()
 
-  const [files, items, threads, greeting] = await Promise.all([
+  const email = await deedEmail()
+  const [files, items, threads, greeting, report, shares] = await Promise.all([
     supabase.from('deed_project_files').select(FILE_FIELDS).eq('project_id', id).eq('owner_user_id', userId).order('filename').order('version', { ascending: false }),
     supabase.from('deed_project_items').select(ITEM_FIELDS).eq('project_id', id).eq('owner_user_id', userId).order('added_at', { ascending: false }).limit(50),
     supabase.from('deed_threads').select('id,title,updated_at').eq('owner_user_id', userId).eq('project_id', id).order('updated_at', { ascending: false }).limit(30),
     projectGreeting(supabase, project),
+    // S3 (PR B): the 18 SIGNAL$ section names, locked or unlocked for this account.
+    signalReportAccess(supabase, email, project),
+    // PR B: active share tokens by file id (empty until the share migration).
+    activeShares(supabase, userId, id),
   ])
 
   // S5: this open is the new "last seen"; a sale date the SSOT moved is kept.
@@ -70,6 +78,8 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
     items: items.data ?? [],
     threads: threads.data ?? [],
     greeting,
+    report,
+    shares,
   })
 }
 

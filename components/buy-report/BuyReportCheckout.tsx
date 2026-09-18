@@ -9,27 +9,7 @@ import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { REPORT_FIELD_RELEASE_POLICY } from '@/lib/report-field-release'
-
-const REPORT_SECTIONS = [
-  'Subject property identification',
-  'Clearing-band value estimate',
-  'Market-band value estimate',
-  'Comparable sales layer',
-  'Comparable quality and confidence',
-  'Comparable distance analysis',
-  'Comparable timing and market fit',
-  'Transaction history',
-  'Property record',
-  'Listing and auction details',
-  'Neighborhood context',
-  'School context',
-  'Flood-risk context',
-  'Market context',
-  'Judgment and encumbrance review',
-  'Provenance and methodology',
-  'Auction outcome tracking',
-  'Prediction scorecard and max-bid decision',
-]
+import { REPORT_SECTIONS } from '@/lib/report-sections'
 
 type CountyOption = {
   county_slug: string

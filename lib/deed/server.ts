@@ -1,4 +1,4 @@
-import { auth } from '@clerk/nextjs/server'
+import { auth, currentUser } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
@@ -56,13 +56,36 @@ export async function requireDeedContext(): Promise<DeedContextResult> {
  * returns for a table PostgREST has never seen. The live proof run
  * 35293962767 got the 502 for the CP-4 tables — only 42P01 was mapped.
  */
-const NOT_CONFIGURED_CODES = new Set(['42P01', 'PGRST205'])
+//
+// PR B adds columns to deed_project_files (share_token …). Before that
+// migration is applied a query naming them fails with 42703 (undefined_column)
+// or PostgREST's PGRST204 — the same "not configured" state, same 503.
+export const NOT_CONFIGURED_CODES = new Set(['42P01', 'PGRST205', '42703', 'PGRST204'])
+
+export function isNotConfigured(error: { code?: string } | null | undefined): boolean {
+  return Boolean(error?.code && NOT_CONFIGURED_CODES.has(error.code))
+}
 
 export function dbErrorResponse(error: { code?: string; message?: string } | null, fallback: string) {
-  if (error?.code && NOT_CONFIGURED_CODES.has(error.code)) {
+  if (isNotConfigured(error)) {
     return NextResponse.json({ error: 'Not configured yet on this deployment.' }, { status: 503 })
   }
   return NextResponse.json({ error: fallback }, { status: 502 })
+}
+
+/**
+ * The account's Clerk-verified primary email, for matching purchases made at
+ * checkout by email (S3 report disclosure). Never sent anywhere; null when
+ * Clerk has none or is unreachable.
+ */
+export async function deedEmail(): Promise<string | null> {
+  try {
+    const user = await currentUser()
+    const email = user?.primaryEmailAddress?.emailAddress ?? user?.emailAddresses?.[0]?.emailAddress ?? null
+    return email ? email.trim().toLowerCase() : null
+  } catch {
+    return null
+  }
 }
 
 export const THREAD_ID_RE = /^[A-Za-z0-9_-]{6,40}$/
