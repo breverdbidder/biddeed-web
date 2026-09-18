@@ -112,6 +112,15 @@ const isPublicRoute = createRouteMatcher([
   '/api/r/(.*)',
   '/chat(.*)',
   '/dashboard(.*)',
+  // /account renders its own signed-out state instead of relying on
+  // auth.protect(): middleware is a pass-through whenever Clerk is not
+  // configured, so the page has to degrade on its own either way, and a
+  // subscriber following the sidebar link should land on something that
+  // explains itself rather than a redirect loop. /upgrade is the redirect
+  // target the MCP hands to refused callers — it must resolve for a
+  // signed-out caller or the upgrade path dead-ends where it matters most.
+  '/account(.*)',
+  '/upgrade(.*)',
   '/pricing(.*)',
   // County coverage index (#20120) — a prospect must be able to see the
   // calendar before there is an account to protect, same reasoning as
