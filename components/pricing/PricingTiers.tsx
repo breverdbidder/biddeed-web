@@ -8,8 +8,27 @@ import { cn } from '@/lib/utils'
 
 type Interval = 'monthly' | 'annual'
 
-export default function PricingTiers() {
+/**
+ * PROMISE-3 (issue 20518). This paragraph printed "2,911 live right now across
+ * 60 counties" as a string literal. Measured 2026-09-18 the live figures were
+ * 2,804 across 62 — the page had been quietly wrong in both directions for
+ * however long since someone last edited it by hand.
+ *
+ * A number on a pricing page is a claim. It is now passed in from the server
+ * component, which reads the same SSOT summary the product does, and when that
+ * read fails the sentence drops the count rather than inventing one.
+ */
+export interface LiveAuctionCounts {
+  upcoming: number | null
+  counties: number | null
+}
+
+export default function PricingTiers({ counts }: { counts?: LiveAuctionCounts }) {
   const [interval, setInterval] = useState<Interval>('monthly')
+  const live =
+    counts?.upcoming && counts?.counties
+      ? `${counts.upcoming.toLocaleString('en-US')} live right now across ${counts.counties} counties, each with its own `
+      : 'each with its own '
 
   return (
     <div className="tier-cq mx-auto w-full max-w-6xl px-4 pb-28 pt-10 sm:px-6 sm:pb-16 lg:px-8">
@@ -19,7 +38,7 @@ export default function PricingTiers() {
       </h1>
       <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground">
         Every Florida auction is free to browse, and free members see the published number on every property:
-        2,911 live right now across 60 counties, each with its own <a href="/maps" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80 -my-2 py-2">deal page</a>.
+        {live}<a href="/maps" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80 -my-2 py-2">deal page</a>.
         Investor, Pro, and Pro Plus add the depth: reports, Due Diligence, and video property assessment with
         360° Orbit on the properties you work, as available. Every level includes the Academy lessons written for it.
       </p>
