@@ -32,11 +32,11 @@ function SuccessInner() {
   }, [sessionId])
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-zinc-950 px-4 text-center text-zinc-100">
+    <main className="flex min-h-screen flex-col items-center justify-center bg-background px-4 text-center text-foreground">
       <h1 className="mb-3 text-3xl font-bold">
         {status === 'working' ? 'Confirming your Pioneer seat…' : status === 'ok' ? "You're in" : 'Almost there'}
       </h1>
-      <p className="mb-6 max-w-md text-zinc-400">
+      <p className="mb-6 max-w-md text-muted-foreground">
         {status === 'ok'
           ? 'Pro access is unlocking now. Keep renewing at $990/year to hold your rate lock.'
           : status === 'working'
@@ -45,7 +45,7 @@ function SuccessInner() {
       </p>
       <Link
         href="/dashboard"
-        className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-zinc-950"
+        className="inline-flex min-h-11 items-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         Go to dashboard
       </Link>
@@ -57,7 +57,7 @@ export default function PioneerSuccessPage() {
   return (
     <Suspense
       fallback={
-        <main className="flex min-h-screen items-center justify-center bg-zinc-950 text-zinc-100">
+        <main className="flex min-h-screen items-center justify-center bg-background text-foreground">
           Loading…
         </main>
       }

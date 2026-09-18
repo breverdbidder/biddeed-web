@@ -7,7 +7,9 @@ export function getStripe(): Stripe {
   if (!key) throw new Error('STRIPE_SECRET_KEY is not configured')
   if (!_stripe) {
     _stripe = new Stripe(key, {
-      apiVersion: '2024-06-20',
+      // stripe@17.7.0 is generated for this version; '2024-06-20' fails typecheck
+      // (TS2322) and broke the production build after #144 (2026-09-18).
+      apiVersion: '2025-02-24.acacia',
       typescript: true,
     })
   }
