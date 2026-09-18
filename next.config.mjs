@@ -42,6 +42,15 @@ const nextConfig = {
     return [
       { source: '/radar/auctions', destination: '/radar', permanent: true },
       { source: '/radar/auctions/:id', destination: '/radar/:id', permanent: true },
+      // Two links that existed in the product before the pages did, and so
+      // served 404 to exactly the people who had paid: the signed-in sidebar
+      // points "Account dashboard" at /dashboard, and the MCP tells a refused
+      // caller to upgrade at /upgrade. Temporary on purpose — /dashboard may
+      // later become a workspace distinct from /account, and a permanent
+      // redirect is cached by the browser long after the server stops sending
+      // it, which is not a thing to undo by hand on a subscriber's machine.
+      { source: '/dashboard', destination: '/account', permanent: false },
+      { source: '/upgrade', destination: '/subscribe?tier=pro', permanent: false },
     ]
   },
   async headers() {
