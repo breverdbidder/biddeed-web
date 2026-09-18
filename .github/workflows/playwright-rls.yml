@@ -12,7 +12,7 @@ on:
 jobs:
   rls-e2e:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     env:
       E2E_BASE_URL: ${{ inputs.base_url || 'https://staging.biddeed.ai' }}
       E2E_USER_A_EMAIL: ${{ secrets.E2E_USER_A_EMAIL }}
@@ -89,8 +89,13 @@ jobs:
           test -n "$E2E_USER_B_PASSWORD" || { echo 'Missing E2E_USER_B_PASSWORD' >&2; exit 1; }
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
-      - name: Run authenticated RLS suite (saved searches, watchlist, Deed chat identity)
+      # PARITY CP-4: projects.spec.ts joins the suite. E2E_S1_WAIT=1 turns on
+      # the real ten-minute S1 proof (reopen after 10 min -> greeting), which
+      # only makes sense here, on a manual dispatch, never on a PR check.
+      - name: Run authenticated RLS suite (saved searches, watchlist, Deed chat identity, Projects)
         run: npm run test:e2e:rls
+        env:
+          E2E_S1_WAIT: '1'
       - name: Upload Playwright evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

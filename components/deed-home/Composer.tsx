@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import {
   ArrowUp,
+  Check,
   FolderKanban,
   LogIn,
   Mic,
@@ -34,6 +35,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { apiUrl } from '@/lib/api'
 import { useDeedAuth } from '@/lib/deed/deedAuth'
+import { listProjects, type ProjectSummary } from '@/lib/deed/projectsRemote'
 import { cn } from '@/lib/utils'
 import type { DeedSendOptions } from './useDeedThread'
 import VoiceStrip from './VoiceStrip'
@@ -112,6 +114,7 @@ export default function Composer({
   const [projectId, setProjectId] = useState<string | null>(initialProjectId)
   const [notice, setNotice] = useState<string | null>(null)
   const [signInGate, setSignInGate] = useState<SignInGate | null>(null)
+  const [projects, setProjects] = useState<ProjectSummary[] | null>(null)
   const auth = useDeedAuth()
   const signedIn = auth.loaded && auth.signedIn
   const pathname = usePathname()
@@ -211,9 +214,17 @@ export default function Composer({
     reader.readAsDataURL(file)
   }
 
-  // Projects (C3) arrive with PARITY CP-4, keyed on the Clerk sub. Until
-  // then the selector says so — labelled coming, never locked — and a thread
-  // reopened with a project id keeps it.
+  // Projects (C3, PARITY CP-4), keyed on the Clerk sub: the picker lists the
+  // account's projects when its submenu opens; choosing one scopes the rest
+  // of this thread (Deed cites that project's files).
+  function loadProjects() {
+    if (!signedIn) {
+      setProjects([])
+      return
+    }
+    void listProjects().then((rows) => setProjects(rows ?? []))
+  }
+  const activeProject = projectId ? projects?.find((p) => p.id === projectId) : null
   const submit = () => {
     if (streaming) return
     const t = value.trim()
@@ -413,15 +424,38 @@ export default function Composer({
             </DropdownMenuItem>
 
             <DropdownMenuSeparator />
-            <DropdownMenuSub>
+            <DropdownMenuSub onOpenChange={(open) => open && projects === null && loadProjects()}>
               <DropdownMenuSubTrigger>
                 <FolderKanban className="mr-2 size-4" aria-hidden />
-                {projectId ? 'Project: scoped' : 'Project: none'}
+                {projectId ? `Project: ${activeProject?.name ?? 'scoped'}` : 'Project: none'}
               </DropdownMenuSubTrigger>
-              <DropdownMenuSubContent className="w-64">
-                <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
-                  Saved projects are coming with the next release — one per property, with its files and this chat.
-                </DropdownMenuLabel>
+              <DropdownMenuSubContent className="w-72">
+                {!signedIn ? (
+                  <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
+                    Sign in to keep projects — one per property, with its files and this chat.
+                  </DropdownMenuLabel>
+                ) : projects === null ? (
+                  <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">Loading…</DropdownMenuLabel>
+                ) : (
+                  <>
+                    {projects.length === 0 ? (
+                      <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">No projects yet.</DropdownMenuLabel>
+                    ) : null}
+                    {projects.slice(0, 12).map((p) => (
+                      <DropdownMenuItem className="min-h-11" key={p.id} onSelect={() => setProjectId(p.id)}>
+                        {p.id === projectId ? <Check className="mr-2 size-4" aria-hidden /> : <FolderKanban className="mr-2 size-4" aria-hidden />}
+                        <span className="truncate">{p.name}</span>
+                      </DropdownMenuItem>
+                    ))}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="min-h-11" asChild>
+                      <Link href="/chat#projects">
+                        <Plus className="mr-2 size-4" aria-hidden />
+                        New project
+                      </Link>
+                    </DropdownMenuItem>
+                  </>
+                )}
                 {projectId ? (
                   <>
                     <DropdownMenuSeparator />

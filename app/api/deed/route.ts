@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 import { WORKER_MAX_CHARS, WORKER_MAX_MESSAGES, type DeedMessage } from '@/lib/deed/protocol'
+import { PROJECT_ID_RE, projectChatContext } from '@/lib/deed/projects'
 import { requireDeedContext } from '@/lib/deed/server'
 
 export const dynamic = 'force-dynamic'
@@ -52,7 +53,15 @@ const WORKER_CHAT_URL = process.env.DEED_WORKER_CHAT_URL || 'https://biddeed.ai/
 // id or an identity: the row is read here, for the Clerk `sub` that owns it,
 // and the text travels as ordinary message content — so the model answers
 // from the document without any email-claim lookup on either side.
-const MAX_CITED_CHARS = 12_000
+//
+// BUDGET. The Worker rejects a payload over WORKER_MAX_CHARS (8,000) with
+// 400 "Messages too long" — measured in src/worker.js. Everything folded in
+// here (an attachment, a project's files) therefore shares the room the
+// question leaves, and the oldest history is dropped before any context is
+// cut. CP-3 capped a citation at 12,000 chars, above the Worker's whole
+// budget; a large PDF would have bounced. Fixed here (CP-4).
+const MAX_CITED_CHARS = 6_000
+const CONTEXT_RESERVE = 120
 const UPLOAD_ID_RE = /^[0-9a-f-]{36}$/i
 
 async function citedDocument(uploadId: string): Promise<{ text: string } | { error: string; status: number }> {
@@ -95,6 +104,7 @@ export async function POST(req: NextRequest) {
     hook?: unknown
     upload_id?: unknown
     public_records?: unknown
+    project_id?: unknown
   }
   try {
     body = await req.json()
@@ -123,13 +133,45 @@ export async function POST(req: NextRequest) {
 
   // Attachment (CP-3): resolve it for the signed-in owner and fold the text
   // into the last user message. upload_id itself is never forwarded.
+  const context: string[] = []
   if (typeof body.upload_id === 'string') {
     if (!UPLOAD_ID_RE.test(body.upload_id)) return bad(400, 'Invalid upload id')
     const doc = await citedDocument(body.upload_id)
     if ('error' in doc) return bad(doc.status, doc.error)
+    if (clean[clean.length - 1].role !== 'user') return bad(400, 'An attachment needs a user message')
+    context.push(doc.text)
+  }
+
+  // Project scope (CP-4, S4): the project's own facts and the text of its
+  // files, resolved for the signed-in owner. Neither the id nor any identity
+  // goes to the Worker; what was folded in is stated back in X-Deed-Cited so
+  // the customer's client (and the CI proof) can see it without trusting the
+  // model's prose.
+  const cited: string[] = []
+  if (typeof body.project_id === 'string' && body.project_id) {
+    if (!PROJECT_ID_RE.test(body.project_id)) return bad(400, 'Invalid project id')
+    const auth = await requireDeedContext()
+    if (!auth.ok) return auth.response
+    const project = await projectChatContext(auth.ctx.supabase, auth.ctx.userId, body.project_id)
+    if (!project.ok) return bad(project.status, project.error)
+    if (clean[clean.length - 1].role !== 'user') return bad(400, 'A project scope needs a user message')
+    context.push(project.ctx.text)
+    cited.push(...project.ctx.cited)
+  }
+
+  // Fit the Worker's budget: the question is kept whole, the context takes
+  // what the question leaves, and history goes first when there is not enough
+  // room for both — a cite turn is about the document, not the small talk.
+  if (context.length) {
     const last = clean[clean.length - 1]
-    if (last.role !== 'user') return bad(400, 'An attachment needs a user message')
-    last.content = `${doc.text}\n\n${last.content}`
+    const question = last.content
+    let block = context.join('\n\n')
+    const room = WORKER_MAX_CHARS - question.length - CONTEXT_RESERVE
+    if (room < 400) return bad(400, 'The message is too long to add a document to')
+    if (block.length > room) block = block.slice(0, room - 24) + '\n[context truncated]'
+    last.content = `${block}\n\n${question}`
+    const total = () => clean.reduce((n, m) => n + m.content.length, 0)
+    while (clean.length > 1 && total() > WORKER_MAX_CHARS) clean.shift()
   }
 
   const ip = clientIp(req)
@@ -190,6 +232,8 @@ export async function POST(req: NextRequest) {
       // Without this a proxy in front of the app may buffer the whole stream and
       // deliver it as one lump, which looks exactly like the model being slow.
       'X-Accel-Buffering': 'no',
+      // The file names Deed was given for this turn (CP-4) — empty when none.
+      'X-Deed-Cited': encodeURIComponent(cited.join('|')),
     },
   })
 }

@@ -146,6 +146,17 @@ function AssistantTurn({ turn, streaming }: { turn: ThreadTurn; streaming: strin
         ) : text ? (
           <>
             <Markdown>{text}</Markdown>
+            {turn.cited?.length ? (
+              <p className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground" data-cited={turn.cited.join('|')}>
+                <span>Cited from your project:</span>
+                {turn.cited.map((name) => (
+                  <span key={name} className="inline-flex items-center gap-1 rounded-md border border-border bg-card px-2 py-0.5 text-sm text-foreground">
+                    <Paperclip className="size-3 shrink-0" aria-hidden />
+                    {name}
+                  </span>
+                ))}
+              </p>
+            ) : null}
             {truncated ? (
               <p className="rounded-lg border border-border bg-secondary/60 px-3 py-2 text-xs text-secondary-foreground">
                 Deed&rsquo;s answer was cut short by the chat service. Ask a follow-up for the rest, or open the sales in
