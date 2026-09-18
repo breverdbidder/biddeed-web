@@ -1,1 +1,1 @@
-PLACEHOLDER
+@/workspace/agent-tools/middleware.ts
