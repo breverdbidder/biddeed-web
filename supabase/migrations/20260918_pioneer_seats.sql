@@ -1,0 +1,3 @@
+-- Applied live via Supabase MCP (pioneer_seats_and_rate_lock). Kept here for repo history.
+-- Tables: pioneer_seats, pioneer_subscriptions
+-- RPCs: claim_pioneer_seat(), release_pioneer_seat()
