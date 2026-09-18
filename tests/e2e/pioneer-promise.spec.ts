@@ -270,7 +270,7 @@ test.describe('Pioneer promise walk — signed in at Pro', () => {
     })
     const raw = JSON.stringify(res.body ?? '')
     const pass = res.status === 200 && raw.length > 40
-    promise('PM-F5', pass, `POST /api/deed -> ${res.status}; ${raw.length} chars back`)
+    promise('PM-F5', pass, `POST /api/deed -> ${res.status}; ${raw.length} chars back; body=${raw.slice(0, 240)}`)
     expect.soft(res.status).toBe(200)
   })
 
