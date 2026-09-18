@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { PIONEER, getStripe, pioneerPriceId } from '@/lib/stripe'
+import { publicOrigin } from '@/lib/public-origin'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -13,10 +14,13 @@ function admin() {
 }
 
 function siteOrigin(req: NextRequest): string {
+  // Fallback is the PUBLIC origin, not req.nextUrl.origin: behind the router
+  // that is the internal workers.dev host, and Stripe would send the buyer
+  // back there (same defect as the share links, biddeed-web PR 143).
   return (
     process.env.NEXT_PUBLIC_SITE_URL ||
     process.env.NEXT_PUBLIC_URL ||
-    req.nextUrl.origin
+    publicOrigin(req)
   ).replace(/\/$/, '')
 }
 
