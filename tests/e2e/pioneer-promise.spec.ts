@@ -52,6 +52,11 @@ const PROMISED_ZONING_FIELDS = [
   'overlays',
 ] as const
 
+// The route builder only accepts UUID stop ids (parseBuildBody filters on the
+// same shape), so the candidate ids are screened here rather than sending the
+// builder something it will reject and calling that a broken feature.
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
 function promise(id: string, pass: boolean, evidence: string) {
   console.log(`PROMISE ${id} ${pass ? 'PASS' : 'FAIL'} — ${evidence}`)
 }
