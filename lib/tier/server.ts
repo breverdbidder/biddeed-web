@@ -54,7 +54,7 @@ const DENIED_BASE: Omit<CapabilityCheck, 'userId' | 'email'> = {
   upgradePrice: null,
 }
 
-const TIER_RANK: Record<string, number> = { free: 0, investor: 1, pro: 2, proplus: 3, enterprise: 4 }
+export { tierAtLeast } from '@/lib/tier/rank'
 
 /**
  * Compares resolved tier rank rather than calling requireCapability again —
@@ -106,8 +106,48 @@ export async function getCallerTierId(): Promise<string> {
   }
 }
 
-export function tierAtLeast(tierId: string, minTierId: string): boolean {
-  return (TIER_RANK[tierId] ?? 0) >= (TIER_RANK[minTierId] ?? Infinity)
+
+/**
+ * Viewer state for tier-aware field release (the pin card conversion
+ * surface, owner decision 2026-09-18). Same SSOT resolution as
+ * getCallerTierId, plus whether the caller is signed in at all - anonymous
+ * and signed-in-free both resolve tier 'free', and the card needs to tell
+ * "Unlock with Free" (sign up) apart from "Unlock with Investor" (upgrade).
+ * Fails closed to signed-out free on any error.
+ */
+export async function getCallerViewer(): Promise<{ tierId: string; signedIn: boolean }> {
+  let userId: string | null = null
+  let email: string | null = null
+  try {
+    const session = await auth()
+    userId = session.userId
+    if (userId) {
+      const user = await currentUser()
+      email =
+        user?.primaryEmailAddress?.emailAddress ??
+        user?.emailAddresses?.[0]?.emailAddress ??
+        null
+    }
+  } catch {
+    return { tierId: 'free', signedIn: false }
+  }
+  if (!userId) return { tierId: 'free', signedIn: false }
+
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!url || !key) return { tierId: 'free', signedIn: true }
+
+  try {
+    const supabase = getRetryingSupabaseClient(key, { retryMode: 'full' })
+    const { data, error } = await supabase.rpc('resolve_user_tier', {
+      p_clerk_user_id: userId,
+      p_email: email,
+    })
+    if (error || typeof data !== 'string') return { tierId: 'free', signedIn: true }
+    return { tierId: data, signedIn: true }
+  } catch {
+    return { tierId: 'free', signedIn: true }
+  }
 }
 
 export async function requireCapability(cap: Capability): Promise<CapabilityCheck> {

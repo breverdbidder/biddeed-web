@@ -47,7 +47,11 @@ if (!mapRoute.includes('AUCTION_PIN_COLUMNS')) fail('/api/auctions/map must sele
 
 // ── 4. The shared card maps type-appropriate fields and labels gaps ──────
 const card = read('../components/auctions/AuctionPinCard.tsx')
-if (!card.includes('Not published')) fail('missing contract values must be labelled "Not published"')
+// Owner decision 2026-09-18: "Not published" is retired - the public card is
+// a conversion surface. Genuinely missing entitled values read "Not yet
+// enriched", never a fabricated value.
+if (card.includes('Not published')) fail('the card must not render "Not published" (owner decision 2026-09-18)')
+if (!card.includes('Not yet enriched')) fail('entitled missing values must be labelled "Not yet enriched"')
 if (!card.includes('Certificate #')) fail('tax deeds must show the certificate number')
 if (!card.includes('isTaxDeed')) fail('the card must branch parties by auction type')
 // No unconditional Plaintiff/Defendant blanks: plaintiff renders only on the
@@ -74,3 +78,62 @@ const heatmap = read('../components/heatmap/HeatmapMap.tsx')
 if (!heatmap.includes("map.on('click', 'auction-points'")) fail('heatmap pins must be tappable')
 
 console.log('Auction pin contract validated: county db-key queries, minimum pin contract columns, type-appropriate shared card on /radar, /maps and homepage')
+
+// ── 6. Tier-aware field release (owner decision 2026-09-18) ──────────────
+// Field classes must match the canonical entitlement SSOT (PLANS in
+// components/deed-home/LandingSections + lib/tier): free-to-browse facts
+// public; "the published number" (assessed value) and parcel ID free-member;
+// plaintiff/owner/year-built/living-area/certificate/case Investor.
+const releaseMatch = contract.match(/export const PIN_FIELD_RELEASE: Record<string, PinFieldClass> = \{([^}]+)\}/s)
+if (!releaseMatch) fail('pin-contract must export PIN_FIELD_RELEASE')
+const release = Object.fromEntries([...releaseMatch[1].matchAll(/(\w+): '(\w+)'/g)].map((m) => [m[1], m[2]]))
+const wantRelease = {
+  property_address: 'public', county: 'public', sale_type: 'public', auction_date: 'public', opening_bid: 'public',
+  assessed_value: 'free_member', market_value: 'free_member', parcel_id: 'free_member',
+  year_built: 'investor', living_area_sqft: 'investor', plaintiff: 'investor',
+  owner_name: 'investor', cert_number: 'investor', case_number: 'investor',
+}
+for (const [field, cls] of Object.entries(wantRelease)) {
+  if (release[field] !== cls) fail(`PIN_FIELD_RELEASE.${field} must be '${cls}' (canonical entitlements), found '${release[field]}'`)
+}
+// Every contract column that carries a property fact is classified - an
+// unclassified fact column would fail closed to 'investor' and silently
+// over-gate. id/latitude/longitude are plot mechanics, not facts.
+for (const col of ['county','case_number','property_address','sale_type','auction_date','plaintiff','opening_bid','assessed_value','market_value','living_area_sqft','year_built','parcel_id','owner_name','cert_number']) {
+  if (!(col in release)) fail(`PIN_FIELD_RELEASE is missing contract column ${col}`)
+}
+if (!contract.includes('export function redactPinForViewer')) fail('pin-contract must export redactPinForViewer (data-level gate)')
+
+// Data-level enforcement on BOTH feeds the card can read, with per-viewer
+// cache behaviour (a shared cache would leak or wrongly lock).
+for (const [name, src] of [['/api/auctions/map', mapRoute], ['/api/auctions', read('../app/api/auctions/route.ts')]]) {
+  if (!src.includes('redactPinForViewer')) fail(`${name} must redact gated fields via redactPinForViewer`)
+  if (!src.includes('getCallerViewer')) fail(`${name} must resolve the viewer via getCallerViewer`)
+  if (!src.includes('private, no-store')) fail(`${name} must be private, no-store (per-viewer payload)`)
+  if (src.includes('s-maxage')) fail(`${name} must not be edge-cached across viewers`)
+}
+
+// The card's three viewer states: anonymous sees "Unlock with Free" on
+// free-member fields, free members see "Unlock with Investor" on Investor
+// fields, investors see values. CTAs use the canonical links.
+if (!card.includes('Unlock with Free')) fail('card must offer "Unlock with Free" to anonymous viewers')
+if (!card.includes('Unlock with Investor')) fail('card must offer "Unlock with Investor" for Investor-gated fields')
+if (!card.includes("href: '/sign-up'")) fail('"Unlock with Free" must link to /sign-up')
+if (!card.includes("'/subscribe?tier=investor'")) fail('"Unlock with Investor" must link to the canonical /subscribe?tier=investor')
+if (!card.includes('/api/viewer/tier')) fail('card must resolve viewer state from /api/viewer/tier')
+if (!card.includes('useViewerState')) fail('card must gate rendering by viewer state')
+
+// Viewer endpoint exists, resolves through the tier SSOT, and is per-viewer.
+const viewerRoute = read('../app/api/viewer/tier/route.ts')
+if (!viewerRoute.includes('getCallerViewer')) fail('/api/viewer/tier must resolve via getCallerViewer (tier SSOT)')
+if (!viewerRoute.includes('no-store')) fail('/api/viewer/tier must be no-store')
+
+// Tier ids stay canonical (no invented tiers): free/investor/pro/proplus/enterprise.
+const rank = read('../lib/tier/rank.ts')
+for (const t of ['free', 'investor', 'pro', 'proplus', 'enterprise']) {
+  if (!rank.includes(`${t}:`)) fail(`lib/tier/rank.ts must keep canonical tier id ${t}`)
+}
+// Investor price label comes from PLANS, never a literal.
+if (!card.includes("PLANS.find((p) => p.name === 'Investor')")) fail('Investor price label must come from PLANS (pricing SSOT)')
+
+console.log('auction pin contract: all gates pass')
