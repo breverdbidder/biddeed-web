@@ -66,7 +66,10 @@ const HOME_CONTEXT: DeedContext = {
  * device. Signed out, nothing is stored anywhere (issue #20226) — the thread
  * lives in this tab's React state and no longer.
  */
-export function useDeedThread(initialId: string | null) {
+export function useDeedThread(initialId: string | null, opts: { projectId?: string | null } = {}) {
+  // /chat?project=<id>: a fresh thread started here belongs to that project
+  // (S4). A reopened thread keeps its own projectId regardless.
+  const defaultProjectId = opts.projectId ?? null
   const [thread, setThread] = useState<Thread | null>(null)
   const [status, setStatus] = useState<ThreadStatus>('idle')
   const [streaming, setStreaming] = useState('')
@@ -224,7 +227,7 @@ export function useDeedThread(initialId: string | null) {
       // A project, once picked, scopes the rest of this thread — not just the
       // message that picked it — mirroring the Worker's own chatState.projectId
       // persistence in src/worker.js.
-      const projectId = opts.projectId !== undefined ? opts.projectId : base.projectId
+      const projectId = opts.projectId !== undefined ? opts.projectId : (base.projectId ?? defaultProjectId)
       const userTurn: ThreadTurn = {
         id: newId(),
         role: 'user',
@@ -274,10 +277,10 @@ export function useDeedThread(initialId: string | null) {
         },
       ])
 
-      void run(next.id, assistantTurn.id, wire, intent, opts)
+      void run(next.id, assistantTurn.id, wire, intent, { ...opts, projectId })
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [thread, status, counts]
+    [thread, status, counts, defaultProjectId]
   )
 
   const patchThreadMeta = useCallback((threadId: string, patch: Partial<Thread>) => {
@@ -309,6 +312,9 @@ export function useDeedThread(initialId: string | null) {
           hook: 'home',
           upload_id: opts.uploadId,
           public_records: opts.publicRecords || undefined,
+          // Project scope (CP-4): the route folds the project's files in for
+          // the signed-in owner and names them back in X-Deed-Cited.
+          project_id: opts.projectId || undefined,
         }),
         signal: controller.signal,
       })
@@ -331,7 +337,9 @@ export function useDeedThread(initialId: string | null) {
         }
       )
       const { action, display } = extractAction(acc)
-      finish(threadId, turnId, { content: display, action: action ?? null, pending: false })
+      const citedHeader = res.headers.get('x-deed-cited')
+      const cited = citedHeader ? decodeURIComponent(citedHeader).split('|').filter(Boolean) : []
+      finish(threadId, turnId, { content: display, action: action ?? null, pending: false, cited: cited.length ? cited : undefined })
     } catch (err) {
       const aborted = (err as Error)?.name === 'AbortError'
       finish(threadId, turnId, {

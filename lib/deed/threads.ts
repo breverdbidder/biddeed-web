@@ -61,6 +61,8 @@ export interface ThreadTurn {
   pending?: boolean
   /** Name of the file attached to this (user) turn, if any — display only. */
   attachmentLabel?: string
+  /** Project files Deed was given for this (assistant) turn — from the X-Deed-Cited header (CP-4). */
+  cited?: string[]
 }
 
 export interface Thread {

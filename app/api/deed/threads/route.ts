@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+import { PROJECT_ID_RE } from '@/lib/deed/projects'
 import { MAX_TITLE, MAX_TURNS, MAX_TURNS_BYTES, THREAD_ID_RE, dbErrorResponse, requireDeedContext } from '@/lib/deed/server'
 import type { ThreadTurn } from '@/lib/deed/threads'
 
@@ -39,6 +40,7 @@ function cleanTurn(t: unknown): ThreadTurn | null {
   }
   if (typeof x.attachmentLabel === 'string') turn.attachmentLabel = x.attachmentLabel.slice(0, 255)
   if (typeof x.error === 'string') turn.error = x.error.slice(0, 500)
+  if (Array.isArray(x.cited)) turn.cited = x.cited.filter((c): c is string => typeof c === 'string').map((c) => c.slice(0, 255)).slice(0, 20)
   if (x.action && typeof x.action === 'object') turn.action = x.action as ThreadTurn['action']
   if (x.cards && typeof x.cards === 'object') {
     // Card rows are re-fetched on reopen (useDeedThread.refreshCards); keep
@@ -57,6 +59,10 @@ export async function GET(req: NextRequest) {
   const { userId, supabase } = auth.ctx
 
   const q = (req.nextUrl.searchParams.get('q') || '').trim().slice(0, 120)
+  // ?project=<id> narrows to one project's chats (CP-4, S4); anything that is
+  // not a well-formed id reads as "no filter" rather than an error.
+  const project = req.nextUrl.searchParams.get('project') || ''
+  const projectFilter = PROJECT_ID_RE.test(project) ? project : null
   let query = supabase.from('deed_threads').select(LIST_FIELDS).eq('owner_user_id', userId).order('updated_at', { ascending: false }).limit(LIST_LIMIT)
   if (q.length >= 2) {
     // websearch_to_tsquery syntax: plain words, quoted phrases, -negation.
@@ -68,6 +74,7 @@ export async function GET(req: NextRequest) {
       .order('updated_at', { ascending: false })
       .limit(LIST_LIMIT)
   }
+  if (projectFilter) query = query.eq('project_id', projectFilter)
   const { data, error } = await query
   if (error) return dbErrorResponse(error, 'Unable to load your chats.')
   return NextResponse.json({ threads: (data ?? []) as ListRow[], query: q || null })
@@ -92,7 +99,7 @@ export async function PUT(req: NextRequest) {
   if (turnsJson.length > MAX_TURNS_BYTES) return NextResponse.json({ error: 'Thread too large' }, { status: 413 })
 
   const title = (typeof body.title === 'string' ? body.title : '').replace(/\s+/g, ' ').trim().slice(0, MAX_TITLE) || 'New conversation'
-  const project_id = typeof body.project_id === 'string' && body.project_id.length <= 64 ? body.project_id : null
+  const project_id = typeof body.project_id === 'string' && PROJECT_ID_RE.test(body.project_id) ? body.project_id : null
   const worker_conversation_id =
     typeof body.worker_conversation_id === 'string' && body.worker_conversation_id.length <= 64 ? body.worker_conversation_id : null
   const search_text = turns

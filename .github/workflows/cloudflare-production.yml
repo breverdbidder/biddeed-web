@@ -198,6 +198,12 @@ jobs:
           expect 401 -H 'x-chat-token: someone@example.com.legacy' "$base/api/deed/threads"
           expect 401 -H 'x-chat-token: someone@example.com.legacy' -X POST -H 'Content-Type: application/json' -d '{"filename":"a.txt","mime_type":"text/plain","data_base64":"aGk="}' "$base/api/deed/upload"
           expect 404 -X POST -H 'Content-Type: application/json' -d '{"email":"someone@example.com"}' "$base/api/deed/identity"
+          # PARITY CP-4: projects are behind the same identity.
+          expect 401 "$base/api/deed/projects"
+          expect 401 -X POST -H 'Content-Type: application/json' -d '{"name":"deploy"}' "$base/api/deed/projects"
+          expect 401 "$base/api/deed/projects/00000000-0000-4000-8000-000000000000/files"
+          expect 401 "$base/api/deed/projects/00000000-0000-4000-8000-000000000000/files/00000000-0000-4000-8000-000000000000/download"
+          expect 401 -X POST -H 'Content-Type: application/json' -d '{"messages":[{"role":"user","content":"x"}],"project_id":"00000000-0000-4000-8000-000000000000"}' "$base/api/deed"
 
       # #20053 P0: the workers.dev checks above cannot catch this bug class --
       # the regression was a Cloudflare zone-route ownership change, which

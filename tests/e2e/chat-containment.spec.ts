@@ -106,17 +106,17 @@ test.describe('Chat history privacy containment', () => {
     expect(res.status).toBe(401)
   })
 
-  test('GET and POST /api/deed/projects return unavailable, never an empty-but-200 list', async ({ page }) => {
+  test('GET and POST /api/deed/projects with a legacy token are 401, never an empty-but-200 list (CP-4)', async ({ page }) => {
     await page.goto('/', { waitUntil: 'domcontentloaded' })
     const getRes = await apiJson(page, '/api/deed/projects', { headers: { 'x-chat-token': 'legacy' } })
-    expect(getRes.status).toBe(503)
+    expect(getRes.status).toBe(401)
 
     const postRes = await apiJson(page, '/api/deed/projects', {
       method: 'POST',
       headers: { 'x-chat-token': 'legacy' },
       body: JSON.stringify({ name: 'Should not be created' }),
     })
-    expect(postRes.status).toBe(503)
+    expect(postRes.status).toBe(401)
   })
 
   test('narrow mobile sidebar at /projects has no Recent group and no Chats history entry point', async ({ page }) => {
