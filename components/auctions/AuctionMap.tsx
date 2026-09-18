@@ -7,6 +7,7 @@ import { useTheme } from '@/lib/theme-context'
 import { getRecommendation } from '@/lib/scoring'
 import { ZONING_CATEGORY_COLORS, type ZoningCategory } from '@/lib/zoning'
 import type { Auction } from '@/types/auctions'
+import { pinToAuction, type AuctionPin } from '@/lib/auctions/pin-contract'
 import { apiUrl } from '@/lib/api'
 import { LIGHT as C } from '@/lib/design-tokens'
 
@@ -22,25 +23,8 @@ import { LIGHT as C } from '@/lib/design-tokens'
  * cluster count that implies completeness it doesn't have.
  */
 
-interface MapPoint {
-  // uuid. GET /api/auctions/map returns
-  // "72f48be9-05ee-4abd-a7bd-90fd90e5678f" (verified 2026-08-20); this was
-  // declared `number` and nothing disagreed, because the value is only ever
-  // used as a Map key and a route segment.
-  id: string
-  latitude: number
-  longitude: number
-  sale_type: string | null
-  county: string
-  property_address: string | null
-  auction_date: string | null
-  opening_bid: number | null
-  assessed_value: number | null
-  market_value: number | null
-}
-
 interface MapResponse {
-  data: MapPoint[]
+  data: AuctionPin[]
   returned: number
   total_mappable: number
   total_matching: number
@@ -73,46 +57,6 @@ function formatCurrency(val: number | null): string {
   return '$' + val.toLocaleString('en-US', { maximumFractionDigits: 0 })
 }
 
-// A lean map pin does not carry the full Auction shape (no plaintiff, no
-// living area, no zoning). Filling the rest with null keeps the shared detail
-// modal working off a click while staying honest about what this row does
-// not know - the same convention app/api/auctions/route.ts already uses for
-// columns that don't exist on multi_county_auctions.
-function toAuctionShape(p: MapPoint): Auction {
-  return {
-    id: p.id,
-    county: p.county,
-    case_number: '',
-    property_address: p.property_address,
-    auction_type: p.sale_type || '',
-    auction_date: p.auction_date,
-    plaintiff: null,
-    assessed_value: p.assessed_value,
-    market_value: p.market_value,
-    opening_bid: p.opening_bid,
-    parcel_id: null,
-    source_url: null,
-    scraped_at: null,
-    created_at: null,
-    land_value: null,
-    year_built: null,
-    owner_name: null,
-    photo_url: null,
-    enriched_at: null,
-    // Unknown, not false — the lean map feed carries no property_type to
-    // classify from, and rendering "No" here would assert a fact we don't
-    // have (same rule the browse endpoint's mapRow() already follows).
-    is_vacant_land: null,
-    address_status: null,
-    dor_use_code: null,
-    zone_code: null,
-    municipality: null,
-    sale_type: p.sale_type,
-    latitude: p.latitude,
-    longitude: p.longitude,
-  }
-}
-
 const STREETS_STYLE = 'mapbox://styles/mapbox/streets-v12'
 const SATELLITE_STYLE = 'mapbox://styles/mapbox/satellite-streets-v12'
 
@@ -128,7 +72,7 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
   // Keyed by the auction uuid, not a numeric id. It worked at runtime only
   // because JS Map keys are compared by value and both sides happened to be
   // the same string; the declared key type was simply wrong.
-  const pointLookup = useRef<Map<string, MapPoint>>(new Map())
+  const pointLookup = useRef<Map<string, AuctionPin>>(new Map())
   const { theme } = useTheme()
 
   const [resp, setResp] = useState<MapResponse | null>(null)
@@ -277,7 +221,7 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
     })
   }, [isSatellite])
 
-  function getPointColor(point: MapPoint): string {
+  function getPointColor(point: AuctionPin): string {
     // Zoning data has no source on the lean map feed (no dor_use_code, no
     // zoning_category on multi_county_auctions) - grey/unknown is honest,
     // inventing a category is not.
@@ -483,7 +427,7 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
         `)
         .addTo(map)
 
-      if (point) onSelectAuction(toAuctionShape(point))
+      if (point) onSelectAuction(pinToAuction(point))
     })
 
     // Cursor changes
