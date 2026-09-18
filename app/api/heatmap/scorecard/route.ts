@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getRetryingSupabaseClient } from '@/lib/supabase-retry'
 import { serverError } from '@/lib/api-errors'
-import { FL_COUNTIES } from '@/lib/counties'
+import { FL_COUNTIES, countyDbKey } from '@/lib/counties'
 import { pickTopParcel, type CandidateAuctionRow } from '@/lib/heatmap/topParcel'
 import { getLayer } from '@/lib/heatmap/config'
 import acsData from '@/lib/heatmap/data/fl-county-acs-2024.json'
@@ -45,13 +45,21 @@ export async function GET(request: NextRequest) {
 
   const supabase = getRetryingSupabaseClient()
 
+  // multi_county_auctions.county stores the slug in underscore form
+  // ('st_lucie'), never the display name ('St. Lucie') - matching on
+  // county.name silently zeroed every multi-word county while its pins
+  // plotted beside the panel (measured live 2026-09-18: St. Lucie panel "0
+  // live auctions" next to 51 live st_lucie pins). countyDbKey is the one
+  // normalization, shared with every other county query surface.
+  const dbCounty = countyDbKey(county.slug)
+
   let rows: CandidateAuctionRow[] = []
   let liveCount = 0
   try {
     const query = supabase
       .from('multi_county_auctions')
       .select(SELECT_COLUMNS, { count: 'exact' })
-      .ilike('county', county.name)
+      .ilike('county', dbCounty)
       .or(LIVE_STATUS_FILTER)
       .gte('auction_date', new Date().toISOString().slice(0, 10))
       .order('auction_date', { ascending: true })
@@ -75,7 +83,7 @@ export async function GET(request: NextRequest) {
         .select('county', { count: 'exact' })
         .or(LIVE_STATUS_FILTER)
         .gte('auction_date', new Date().toISOString().slice(0, 10))
-        .neq('county', county.name)
+        .neq('county', dbCounty)
         .limit(500)
       const counts = new Map<string, number>()
       for (const r of (data as { county: string }[]) || []) {
@@ -83,7 +91,10 @@ export async function GET(request: NextRequest) {
       }
       const [bestCounty, bestCount] = [...counts.entries()].sort((a, b) => b[1] - a[1])[0] || []
       if (bestCounty) {
-        const match = FL_COUNTIES.find((c) => c.name.toLowerCase() === bestCounty.toLowerCase())
+        // bestCounty is a raw stored value ('st_lucie'); resolve it through
+        // the same db-key normalization or every multi-word county surfaces
+        // with an empty fips and a snake_case name.
+        const match = FL_COUNTIES.find((c) => countyDbKey(c.slug) === bestCounty.toLowerCase())
         nearestWithInventory = {
           county_fips: match?.fips ?? '',
           county_name: match?.name ?? bestCounty,
