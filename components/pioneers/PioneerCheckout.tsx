@@ -66,32 +66,32 @@ export function PioneerCheckout() {
   const soldOut = avail?.soldOut === true
 
   return (
-    <div className="mx-auto max-w-xl rounded-2xl border border-amber-500/40 bg-zinc-950/80 p-6 shadow-xl">
+    <div className="mx-auto max-w-xl rounded-2xl border border-primary/40 bg-card p-6 shadow-xl">
       <div className="mb-4 flex items-baseline justify-between gap-3">
-        <h2 className="text-xl font-semibold text-white">Join 100 Pioneers</h2>
+        <h2 className="text-xl font-semibold text-foreground">Join 100 Pioneers</h2>
         {avail && (
-          <p className="text-sm text-amber-300/90">
+          <p className="text-base font-medium text-primary">
             {avail.remaining} of {avail.cap} left
           </p>
         )}
       </div>
 
-      <p className="mb-4 text-sm leading-relaxed text-zinc-300">
-        <span className="font-medium text-white">$990/year</span> for{' '}
-        <span className="font-medium text-white">Pro</span> access (list{' '}
+      <p className="mb-4 text-base leading-relaxed text-muted-foreground">
+        <span className="font-medium text-foreground">$990/year</span> for{' '}
+        <span className="font-medium text-foreground">Pro</span> access (list{' '}
         {avail ? `$${avail.offer.listProAnnualUsd.toLocaleString()}/yr` : '$1,990/yr'}). Same dollar
-        as Investor annual — you get Pro, and your <span className="text-white">$990/yr Pro rate
+        as Investor annual — you get Pro, and your <span className="text-foreground">$990/yr Pro rate
         stays locked</span> for as long as you keep renewing. Cancel and the lock ends. Cap: 100.
         No Pro Plus. No direct founder line.
       </p>
 
       {soldOut ? (
-        <p className="rounded-lg bg-zinc-900 px-4 py-3 text-sm text-zinc-200">
+        <p className="rounded-lg bg-secondary px-4 py-3 text-base text-foreground">
           Sold out — all 100 Pioneer seats are taken.
         </p>
       ) : (
         <form onSubmit={startCheckout} className="space-y-3">
-          <label className="block text-sm text-zinc-400">
+          <label className="block text-[15px] text-muted-foreground">
             Email for Stripe receipt
             <input
               type="email"
@@ -99,20 +99,20 @@ export function PioneerCheckout() {
               value={email}
               onChange={(ev) => setEmail(ev.target.value)}
               placeholder="you@company.com"
-              className="mt-1 w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-white outline-none focus:border-amber-500"
+              className="mt-1 min-h-11 w-full rounded-lg border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary focus-visible:ring-2 focus-visible:ring-ring"
             />
           </label>
           <button
             type="submit"
             disabled={loading || !avail}
-            className="w-full rounded-lg bg-amber-500 px-4 py-2.5 text-sm font-semibold text-zinc-950 disabled:opacity-50"
+            className="min-h-11 w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
           >
             {loading ? 'Redirecting to Stripe…' : 'Continue to Stripe — $990/year Pro'}
           </button>
         </form>
       )}
 
-      {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
+      {error && <p className="mt-3 text-base text-destructive sm:text-[15px]" role="alert">{error}</p>}
     </div>
   )
 }
