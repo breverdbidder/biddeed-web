@@ -326,19 +326,80 @@ export default function AuctionDetail({ auctionId }: Props) {
               )}
             </SectionCard>
 
-            {/* Dimensional Standards */}
+            {/* Dimensional Standards — PROMISE-6 (issue 20518).
+                /pricing names eight fields for Pro: setbacks, parking, height,
+                land use, units per acre, FAR, permitted uses, overlays.
+                Verified jurisdiction standards are shown as standards, with the
+                land development code cited. Where none have been researched
+                yet, the zone-code pattern estimate is still offered — it is
+                genuinely useful for orientation — but it is named as an
+                estimate and the unresearched fields are listed as unresearched
+                rather than quietly omitted. A blank cannot be relied on by
+                mistake; a fabricated setback can. */}
             {auction.zoning?.zone_code && (() => {
+              const std = auction.zoning_standards ?? null
+              const verified = Boolean(std?.standards_verified)
               const dims = parseDimensionalStandards(auction.zoning?.zone_code ?? null, auction.zoning?.future_land_use ?? null)
-              if (!dims) return null
+              if (!verified && !dims) return null
+
+              const fmtFt = (v: number | null | undefined) => (v == null ? null : `${v} ft`)
+              const fmtSetbacks = (s: Record<string, unknown> | null | undefined) => {
+                if (!s) return null
+                const parts = (['front', 'side', 'side_street', 'rear'] as const)
+                  .filter((k) => s[k] != null)
+                  .map((k) => `${k.replace('_', ' ')}: ${String(s[k])} ft`)
+                return parts.length ? parts.join(' · ') : null
+              }
+              const fmtList = (v: unknown[] | null | undefined) =>
+                Array.isArray(v) && v.length ? v.map((x) => String(x)).join(', ') : null
+
+              const missing = verified
+                ? ([
+                    ['setbacks', fmtSetbacks(std?.setbacks)],
+                    ['parking', std?.parking ? 'set' : null],
+                    ['height', fmtFt(std?.max_height_ft)],
+                    ['land use', std?.land_use ?? null],
+                    ['units per acre', std?.units_per_acre ?? null],
+                    ['FAR', std?.far_max ?? null],
+                    ['permitted uses', fmtList(std?.permitted_uses)],
+                    ['overlays', fmtList(std?.overlays)],
+                  ] as const)
+                    .filter(([, v]) => v == null)
+                    .map(([k]) => k)
+                : []
+
               return (
                 <SectionCard title="Dimensional Standards" icon="📐">
-                  <InfoRow label="Min Lot Size" value={dims.minLotSize} />
-                  <InfoRow label="Max Height" value={dims.maxHeight} />
-                  <InfoRow label="Setbacks" value={dims.setbacks} />
-                  <InfoRow label="Density" value={dims.density} />
-                  <p className="text-[10px] text-muted-foreground dark:text-muted-foreground mt-2">
-                    Estimates based on zone code pattern. Verify with local municipality.
-                  </p>
+                  {verified ? (
+                    <>
+                      <InfoRow label="Setbacks" value={fmtSetbacks(std?.setbacks)} />
+                      <InfoRow label="Max Height" value={fmtFt(std?.max_height_ft) ?? (std?.max_stories ? `${std.max_stories} stories` : null)} />
+                      <InfoRow label="Units / Acre" value={std?.units_per_acre != null ? String(std.units_per_acre) : null} />
+                      <InfoRow label="FAR" value={std?.far_max != null ? String(std.far_max) : null} />
+                      <InfoRow label="Min Lot Size" value={std?.min_lot_sqft != null ? `${Number(std.min_lot_sqft).toLocaleString('en-US')} sqft` : null} />
+                      <InfoRow label="Parking" value={std?.parking ? JSON.stringify(std.parking) : null} />
+                      <InfoRow label="Permitted Uses" value={fmtList(std?.permitted_uses)} />
+                      <InfoRow label="Overlays" value={fmtList(std?.overlays)} />
+                      <p className="text-[10px] text-muted-foreground dark:text-muted-foreground mt-2">
+                        {std?.jurisdiction ? `${std.jurisdiction} · ` : ''}zone {std?.zoning_code}
+                        {std?.source_citation ? ` · ${std.source_citation}` : ''}
+                        {missing.length ? ` · not yet researched: ${missing.join(', ')}` : ''}
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <InfoRow label="Min Lot Size" value={dims?.minLotSize ?? null} />
+                      <InfoRow label="Max Height" value={dims?.maxHeight ?? null} />
+                      <InfoRow label="Setbacks" value={dims?.setbacks ?? null} />
+                      <InfoRow label="Density" value={dims?.density ?? null} />
+                      <p className="text-[10px] text-muted-foreground dark:text-muted-foreground mt-2">
+                        Pattern estimate from the zone code — not this jurisdiction&apos;s adopted standards, which we have
+                        not verified for {std?.jurisdiction || auction.county} zone {auction.zoning.zone_code} yet.
+                        Parking, FAR, permitted uses and overlays are not estimated at all. Verify with the municipality
+                        before you rely on any of it.
+                      </p>
+                    </>
+                  )}
                 </SectionCard>
               )
             })()}
