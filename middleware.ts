@@ -81,6 +81,8 @@ const isPublicRoute = createRouteMatcher([
   // was an oversight: the page was public and the endpoint it depends on was
   // not, which breaks the moment Clerk keys are configured.
   '/api/checkout(.*)',
+  '/api/pioneers(.*)', // 100 Pioneers funnel — anonymous checkout before account exists
+  '/pioneers(.*)', // 100 Pioneers landing + success pages must be reachable signed-out
   // Pages — public access
   '/',
   // M9 (Ariel, 2026-09-06): the reel funnel is the lead magnet and MUST be
