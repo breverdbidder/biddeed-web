@@ -34,6 +34,8 @@ interface Props {
 const bodyText = 'text-base leading-6 sm:text-[15px]'
 const itemClass =
   'flex w-full min-h-11 items-center gap-2 rounded-md px-2 text-left text-base text-foreground outline-none transition-colors hover:bg-secondary focus-visible:ring-2 focus-visible:ring-ring sm:text-[15px]'
+// Used as `fieldClass + ' …'` (not cn()) so scripts/control-boundary-gate.mjs
+// can resolve the literal and see border-input at rest on every control.
 const fieldClass =
   'h-11 w-full rounded-md border border-input bg-background px-3 text-base text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring sm:text-[15px]'
 
@@ -194,12 +196,12 @@ export default function ProjectsSheet({ open, onOpenChange, draft, onAskDeed, on
                     onChange={(e) => setName(e.target.value)}
                     placeholder={county ? `${countyLabel(county)} — ${caseNumber || 'new bid'}` : 'e.g. 123 Main St — tax deed'}
                     maxLength={120}
-                    className={cn(fieldClass, 'mt-1')}
+                    className={fieldClass + ' mt-1'}
                   />
                   <label htmlFor="project-county" className="mt-3 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                     County
                   </label>
-                  <select id="project-county" value={county} onChange={(e) => setCounty(e.target.value)} className={cn(fieldClass, 'mt-1')}>
+                  <select id="project-county" value={county} onChange={(e) => setCounty(e.target.value)} className={fieldClass + ' mt-1'}>
                     <option value="">Not yet</option>
                     {FL_COUNTIES.map((c) => (
                       <option key={c.slug} value={c.slug}>
@@ -216,7 +218,7 @@ export default function ProjectsSheet({ open, onOpenChange, draft, onAskDeed, on
                     onChange={(e) => setCaseNumber(e.target.value)}
                     placeholder="Optional — fills the sale date from the calendar"
                     maxLength={80}
-                    className={cn(fieldClass, 'mt-1')}
+                    className={fieldClass + ' mt-1'}
                   />
                   {error ? <p className={cn(bodyText, 'mt-2 text-destructive')}>{error}</p> : null}
                   <div className="mt-3 flex flex-wrap gap-2">
