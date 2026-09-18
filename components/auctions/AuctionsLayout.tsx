@@ -8,6 +8,7 @@ import AuctionFilters from './AuctionFilters'
 import AuctionTable from './AuctionTable'
 import AuctionSpreadsheet from './AuctionSpreadsheet'
 import AuctionSidebarList from './AuctionSidebarList'
+import AuctionPinCard from './AuctionPinCard'
 import { formatCountyLabel } from '@/lib/counties'
 import type { Auction, AuctionSummary, AuctionsResponse, ViewMode } from '@/types/auctions'
 import { apiUrl } from '@/lib/api'
@@ -273,10 +274,6 @@ export default function AuctionsLayout({
     )
   }
 
-  const selectedJustValue = selectedAuction
-    ? selectedAuction.market_value ?? selectedAuction.assessed_value ?? null
-    : null
-
   return (
     <div className="w-full min-w-0 overflow-x-hidden bg-muted dark:bg-background">
       <div className="mx-auto max-w-7xl min-w-0 space-y-6 px-4 py-6 sm:px-6">
@@ -422,103 +419,7 @@ export default function AuctionsLayout({
         )}
 
         {selectedAuction && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setSelectedAuction(null)}>
-            <div
-              className="bg-card dark:bg-card border border-border dark:border-border rounded-xl shadow-2xl max-w-lg w-full mx-4 p-6"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <h2 className="text-lg font-bold text-foreground dark:text-white">
-                    {selectedAuction.property_address || 'No Address'}
-                  </h2>
-                  <p className="text-sm text-muted-foreground dark:text-muted-foreground">
-                    {formatCountyLabel(selectedAuction.county)} County &middot; {selectedAuction.case_number}
-                  </p>
-                </div>
-                <button
-                  onClick={() => setSelectedAuction(null)}
-                  className="text-muted-foreground hover:text-muted-foreground dark:hover:text-muted-foreground text-xl leading-none"
-                >
-                  &times;
-                </button>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <p className="text-muted-foreground dark:text-muted-foreground">Type</p>
-                  <p className={`font-medium ${selectedAuction.auction_type === 'foreclosure' ? 'text-primary' : 'text-foreground'}`}>
-                    {selectedAuction.auction_type === 'foreclosure' ? 'Foreclosure' : 'Tax Deed'}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground dark:text-muted-foreground">Auction Date</p>
-                  <p className="text-foreground dark:text-white font-medium tabular">
-                    {selectedAuction.auction_date
-                      ? new Date(selectedAuction.auction_date + 'T00:00:00').toLocaleDateString()
-                      : '—'}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground dark:text-muted-foreground">Assessed Value</p>
-                  <p className="text-foreground dark:text-white font-medium tabular">
-                    {selectedJustValue
-                      ? '$' + selectedJustValue.toLocaleString('en-US', { maximumFractionDigits: 0 })
-                      : '—'}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground dark:text-muted-foreground">Year Built</p>
-                  <p className="text-foreground dark:text-white font-medium tabular">{selectedAuction.year_built || '—'}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground dark:text-muted-foreground">Plaintiff</p>
-                  <p className="text-foreground dark:text-white font-medium">{selectedAuction.plaintiff || '—'}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground dark:text-muted-foreground">Defendant</p>
-                  <p className="text-foreground dark:text-white font-medium">{selectedAuction.defendant || '—'}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground dark:text-muted-foreground">Living Area</p>
-                  <p className="text-foreground dark:text-white font-medium tabular">
-                    {selectedAuction.living_area_sqft
-                      ? selectedAuction.living_area_sqft.toLocaleString() + ' sqft'
-                      : '—'}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground dark:text-muted-foreground">Parcel ID</p>
-                  <p className="text-foreground dark:text-white font-mono text-xs">{selectedAuction.parcel_id || '—'}</p>
-                </div>
-              </div>
-
-              {selectedAuction.is_vacant_land && (
-                <div className="mt-4 px-3 py-2 bg-muted dark:bg-card rounded-md">
-                  <p className="text-xs text-muted-foreground dark:text-muted-foreground">
-                    This parcel is classified as <span className="font-medium text-foreground dark:text-muted-foreground">vacant land</span> with no situs address.
-                  </p>
-                </div>
-              )}
-
-              {selectedAuction.address_status && (
-                <div className="mt-3 px-3 py-2 bg-foreground/10 dark:bg-foreground/15/20 rounded-md">
-                  <p className="text-xs text-foreground dark:text-foreground">
-                    Status: {selectedAuction.address_status.replace(/_/g, ' ')}
-                  </p>
-                </div>
-              )}
-
-              {/* S2 hook (issue #19847 Pass 3) — same /chat?new_project_county=
-                  mechanism every other hook point across the product uses. */}
-              <a
-                href={`/chat?new_project_county=${encodeURIComponent(selectedAuction.county || '')}&case=${encodeURIComponent(selectedAuction.case_number || '')}&source=radar_modal`}
-                className="mt-4 block text-center text-sm font-semibold text-primary dark:text-primary underline hover:no-underline"
-              >
-                📁 New project from this
-              </a>
-            </div>
-          </div>
+          <AuctionPinCard auction={selectedAuction} onClose={() => setSelectedAuction(null)} />
         )}
       </div>
     </div>
