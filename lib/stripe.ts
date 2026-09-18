@@ -11,6 +11,13 @@ export function getStripe(): Stripe {
       // (TS2322) and broke the production build after #144 (2026-09-18).
       apiVersion: '2025-02-24.acacia',
       typescript: true,
+      // This app runs on Cloudflare Workers (OpenNext). stripe-node's default
+      // transport is Node's https module, which never completes there: live
+      // POST /api/pioneers/checkout hung past 40 s on both biddeed.ai and the
+      // workers.dev origin (2026-09-18 06:2x EDT) while the Supabase-only
+      // availability route answered instantly. Stripe's documented Workers
+      // setup is the fetch-based client.
+      httpClient: Stripe.createFetchHttpClient(),
     })
   }
   return _stripe
