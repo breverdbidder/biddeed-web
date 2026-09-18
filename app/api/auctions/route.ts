@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getRetryingSupabaseClient } from '@/lib/supabase-retry'
 import { serverError } from '@/lib/api-errors'
+import { redactPinForViewer, type PinViewerClass } from '@/lib/auctions/pin-contract'
+import { getCallerViewer } from '@/lib/tier/server'
+import { tierAtLeast } from '@/lib/tier/rank'
 
 export const dynamic = 'force-dynamic'
 
@@ -120,6 +123,15 @@ export async function GET(request: NextRequest) {
   if (caseNumber) query = query.ilike('case_number', `%${caseNumber}%`)
   if (address) query = query.ilike('property_address', `%${address}%`)
 
+  // Tier-aware field release (owner decision 2026-09-18), same gate as
+  // /api/auctions/map - the radar card reads this feed.
+  const caller = await getCallerViewer()
+  const viewer: PinViewerClass = tierAtLeast(caller.tierId, 'investor')
+    ? 'investor'
+    : caller.signedIn
+      ? 'free_member'
+      : 'anonymous'
+
   const { data, error, count } = await query
 
   if (error) {
@@ -129,15 +141,19 @@ export async function GET(request: NextRequest) {
 
   return NextResponse.json(
     {
-      data: (data || []).map((r) => mapRow(r as unknown as Record<string, unknown>)),
+      data: (data || []).map((r) =>
+        redactPinForViewer(mapRow(r as unknown as Record<string, unknown>), viewer)
+      ),
       total: count,
       limit,
       offset,
       ...(ignored.length ? { ignored_filters: ignored } : {}),
+      viewer_fields_released: viewer,
     },
     {
       headers: {
-        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+        // Per-viewer payload (tier-aware field release) - never a shared cache.
+        'Cache-Control': 'private, no-store',
       },
     }
   )
