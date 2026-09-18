@@ -240,6 +240,63 @@ export default function BuyReportCheckout() {
 
   const mcaIdForSubmit = useMemo(() => (mcaId ? mcaId : null), [mcaId])
 
+  // PROMISE-4 (issue 20518). Investor, Pro and Pro Plus all print a monthly
+  // SIGNAL$ Property Report allowance on /pricing — 10, 30 and 50. Until this
+  // existed, this page charged every visitor $25 with no idea who they were,
+  // so a Pioneer paying $990/yr for thirty reports a month was asked to pay
+  // again for the first one. When the signed-in account has an allowance left,
+  // the whole page switches to claiming rather than buying.
+  //
+  // Same-origin fetch, not apiUrl(): allowance lives behind the Clerk session
+  // on this app, not on the worker API. A 401 here is the ordinary signed-out
+  // case and must leave the $25 path exactly as it was.
+  const [allowance, setAllowance] = useState<{ tier_id: string; allowance: number; used: number; remaining: number } | null>(null)
+  const [claiming, setClaiming] = useState(false)
+  const [claimed, setClaimed] = useState<{ already: boolean; remaining: number } | null>(null)
+
+  useEffect(() => {
+    let live = true
+    fetch('/api/reports/allowance')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (live && d && typeof d.remaining === 'number') setAllowance(d)
+      })
+      .catch(() => {})
+    return () => {
+      live = false
+    }
+  }, [])
+
+  const included = Boolean(allowance && allowance.allowance > 0)
+  const canClaim = Boolean(allowance && allowance.remaining > 0)
+
+  async function handleClaim() {
+    setError('')
+    setClaiming(true)
+    try {
+      const res = await fetch('/api/reports/claim', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          county: countyName || countySlug,
+          case_number: selected.case_number,
+          mca_id: mcaIdForSubmit,
+        }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setClaimed({ already: Boolean(data.already_claimed), remaining: Number(data.remaining ?? 0) })
+        setAllowance((prev) => (prev ? { ...prev, used: Number(data.used ?? prev.used), remaining: Number(data.remaining ?? prev.remaining) } : prev))
+        return
+      }
+      setError(data.error || 'Could not claim this report. Please try again.')
+    } catch {
+      setError('Network error. Please try again.')
+    } finally {
+      setClaiming(false)
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
@@ -271,12 +328,16 @@ export default function BuyReportCheckout() {
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 pb-28 pt-10 sm:px-6 sm:pb-16 lg:px-8">
-      <p className="text-base font-semibold uppercase tracking-[0.18em] text-primary">One-time · no subscription</p>
+      <p className="text-base font-semibold uppercase tracking-[0.18em] text-primary">
+        {included ? 'Included in your plan' : 'One-time · no subscription'}
+      </p>
       <h1 className="font-display mt-2 text-[1.9rem] font-medium leading-[1.15] tracking-tight text-foreground sm:text-4xl">
-        One SIGNAL$ Property Report — $25
+        {included ? 'Your SIGNAL$ Property Reports' : 'One SIGNAL$ Property Report — $25'}
       </h1>
       <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground">
-        A source-backed snapshot for one auction: official auction facts, parcel and assessment data, comps, zoning, and red flags when their source and exact property match are verified. One-time $25, no subscription.
+        {included
+          ? `A source-backed snapshot for one auction: official auction facts, parcel and assessment data, comps, zoning, and red flags when their source and exact property match are verified. You have ${allowance?.remaining ?? 0} of ${allowance?.allowance ?? 0} reports left this month on your plan.`
+          : 'A source-backed snapshot for one auction: official auction facts, parcel and assessment data, comps, zoning, and red flags when their source and exact property match are verified. One-time $25, no subscription.'}
       </p>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
@@ -413,7 +474,9 @@ export default function BuyReportCheckout() {
                   ← Change auction
                 </button>
               ) : null}
-              <h2 className="mt-3 text-lg font-semibold text-foreground">One SIGNAL$ Property Report — $25</h2>
+              <h2 className="mt-3 text-lg font-semibold text-foreground">
+                {included ? 'Claim this report — included in your plan' : 'One SIGNAL$ Property Report — $25'}
+              </h2>
 
               <div className="mt-4 rounded-lg border border-input bg-background p-3 text-sm text-muted-foreground">
                 <div className="font-semibold text-foreground">{fmtAddress(selected.property_address, selected.case_number)}</div>
@@ -440,6 +503,42 @@ export default function BuyReportCheckout() {
                 <p className="mt-1">Third-party purchase probability · Predicted sale price · SIGNAL$ Max Bid</p>
               </div>
 
+              {included ? (
+                <div className="mt-5 flex flex-col gap-3">
+                  <p className="text-base leading-6 text-foreground">
+                    {claimed
+                      ? claimed.already
+                        ? `Already claimed — this one did not cost a report. ${claimed.remaining} of ${allowance?.allowance ?? 0} reports left this month.`
+                        : `Claimed. ${claimed.remaining} of ${allowance?.allowance ?? 0} reports left this month — it arrives by email when it finishes building.`
+                      : `${allowance?.remaining ?? 0} of ${allowance?.allowance ?? 0} reports left this month on your ${allowance?.tier_id === 'proplus' ? 'Pro Plus' : allowance?.tier_id === 'pro' ? 'Pro' : 'Investor'} plan.`}
+                  </p>
+                  {claimed ? null : (
+                    <Button type="button" onClick={handleClaim} disabled={claiming || prefillLoading || !canClaim} className="mt-1 min-h-11">
+                      {claiming ? (
+                        'Claiming…'
+                      ) : (
+                        <>
+                          <Check className="size-4" aria-hidden />
+                          {canClaim ? 'Claim this report — included' : 'No reports left this month'}
+                        </>
+                      )}
+                    </Button>
+                  )}
+                  {/* The one-time path stays reachable on purpose: running out
+                      mid-month must not become a dead end when the next
+                      auction is on Thursday. */}
+                  {!canClaim && !claimed ? (
+                    <button
+                      type="button"
+                      onClick={() => setAllowance(null)}
+                      className="self-start text-sm font-semibold text-primary underline-offset-4 hover:underline"
+                    >
+                      Buy this one for $25 instead →
+                    </button>
+                  ) : null}
+                  {error ? <p className="text-base text-destructive" role="alert">{error}</p> : null}
+                </div>
+              ) : (
               <form onSubmit={handleSubmit} className="mt-5 flex flex-col gap-3">
                 <label htmlFor="br-email" className="text-sm font-medium text-foreground">
                   Email address (report delivered here)
@@ -474,6 +573,7 @@ export default function BuyReportCheckout() {
                 </Button>
                 {error ? <p className="text-base text-destructive">{error}</p> : null}
               </form>
+              )}
             </div>
           ) : null}
 
