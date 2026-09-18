@@ -167,14 +167,18 @@ test.describe('Pioneer promise walk — signed in at Pro', () => {
   test('PM-P1 a D4D route builds from real calendar lots', async () => {
     const candidates = await apiJson(page, `/api/d4d/candidates?county=${TP3.county}`)
     const lots = ((candidates.body as { candidates?: Record<string, unknown>[] } | null)?.candidates ?? [])
-    const stopIds = lots.slice(0, 3).map((l) => String(l.id ?? l.mca_id ?? '')).filter(Boolean)
+    // The route builder takes `mcaIds`, not `stops` — run 35357344330 sent the
+    // wrong shape and read the resulting 400 as a broken feature. A promise
+    // test that cries wolf is worse than no test, so the payload is taken from
+    // parseBuildBody in app/api/d4d/routes/route.ts.
+    const stopIds = lots.slice(0, 3).map((l) => String(l.mca_id ?? l.id ?? '')).filter((v) => UUID_RE.test(v))
 
     let buildStatus = 0
     let buildNote = 'not attempted'
     if (stopIds.length >= 2) {
       const build = await apiJson(page, '/api/d4d/routes', {
         method: 'POST',
-        body: JSON.stringify({ name: `PROMISE-7 proof ${Date.now()}`, county: TP3.county, stops: stopIds }),
+        body: JSON.stringify({ name: `PROMISE-7 proof ${Date.now()}`, county: TP3.county, mcaIds: stopIds }),
       })
       buildStatus = build.status
       buildNote = JSON.stringify(build.body).slice(0, 200)
@@ -199,7 +203,9 @@ test.describe('Pioneer promise walk — signed in at Pro', () => {
         body: JSON.stringify({
           case_number: `PROMISE9-${county.toUpperCase()}`,
           county,
-          alert_types: ['sale_date'],
+          // lib/alerts/server.ts ALERT_TYPES — 'sale_date' is not one of them,
+          // which is why run 35357344330 read three 400s as a broken feature.
+          alert_types: ['sale_date_change'],
           channels: ['email'],
           timezone: 'America/New_York',
         }),
