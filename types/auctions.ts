@@ -32,6 +32,13 @@ export interface Auction {
   market_value?: number | null
   opening_bid: number | null
   parcel_id: string | null
+  /**
+   * Tax deed certificate number - the tax-deed identifier that takes the
+   * place plaintiff/defendant occupy on a foreclosure. Returned by
+   * /api/auctions and /api/auctions/map; null on foreclosures and on tax
+   * deeds the county source has not published a certificate for.
+   */
+  cert_number?: string | null
   source_url: string | null
   scraped_at?: string | null
   created_at?: string | null
