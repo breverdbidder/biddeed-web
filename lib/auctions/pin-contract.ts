@@ -90,3 +90,72 @@ export function pinToAuction(p: AuctionPin): Auction {
     cert_number: p.cert_number,
   }
 }
+
+/**
+ * Tier-aware field release for the pin card (owner decision 2026-09-18:
+ * "Not published is wrong approach we need to have it as lead conversion...
+ * unlock with free for the free kpis and unlock with investor for the paid
+ * kpis"). The public card is a conversion surface: every field previews its
+ * category and locked fields carry the CTA that opens them, never a
+ * broken-looking "Not published".
+ *
+ * Field classes are grounded in the canonical entitlement SSOT
+ * (components/deed-home/LandingSections PLANS + lib/tier):
+ * - public: what "free to browse" means - address, county, sale type,
+ *   auction date, opening bid.
+ * - free_member: "free members see the published number on every property"
+ *   (PricingTiers canon) - assessed/market value and parcel ID. Signing up
+ *   free unlocks them, hence the "Unlock with Free" CTA (/sign-up).
+ * - investor: PLANS lists "Plaintiff identity and max-bid intelligence" and
+ *   "Unlimited property cards" under Investor ($99/month) - year built,
+ *   living area, plaintiff, owner, certificate and case details. CTA:
+ *   "Unlock with Investor" (/subscribe?tier=investor, the canonical
+ *   W.subscribeInvestor link).
+ * Pro/Pro Plus add reports, zoning, D4D and title work that live on other
+ * surfaces (canonical entitlements); the pin card adds no Pro-only fields.
+ */
+export type PinFieldClass = 'public' | 'free_member' | 'investor'
+
+export const PIN_FIELD_RELEASE: Record<string, PinFieldClass> = {
+  property_address: 'public',
+  county: 'public',
+  sale_type: 'public',
+  auction_date: 'public',
+  opening_bid: 'public',
+  assessed_value: 'free_member',
+  market_value: 'free_member',
+  parcel_id: 'free_member',
+  year_built: 'investor',
+  living_area_sqft: 'investor',
+  plaintiff: 'investor',
+  owner_name: 'investor',
+  cert_number: 'investor',
+  case_number: 'investor',
+}
+
+export type PinViewerClass = 'anonymous' | 'free_member' | 'investor'
+
+/** Fields a viewer class may read. Fails closed on unknown classes. */
+export function pinFieldVisible(field: string, viewer: PinViewerClass): boolean {
+  const cls = PIN_FIELD_RELEASE[field] ?? 'investor'
+  if (cls === 'public') return true
+  if (cls === 'free_member') return viewer === 'free_member' || viewer === 'investor'
+  return viewer === 'investor'
+}
+
+/**
+ * Data-level enforcement for the auction feeds (/api/auctions/map and
+ * /api/auctions): null every field the viewer class may not read, so the
+ * conversion gate is real and not just a UI veil over a full payload. Fields
+ * not listed in PIN_FIELD_RELEASE are left untouched (ids, coordinates,
+ * status) - the gate is about property facts, not plotability.
+ */
+export function redactPinForViewer<T extends Record<string, unknown>>(row: T, viewer: PinViewerClass): T {
+  const out = { ...row }
+  for (const field of Object.keys(PIN_FIELD_RELEASE)) {
+    if (field in out && !pinFieldVisible(field, viewer)) {
+      ;(out as Record<string, unknown>)[field] = null
+    }
+  }
+  return out
+}
