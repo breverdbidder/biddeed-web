@@ -278,7 +278,13 @@ function tooManyRequests(req: NextRequest, resetAt: number): NextResponse {
   })
 }
 
-async function rateLimitMiddleware(req: NextRequest): Promise<NextResponse | undefined> {
+/**
+ * Resolves the signed-in Clerk user id, or null. Supplied by the Clerk branch
+ * only; the passthrough branch (Clerk not configured) has no identity.
+ */
+type IdentityResolver = () => Promise<string | null>
+
+async function rateLimitMiddleware(req: NextRequest, identity?: IdentityResolver): Promise<NextResponse | undefined> {
   const pathname = req.nextUrl.pathname
   const clientIp = getClientIp(req)
 
@@ -307,7 +313,23 @@ async function rateLimitMiddleware(req: NextRequest): Promise<NextResponse | und
       return new NextResponse(null, { status: 204 })
     }
   } else if (pathname.startsWith('/api/')) {
-    const result = await checkRateLimit(`api:${clientIp}`, API_LIMIT)
+    // Ariel, 2026-09-18 ("keep the floor"): the 120/60 s budget is unchanged,
+    // but signed-in traffic is bucketed per Clerk user and only anonymous
+    // traffic per IP. One /chat interaction is 3-4 API calls, so a single
+    // per-IP bucket capped an office behind one NAT at ~30 interactions a
+    // minute in total (ten people at three each sat exactly on the limit;
+    // playwright-rls 35321578293 hit it with two workers on one runner IP).
+    // Bots and scrapers are anonymous and stay capped per IP as before.
+    let userId: string | null = null
+    if (identity) {
+      try {
+        userId = await identity()
+      } catch {
+        userId = null
+      }
+    }
+    const key = userId ? `api:user:${userId}` : `api:${clientIp}`
+    const result = await checkRateLimit(key, API_LIMIT)
     if (!result.allowed) {
       return tooManyRequests(req, result.resetAt)
     }
@@ -479,7 +501,7 @@ async function passthroughMiddleware(req: NextRequest) {
 
 export default CLERK_ENABLED
   ? clerkMiddleware(async (auth, req) => {
-      const rateLimitResponse = await rateLimitMiddleware(req)
+      const rateLimitResponse = await rateLimitMiddleware(req, async () => (await auth()).userId ?? null)
       if (rateLimitResponse) return rateLimitResponse
 
       if (!isPublicRoute(req)) {
