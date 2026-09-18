@@ -80,10 +80,45 @@ export interface Auction {
   auction_url?: string | null
 }
 
+/**
+ * Jurisdiction dimensional standards for this parcel's zone code (PROMISE-6,
+ * issue 20518). /pricing names eight fields for Pro; these are them.
+ *
+ * Every field is nullable and a null means NOT RESEARCHED, never a default.
+ * Dimensional standards are set by a jurisdiction per zone code, so they are
+ * looked up by (jurisdiction, zoning_code) rather than stored per parcel —
+ * 1,651 pairs statewide instead of 2.18M rows, which is why the per-parcel
+ * columns sat empty for a year.
+ *
+ * `standards_verified` is the only thing that says whether these numbers came
+ * from a cited land development code. The UI must never render an unverified
+ * blank as though it were a source.
+ */
+export interface ZoningStandards {
+  zoning_code: string | null
+  zoning_desc: string | null
+  jurisdiction: string | null
+  land_use: string | null
+  setbacks: Record<string, unknown> | null
+  parking: Record<string, unknown> | null
+  max_height_ft: number | null
+  max_stories: number | null
+  units_per_acre: number | null
+  far_max: number | null
+  permitted_uses: unknown[] | null
+  overlays: unknown[] | null
+  min_lot_sqft: number | null
+  source_url: string | null
+  source_citation: string | null
+  verified_at: string | null
+  standards_verified: boolean
+}
+
 /** Enriched auction detail (from /api/auctions/[id]) */
 export interface AuctionDetail extends Auction {
   bcpao_photo_url: string | null
   zoning: ZoningInfo | null
+  zoning_standards?: ZoningStandards | null
   recommendation: 'BID' | 'REVIEW' | 'SKIP' | 'UNKNOWN'
   /** true when the caller's tier is below investor - score fields stripped server-side. */
   score_locked?: boolean
