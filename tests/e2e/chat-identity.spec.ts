@@ -1,4 +1,5 @@
 import { test, expect, type Browser, type Page } from '@playwright/test'
+import { apiJson } from './helpers/clerk'
 
 /**
  * PARITY CP-3 — verified identity for Deed chat (gate D10). The three
@@ -23,22 +24,6 @@ const A = { email: process.env.E2E_USER_A_EMAIL, password: process.env.E2E_USER_
 const B = { email: process.env.E2E_USER_B_EMAIL, password: process.env.E2E_USER_B_PASSWORD }
 const haveCreds = Boolean(A.email && A.password && B.email && B.password)
 
-async function apiJson(page: Page, path: string, init: RequestInit = {}) {
-  return page.evaluate(
-    async ({ path, init }) => {
-      const response = await fetch(path, { ...init, headers: { 'Content-Type': 'application/json', ...(init.headers || {}) } })
-      const text = await response.text()
-      let body: unknown = null
-      try {
-        body = text ? JSON.parse(text) : null
-      } catch {
-        body = { raw: text }
-      }
-      return { status: response.status, body }
-    },
-    { path, init }
-  )
-}
 
 async function signIn(page: Page, email: string, _password: string) {
   // The UI password flow dead-ends on Clerk Client Trust (new-device email

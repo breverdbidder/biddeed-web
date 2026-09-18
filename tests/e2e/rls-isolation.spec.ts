@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test'
+import { apiJson } from './helpers/clerk'
 
 const userA = {
   email: process.env.E2E_USER_A_EMAIL,
@@ -86,18 +87,6 @@ async function signIn(page: Page, email: string, _password: string) {
   await expect(page).not.toHaveURL(/\/sign-in/, { timeout: 15_000 })
 }
 
-async function apiJson(page: Page, path: string, init: RequestInit = {}) {
-  return page.evaluate(async ({ path, init }) => {
-    const response = await fetch(path, {
-      ...init,
-      headers: { 'Content-Type': 'application/json', ...(init.headers || {}) },
-    })
-    const text = await response.text()
-    let body: unknown = null
-    try { body = text ? JSON.parse(text) : null } catch { body = { raw: text } }
-    return { status: response.status, body }
-  }, { path, init })
-}
 
 test.describe('Clerk authenticated RLS isolation', () => {
   test('Account B cannot read or mutate Account A saved searches and watchlist rows', async ({ browser }) => {
