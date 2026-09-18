@@ -1,4 +1,5 @@
-import { test, expect, type Page } from '@playwright/test'
+import { test, expect } from '@playwright/test'
+import { apiJson } from './helpers/clerk'
 
 /**
  * Privacy containment (issue #20226).
@@ -17,25 +18,6 @@ import { test, expect, type Page } from '@playwright/test'
  * not by spending real inference cost on every CI run.
  */
 
-async function apiJson(page: Page, path: string, init: RequestInit = {}) {
-  return page.evaluate(
-    async ({ path, init }) => {
-      const response = await fetch(path, {
-        ...init,
-        headers: { 'Content-Type': 'application/json', ...(init.headers || {}) },
-      })
-      const text = await response.text()
-      let body: unknown = null
-      try {
-        body = text ? JSON.parse(text) : null
-      } catch {
-        body = { raw: text }
-      }
-      return { status: response.status, body }
-    },
-    { path, init }
-  )
-}
 
 test.describe('Chat history privacy containment', () => {
   test('a clean browser has no Recent group and no legacy thread/identity data in storage', async ({ page }) => {
