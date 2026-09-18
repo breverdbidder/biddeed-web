@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { ChevronDown, ChevronUp, Download, FileText, FolderKanban, MessageSquarePlus, Paperclip, Pencil, Trash2, X } from 'lucide-react'
+import { Check, ChevronDown, ChevronUp, Download, FileDown, FileText, FolderKanban, Link2, Link2Off, Lock, MessageSquarePlus, Paperclip, Pencil, Trash2, X } from 'lucide-react'
 import Link from 'next/link'
 
 import { countyLabel } from '@/lib/deed/context'
@@ -11,13 +11,19 @@ import {
   downloadUrl,
   fileToBase64,
   formatBytes,
+  generateReport,
   getProject,
+  isReportFile,
   notifyProjectsChanged,
   renameProjectFile,
+  revokeShare,
+  shareFile,
+  shareUrlFor,
   updateProject,
   uploadProjectFile,
   type ProjectDetail,
   type ProjectFile,
+  type ReportFormat,
 } from '@/lib/deed/projectsRemote'
 import { cn } from '@/lib/utils'
 
@@ -51,6 +57,12 @@ function groupVersions(files: ProjectFile[]) {
  * what the project is, what changed since the last visit (S1), its chats
  * (S4), and its files — upload, version, rename, download, delete (the
  * "attachment and download abilities" of #19847). PARITY CP-4.
+ *
+ * PR B adds three things: generated reports (a JSON / CSV / PDF snapshot of
+ * the project, versioned like any file), share links (/r/{token}, revocable)
+ * on every file, and the SIGNAL$ card — the report's 18 section names with
+ * their values locked until this account has bought the report for this sale
+ * (S3 progressive disclosure), unlocking in place.
  */
 export default function ProjectPanel({ projectId, activeThreadId, onDeleted }: Props) {
   const [detail, setDetail] = useState<ProjectDetail | null>(null)
@@ -62,6 +74,8 @@ export default function ProjectPanel({ projectId, activeThreadId, onDeleted }: P
   const [notice, setNotice] = useState<string | null>(null)
   const [expanded, setExpanded] = useState<Record<string, boolean>>({})
   const [fileRename, setFileRename] = useState<{ id: string; value: string } | null>(null)
+  const [reportsOpen, setReportsOpen] = useState(false)
+  const [signalOpen, setSignalOpen] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
 
   // The first load consumes the S1 window (touches last_viewed_at); refreshes
@@ -159,6 +173,52 @@ export default function ProjectPanel({ projectId, activeThreadId, onDeleted }: P
     }
   }
 
+  async function makeReport(format: ReportFormat) {
+    setBusy(`report:${format}`)
+    const r = await generateReport(projectId, format)
+    setBusy(null)
+    if (!r.ok) {
+      setNotice(r.error)
+      return
+    }
+    setNotice(`${r.data.file.filename} v${r.data.file.version} — ready to download or share.`)
+    setReportsOpen(true)
+    await load(true)
+  }
+
+  async function share(f: ProjectFile) {
+    setBusy(`share:${f.id}`)
+    const r = await shareFile(projectId, f.id)
+    setBusy(null)
+    if (!r.ok) {
+      setNotice(r.error)
+      return
+    }
+    await copyLink(r.data.token)
+    await load(true)
+  }
+
+  async function copyLink(token: string) {
+    const url = shareUrlFor(token)
+    try {
+      await navigator.clipboard.writeText(url)
+      setNotice(`Link copied — anyone with it can open this file until you revoke it: ${url}`)
+    } catch {
+      setNotice(`Share link: ${url}`)
+    }
+  }
+
+  async function unshare(f: ProjectFile) {
+    setBusy(`unshare:${f.id}`)
+    const r = await revokeShare(projectId, f.id)
+    setBusy(null)
+    if (!r.ok) setNotice(r.error)
+    else {
+      setNotice(`Share link revoked — it answers "not found" from now on.`)
+      await load(true)
+    }
+  }
+
   async function saveName() {
     const value = nameDraft.trim()
     if (!value || !detail || value === detail.project.name) {
@@ -205,8 +265,30 @@ export default function ProjectPanel({ projectId, activeThreadId, onDeleted }: P
     )
   }
 
-  const { project, files, threads, greeting } = detail
-  const groups = groupVersions(files)
+  const { project, files, threads, greeting, report, shares } = detail
+  const uploads = files.filter((f) => !isReportFile(f))
+  const reports = files.filter(isReportFile).sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at))
+  const groups = groupVersions(uploads)
+
+  // Share / copy / revoke for one stored file version (uploads and reports alike).
+  const shareControls = (f: ProjectFile) => {
+    const active = shares[f.id]
+    return active ? (
+      <>
+        <button type="button" onClick={() => void copyLink(active.token)} className={btn} data-share={f.id} data-share-token={active.token} aria-label={`Copy the share link for ${f.filename} v${f.version}`}>
+          <Link2 className="size-4" aria-hidden />
+          Copy link{active.views ? ` · ${active.views}` : ''}
+        </button>
+        <button type="button" onClick={() => unshare(f)} disabled={busy === `unshare:${f.id}`} className={iconBtn} data-unshare={f.id} aria-label={`Revoke the share link for ${f.filename} v${f.version}`}>
+          <Link2Off className="size-4" aria-hidden />
+        </button>
+      </>
+    ) : (
+      <button type="button" onClick={() => share(f)} disabled={busy === `share:${f.id}`} className={iconBtn} data-share-create={f.id} aria-label={`Share ${f.filename} v${f.version} by link`}>
+        <Link2 className="size-4" aria-hidden />
+      </button>
+    )
+  }
   const meta = [
     project.county ? `${countyLabel(project.county)} County` : null,
     project.case_number ? `case ${project.case_number}` : null,
@@ -269,6 +351,24 @@ export default function ProjectPanel({ projectId, activeThreadId, onDeleted }: P
               <Paperclip className="size-4" aria-hidden />
               Files ({groups.length})
               {filesOpen ? <ChevronUp className="size-4" aria-hidden /> : <ChevronDown className="size-4" aria-hidden />}
+            </button>
+            <button type="button" onClick={() => setReportsOpen((v) => !v)} className={btn} aria-expanded={reportsOpen} aria-controls="project-reports">
+              <FileDown className="size-4" aria-hidden />
+              Reports ({reports.length})
+              {reportsOpen ? <ChevronUp className="size-4" aria-hidden /> : <ChevronDown className="size-4" aria-hidden />}
+            </button>
+            <button
+              type="button"
+              onClick={() => setSignalOpen((v) => !v)}
+              className={cn(btn, report.unlocked && 'text-primary')}
+              aria-expanded={signalOpen}
+              aria-controls="project-signal"
+              data-signal-report={report.unlocked ? 'unlocked' : 'locked'}
+              data-signal-status={report.status}
+            >
+              {report.unlocked ? <Check className="size-4" aria-hidden /> : <Lock className="size-4" aria-hidden />}
+              SIGNAL$ report
+              {signalOpen ? <ChevronUp className="size-4" aria-hidden /> : <ChevronDown className="size-4" aria-hidden />}
             </button>
             <Link href={`/chat?project=${encodeURIComponent(project.id)}&new=1`} className={btn}>
               <MessageSquarePlus className="size-4" aria-hidden />
@@ -383,6 +483,7 @@ export default function ProjectPanel({ projectId, activeThreadId, onDeleted }: P
                           <Download className="size-4" aria-hidden />
                           Download
                         </button>
+                        {shareControls(latest)}
                         <button type="button" onClick={() => setFileRename({ id: latest.id, value: latest.filename })} className={iconBtn} aria-label={`Rename ${filename}`}>
                           <Pencil className="size-4" aria-hidden />
                         </button>
@@ -424,6 +525,98 @@ export default function ProjectPanel({ projectId, activeThreadId, onDeleted }: P
                 ))}
               </ul>
             )}
+          </div>
+        ) : null}
+
+        {reportsOpen ? (
+          <div id="project-reports" className="border-t border-border px-4 py-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Generated reports</p>
+              <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Generate a project report">
+                {(['pdf', 'csv', 'json'] as ReportFormat[]).map((format) => (
+                  <button key={format} type="button" onClick={() => void makeReport(format)} disabled={busy === `report:${format}`} className={cn(btn, 'text-primary')} data-generate={format}>
+                    <FileDown className="size-4" aria-hidden />
+                    {busy === `report:${format}` ? 'Generating…' : format.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <p className={cn(bodyText, 'mt-1 text-muted-foreground')}>
+              A snapshot of this project — the sale, your notes and files, what Deed said in each chat, and the SIGNAL$ section list — as a real file you can download or share by link.
+            </p>
+            {reports.length === 0 ? (
+              <p className={cn(bodyText, 'mt-2 text-muted-foreground')}>No reports generated yet.</p>
+            ) : (
+              <ul className="mt-2 divide-y divide-border" aria-label="Generated reports">
+                {reports.map((f) => (
+                  <li key={f.id} className="flex flex-wrap items-center gap-2 py-2" data-report-file={f.id}>
+                    <FileText className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+                    <div className="min-w-0 flex-1">
+                      <p className={cn(bodyText, 'truncate font-medium text-foreground')}>
+                        {f.filename} <span className="text-muted-foreground">v{f.version}</span>
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {formatBytes(f.size_bytes)} · {new Date(f.created_at).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}
+                        {shares[f.id] ? ' · shared by link' : ''}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button type="button" onClick={() => download(f)} disabled={busy === `dl:${f.id}`} className={btn} data-download={f.id}>
+                        <Download className="size-4" aria-hidden />
+                        Download
+                      </button>
+                      {shareControls(f)}
+                      <button type="button" onClick={() => removeFile(f)} disabled={busy === `rm:${f.id}`} className={iconBtn} aria-label={`Delete ${f.filename} v${f.version}`}>
+                        <Trash2 className="size-4" aria-hidden />
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        ) : null}
+
+        {signalOpen ? (
+          <div id="project-signal" className="border-t border-border px-4 py-3" data-signal-sections={report.section_count}>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">SIGNAL$ Property Report · {report.section_count} sections</p>
+              {report.unlocked ? (
+                <span className={cn(bodyText, 'inline-flex items-center gap-1 font-medium text-primary')}>
+                  <Check className="size-4" aria-hidden />
+                  {report.status === 'delivered' ? 'Purchased and delivered' : 'Purchased — in production'}
+                </span>
+              ) : report.buy_url ? (
+                <Link href={report.buy_url} className="inline-flex min-h-11 items-center gap-1.5 rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90" data-signal-buy>
+                  <Lock className="size-4" aria-hidden />
+                  Unlock all {report.section_count} sections — ${report.price_usd}
+                </Link>
+              ) : null}
+            </div>
+            <p className={cn(bodyText, 'mt-1 text-muted-foreground')}>
+              {report.unlocked
+                ? report.status === 'delivered'
+                  ? `Delivered ${report.delivered_at ? new Date(report.delivered_at).toLocaleDateString('en-US', { dateStyle: 'medium' }) : ''} to your email.${report.report_url ? '' : ' The PDF is in your inbox.'}`
+                  : `Purchased ${report.purchased_at ? new Date(report.purchased_at).toLocaleDateString('en-US', { dateStyle: 'medium' }) : ''}. The report is being produced and lands in your inbox.`
+                : report.reason ?? 'The section names are the report\u2019s. Their values unlock for this sale with the report.'}
+            </p>
+            {report.unlocked && report.report_url ? (
+              <a href={report.report_url} className={cn(btn, 'mt-2 text-primary')} target="_blank" rel="noopener noreferrer" data-signal-open>
+                <FileText className="size-4" aria-hidden />
+                Open the delivered PDF
+              </a>
+            ) : null}
+            <ol className="mt-2 grid gap-x-4 gap-y-1 sm:grid-cols-2" aria-label="Report sections">
+              {report.sections.map((name, i) => (
+                <li key={name} className={cn(bodyText, 'flex items-start gap-2')} data-signal-section={report.unlocked ? 'unlocked' : 'locked'}>
+                  {report.unlocked ? <Check className="mt-1 size-4 shrink-0 text-primary" aria-hidden /> : <Lock className="mt-1 size-4 shrink-0 text-muted-foreground" aria-hidden />}
+                  <span className={report.unlocked ? 'text-foreground' : 'text-muted-foreground'}>
+                    <span className="text-muted-foreground">{i + 1}.</span> {name}
+                    {report.unlocked ? null : <span className="sr-only"> — locked</span>}
+                  </span>
+                </li>
+              ))}
+            </ol>
           </div>
         ) : null}
 

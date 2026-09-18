@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 import { getCountyBySlug } from '@/lib/counties'
+import { isNotConfigured } from '@/lib/deed/server'
 
 /**
  * Projects (PARITY CP-4, issue #19847) — server-side helpers shared by the
@@ -276,7 +277,7 @@ export async function projectChatContext(
   projectId: string
 ): Promise<{ ok: true; ctx: ProjectChatContext } | { ok: false; status: number; error: string }> {
   const { data: project, error } = await ownedProject(supabase, userId, projectId)
-  if (error) return { ok: false, status: error.code === '42P01' ? 503 : 502, error: 'Could not read the project.' }
+  if (error) return { ok: false, status: isNotConfigured(error) ? 503 : 502, error: 'Could not read the project.' }
   if (!project) return { ok: false, status: 404, error: 'That project is not available.' }
 
   const { data: files } = await supabase
@@ -314,4 +315,46 @@ export async function projectChatContext(
     ...parts,
   ].join('\n\n')
   return { ok: true, ctx: { text, cited } }
+}
+
+// ---------------------------------------------------------------------------
+// PR B — share links (/r/{token}) and generated reports.
+
+/** 32 random bytes as base64url = 43 chars; the column check allows 32–64. */
+export const SHARE_TOKEN_RE = /^[A-Za-z0-9_-]{32,64}$/
+export const SHARE_FIELDS = 'id,share_token,shared_at,share_revoked_at,share_views'
+
+export function newShareToken(): string {
+  const bytes = new Uint8Array(32)
+  crypto.getRandomValues(bytes)
+  let s = ''
+  for (const b of bytes) s += String.fromCharCode(b)
+  return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+}
+
+export interface ShareRow {
+  id: string
+  share_token: string | null
+  shared_at: string | null
+  share_revoked_at: string | null
+  share_views: number
+}
+
+/**
+ * Active shares of a project's files: {file id → token}. Tolerates the PR B
+ * migration not being applied yet (the columns do not exist → empty map), so
+ * the project page keeps working; only sharing itself answers 503 then.
+ */
+export async function activeShares(supabase: SupabaseClient, userId: string, projectId: string): Promise<Record<string, { token: string; shared_at: string | null; views: number }>> {
+  const { data, error } = await supabase
+    .from('deed_project_files')
+    .select(SHARE_FIELDS)
+    .eq('project_id', projectId)
+    .eq('owner_user_id', userId)
+    .not('share_token', 'is', null)
+    .is('share_revoked_at', null)
+  if (error || !data) return {}
+  const out: Record<string, { token: string; shared_at: string | null; views: number }> = {}
+  for (const row of data as ShareRow[]) if (row.share_token) out[row.id] = { token: row.share_token, shared_at: row.shared_at, views: row.share_views ?? 0 }
+  return out
 }

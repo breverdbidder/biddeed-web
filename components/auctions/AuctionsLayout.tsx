@@ -265,7 +265,7 @@ export default function AuctionsLayout({
       <div className="flex min-h-[60vh] items-center justify-center bg-muted dark:bg-background">
         <div className="flex flex-col items-center gap-4">
           <p className="text-primary text-sm">{error}</p>
-          <button onClick={() => window.location.reload()} className="text-sm text-primary underline">
+          <button type="button" onClick={() => window.location.reload()} className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md px-3 text-sm font-medium text-primary underline underline-offset-4 hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
             Retry
           </button>
         </div>

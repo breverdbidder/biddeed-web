@@ -11,10 +11,15 @@ import { A, B, apiJson, haveCreds, signIn } from './helpers/clerk'
  *      project; account B sees 0 rows, 404 on open / upload / download / delete
  *   3. S1 — reopening after 10 minutes greets with what changed (a real
  *      10-minute wait; runs only when E2E_S1_WAIT=1, i.e. in playwright-rls.yml)
+ *   4. PR B — generated reports (PDF / CSV / JSON as real files, versioned),
+ *      the SIGNAL$ disclosure state (18 section names, locked for a sale the
+ *      account has not bought), share links (/r/{token} 200 with the exact
+ *      bytes → revoke → 404; account B cannot share or revoke A's file)
  *
- * 2 and 3 need the two Clerk E2E accounts and skip loudly without them; a 503
+ * 2–4 need the two Clerk E2E accounts and skip loudly without them; a 503
  * from /api/deed/projects means the CP-4 migration is not applied on that
- * environment yet and is reported as a skip with the reason.
+ * environment yet and is reported as a skip with the reason (4: the PR B
+ * share columns).
  */
 
 const ZERO_UUID = '00000000-0000-4000-8000-000000000000'
@@ -43,6 +48,13 @@ test.describe('Deed Projects (PARITY CP-4)', () => {
       body: JSON.stringify({ messages: [{ role: 'user', content: 'What is in my project?' }], project_id: ZERO_UUID }),
     })
     expect(scoped.status).toBe(401)
+    // PR B routes are behind the same identity; the public share route is 404 for anything unknown.
+    expect((await apiJson(page, `${PROJECTS}/${ZERO_UUID}/reports`)).status).toBe(401)
+    expect((await apiJson(page, `${PROJECTS}/${ZERO_UUID}/reports`, { method: 'POST', body: JSON.stringify({ format: 'pdf' }) })).status).toBe(401)
+    expect((await apiJson(page, `${PROJECTS}/${ZERO_UUID}/files/${ZERO_UUID}/share`, { method: 'POST' })).status).toBe(401)
+    expect((await apiJson(page, `${PROJECTS}/${ZERO_UUID}/files/${ZERO_UUID}/share`, { method: 'DELETE' })).status).toBe(401)
+    expect((await page.request.get('/r/not-a-token')).status()).toBe(404)
+    expect((await page.request.get('/r/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')).status()).toBe(404)
   })
 
   test('create → upload → cite → download → other user sees nothing', async ({ browser }) => {
@@ -174,6 +186,140 @@ test.describe('Deed Projects (PARITY CP-4)', () => {
       const gone = await apiJson(pageA, `${PROJECTS}/${pid}`, { method: 'DELETE' })
       expect(gone.status).toBe(200)
       expect((await apiJson(pageA, `${PROJECTS}/${pid}`)).status).toBe(404)
+      await ctxA.close()
+    }
+  })
+
+  test('PR B: generated reports, SIGNAL$ disclosure, share link 200 then 404 after revoke', async ({ browser }) => {
+    test.skip(!haveCreds, 'Dedicated Clerk E2E credentials (E2E_USER_A/B_EMAIL, _PASSWORD) are not configured')
+    test.setTimeout(240_000)
+    const marker = `prb${Date.now().toString(36)}`
+
+    const ctxA = await (browser as Browser).newContext()
+    const pageA = await ctxA.newPage()
+    await signIn(pageA, A.email!, A.password!)
+    await pageA.goto('/chat', { waitUntil: 'domcontentloaded' })
+    const created = await apiJson(pageA, PROJECTS, {
+      method: 'POST',
+      body: JSON.stringify({ county: 'brevard', case_number: `E2E-${marker}`, name: `PR B ${marker}`, notes: 'Ceiling 210k. Roof 2019.' }),
+    })
+    test.skip(created.status === 503, 'CP-4 migration not applied on this environment yet (projects route answered 503)')
+    expect(created.status).toBe(201)
+    const pid = (created.body as { project: { id: string } }).project.id
+
+    try {
+      // S3: the 18 section names come back locked for a sale this account has not bought.
+      const detail = await apiJson(pageA, `${PROJECTS}/${pid}?peek=1`)
+      expect(detail.status).toBe(200)
+      const report = (detail.body as { report: { sections: string[]; section_count: number; unlocked: boolean; status: string; buy_url: string | null; price_usd: number } }).report
+      expect(report.section_count).toBe(18)
+      expect(report.sections).toHaveLength(18)
+      expect(report.sections[0]).toBe('Subject property identification')
+      expect(report.sections[17]).toBe('Prediction scorecard and max-bid decision')
+      expect(report.unlocked).toBe(false)
+      expect(report.status).toBe('none')
+      expect(report.buy_url).toBe(`/buy-report?county=brevard&case=${encodeURIComponent(`E2E-${marker}`)}`)
+      expect(report.price_usd).toBe(25)
+
+      // Generated reports: PDF bytes are a PDF, CSV is CSV, JSON is the snapshot; the same format again is v2.
+      const pdf1 = await apiJson(pageA, `${PROJECTS}/${pid}/reports`, { method: 'POST', body: JSON.stringify({ format: 'pdf' }) })
+      expect(pdf1.status).toBe(201)
+      const pdfFile = (pdf1.body as { file: { id: string; filename: string; version: number; mime_type: string; size_bytes: number } }).file
+      expect(pdfFile.filename).toBe('Project report.pdf')
+      expect(pdfFile.version).toBe(1)
+      expect(pdfFile.mime_type).toBe('application/pdf')
+      expect(pdfFile.size_bytes).toBeGreaterThan(1000)
+      const pdf2 = await apiJson(pageA, `${PROJECTS}/${pid}/reports`, { method: 'POST', body: JSON.stringify({ format: 'pdf' }) })
+      expect(pdf2.status).toBe(201)
+      expect((pdf2.body as { file: { version: number } }).file.version).toBe(2)
+      const csv = await apiJson(pageA, `${PROJECTS}/${pid}/reports`, { method: 'POST', body: JSON.stringify({ format: 'csv' }) })
+      expect(csv.status).toBe(201)
+      const json = await apiJson(pageA, `${PROJECTS}/${pid}/reports`, { method: 'POST', body: JSON.stringify({ format: 'json' }) })
+      expect(json.status).toBe(201)
+      expect((await apiJson(pageA, `${PROJECTS}/${pid}/reports`, { method: 'POST', body: JSON.stringify({ format: 'docx' }) })).status).toBe(400)
+      const listed = await apiJson(pageA, `${PROJECTS}/${pid}/reports`)
+      expect(listed.status).toBe(200)
+      expect((listed.body as { reports: unknown[] }).reports).toHaveLength(4)
+
+      // The PDF opens: the signed download serves bytes that start with %PDF-.
+      const dl = await apiJson(pageA, `${PROJECTS}/${pid}/files/${pdfFile.id}/download`)
+      expect(dl.status).toBe(200)
+      const pdfBytes = await (await pageA.request.get((dl.body as { url: string }).url)).body()
+      expect(pdfBytes.subarray(0, 5).toString('latin1')).toBe('%PDF-')
+      expect(pdfBytes.length).toBe(pdfFile.size_bytes)
+      // The JSON is the snapshot of this project.
+      const jsonFile = (json.body as { file: { id: string } }).file
+      const jdl = await apiJson(pageA, `${PROJECTS}/${pid}/files/${jsonFile.id}/download`)
+      const snapshot = (await (await pageA.request.get((jdl.body as { url: string }).url)).json()) as { project: { name: string; notes: string }; signal_report: { sections: string[]; unlocked: boolean }; chats: unknown[] }
+      expect(snapshot.project.name).toBe(`PR B ${marker}`)
+      expect(snapshot.project.notes).toBe('Ceiling 210k. Roof 2019.')
+      expect(snapshot.signal_report.sections).toHaveLength(18)
+      expect(snapshot.signal_report.unlocked).toBe(false)
+      // The report items are attached to the project.
+      const items = ((await apiJson(pageA, `${PROJECTS}/${pid}?peek=1`)).body as { items: Array<{ kind: string; ref_id: string }> }).items
+      expect(items.filter((i) => i.kind === 'report').map((i) => i.ref_id)).toContain(pdfFile.id)
+
+      // Share: mint → /r/{token} serves the exact PDF bytes to a signed-out browser → revoke → 404.
+      const shared = await apiJson(pageA, `${PROJECTS}/${pid}/files/${pdfFile.id}/share`, { method: 'POST' })
+      test.skip(shared.status === 503, 'PR B share migration (20260918070000_deed_project_share) not applied on this environment yet')
+      expect(shared.status).toBe(201)
+      const { token, url } = shared.body as { token: string; url: string }
+      expect(token).toMatch(/^[A-Za-z0-9_-]{43}$/)
+      expect(url).toBe(`${new URL(pageA.url()).origin}/r/${token}`)
+      expect(url).not.toContain(pid)
+      expect(url).not.toContain(pdfFile.id)
+      // Idempotent while active.
+      const again = await apiJson(pageA, `${PROJECTS}/${pid}/files/${pdfFile.id}/share`, { method: 'POST' })
+      expect(again.status).toBe(200)
+      expect((again.body as { token: string; existing: boolean }).token).toBe(token)
+
+      const anon = await (browser as Browser).newContext()
+      const anonPage = await anon.newPage()
+      const pub = await anonPage.request.get(`/r/${token}`)
+      expect(pub.status()).toBe(200)
+      expect(pub.headers()['content-type']).toContain('application/pdf')
+      expect(pub.headers()['x-robots-tag']).toContain('noindex')
+      expect(pub.headers()['content-disposition']).toContain('Project report.pdf')
+      const pubBytes = await pub.body()
+      expect(pubBytes.equals(pdfBytes)).toBe(true)
+
+      // The page shows the report with its share controls.
+      await pageA.goto(`/chat?project=${pid}`, { waitUntil: 'domcontentloaded' })
+      await expect(pageA.locator('[data-project-panel="ready"]')).toBeVisible({ timeout: 30_000 })
+      await expect(pageA.locator('[data-signal-report="locked"]')).toBeVisible()
+      await pageA.getByRole('button', { name: /^SIGNAL\$ report/ }).click()
+      await expect(pageA.locator('[data-signal-section="locked"]')).toHaveCount(18)
+      await expect(pageA.locator('[data-signal-buy]')).toBeVisible()
+      await pageA.getByRole('button', { name: /^Reports \(/ }).click()
+      await expect(pageA.locator(`[data-report-file="${pdfFile.id}"]`)).toBeVisible()
+      await expect(pageA.locator(`[data-share="${pdfFile.id}"]`)).toHaveAttribute('data-share-token', token)
+
+      // Account B cannot share, revoke or see A's file.
+      const ctxB = await (browser as Browser).newContext()
+      const pageB = await ctxB.newPage()
+      await signIn(pageB, B.email!, B.password!)
+      await pageB.goto('/chat', { waitUntil: 'domcontentloaded' })
+      expect((await apiJson(pageB, `${PROJECTS}/${pid}/files/${pdfFile.id}/share`, { method: 'POST' })).status).toBe(404)
+      expect((await apiJson(pageB, `${PROJECTS}/${pid}/files/${pdfFile.id}/share`, { method: 'DELETE' })).status).toBe(404)
+      expect((await apiJson(pageB, `${PROJECTS}/${pid}/reports`)).status).toBe(404)
+      expect((await apiJson(pageB, `${PROJECTS}/${pid}/reports`, { method: 'POST', body: JSON.stringify({ format: 'pdf' }) })).status).toBe(404)
+      await ctxB.close()
+
+      // Revoke: the same link is 404 from now on; revoking twice is 404 too.
+      const revoked = await apiJson(pageA, `${PROJECTS}/${pid}/files/${pdfFile.id}/share`, { method: 'DELETE' })
+      expect(revoked.status).toBe(200)
+      expect((await anonPage.request.get(`/r/${token}`)).status()).toBe(404)
+      expect((await apiJson(pageA, `${PROJECTS}/${pid}/files/${pdfFile.id}/share`, { method: 'DELETE' })).status).toBe(404)
+      // A new share is a new token.
+      const reshared = await apiJson(pageA, `${PROJECTS}/${pid}/files/${pdfFile.id}/share`, { method: 'POST' })
+      expect(reshared.status).toBe(201)
+      expect((reshared.body as { token: string }).token).not.toBe(token)
+      expect((await anonPage.request.get(`/r/${token}`)).status()).toBe(404)
+      await anon.close()
+      test.info().annotations.push({ type: 'pr-b', description: `pdf v1 ${pdfFile.size_bytes} B; share ${token.slice(0, 6)}… 200 → revoke → 404` })
+    } finally {
+      const gone = await apiJson(pageA, `${PROJECTS}/${pid}`, { method: 'DELETE' })
+      expect(gone.status).toBe(200)
       await ctxA.close()
     }
   })

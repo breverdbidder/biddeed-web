@@ -207,6 +207,18 @@ export default function AuctionDetail({ auctionId }: Props) {
               <p className="text-sm text-muted-foreground dark:text-muted-foreground mt-0.5">
                 {formatCountyLabel(auction.county)} County &middot; {auction.case_number}
               </p>
+              {/* S2 hook (PARITY CP-4, #19847): one click turns this sale into a
+                  project on /chat — county + case prefilled, first_touch = this page. */}
+              <a
+                href={`/chat?new_project_county=${encodeURIComponent(String(auction.county || '').trim().toLowerCase().replace(/[\s-]+/g, '_'))}&case=${encodeURIComponent(auction.case_number || '')}&source=auction_page`}
+                className="mt-2 inline-flex min-h-9 items-center gap-1.5 rounded-md border border-input bg-card px-2.5 text-sm font-medium text-primary transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                data-start-project
+              >
+                <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14m-7-7h14" />
+                </svg>
+                Start a project for this sale
+              </a>
             </div>
 
             <span className={`px-2.5 py-1 text-xs font-semibold rounded-full shrink-0 ${typeBadge(auction.auction_type)}`}>

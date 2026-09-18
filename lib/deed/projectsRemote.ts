@@ -61,12 +61,46 @@ export interface Greeting {
   lines: string[]
 }
 
+/** S3 (PR B): the SIGNAL$ report for this project's sale — names always, values when bought. */
+export interface SignalReportAccess {
+  sections: readonly string[]
+  section_count: number
+  price_usd: number
+  unlocked: boolean
+  status: 'none' | 'pending' | 'delivered' | 'unknown'
+  purchased_at: string | null
+  delivered_at: string | null
+  report_url: string | null
+  buy_url: string | null
+  reason: string | null
+}
+
+export interface ShareInfo {
+  token: string
+  shared_at: string | null
+  views: number
+}
+
 export interface ProjectDetail {
   project: Project
   files: ProjectFile[]
   items: ProjectItem[]
   threads: ProjectThread[]
   greeting: Greeting
+  report: SignalReportAccess
+  /** Active share tokens by file id (PR B). */
+  shares: Record<string, ShareInfo>
+}
+
+export type ReportFormat = 'json' | 'csv' | 'pdf'
+/** Generated reports are ordinary project files under these names. */
+export const REPORT_FILENAMES: Record<ReportFormat, string> = {
+  json: 'Project report.json',
+  csv: 'Project report.csv',
+  pdf: 'Project report.pdf',
+}
+export function isReportFile(f: { filename: string }): boolean {
+  return Object.values(REPORT_FILENAMES).includes(f.filename)
 }
 
 export interface ProjectCreate {
@@ -170,4 +204,29 @@ export function fileToBase64(file: File): Promise<string> {
     reader.onload = () => resolve(String(reader.result).split(',')[1] || '')
     reader.readAsDataURL(file)
   })
+}
+
+// ---------------------------------------------------------------------------
+// PR B — generated reports and share links.
+
+export function generateReport(id: string, format: ReportFormat) {
+  return call<{ file: ProjectFile; format: ReportFormat; unlocked: boolean }>(`/api/deed/projects/${encodeURIComponent(id)}/reports`, {
+    method: 'POST',
+    body: JSON.stringify({ format }),
+  })
+}
+
+export function shareFile(id: string, fileId: string) {
+  return call<{ token: string; url: string; shared_at: string; views: number; existing: boolean }>(
+    `/api/deed/projects/${encodeURIComponent(id)}/files/${encodeURIComponent(fileId)}/share`,
+    { method: 'POST' }
+  )
+}
+
+export function revokeShare(id: string, fileId: string) {
+  return call<{ revoked: string; revoked_at: string }>(`/api/deed/projects/${encodeURIComponent(id)}/files/${encodeURIComponent(fileId)}/share`, { method: 'DELETE' })
+}
+
+export function shareUrlFor(token: string): string {
+  return `${window.location.origin}/r/${token}`
 }
