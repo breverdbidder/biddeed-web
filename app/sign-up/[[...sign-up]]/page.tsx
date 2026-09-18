@@ -75,4 +75,4 @@ export const metadata: Metadata = {
   title: 'Create account · BidDeed.AI',
   description: 'Create a BidDeed.AI account to save searches, receive alerts, and access source-backed auction reports.',
   alternates: { canonical: 'https://biddeed.ai/sign-up' },
-                         }
+}
