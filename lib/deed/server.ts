@@ -45,14 +45,22 @@ export async function requireDeedContext(): Promise<DeedContextResult> {
 }
 
 /**
- * PostgREST tells us when the CP-3 migration has not been applied yet
- * (42P01 undefined_table). Report it as 503 "not configured" — the client
- * treats that exactly like "no history" — instead of a 502 that reads as an
- * outage.
+ * A table that the migration has not created yet (CP-3 deed_threads /
+ * deed_uploads, CP-4 deed_projects*) must read as 503 "not configured" — the
+ * client treats that exactly like "nothing here yet" — never as a 502 that
+ * reads as an outage.
+ *
+ * Two codes mean "no such table": Postgres 42P01 (undefined_table) when the
+ * query reaches the database, and PostgREST's own PGRST205 ("Could not find
+ * the table … in the schema cache") which is what supabase-js actually
+ * returns for a table PostgREST has never seen. The live proof run
+ * 35293962767 got the 502 for the CP-4 tables — only 42P01 was mapped.
  */
+const NOT_CONFIGURED_CODES = new Set(['42P01', 'PGRST205'])
+
 export function dbErrorResponse(error: { code?: string; message?: string } | null, fallback: string) {
-  if (error?.code === '42P01') {
-    return NextResponse.json({ error: 'Chat history is not configured yet.' }, { status: 503 })
+  if (error?.code && NOT_CONFIGURED_CODES.has(error.code)) {
+    return NextResponse.json({ error: 'Not configured yet on this deployment.' }, { status: 503 })
   }
   return NextResponse.json({ error: fallback }, { status: 502 })
 }
