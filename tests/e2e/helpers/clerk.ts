@@ -10,25 +10,49 @@ export const A = { email: process.env.E2E_USER_A_EMAIL, password: process.env.E2
 export const B = { email: process.env.E2E_USER_B_EMAIL, password: process.env.E2E_USER_B_PASSWORD }
 export const haveCreds = Boolean(A.email && A.password && B.email && B.password)
 
+/**
+ * Honour the app's own 429 contract. middleware.ts limits /api/* to 120
+ * requests per IP per 60 s and answers 429 with `Retry-After` and
+ * "Please retry shortly." The whole CP-3 + CP-4 suite runs serially from ONE
+ * runner IP, so back-to-back specs can spend that budget inside a single
+ * window: playwright-rls run 35321578293 (2026-09-18) 429'd the PR B and S1
+ * project creates 7 s after the full-cycle spec finished, and S1 passed on
+ * its retry one second later when the window rolled. A client that ignores
+ * Retry-After is the bug here, not the limiter — no limit is changed. Bounded:
+ * at most two waits, each capped at 65 s, and only on 429, so a 401/404
+ * assertion is never retried into something else.
+ */
+const RATE_LIMIT_RETRIES = 2
+const RATE_LIMIT_MAX_WAIT_MS = 65_000
+
 export async function apiJson(page: Page, path: string, init: RequestInit = {}) {
-  return page.evaluate(
-    async ({ path, init }) => {
-      const response = await fetch(path, { ...init, headers: { 'Content-Type': 'application/json', ...(init.headers || {}) } })
-      const text = await response.text()
-      let body: unknown = null
-      try {
-        body = text ? JSON.parse(text) : null
-      } catch {
-        body = { raw: text }
-      }
-      const headers: Record<string, string> = {}
-      response.headers.forEach((v, k) => {
-        headers[k] = v
-      })
-      return { status: response.status, body, headers }
-    },
-    { path, init }
-  )
+  let retried = 0
+  for (;;) {
+    const result = await page.evaluate(
+      async ({ path, init }) => {
+        const response = await fetch(path, { ...init, headers: { 'Content-Type': 'application/json', ...(init.headers || {}) } })
+        const text = await response.text()
+        let body: unknown = null
+        try {
+          body = text ? JSON.parse(text) : null
+        } catch {
+          body = { raw: text }
+        }
+        const headers: Record<string, string> = {}
+        response.headers.forEach((v, k) => {
+          headers[k] = v
+        })
+        return { status: response.status, body, headers }
+      },
+      { path, init }
+    )
+    if (result.status !== 429 || retried >= RATE_LIMIT_RETRIES) return { ...result, retried }
+    const retryAfter = Number(result.headers['retry-after'] ?? (result.body as { retry_after_seconds?: number } | null)?.retry_after_seconds ?? 5)
+    const waitMs = Math.min(RATE_LIMIT_MAX_WAIT_MS, Math.max(1000, (Number.isFinite(retryAfter) ? retryAfter : 5) * 1000 + 250))
+    console.log(`apiJson: 429 on ${init.method ?? 'GET'} ${path}; honouring Retry-After (${Math.round(waitMs / 1000)} s), retry ${retried + 1}/${RATE_LIMIT_RETRIES}`)
+    await page.waitForTimeout(waitMs)
+    retried += 1
+  }
 }
 
 export async function signIn(page: Page, email: string, _password: string) {
