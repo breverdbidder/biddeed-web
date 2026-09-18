@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { SignUp } from '@clerk/nextjs'
 import { headers } from 'next/headers'
+import { auth } from '@clerk/nextjs/server'
+import { redirect } from 'next/navigation'
 import { isClerkHostAuthorized } from '@/lib/clerk-host'
 import Link from 'next/link'
 import { LIGHT as C } from '@/lib/design-tokens'
@@ -14,6 +16,19 @@ export default async function SignUpCatchAllPage() {
     ) &&
     process.env.CLERK_RUNTIME_ENABLED === 'true' &&
     Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && process.env.CLERK_SECRET_KEY)
+
+  // A signed-in visitor has nothing to do on the auth pages: their post-success
+  // destination is /radar already. Beyond UX, this skips a broken render path:
+  // measured on production 2026-09-18, a brand-new account completes email
+  // verification, the route re-renders under the now-active session, and the
+  // server-components flight render of this page 500s (React #441 client-side),
+  // leaving the registrant on a white screen instead of in the app. Redirect
+  // before that path executes; auth() resolves null for pending 2FA sessions,
+  // so in-progress factor challenges are not bounced.
+  if (clerkLive) {
+    const { userId } = await auth()
+    if (userId) redirect('/radar')
+  }
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: C.background, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
