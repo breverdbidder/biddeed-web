@@ -4,6 +4,7 @@ import { headers } from 'next/headers'
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { isClerkHostAuthorized } from '@/lib/clerk-host'
+import SignedInRedirect from '@/components/auth/SignedInRedirect'
 import Link from 'next/link'
 import { LIGHT as C } from '@/lib/design-tokens'
 
@@ -56,6 +57,7 @@ export default async function SignInCatchAllPage() {
             <span style={{ fontSize: '24px', fontWeight: 'bold', color: C.ink }}>BidDeed<span style={{ color: C.brand }}>.AI</span></span>
           </Link>
         </div>
+        {clerkLive && <SignedInRedirect />}
         {clerkLive ? (
           <SignIn fallbackRedirectUrl="/radar" signUpUrl="/sign-up" />
         ) : (
