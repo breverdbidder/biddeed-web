@@ -441,13 +441,18 @@ function buildCspHeaders(nonce: string): Record<string, string> {
     // (environment reports captcha_enabled true, widget "smart", Turnstile).
     // Listed for completeness and for any non-strict-dynamic consumer; the
     // directive that actually unblocked the widget is connect-src below.
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' blob: https://js.stripe.com https://*.clerk.accounts.dev https://clerk.biddeed.ai https://challenges.cloudflare.com https://app.chatwoot.com`,
+    // us-assets.i.posthog.com serves array.js; us.i.posthog.com is ingest.
+    // Listed for completeness — 'strict-dynamic' makes host-sources inert, so
+    // the nonced loader in PostHogAnalytics is what actually runs array.js —
+    // but connect-src below is NOT relaxed by strict-dynamic and is the one
+    // that must allow ingestion. Same PostHog project the Worker reports into.
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' blob: https://js.stripe.com https://*.clerk.accounts.dev https://clerk.biddeed.ai https://challenges.cloudflare.com https://app.chatwoot.com https://us-assets.i.posthog.com https://us.i.posthog.com`,
     // Explicit rather than inheriting from script-src via child-src.
     `worker-src 'self' blob:`,
     `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com`,
     `img-src 'self' data: blob: https://img.clerk.com https://images.clerk.dev https://*.clerk.accounts.dev https://clerk.biddeed.ai https://*.supabase.co https://www.bcpao.us https://gis.brevardfl.gov https://api.mapbox.com https://*.mapbox.com`,
     `font-src 'self' https://fonts.gstatic.com`,
-    `connect-src 'self' https://*.clerk.accounts.dev wss://*.clerk.accounts.dev https://clerk.biddeed.ai https://api.clerk.com https://*.supabase.co wss://*.supabase.co https://api.mapbox.com https://events.mapbox.com https://api.stripe.com https://api.us.elevenlabs.io wss://api.us.elevenlabs.io https://api.elevenlabs.io wss://api.elevenlabs.io https://app.chatwoot.com wss://app.chatwoot.com https://challenges.cloudflare.com`,
+    `connect-src 'self' https://*.clerk.accounts.dev wss://*.clerk.accounts.dev https://clerk.biddeed.ai https://api.clerk.com https://*.supabase.co wss://*.supabase.co https://api.mapbox.com https://events.mapbox.com https://api.stripe.com https://api.us.elevenlabs.io wss://api.us.elevenlabs.io https://api.elevenlabs.io wss://api.elevenlabs.io https://app.chatwoot.com wss://app.chatwoot.com https://challenges.cloudflare.com https://us.i.posthog.com https://us-assets.i.posthog.com`,
     `frame-src 'self' https://*.clerk.accounts.dev https://clerk.biddeed.ai https://challenges.cloudflare.com https://js.stripe.com https://hooks.stripe.com https://app.chatwoot.com`,
     `object-src 'none'`,
     `base-uri 'self'`,
