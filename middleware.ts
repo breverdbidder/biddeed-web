@@ -259,22 +259,22 @@ function tooManyRequests(req: NextRequest, resetAt: number): NextResponse {
   :root { color-scheme: light; }
   * { box-sizing: border-box; }
   body { margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
-         background:#f4eee5; color:#1c1917; padding:24px;
+         background:#E6F0FA; color:#1a1a1a; padding:24px;
          font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
-  .card { width:100%; max-width:440px; background:#fffaf3; border:1px solid #d8cfc2;
+  .card { width:100%; max-width:440px; background:#ffffff; border:1px solid #D7E3F1;
           border-radius:16px; padding:32px 28px; text-align:center; }
   .brand { display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:22px; }
-  .mark { width:36px; height:36px; border-radius:9px; background:#c96a4a; color:#fffaf3;
+  .mark { width:36px; height:36px; border-radius:9px; background:#005EB8; color:#ffffff;
           font-weight:800; font-size:18px; display:flex; align-items:center; justify-content:center; }
-  .name { font-size:17px; font-weight:700; color:#1c1917; }
-  .name span { color:#c96a4a; }
-  h1 { font-size:20px; margin:0 0 10px; color:#1c1917; }
-  p { margin:0 0 22px; font-size:14px; line-height:1.6; color:#6b625a; }
-  .wait { font-variant-numeric:tabular-nums; font-weight:700; color:#c96a4a; }
+  .name { font-size:17px; font-weight:700; color:#1a1a1a; }
+  .name span { color:#005EB8; }
+  h1 { font-size:20px; margin:0 0 10px; color:#1a1a1a; }
+  p { margin:0 0 22px; font-size:14px; line-height:1.6; color:#0A2540; }
+  .wait { font-variant-numeric:tabular-nums; font-weight:700; color:#005EB8; }
   a { display:inline-flex; align-items:center; justify-content:center; min-height:44px;
-      padding:0 22px; border-radius:10px; background:#c96a4a; color:#fffaf3;
+      padding:0 22px; border-radius:10px; background:#005EB8; color:#ffffff;
       font-weight:700; font-size:14px; text-decoration:none; }
-  .fine { margin-top:18px; font-size:12px; color:#8a8178; }
+  .fine { margin-top:18px; font-size:12px; color:#0A2540; }
 </style></head>
 <body>
   <main class="card">
@@ -308,8 +308,25 @@ async function rateLimitMiddleware(req: NextRequest, identity?: IdentityResolver
     req.headers.get('next-router-prefetch') === '1' ||
     req.nextUrl.searchParams.has('_rsc')
 
+  // The OAuth return and Clerk handshake legs are machine-driven redirects,
+  // not user submissions, and they must never count against the auth bucket.
+  // Measured on production 2026-09-19: one GitHub sign-in costs the same IP
+  // /sign-in (twice, Clerk rewrites the URL), /sign-in/sso-callback, the
+  // __clerk_handshake bounce, and a final /sign-in - five or six hits inside
+  // ten seconds against a limit that was five per minute with a five-minute
+  // backoff. The return leg then answered 429 with the self-refreshing "One
+  // moment" page below, which re-tripped the limit on every refresh. From the
+  // user's side: click GitHub, approve, and the tab spins forever with no
+  // error. Password sign-in was unaffected because it is one POST.
+  const isOAuthLeg =
+    pathname.includes('/sso-callback') ||
+    req.nextUrl.searchParams.has('__clerk_handshake') ||
+    req.nextUrl.searchParams.has('__clerk_status') ||
+    req.nextUrl.searchParams.has('__clerk_ticket')
+
   if (
     !isRscPrefetch &&
+    !isOAuthLeg &&
     (pathname.startsWith('/sign-in') || pathname.startsWith('/sign-up') || pathname.startsWith('/api/auth'))
   ) {
     const result = await checkRateLimit(`auth:${clientIp}`, RATE_LIMITS.auth)
