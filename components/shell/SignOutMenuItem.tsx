@@ -36,6 +36,11 @@ export function SignOutMenuItem({ onSelect }: { onSelect?: () => void }) {
         try {
           await signOut()
         } finally {
+          // Drop the PostHog identity on the way out so a shared device does not
+          // attribute the next visitor to this account.
+          try {
+            ;(globalThis as unknown as { posthog?: { reset?: () => void } }).posthog?.reset?.()
+          } catch {}
           window.location.assign('/')
         }
       }}
