@@ -4,6 +4,7 @@ import { Inter, Source_Serif_4 } from 'next/font/google'
 import './globals.css'
 import AppShell from '@/components/shell/AppShell'
 import ChatwootWidget from '@/components/ChatwootWidget'
+import PostHogAnalytics from '@/components/analytics/PostHogAnalytics'
 import ConditionalClerkProvider from '@/components/ConditionalClerkProvider'
 import SkipToContent from '@/components/shell/SkipToContent'
 import { isClerkHostAuthorized } from '@/lib/clerk-host'
@@ -167,6 +168,10 @@ export default async function RootLayout({
             full-page /chat (Deed) entry point, does not replace it. No-ops
             when NEXT_PUBLIC_CHATWOOT_WEBSITE_TOKEN_BIDDEED is unset.
           */}
+          {/* Browser analytics for the app — the Worker reports the public
+              pages into the same PostHog project; this covers the signed-in
+              product, which had no SDK at all. */}
+          <PostHogAnalytics nonce={nonce} />
           <ChatwootWidget nonce={nonce} />
       </body>
     </html>
