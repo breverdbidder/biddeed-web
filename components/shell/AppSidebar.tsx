@@ -351,7 +351,16 @@ export default function AppSidebar({ deedOpen, onToggleDeed, authEnabled = false
               {showDeedToggle ? (
                 <SidebarMenuItem>
                   <SidebarMenuButton
-                    onClick={onToggleDeed}
+                    onClick={() => {
+                      // Every other destination in this drawer closes it via
+                      // closeOnMobile; the Deed toggle is the one control that
+                      // navigated "in place" and left the sheet up. On mobile
+                      // that left the chat panel open but unreachable behind
+                      // the drawer (owner report 2026-09-18, Samsung/Chrome):
+                      // close the sheet first so the panel takes focus.
+                      closeOnMobile()
+                      onToggleDeed()
+                    }}
                     isActive={deedOpen}
                     aria-expanded={deedOpen}
                     aria-controls="deed-panel"
