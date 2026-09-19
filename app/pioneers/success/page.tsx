@@ -21,6 +21,16 @@ function SuccessInner() {
           method: 'POST',
         })
         if (cancelled) return
+        if (res.ok) {
+          // Funnel completion (PARITY D14) for the Pioneer Pro conversion.
+          // Fires only when confirm succeeds; PostHogIdentify attributes it to
+          // the buyer. Server-side (Stripe webhook) is the reliable count and
+          // is held for billing-path sign-off.
+          try {
+            ;(globalThis as unknown as { posthog?: { capture?: (e: string, p?: Record<string, unknown>) => void } })
+              .posthog?.capture?.('checkout_completed', { product: 'pioneer_pro', plan: 'pro_annual', session_id: sessionId })
+          } catch {}
+        }
         setStatus(res.ok ? 'ok' : 'error')
       } catch {
         if (!cancelled) setStatus('error')
