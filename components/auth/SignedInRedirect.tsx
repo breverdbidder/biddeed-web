@@ -3,26 +3,32 @@
 import { useAuth } from '@clerk/nextjs'
 import { useEffect } from 'react'
 
+const RADAR = '/radar'
+
 /**
- * Hard-navigates away from the auth pages the moment the session activates.
+ * Escorts a just-authenticated visitor off the auth pages.
  *
- * Measured on production 2026-09-18 (flight digest 54830976@E80, builds
- * _KgRF18P3IXZ4OpkAWa72 and UtCKLC3CiCBygBdnTdESL alike): in the seconds
- * after a factor completes, ClerkJS drives its post-auth redirect through a
- * soft Next navigation, and the resulting RSC flight request for the auth
- * route answers 500 while the Clerk session cookie is mid-handshake. The dead
- * flight kills the client transition, so a correctly-signed-in user is left
- * on a frozen form (or, on registration, a white screen) until a manual
- * reload. Steady-state requests — signed-in or anonymous — never crash.
+ * Layer 1 (added in #168): the instant useAuth() reports an active session,
+ * hard-navigate to /radar. A document navigation resolves the Clerk session
+ * handshake natively — the same path that always recovered a manual reload.
  *
- * A full document navigation is the path the platform already recovers with:
- * middleware resolves the session handshake natively for document requests
- * (the 307 handshake chain works there exactly as it does on a manual
- * reload). Firing location.assign as soon as the session is active starts
- * that load immediately; a straggling flight error in the dying page cannot
- * cancel it. /radar is a public route, so this grants nothing.
+ * Layer 2 (this change): on production the post-auth transition's RSC flight
+ * request 500s in the handshake window (digest 54830976@E80, reproduced on
+ * the #166, #167 AND #168 builds) and the dead flight kills the React tree
+ * before the session activates client-side — so Layer 1 never gets to run.
+ * The fatal error surfaces as a window `unhandledrejection` event carrying
+ * "Minified React error #441" (measured live 2026-09-18), and window-level
+ * listeners registered here keep working after the tree dies. On detection,
+ * poll the public /api/viewer/tier endpoint: the session DOES establish
+ * server-side within seconds-to-a-minute of the crash, and the first
+ * signed_in:true answer triggers the same hard navigation to /radar. If the
+ * session never lands (genuinely failed sign-in), reload instead — an
+ * anonymous reload simply re-renders the healthy form.
+ *
+ * /radar is a public route and /api/viewer/tier is a public endpoint; this
+ * grants nothing and touches no security control.
  */
-export default function SignedInRedirect({ to = '/radar' }: { to?: string }) {
+export default function SignedInRedirect({ to = RADAR }: { to?: string }) {
   const { isLoaded, isSignedIn } = useAuth()
 
   useEffect(() => {
@@ -30,6 +36,46 @@ export default function SignedInRedirect({ to = '/radar' }: { to?: string }) {
       window.location.assign(to)
     }
   }, [isLoaded, isSignedIn, to])
+
+  useEffect(() => {
+    let timers: ReturnType<typeof setTimeout>[] = []
+    let done = false
+
+    const recover = () => {
+      if (done) return
+      done = true
+      const started = Date.now()
+      const poll = async () => {
+        try {
+          const r = await fetch('/api/viewer/tier', { credentials: 'include' })
+          const t = await r.json()
+          if (t && t.signed_in) {
+            window.location.assign(to)
+            return
+          }
+        } catch {
+          // endpoint unreachable — fall through to the next attempt
+        }
+        if (Date.now() - started > 90_000) {
+          window.location.reload()
+          return
+        }
+        timers.push(setTimeout(poll, 3_000))
+      }
+      timers.push(setTimeout(poll, 3_000))
+    }
+
+    const onRejection = (e: PromiseRejectionEvent) => {
+      const msg = String((e.reason && e.reason.message) || e.reason || '')
+      if (msg.includes('#441')) recover()
+    }
+
+    window.addEventListener('unhandledrejection', onRejection)
+    return () => {
+      window.removeEventListener('unhandledrejection', onRejection)
+      timers.forEach(clearTimeout)
+    }
+  }, [to])
 
   return null
 }
