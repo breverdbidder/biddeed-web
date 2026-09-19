@@ -149,7 +149,12 @@ export async function checkRateLimit(identifier: string, config: RateLimitConfig
 // Preset configurations
 export const RATE_LIMITS = {
   /** Auth endpoints: 5 requests per minute (tightened from 10) */
-  auth: { limit: 5, windowSeconds: 60 } as RateLimitConfig,
+  // Was 5. Brute force on the password form is Clerk's job - it enforces its
+  // own attempt limits and the Turnstile check on the FAPI - so this bucket is
+  // anti-flood, not the credential gate. At 5, a single sign-in page load plus
+  // its RSC refetches could exhaust it, and on carrier NAT the bucket is shared
+  // with strangers. 30 still stops a flood; it no longer stops a human.
+  auth: { limit: 30, windowSeconds: 60 } as RateLimitConfig,
   /** API endpoints: 30 requests per minute */
   api: { limit: 30, windowSeconds: 60 } as RateLimitConfig,
   /** Per-user API limit: 20 requests per minute */
