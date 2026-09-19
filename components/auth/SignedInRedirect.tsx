@@ -17,7 +17,7 @@ const RADAR = '/radar'
  * the #166, #167 AND #168 builds) and the dead flight kills the React tree
  * before the session activates client-side — so Layer 1 never gets to run.
  * The fatal error surfaces as a window `unhandledrejection` event carrying
- * "Minified React error #441" (measured live 2026-09-18), and window-level
+ * the minified-React error 441 message (measured live 2026-09-18), and window-level
  * listeners registered here keep working after the tree dies. On detection,
  * poll the public /api/viewer/tier endpoint: the session DOES establish
  * server-side within seconds-to-a-minute of the crash, and the first
@@ -67,7 +67,7 @@ export default function SignedInRedirect({ to = RADAR }: { to?: string }) {
 
     const onRejection = (e: PromiseRejectionEvent) => {
       const msg = String((e.reason && e.reason.message) || e.reason || '')
-      if (msg.includes('#441')) recover()
+      if (msg.includes('errors/441')) recover()
     }
 
     window.addEventListener('unhandledrejection', onRejection)
