@@ -32,6 +32,12 @@ import type { Auction } from '@/types/auctions'
  * certificate number and owner instead. (There is no defendant column on
  * multi_county_auctions at all; the old card rendered it as an em-dash on
  * every row.)
+ *
+ * Free-benefit labeling (2026-09-18): signed-in free members see a "Free"
+ * chip on the two fields their registration unlocked (assessed value,
+ * parcel ID) so the card itself says what the account includes; anonymous
+ * viewers keep the "Unlock with Free" CTAs, and no signed-in viewer is
+ * ever routed back to registration.
  */
 
 type ViewerState = 'anonymous' | 'free_member' | 'investor'
@@ -99,6 +105,21 @@ function LockedField({ label, cta, href }: { label: string; cta: string; href: s
   )
 }
 
+/**
+ * Marks the fields a free registration unlocked. Shown only to signed-in
+ * free members: without it the card gave no sign of what their account
+ * already includes (acceptance case 2026-09-18: a signed-in free viewer
+ * asked where the free KPIs were). Anonymous viewers keep the
+ * "Unlock with Free" lock CTA; Investor viewers need no marker.
+ */
+function FreeBenefitChip() {
+  return (
+    <span className="ml-1 inline-flex items-center rounded-full bg-primary/10 px-1.5 py-0.5 align-middle text-[10px] font-semibold uppercase tracking-wide text-primary">
+      Free
+    </span>
+  )
+}
+
 export default function AuctionPinCard({ auction, onClose }: { auction: Auction; onClose: () => void }) {
   const isTaxDeed = (auction.sale_type || auction.auction_type) === 'tax_deed'
   const justValue = auction.market_value ?? auction.assessed_value ?? null
@@ -155,7 +176,10 @@ export default function AuctionPinCard({ auction, onClose }: { auction: Auction;
             <LockedField label="Assessed Value" {...freeCta} />
           ) : (
             <div>
-              <p className="text-muted-foreground dark:text-muted-foreground">Assessed Value</p>
+              <p className="text-muted-foreground dark:text-muted-foreground">
+                Assessed Value
+                {viewer === 'free_member' ? <FreeBenefitChip /> : null}
+              </p>
               <p className="text-foreground dark:text-white font-medium tabular">
                 {justValue
                   ? '$' + justValue.toLocaleString('en-US', { maximumFractionDigits: 0 })
@@ -204,7 +228,17 @@ export default function AuctionPinCard({ auction, onClose }: { auction: Auction;
           {isAnonymous ? (
             <LockedField label="Parcel ID" {...freeCta} />
           ) : (
-            <Field label="Parcel ID" value={auction.parcel_id} mono />
+            <div>
+              <p className="text-muted-foreground dark:text-muted-foreground">
+                Parcel ID
+                {viewer === 'free_member' ? <FreeBenefitChip /> : null}
+              </p>
+              {auction.parcel_id ? (
+                <p className="text-foreground dark:text-white font-medium font-mono text-xs">{auction.parcel_id}</p>
+              ) : (
+                <p className="text-muted-foreground/70 dark:text-muted-foreground/70 text-xs italic">Not yet enriched</p>
+              )}
+            </div>
           )}
         </div>
 
