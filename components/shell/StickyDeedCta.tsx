@@ -6,16 +6,23 @@ import { cn } from '@/lib/utils'
 interface Props {
   open: boolean
   onToggle: () => void
+  /**
+   * Id of the Deed panel this launcher controls. Pass null when the launcher
+   * routes to the full chat instead of toggling the panel (the landing page,
+   * where the panel is deliberately not mounted) so aria-controls never
+   * points at an element that is not on the page.
+   */
+  panelId?: string | null
 }
 
-export default function StickyDeedCta({ open, onToggle }: Props) {
+export default function StickyDeedCta({ open, onToggle, panelId = 'deed-panel' }: Props) {
   return (
     <button
       type="button"
       onClick={onToggle}
       aria-label={open ? 'Close Deed assistant' : 'Talk to Deed - voice AI assistant'}
       aria-expanded={open}
-      aria-controls="deed-panel"
+      aria-controls={panelId ?? undefined}
       className={cn(
         // P1-4 (2026-09-11 audit): the 251x70 card covered working content on
         // every mobile route (calendar cells, form fields, pricing text). Below

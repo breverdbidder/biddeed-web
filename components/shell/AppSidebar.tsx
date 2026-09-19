@@ -351,7 +351,16 @@ export default function AppSidebar({ deedOpen, onToggleDeed, authEnabled = false
               {showDeedToggle ? (
                 <SidebarMenuItem>
                   <SidebarMenuButton
-                    onClick={onToggleDeed}
+                    onClick={() => {
+                      // Every other destination in this drawer closes it via
+                      // closeOnMobile; the Deed toggle is the one control that
+                      // navigated "in place" and left the sheet up. On mobile
+                      // that left the chat panel open but unreachable behind
+                      // the drawer (owner report 2026-09-18, Samsung/Chrome):
+                      // close the sheet first so the panel takes focus.
+                      closeOnMobile()
+                      onToggleDeed()
+                    }}
                     isActive={deedOpen}
                     aria-expanded={deedOpen}
                     aria-controls="deed-panel"
@@ -359,6 +368,30 @@ export default function AppSidebar({ deedOpen, onToggleDeed, authEnabled = false
                   >
                     <DeedRobotMark size={24} decorative={false} className="rounded-md" />
                     <span>Ask Deed here</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ) : null}
+
+              {!showDeedToggle ? (
+                <SidebarMenuItem>
+                  {/*
+                    Home and /chat gate the in-place Deed toggle off
+                    (showDeedToggle=false), which removed "Ask Deed here" from
+                    the mobile drawer entirely on those routes (owner report
+                    2026-09-19, Samsung/Chrome, signed in on /): keep the entry
+                    visible and route it to the full Deed chat instead of the
+                    panel. Same position, directly above Support, same close
+                    behavior as every other destination in this drawer.
+                  */}
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname === '/chat'}
+                    tooltip="Deed — open the chat"
+                  >
+                    <Link href="/chat" onClick={closeOnMobile}>
+                      <DeedRobotMark size={24} decorative={false} className="rounded-md" />
+                      <span>Ask Deed here</span>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ) : null}

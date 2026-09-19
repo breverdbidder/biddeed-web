@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { DeedAuthProvider } from '@/lib/deed/deedAuth'
@@ -46,6 +46,7 @@ export default function AppShell({
   authEnabled?: boolean
 }) {
   const pathname = usePathname()
+  const router = useRouter()
   // '/' and '/chat' ARE the conversation (PARITY CP-2); the Deed side panel
   // and floating card stay off them. `isHome` keeps its name for the diff.
   const isHome = pathname === '/' || pathname === '/chat'
@@ -123,6 +124,19 @@ export default function AppShell({
               <DeedPanel open={deedOpen} onClose={() => setDeedOpen(false)} />
               {!deedOpen && !hasOwnDeedEntry ? <StickyDeedCta open={deedOpen} onToggle={toggleDeed} /> : null}
             </>
+          ) : null}
+          {/*
+            Owner call 2026-09-19: the bottom-right Talk-to-Deed launcher
+            belongs on the landing page too - the CP-4 shell dropped it there
+            ("disappeared", Samsung/Chrome) and both doors are wanted back:
+            this floating button AND the sidebar's "Ask Deed here". The side
+            panel itself still stays off '/', so the launcher routes to the
+            full chat instead of toggling a panel that is not mounted. '/chat'
+            keeps neither launcher nor panel - the customer is already in the
+            room.
+          */}
+          {pathname === '/' ? (
+            <StickyDeedCta open={false} onToggle={() => router.push('/chat')} panelId={null} />
           ) : null}
         </div>
       </SidebarInset>
