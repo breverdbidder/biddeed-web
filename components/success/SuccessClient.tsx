@@ -48,6 +48,15 @@ export default function SuccessClient() {
         if (data.status === 'ok') {
           setEmail((data.email as string) ?? null)
           setPhase('delivered')
+          // Funnel completion (PARITY D14). Fires only on a confirmed-paid,
+          // fulfilled session, so it cannot overcount; PostHogIdentify ties it
+          // to the buyer when signed in. The fully reliable count is the Stripe
+          // webhook (server-side) — a billing-path change held for sign-off —
+          // so this is the client signal that makes the funnel measurable now.
+          try {
+            ;(globalThis as unknown as { posthog?: { capture?: (e: string, p?: Record<string, unknown>) => void } })
+              .posthog?.capture?.('checkout_completed', { product: 'clear_to_bid', session_id: sessionId })
+          } catch {}
         } else if (data.status === 'unpaid') {
           setPhase('unpaid')
         } else {
