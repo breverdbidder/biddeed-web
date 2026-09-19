@@ -372,6 +372,30 @@ export default function AppSidebar({ deedOpen, onToggleDeed, authEnabled = false
                 </SidebarMenuItem>
               ) : null}
 
+              {!showDeedToggle ? (
+                <SidebarMenuItem>
+                  {/*
+                    Home and /chat gate the in-place Deed toggle off
+                    (showDeedToggle=false), which removed "Ask Deed here" from
+                    the mobile drawer entirely on those routes (owner report
+                    2026-09-19, Samsung/Chrome, signed in on /): keep the entry
+                    visible and route it to the full Deed chat instead of the
+                    panel. Same position, directly above Support, same close
+                    behavior as every other destination in this drawer.
+                  */}
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname === '/chat'}
+                    tooltip="Deed — open the chat"
+                  >
+                    <Link href="/chat" onClick={closeOnMobile}>
+                      <DeedRobotMark size={24} decorative={false} className="rounded-md" />
+                      <span>Ask Deed here</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ) : null}
+
               {/*
                 Support tickets (Ariel, 2026-09-06): always visible, directly
                 under "Ask Deed here" — Deed is the first stop, a ticket is the
