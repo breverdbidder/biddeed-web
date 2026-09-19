@@ -34,6 +34,7 @@ import {
 import { ACCOUNT_LINKS, NAV_ITEMS, type NavItem } from './nav'
 import { formatCount, useAuctionCounts } from './useAuctionCounts'
 import DeedRobotMark from '@/components/deed/DeedRobotMark'
+import { SignOutMenuItem } from './SignOutMenuItem'
 import { useDeedAuth } from '@/lib/deed/deedAuth'
 import { CHAT_HISTORY_CONTAINED, deleteThread, loadThreads, subscribeThreads } from '@/lib/deed/threads'
 import { deleteThreadRemote, listThreads, notifyThreadsChanged, type ThreadSummary } from '@/lib/deed/threadsRemote'
@@ -460,6 +461,8 @@ export default function AppSidebar({ deedOpen, onToggleDeed, authEnabled = false
                       <DropdownMenuItem asChild>
                         <Link href="/dashboard" onClick={closeOnMobile}>Account dashboard</Link>
                       </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <SignOutMenuItem onSelect={closeOnMobile} />
                     </Show>
                   </>
                 ) : (
