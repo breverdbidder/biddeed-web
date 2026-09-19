@@ -3,6 +3,7 @@
 import { ClerkProvider } from '@clerk/nextjs'
 import { useTheme } from '@/lib/theme-context'
 import { palette } from '@/lib/design-tokens'
+import PostHogIdentify from '@/components/analytics/PostHogIdentify'
 
 // Ported from zonewise-web 2026-08-20 with one deliberate deviation: no
 // `@clerk/themes` import. Clerk's appearance API needs real colour strings (it
@@ -117,6 +118,9 @@ export default function ConditionalClerkProvider({
 
   return (
     <ClerkProvider appearance={clerkAppearance(theme)} localization={clerkLocalization} nonce={nonce}>
+      {/* Inside the provider so useAuth/useUser resolve; ties the Clerk user to
+          their PostHog identity. Renders null. */}
+      <PostHogIdentify />
       {children}
     </ClerkProvider>
   )
