@@ -48,6 +48,8 @@ jobs:
 
       - name: Typecheck
         run: npm run typecheck
+      - name: D10 Clerk identity boundary
+        run: npm run test:deed-identity-boundary
 
       - name: Validate SIGNAL$ field release policy
         run: npm run test:report-release
