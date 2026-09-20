@@ -15,6 +15,7 @@ export const QUEUES = [
   "technical",
   "data",
   "customer_success",
+  "other",
 ] as const;
 type Category = typeof CATEGORIES[number];
 type Queue = typeof QUEUES[number];
@@ -69,6 +70,7 @@ export const JEV_QUESTIONS = {
       technical: "bugs login API outage",
       data: "auction parcel report zoning quality",
       customer_success: "how-to features general help",
+      other: "none of the listed queues fit; require deterministic review",
     },
   },
   revenueRisk: {
@@ -173,8 +175,12 @@ export async function decide(t: Ticket, j?: Evaluator): Promise<Decision> {
       );
     if (
       !CATEGORIES.includes(a.category.choice) ||
-      !QUEUES.includes(a.queue.choice) || !Number.isFinite(a.urgency.score) ||
-      a.urgency.score < 0 || a.urgency.score > 3 || c < .7
+      !QUEUES.includes(a.queue.choice) ||
+      // Closed-set confidence does not prove that an input belongs in-set.
+      // Every Choice includes explicit other/none and it always fails closed.
+      a.category.choice === "other" || a.queue.choice === "other" ||
+      !Number.isFinite(a.urgency.score) || a.urgency.score < 0 ||
+      a.urgency.score > 3 || c < .7
     ) return f;
     const p = a.urgency.score;
     return {
