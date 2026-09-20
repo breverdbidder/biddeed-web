@@ -17,6 +17,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { decide } from '@/lib/support/decision'
 import {
   PLAN_TIERS,
   PUBLIC_TICKET_FIELDS,
@@ -96,9 +97,12 @@ export async function POST(request: NextRequest) {
   if (!TICKET_PRIORITIES.includes(requestedPriority)) return json({ error: 'Invalid priority.' }, 400)
   if (planTier && !(PLAN_TIERS as readonly string[]).includes(planTier)) return json({ error: 'Invalid plan.' }, 400)
 
-  // Security reports jump the queue when the customer left priority at the default.
-  const priority: TicketPriority =
-    category === 'security' && requestedPriority === 'normal' ? 'high' : requestedPriority
+  // Shadow decision is local-only today. No ticket text leaves BidDeed and no
+  // model can authorize a refund, account change, send, or other mutation.
+  const decision = await decide({ subject, message, declaredCategory: category, planTier })
+  const priority: TicketPriority = requestedPriority === 'normal'
+    ? decision.priority
+    : requestedPriority
 
   const clerkUserId = await optionalClerkUserId()
 
@@ -114,6 +118,14 @@ export async function POST(request: NextRequest) {
     user_agent: clampText(request.headers.get('user-agent'), 500) || null,
     clerk_user_id: clerkUserId,
     channel: 'web_support_form',
+    classification: decision.category,
+    escalated_to: decision.requiresHuman ? decision.queue : null,
+    decision_source: decision.source,
+    decision_confidence: decision.confidence,
+    decision_queue: decision.queue,
+    decision_revenue_risk: decision.revenueRisk,
+    decision_requires_human: decision.requiresHuman,
+    decision_at: new Date().toISOString(),
     metadata: {
       source: 'web_support_form',
       cf_ray: request.headers.get('cf-ray'),
