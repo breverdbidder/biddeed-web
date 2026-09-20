@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+import { decide } from '@/lib/support/decision'
 import { WORKER_MAX_CHARS, WORKER_MAX_MESSAGES, type DeedMessage } from '@/lib/deed/protocol'
 import { PROJECT_ID_RE, projectChatContext } from '@/lib/deed/projects'
 import { requireDeedContext } from '@/lib/deed/server'
@@ -173,6 +174,19 @@ export async function POST(req: NextRequest) {
     const total = () => clean.reduce((n, m) => n + m.content.length, 0)
     while (clean.length > 1 && total() > WORKER_MAX_CHARS) clean.shift()
   }
+
+  // Local shadow triage only. This never changes the answer, sends no customer
+  // text to Jev, and cannot authorize any action. It gives operations a safe
+  // fallback signal while the external privacy/cost gate remains closed.
+  const lastUserMessage = [...clean].reverse().find((message) => message.role === 'user')?.content ?? ''
+  const supportDecision = await decide({ message: lastUserMessage })
+  console.info(JSON.stringify({
+    level: 'info', scope: 'deed.support-shadow', category: supportDecision.category,
+    priority: supportDecision.priority, queue: supportDecision.queue,
+    revenue_risk: supportDecision.revenueRisk, requires_human: supportDecision.requiresHuman,
+    source: supportDecision.source, confidence: supportDecision.confidence,
+    ts: new Date().toISOString(),
+  }))
 
   const ip = clientIp(req)
   const headers: Record<string, string> = {
