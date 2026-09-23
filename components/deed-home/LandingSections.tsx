@@ -34,7 +34,9 @@ export const W = {
   // expired pre-sample-pair report whose key died - the CTA 401'd (P0-2,
   // 2026-09-11 audit). A blocking smoke check in cloudflare-production.yml now
   // fails the deploy if this URL stops returning 200.
-  sampleReport: '/report/04a30c35-6cef-486d-8599-ce0eb20dd79c?key=bd_live_S9KLXyeH9fV1epdliLz731n1',
+  // Keyless since 2026-09-23: the Worker serves SAMPLE_MCA_ID with no key, so
+  // the public page no longer carries a live report key.
+  sampleReport: '/report/04a30c35-6cef-486d-8599-ce0eb20dd79c',
 }
 
 export const BTN =
