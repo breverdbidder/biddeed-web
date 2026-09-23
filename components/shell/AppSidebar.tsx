@@ -253,10 +253,9 @@ export default function AppSidebar({ deedOpen, onToggleDeed, authEnabled = false
 
         {/*
           Deed's own rows (PARITY CP-2 §2: New chat · Recents · Projects ·
-          Skills · Scheduled). Projects opens the panel on /chat; Skills is a
-          labelled "coming" row, never a locked wall (meta prompt CP-2 §1),
-          until PARITY-6 ships it; Scheduled is the Deed Watches layer, which
-          today is the Alerts page (PARITY-5 grows it).
+          Skills · Scheduled). Projects and Skills each open their panel on
+          /chat (PARITY-4, PARITY-6); Scheduled is the Deed Watches layer,
+          which today is the Alerts page (PARITY-5 grows it).
         */}
         <SidebarGroup>
           <SidebarGroupLabel>Deed</SidebarGroupLabel>
@@ -273,15 +272,13 @@ export default function AppSidebar({ deedOpen, onToggleDeed, authEnabled = false
                 </SidebarMenuItem>
               ) : null}
               <SidebarMenuItem>
-                <SidebarMenuButton
-                  aria-disabled="true"
-                  tooltip="Skills — coming: system skills that run live county queries from a slash command"
-                  className="cursor-default text-muted-foreground hover:bg-transparent hover:text-muted-foreground"
-                >
-                  <Wand2 />
-                  <span>Skills</span>
+                {/* PARITY CP-6: a hash link, like Projects — the panel lives on /chat. */}
+                <SidebarMenuButton asChild tooltip="Skills — live county checks you can run on any auction, or type / in the chat">
+                  <Link href="/chat#skills" onClick={closeOnMobile}>
+                    <Wand2 />
+                    <span>Skills</span>
+                  </Link>
                 </SidebarMenuButton>
-                <SidebarMenuBadge className="text-muted-foreground">Coming</SidebarMenuBadge>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton

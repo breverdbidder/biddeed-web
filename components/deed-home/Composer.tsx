@@ -14,12 +14,14 @@ import {
   Search,
   Sparkles,
   Square,
+  Wand2,
   X,
 } from 'lucide-react'
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
+import SlashMenu, { filterCommands, type SlashCommand } from '@/components/deed/SlashMenu'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -36,6 +38,7 @@ import {
 import { apiUrl } from '@/lib/api'
 import { useDeedAuth } from '@/lib/deed/deedAuth'
 import { listProjects, type ProjectSummary } from '@/lib/deed/projectsRemote'
+import { SKILL_COMMANDS, SKILL_COMMAND_TARGET } from '@/lib/skills/commands'
 import { cn } from '@/lib/utils'
 import type { DeedSendOptions } from './useDeedThread'
 import VoiceStrip from './VoiceStrip'
@@ -81,6 +84,11 @@ interface Props {
   autoFocus?: boolean
   /** The Project this thread is already scoped to, if any (issue #19847 C3). */
   projectId?: string | null
+  /**
+   * PARITY CP-6: opens the Skills panel (null = the library). When set, "/" at
+   * the start of the box lists the skills and the "+" menu gains "Skills".
+   */
+  onSkill?: (preset: string | null) => void
 }
 
 /**
@@ -107,8 +115,10 @@ export default function Composer({
   onSeedConsumed,
   autoFocus,
   projectId: initialProjectId = null,
+  onSkill,
 }: Props) {
   const [value, setValue] = useState('')
+  const [slashIndex, setSlashIndex] = useState(0)
   const [pendingUpload, setPendingUpload] = useState<PendingUpload | null>(null)
   const [publicRecords, setPublicRecords] = useState(false)
   const [projectId, setProjectId] = useState<string | null>(initialProjectId)
@@ -225,6 +235,17 @@ export default function Composer({
     void listProjects().then((rows) => setProjects(rows ?? []))
   }
   const activeProject = projectId ? projects?.find((p) => p.id === projectId) : null
+  // "/" + letters, no space yet: the skills menu. Anything else is a message.
+  const slashOpen = Boolean(onSkill) && value.startsWith('/') && !/\s/.test(value) && !streaming
+  const slashMatches = slashOpen ? filterCommands(value, SKILL_COMMANDS) : []
+  const slashActive = slashOpen && slashMatches.length > 0
+  useEffect(() => setSlashIndex(0), [value])
+
+  const pickSkill = (c: SlashCommand) => {
+    setValue('')
+    onSkill?.(SKILL_COMMAND_TARGET[c.name] ?? null)
+  }
+
   const submit = () => {
     if (streaming) return
     const t = value.trim()
@@ -240,6 +261,28 @@ export default function Composer({
   }
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (slashActive && !e.nativeEvent.isComposing) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault()
+        setSlashIndex((i) => (i + 1) % slashMatches.length)
+        return
+      }
+      if (e.key === 'ArrowUp') {
+        e.preventDefault()
+        setSlashIndex((i) => (i - 1 + slashMatches.length) % slashMatches.length)
+        return
+      }
+      if (e.key === 'Enter' || e.key === 'Tab') {
+        e.preventDefault()
+        pickSkill(slashMatches[Math.min(slashIndex, slashMatches.length - 1)])
+        return
+      }
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        setValue('')
+        return
+      }
+    }
     if (e.key !== 'Enter' || e.shiftKey || e.nativeEvent.isComposing) return
     // Coarse pointer = touch keyboard: Enter is a newline there.
     if (typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches) return
@@ -335,12 +378,29 @@ export default function Composer({
         onDismiss={voice.dismiss}
       />
 
+      {slashActive ? (
+        <SlashMenu
+          query={value}
+          activeIndex={slashIndex}
+          onHover={setSlashIndex}
+          onPick={pickSkill}
+          commands={SKILL_COMMANDS}
+          id="chat-slash-menu"
+          optionPrefix="chat-slash"
+        />
+      ) : null}
+
       <label htmlFor={inputId} className="sr-only">
         Ask Deed about Florida foreclosure and tax deed auctions
       </label>
       <textarea
         id={inputId}
         ref={ref}
+        role={slashActive ? 'combobox' : undefined}
+        aria-expanded={slashActive ? true : undefined}
+        aria-controls={slashActive ? 'chat-slash-menu' : undefined}
+        aria-autocomplete={slashActive ? 'list' : undefined}
+        aria-activedescendant={slashActive ? `chat-slash-${slashMatches[Math.min(slashIndex, slashMatches.length - 1)]?.name}` : undefined}
         rows={hero ? 2 : 1}
         value={value}
         maxLength={MAX_LEN}
@@ -349,8 +409,12 @@ export default function Composer({
         onPaste={onPaste}
         placeholder={
           hero
-            ? 'Ask about any Florida auction — a county, a case number, an address…'
-            : 'Ask a follow-up…'
+            ? onSkill
+              ? 'Ask about any Florida auction, or type / for skills…'
+              : 'Ask about any Florida auction — a county, a case number, an address…'
+            : onSkill
+              ? 'Ask a follow-up, or type / for skills…'
+              : 'Ask a follow-up…'
         }
         className={cn(
           'block w-full resize-none bg-transparent outline-none placeholder:text-muted-foreground/80',
@@ -422,6 +486,12 @@ export default function Composer({
               <Sparkles className="mr-2 size-4" aria-hidden />
               Deep Research → SIGNAL$
             </DropdownMenuItem>
+            {onSkill ? (
+              <DropdownMenuItem className="min-h-11" onSelect={() => onSkill(null)}>
+                <Wand2 className="mr-2 size-4" aria-hidden />
+                Skills
+              </DropdownMenuItem>
+            ) : null}
 
             <DropdownMenuSeparator />
             <DropdownMenuSub onOpenChange={(open) => open && projects === null && loadProjects()}>

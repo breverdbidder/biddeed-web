@@ -12,6 +12,7 @@ import { createProject, notifyProjectsChanged } from '@/lib/deed/projectsRemote'
 import ChatEmptyState from './ChatEmptyState'
 import ProjectPanel from './ProjectPanel'
 import ProjectsSheet, { draftPrompt, type ProjectDraft } from './ProjectsSheet'
+import SkillsSheet from './SkillsSheet'
 
 const PROJECT_ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
@@ -30,6 +31,7 @@ const PROJECT_ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{
  *   /chat?project=<id>    a project (CP-4): header, files, and a chat scoped to it;
  *                         &new=1 starts another chat inside the same project
  *   /chat#projects        open the Projects panel (sidebar row, legacy links)
+ *   /chat#skills          open the Skills panel (sidebar row); ?skill=<slug|id> preselects one
  *   /chat?new_project_county=&case=&source=&intent=
  *                         the S2 hook (#19847): signed in, the project is created
  *                         with first_touch and opened; signed out, the panel opens
@@ -50,6 +52,8 @@ export default function DeedChat() {
   const [seed, setSeed] = useState<string | null>(null)
   const [projectsOpen, setProjectsOpen] = useState(false)
   const [projectDraft, setProjectDraft] = useState<ProjectDraft | null>(null)
+  const [skillsOpen, setSkillsOpen] = useState(false)
+  const [skillPreset, setSkillPreset] = useState<string | null>(null)
 
   // The project this page is about: the thread's own, else the URL's.
   const activeProjectId = thread?.projectId ?? projectFromUrl
@@ -118,10 +122,21 @@ export default function DeedChat() {
   // change on the same page is not a navigation Next sees, so listen for it.
   useEffect(() => {
     const check = () => {
-      if (typeof window !== 'undefined' && window.location.hash === '#projects') {
+      if (typeof window === 'undefined') return
+      if (window.location.hash === '#projects') {
         setProjectsOpen(true)
         // Leave the URL clean so closing the panel and reloading does not reopen it.
         window.history.replaceState(null, '', window.location.pathname + window.location.search)
+      } else if (window.location.hash === '#skills') {
+        // PARITY CP-6: the sidebar's Skills row. ?skill= (from a sign-in
+        // return or a link) preselects one; both are consumed here.
+        const url = new URL(window.location.href)
+        const preset = url.searchParams.get('skill')
+        setSkillPreset(preset && /^[a-z0-9_-]{2,64}$/i.test(preset) ? preset : null)
+        setSkillsOpen(true)
+        url.searchParams.delete('skill')
+        url.hash = ''
+        window.history.replaceState(null, '', url.pathname + url.search)
       }
     }
     check()
@@ -144,6 +159,11 @@ export default function DeedChat() {
     },
     [send]
   )
+
+  const openSkills = useCallback((preset: string | null) => {
+    setSkillPreset(preset)
+    setSkillsOpen(true)
+  }, [])
 
   const openProject = useCallback(
     (id: string) => {
@@ -177,6 +197,7 @@ export default function DeedChat() {
                 streaming={streamingNow}
                 seed={seed}
                 onSeedConsumed={() => setSeed(null)}
+                onSkill={openSkills}
                 autoFocus
                 projectId={thread.projectId ?? null}
               />
@@ -200,6 +221,7 @@ export default function DeedChat() {
                 streaming={streamingNow}
                 seed={seed}
                 onSeedConsumed={() => setSeed(null)}
+                onSkill={openSkills}
                 autoFocus
                 projectId={activeProjectId}
               />
@@ -215,6 +237,7 @@ export default function DeedChat() {
             streaming={streamingNow}
             seed={seed}
             onSeedConsumed={() => setSeed(null)}
+            onSkill={openSkills}
             autoFocus
           />
         </ChatEmptyState>
@@ -233,6 +256,16 @@ export default function DeedChat() {
           setSeed(prompt)
         }}
         onOpenProject={openProject}
+      />
+
+      <SkillsSheet
+        open={skillsOpen}
+        onOpenChange={setSkillsOpen}
+        preset={skillPreset}
+        onAskDeed={(prompt) => {
+          setSkillsOpen(false)
+          setSeed(prompt)
+        }}
       />
     </>
   )

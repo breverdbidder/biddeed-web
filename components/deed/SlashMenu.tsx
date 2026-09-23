@@ -35,12 +35,18 @@ interface Props {
   activeIndex: number
   onHover: (index: number) => void
   onPick: (command: SlashCommand) => void
+  /** Another surface's wired commands (the /chat composer lists skills). Defaults to SLASH_COMMANDS. */
+  commands?: SlashCommand[]
+  /** DOM id of the listbox; the textarea's aria-controls must match it. */
+  id?: string
+  /** Option ids are `${optionPrefix}-${name}`, for the textarea's aria-activedescendant. */
+  optionPrefix?: string
 }
 
-export function filterCommands(query: string): SlashCommand[] {
+export function filterCommands(query: string, commands: SlashCommand[] = SLASH_COMMANDS): SlashCommand[] {
   const q = query.replace(/^\//, '').toLowerCase()
-  if (!q) return SLASH_COMMANDS
-  return SLASH_COMMANDS.filter((c) => c.name.startsWith(q))
+  if (!q) return commands
+  return commands.filter((c) => c.name.startsWith(q))
 }
 
 /**
@@ -51,9 +57,9 @@ export function filterCommands(query: string): SlashCommand[] {
  * through aria-activedescendant on the input instead. Arrow keys, Enter, Tab
  * and Escape are handled by the composer and passed down as `activeIndex`.
  */
-export default function SlashMenu({ query, activeIndex, onHover, onPick }: Props) {
+export default function SlashMenu({ query, activeIndex, onHover, onPick, commands = SLASH_COMMANDS, id = 'deed-slash-menu', optionPrefix = 'deed-slash' }: Props) {
   const listRef = useRef<HTMLUListElement>(null)
-  const items = filterCommands(query)
+  const items = filterCommands(query, commands)
 
   useEffect(() => {
     listRef.current
@@ -66,7 +72,7 @@ export default function SlashMenu({ query, activeIndex, onHover, onPick }: Props
   return (
     <ul
       ref={listRef}
-      id="deed-slash-menu"
+      id={id}
       role="listbox"
       aria-label="Commands"
       className={cn(
@@ -80,7 +86,7 @@ export default function SlashMenu({ query, activeIndex, onHover, onPick }: Props
         return (
           <li
             key={c.name}
-            id={`deed-slash-${c.name}`}
+            id={`${optionPrefix}-${c.name}`}
             data-index={i}
             role="option"
             aria-selected={active}
