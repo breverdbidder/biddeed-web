@@ -7,3 +7,6 @@ ada6a84290de5b1e4471434cb85288e065095602:components/home/Landing.tsx:generic-api
 
 # 2026-09-23 #181: synthetic banned-value fixture in the funnel PII validator (not a real key); later commit carries gitleaks:allow.
 22ce7858af765094c650fc653dbf8a5263cc9e88:scripts/validate-funnel-events.mjs:generic-api-key:26
+
+# 2026-09-23 (approved by Ariel): PostHog phc_ project key is a public, browser-side ingestion key by design (not a secret).
+e09c36da1cedb0bc6542b3916a9183f63efbca7e:components/analytics/PostHogAnalytics.tsx:generic-api-key:30
