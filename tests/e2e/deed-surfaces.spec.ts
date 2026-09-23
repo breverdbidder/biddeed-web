@@ -182,14 +182,29 @@ test.describe('Deed Skills, API keys and chat recents, signed in (PARITY CP-6 / 
     let threadId: string | null = null
     try {
       await signIn(page, A.email!, A.password!)
+      // Every /api/deed response on this page, so a failed answer says why.
+      const deedCalls: string[] = []
+      page.on('response', (r) => {
+        if (/\/api\/deed(\?|$)/.test(r.url())) deedCalls.push(`${r.request().method()} ${r.status()} ${r.headers()['content-type'] ?? ''}`)
+      })
       await page.goto('/chat', { waitUntil: 'domcontentloaded' })
       await page.getByRole('textbox', { name: /Ask Deed about Florida/ }).fill(question)
       await page.getByRole('button', { name: 'Send message' }).click()
       await expect(page).toHaveURL(/\/chat\?c=[A-Za-z0-9-]+/, { timeout: 30_000 })
       threadId = new URL(page.url()).searchParams.get('c')
       expect(threadId).toBeTruthy()
-      // A real answer, streamed from the live model path.
-      await expect(page.getByRole('button', { name: 'Copy' }).first()).toBeVisible({ timeout: 120_000 })
+      // A real answer, streamed from the live model path. On a miss, the error
+      // carries what the page showed and what /api/deed answered.
+      const answered = await page
+        .getByRole('button', { name: 'Copy' })
+        .first()
+        .waitFor({ state: 'visible', timeout: 90_000 })
+        .then(() => true)
+        .catch(() => false)
+      if (!answered) {
+        const shown = (await page.locator('#main').innerText().catch(() => '')).replace(/\s+/g, ' ').slice(-700)
+        throw new Error(`No answer within 90 s. /api/deed: [${deedCalls.join(' | ')}]. Page: …${shown}`)
+      }
 
       // Saved server-side under this account, not in the browser.
       await expect
