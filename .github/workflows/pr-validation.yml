@@ -26,7 +26,7 @@ concurrency:
 
 jobs:
   production-build:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, dell-gpu]
     timeout-minutes: 20
     env:
       NEXT_TELEMETRY_DISABLED: '1'
@@ -62,7 +62,7 @@ jobs:
 
   ui-parity-audit:
     needs: production-build
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, dell-gpu]
     timeout-minutes: 20
     steps:
       - name: Checkout the vendored canon harness
