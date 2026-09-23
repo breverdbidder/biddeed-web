@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
+import { track } from '@/lib/analytics/funnel'
 
 import { PLANS } from '@/components/deed-home/LandingSections'
 import { apiUrl } from '@/lib/api'
@@ -120,6 +121,7 @@ export default function SubscribeCheckout() {
       })
       const data = await res.json()
       if (res.ok && data.url) {
+        track('checkout_started', { product: 'subscription', plan: tier, interval, surface: 'subscribe' }, { beacon: true })
         window.location.href = data.url
         return
       }
