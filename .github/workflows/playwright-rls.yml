@@ -108,7 +108,8 @@ jobs:
       # conversation and deletes both through the UI; see the spec header.
       - name: Run signed-in Skills, API keys and chat recents proof (PARITY CP-6, CP-8, CP-2)
         if: ${{ !cancelled() && (inputs.suite == 'surfaces' || inputs.suite == 'all') }}
-        run: npx playwright test tests/e2e/deed-surfaces.spec.ts
+        # github reporter: each failure becomes a check-run annotation (file, line, message).
+        run: npx playwright test tests/e2e/deed-surfaces.spec.ts --reporter=github,list
       - name: Upload Playwright evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
