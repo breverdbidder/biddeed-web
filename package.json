@@ -22,7 +22,9 @@
     "test:auction-detail-gate": "node scripts/validate-auction-detail-gate.mjs",
     "test:auction-pin-contract": "node scripts/validate-auction-pin-contract.mjs",
     "test:deed-identity-boundary": "node scripts/validate-deed-identity-boundary.mjs",
-    "test:funnel-events": "node scripts/validate-funnel-events.mjs"
+    "test:funnel-events": "node scripts/validate-funnel-events.mjs",
+    "test:zone-standards-dims": "node scripts/validate-zone-standards-dims.mjs",
+    "test:zone-standards-preference": "node scripts/validate-zone-standards-preference.mjs"
   },
   "dependencies": {
     "@assistant-ui/react": "0.15.15",

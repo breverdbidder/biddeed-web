@@ -119,6 +119,10 @@ export interface ZoningStandards {
   source_citation: string | null
   verified_at: string | null
   standards_verified: boolean
+  /** Present when dims came from public.zone_standards (ZW-P0-003). */
+  confidence_score?: number | null
+  /** 'zone_standards' | 'zw_zoning_standards' — lets UI avoid regex fiction. */
+  standards_source?: 'zone_standards' | 'zw_zoning_standards' | null
 }
 
 /** Enriched auction detail (from /api/auctions/[id]) */

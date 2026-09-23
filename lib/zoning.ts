@@ -124,6 +124,10 @@ export function getDorDescription(dorCode: string | null | undefined): string | 
  * Parse DIMS (Dimensional Standards) from zone_code string.
  * Many Florida municipalities encode setbacks and density in the zone code
  * or the future_land_use field. This provides basic parsing.
+ *
+ * ZW-P0-003: fallback / orientation only. Do NOT render these values as
+ * ordinance on auction detail — prefer public.zone_standards via
+ * lib/zone-standards.ts. If no DB row exists, show Unknown / not linked.
  */
 export interface DimensionalStandards {
   minLotSize: string | null
