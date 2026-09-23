@@ -9,7 +9,7 @@ on:
         default: 'https://staging.biddeed.ai'
         type: string
       suite:
-        description: 'rls = CP-3/CP-4 isolation suite; surfaces = CP-6 Skills + CP-8 API keys signed in; all = both'
+        description: 'rls = CP-3/CP-4 isolation suite; surfaces = CP-6 Skills, CP-8 API keys and CP-2 chat recents signed in; all = both'
         required: false
         default: 'rls'
         type: choice
@@ -103,10 +103,10 @@ jobs:
         run: npm run test:e2e:rls
         env:
           E2E_S1_WAIT: '1'
-      # PARITY CP-6 + CP-8: the signed-in pages a customer sees (Skills panel,
-      # API key page). Writes one skill and deletes it through the panel; see
-      # the spec header for why nothing survives the run.
-      - name: Run signed-in Skills + API keys proof (PARITY CP-6, CP-8)
+      # PARITY CP-6 + CP-8 + CP-2: the signed-in pages a customer sees (Skills
+      # panel, API key page, chat recents). Writes one skill and one
+      # conversation and deletes both through the UI; see the spec header.
+      - name: Run signed-in Skills, API keys and chat recents proof (PARITY CP-6, CP-8, CP-2)
         if: ${{ !cancelled() && (inputs.suite == 'surfaces' || inputs.suite == 'all') }}
         run: npx playwright test tests/e2e/deed-surfaces.spec.ts
       - name: Upload Playwright evidence

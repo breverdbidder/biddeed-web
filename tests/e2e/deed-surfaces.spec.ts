@@ -3,7 +3,8 @@ import { test, expect, type Browser, type Page } from '@playwright/test'
 import { A, B, apiJson, haveCreds, signIn } from './helpers/clerk'
 
 /**
- * PARITY CP-6 (Skills) and CP-8 (API keys), signed in, against E2E_BASE_URL.
+ * PARITY CP-6 (Skills), CP-8 (API keys) and CP-2 (chat recents), signed in,
+ * against E2E_BASE_URL.
  *
  * Both surfaces were proven live at the database layer on 2026-09-23 (every
  * skill run on a real auction, a user skill saved / run / deleted, a key
@@ -17,12 +18,17 @@ import { A, B, apiJson, haveCreds, signIn } from './helpers/clerk'
  *            the upgrade link, shown in the panel) · delete through the panel
  *   API keys the key page signed in, for an account without an API plan: the
  *            reason and the plans link are shown, and a create is refused
+ *   Chat     one real conversation: saved under the account, back after a
+ *            reload, found by the sidebar search, reopened, deleted
  *
- * Nothing survives the run: the one skill it writes is deleted through the UI
- * (with an API delete in `finally` as the backstop), a free account never
- * reaches the run RPC so no run is logged, and the key create is refused
- * before any row is written. The ephemeral identities are deleted by the
- * workflow.
+ * What it writes, it removes: the one skill is deleted through the UI (API
+ * delete in `finally` as the backstop), the key create is refused before any
+ * row is written, and the one conversation is deleted from the sidebar (API
+ * delete as the backstop). The one exception is a run on a paid identity: it
+ * writes the same usage-log row any customer's run writes (a free identity is
+ * stopped at the 402 before the run RPC). First run 2026-09-23 (run
+ * 35930629828): identity A is on a paid plan, so the panel ran Lien survival
+ * live.
  */
 
 const SYSTEM = ['lien_survival', 'surplus_check', 'zoning', 'comps', 'repair_estimate', 'max_bid']
@@ -36,7 +42,7 @@ async function library(page: Page): Promise<Library> {
   return r.body as Library
 }
 
-test.describe('Deed Skills + API keys, signed in (PARITY CP-6 / CP-8)', () => {
+test.describe('Deed Skills, API keys and chat recents, signed in (PARITY CP-6 / CP-8 / CP-2)', () => {
   test('anon: the panel asks for sign-in and every write answers 401', async ({ page }) => {
     await page.goto('/chat#skills', { waitUntil: 'domcontentloaded' })
     await expect(page.getByRole('dialog').getByText('Sign in to run skills.')).toBeVisible({ timeout: 20_000 })
@@ -162,6 +168,65 @@ test.describe('Deed Skills + API keys, signed in (PARITY CP-6 / CP-8)', () => {
     } finally {
       if (createdId) await apiJson(pageA, `${SKILLS}/${createdId}`, { method: 'DELETE' }).catch(() => undefined)
       await ctxA.close()
+    }
+  })
+
+  test('chat (CP-2): a signed-in conversation survives a reload, is searchable, reopens and deletes', async ({ browser }) => {
+    test.skip(!haveCreds, 'Clerk E2E identities (E2E_USER_A/B_*) are not configured')
+    test.setTimeout(240_000)
+    const marker = `e2e${Date.now().toString(36)}`
+    // Under 48 characters, so the sidebar title is the question itself.
+    const question = `${marker}: what sells in Brevard this week?`
+    const ctx = await (browser as Browser).newContext()
+    const page = await ctx.newPage()
+    let threadId: string | null = null
+    try {
+      await signIn(page, A.email!, A.password!)
+      await page.goto('/chat', { waitUntil: 'domcontentloaded' })
+      await page.getByRole('textbox', { name: /Ask Deed about Florida/ }).fill(question)
+      await page.getByRole('button', { name: 'Send message' }).click()
+      await expect(page).toHaveURL(/\/chat\?c=[A-Za-z0-9-]+/, { timeout: 30_000 })
+      threadId = new URL(page.url()).searchParams.get('c')
+      expect(threadId).toBeTruthy()
+      // A real answer, streamed from the live model path.
+      await expect(page.getByRole('button', { name: 'Copy' }).first()).toBeVisible({ timeout: 120_000 })
+
+      // Saved server-side under this account, not in the browser.
+      await expect
+        .poll(async () => JSON.stringify((await apiJson(page, '/api/deed/threads')).body), { timeout: 30_000 })
+        .toContain(threadId!)
+
+      // Reload: the recents come back from the server.
+      await page.goto('/chat', { waitUntil: 'domcontentloaded' })
+      const recent = page.locator(`a[href="/chat?c=${threadId}"]`)
+      await expect(recent).toBeVisible({ timeout: 20_000 })
+      await expect(recent).toContainText(marker)
+
+      // Search your chats.
+      const search = page.locator('#deed-thread-search')
+      await search.fill(marker)
+      await expect(recent).toBeVisible({ timeout: 15_000 })
+      await search.fill(`zz${marker}nomatch`)
+      await expect(page.getByText('No chats match')).toBeVisible({ timeout: 15_000 })
+      await search.fill('')
+      await expect(recent).toBeVisible({ timeout: 15_000 })
+
+      // Reopen from recents: the turns are restored from the server.
+      await recent.click()
+      await expect(page).toHaveURL(new RegExp(`[?&]c=${threadId}`))
+      // The question and the answer's Copy action, inside the conversation (not the sidebar title).
+      await expect(page.locator('#main').getByText(question).first()).toBeVisible({ timeout: 20_000 })
+      await expect(page.locator('#main').getByRole('button', { name: 'Copy' }).first()).toBeVisible()
+
+      // Delete from the sidebar.
+      await recent.hover()
+      await page.getByRole('button', { name: `Delete conversation “${question}”` }).click()
+      await expect(recent).toHaveCount(0, { timeout: 15_000 })
+      expect((await apiJson(page, `/api/deed/threads/${threadId}`)).status).toBe(404)
+      threadId = null
+    } finally {
+      if (threadId) await apiJson(page, `/api/deed/threads/${threadId}`, { method: 'DELETE' }).catch(() => undefined)
+      await ctx.close()
     }
   })
 
