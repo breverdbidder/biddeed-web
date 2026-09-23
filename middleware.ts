@@ -65,6 +65,7 @@ const isPublicRoute = createRouteMatcher([
   // signup_started) happens before a Clerk account exists by definition, same
   // reasoning as /api/support-ticket above.
   '/api/analytics(.*)',
+  '/api/leads(.*)', // public: the free-report popup captures anonymous visitors by definition
   '/api/csp-report(.*)',
   // Deed's same-origin SSE proxy to the Worker's /chat/api. Public for the
   // same reason /chat is on the Worker: the conversational surface is how a
