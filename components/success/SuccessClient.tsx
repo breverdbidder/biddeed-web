@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { track } from '@/lib/analytics/funnel'
 
 import { apiUrl } from '@/lib/api'
 import { LIGHT as C } from '@/lib/design-tokens'
@@ -56,6 +57,10 @@ export default function SuccessClient() {
           try {
             ;(globalThis as unknown as { posthog?: { capture?: (e: string, p?: Record<string, unknown>) => void } })
               .posthog?.capture?.('checkout_completed', { product: 'clear_to_bid', session_id: sessionId })
+          } catch {}
+          // Named funnel event (issue #181 contract v1): same moment, PII-safe props.
+          try {
+            track('purchase_completed', { product: 'clear_to_bid', currency: 'usd', surface: 'success' })
           } catch {}
         } else if (data.status === 'unpaid') {
           setPhase('unpaid')
