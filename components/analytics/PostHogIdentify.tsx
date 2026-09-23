@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { useAuth, useUser } from '@clerk/nextjs'
+import { track } from '@/lib/analytics/funnel'
 
 /**
  * Ties the signed-in Clerk user to their PostHog identity, so authed events
@@ -51,6 +52,19 @@ export default function PostHogIdentify() {
         const email = user?.primaryEmailAddress?.emailAddress
         posthog.identify(userId, email ? { email } : undefined)
         identified.current = true
+        // signup_completed (issue #181): a Clerk account created in the last
+        // 30 minutes, fired once per account per browser. Identify runs first,
+        // so the event lands on the new person, not an anonymous device. The
+        // email stays a person property (for the owner's registered-user
+        // digest) and is never an event property.
+        try {
+          const created = user?.createdAt ? new Date(user.createdAt).getTime() : 0
+          const flag = `bd_signup_tracked_${userId}`
+          if (created && Date.now() - created < 30 * 60 * 1000 && !localStorage.getItem(flag)) {
+            localStorage.setItem(flag, '1')
+            track('signup_completed', { method: user?.externalAccounts?.length ? 'oauth' : 'email' })
+          }
+        } catch {}
       } else if (identified.current) {
         posthog.reset?.()
         identified.current = false
