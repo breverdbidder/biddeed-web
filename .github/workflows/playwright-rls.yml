@@ -8,6 +8,12 @@ on:
         required: false
         default: 'https://staging.biddeed.ai'
         type: string
+      suite:
+        description: 'rls = CP-3/CP-4 isolation suite; surfaces = CP-6 Skills + CP-8 API keys signed in; all = both'
+        required: false
+        default: 'rls'
+        type: choice
+        options: [rls, surfaces, all]
 
 jobs:
   rls-e2e:
@@ -93,9 +99,16 @@ jobs:
       # the real ten-minute S1 proof (reopen after 10 min -> greeting), which
       # only makes sense here, on a manual dispatch, never on a PR check.
       - name: Run authenticated RLS suite (saved searches, watchlist, Deed chat identity, Projects)
+        if: ${{ inputs.suite != 'surfaces' }}
         run: npm run test:e2e:rls
         env:
           E2E_S1_WAIT: '1'
+      # PARITY CP-6 + CP-8: the signed-in pages a customer sees (Skills panel,
+      # API key page). Writes one skill and deletes it through the panel; see
+      # the spec header for why nothing survives the run.
+      - name: Run signed-in Skills + API keys proof (PARITY CP-6, CP-8)
+        if: ${{ !cancelled() && (inputs.suite == 'surfaces' || inputs.suite == 'all') }}
+        run: npx playwright test tests/e2e/deed-surfaces.spec.ts
       - name: Upload Playwright evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
