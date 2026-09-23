@@ -4,6 +4,8 @@ import { ClerkProvider } from '@clerk/nextjs'
 import { useTheme } from '@/lib/theme-context'
 import { palette } from '@/lib/design-tokens'
 import PostHogIdentify from '@/components/analytics/PostHogIdentify'
+import FreeReportPopup from '@/components/lead/FreeReportPopup'
+import FreeReportPopupAuthGate from '@/components/lead/FreeReportPopupAuthGate'
 
 // Ported from zonewise-web 2026-08-20 with one deliberate deviation: no
 // `@clerk/themes` import. Clerk's appearance API needs real colour strings (it
@@ -113,7 +115,13 @@ export default function ConditionalClerkProvider({
   // functional in passthrough mode and mirrors middleware.ts, where
   // CLERK_ENABLED requires both halves of the credential pair.
   if (!CLERK_KEY || !hostAuthorized || !authEnabled) {
-    return <>{children}</>
+    // No auth on this host/deploy: every visitor is signed out.
+    return (
+      <>
+        {children}
+        <FreeReportPopup signedIn={false} />
+      </>
+    )
   }
 
   return (
@@ -122,6 +130,8 @@ export default function ConditionalClerkProvider({
           their PostHog identity. Renders null. */}
       <PostHogIdentify />
       {children}
+      {/* Free-report lead popup for signed-out visitors only (issue #181). */}
+      <FreeReportPopupAuthGate />
     </ClerkProvider>
   )
 }

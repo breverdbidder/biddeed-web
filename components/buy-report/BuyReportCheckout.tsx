@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { REPORT_FIELD_RELEASE_POLICY } from '@/lib/report-field-release'
 import { REPORT_SECTIONS } from '@/lib/report-sections'
+import { track } from '@/lib/analytics/funnel'
 
 type CountyOption = {
   county_slug: string
@@ -253,11 +254,16 @@ export default function BuyReportCheckout() {
   const [allowance, setAllowance] = useState<{ tier_id: string; allowance: number; used: number; remaining: number } | null>(null)
   const [claiming, setClaiming] = useState(false)
   const [claimed, setClaimed] = useState<{ already: boolean; remaining: number } | null>(null)
+  // Signed-out visitor (allowance answered 401): show the free-account prompt.
+  const [signedOut, setSignedOut] = useState(false)
 
   useEffect(() => {
     let live = true
     fetch('/api/reports/allowance')
-      .then((r) => (r.ok ? r.json() : null))
+      .then((r) => {
+        if (live && r.status === 401) setSignedOut(true)
+        return r.ok ? r.json() : null
+      })
       .then((d) => {
         if (live && d && typeof d.remaining === 'number') setAllowance(d)
       })
@@ -315,6 +321,11 @@ export default function BuyReportCheckout() {
       })
       const data = await res.json()
       if (res.ok && data.url) {
+        track(
+          'checkout_started',
+          { product: 'signal_report', price_usd: 25, currency: 'usd', surface: 'buy_report', county: countySlug || null, sale_type: selected.sale_type ?? null },
+          { beacon: true }
+        )
         window.location.href = data.url
         return
       }
@@ -572,6 +583,19 @@ export default function BuyReportCheckout() {
                   )}
                 </Button>
                 {error ? <p className="text-base text-destructive">{error}</p> : null}
+                {signedOut ? (
+                  <p className="mt-1 rounded-lg bg-secondary px-4 py-3 text-sm text-foreground">
+                    New to biddeed.ai?{' '}
+                    <a
+                      href="/sign-up?redirect_url=%2Fbuy-report"
+                      onClick={() => track('signup_prompt_clicked', { surface: 'buy_report' })}
+                      className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline"
+                    >
+                      Create a free account
+                    </a>{' '}
+                    first - it takes a minute and your Radar tracks the next auction for you.
+                  </p>
+                ) : null}
               </form>
               )}
             </div>

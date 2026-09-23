@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import { track } from '@/lib/analytics/funnel'
 
 type Availability = {
   sold: number
@@ -52,6 +53,7 @@ export function PioneerCheckout() {
         return
       }
       if (data.url) {
+        track('checkout_started', { product: 'pioneer_pro', plan: 'pro_annual', surface: 'pioneers' }, { beacon: true })
         window.location.href = data.url as string
         return
       }

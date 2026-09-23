@@ -5,6 +5,7 @@ import './globals.css'
 import AppShell from '@/components/shell/AppShell'
 import ChatwootWidget from '@/components/ChatwootWidget'
 import PostHogAnalytics from '@/components/analytics/PostHogAnalytics'
+import FunnelClickTracker from '@/components/analytics/FunnelClickTracker'
 import ConditionalClerkProvider from '@/components/ConditionalClerkProvider'
 import SkipToContent from '@/components/shell/SkipToContent'
 import { isClerkHostAuthorized } from '@/lib/clerk-host'
@@ -172,6 +173,7 @@ export default async function RootLayout({
               pages into the same PostHog project; this covers the signed-in
               product, which had no SDK at all. */}
           <PostHogAnalytics nonce={nonce} />
+          <FunnelClickTracker />
           <ChatwootWidget nonce={nonce} />
       </body>
     </html>

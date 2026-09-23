@@ -25,6 +25,13 @@ import { usePathname } from 'next/navigation'
  * Session recording is left OFF deliberately: it is the expensive part of
  * PostHog's quota and was not requested for the authed app. Autocapture +
  * pageviews are the low-cost, high-value signal the funnel needs.
+ *
+ * Privacy (issue #181): respect_dnt is ON, and a browser sending Global Privacy
+ * Control starts opted out, so neither kind of visitor is captured at all -
+ * not pageviews, not autocapture, not the named funnel events. The loader also
+ * skips injecting array.js entirely for those visitors. Named events fired
+ * before array.js finishes loading wait on window.__bd_ph_q and are flushed
+ * right after init (lib/analytics/funnel.ts).
  */
 
 const POSTHOG_KEY = 'phc_zUQGNqDUYXbpJn7RGKt2wwnHfP8GXge2MZsYAJXTs14'
@@ -54,7 +61,7 @@ export default function PostHogAnalytics({ nonce }: { nonce?: string }) {
 
   return (
     <Script id="posthog-init" strategy="afterInteractive" nonce={nonce}>
-      {`(function(){var s=document.createElement("script");s.src="${POSTHOG_ASSET_HOST}/static/array.js";s.async=true;s.crossOrigin="anonymous";s.onload=function(){if(window.posthog&&window.posthog.init){window.posthog.init("${POSTHOG_KEY}",{api_host:"${POSTHOG_API_HOST}",capture_pageview:true,autocapture:true,disable_session_recording:true})}};document.head.appendChild(s);})();`}
+      {`(function(){var n=navigator,d=n.doNotTrack||window.doNotTrack||n.msDoNotTrack;if(d==="1"||d==="yes"||n.globalPrivacyControl===true){window.__bd_ph_q=[];return}var s=document.createElement("script");s.src="${POSTHOG_ASSET_HOST}/static/array.js";s.async=true;s.crossOrigin="anonymous";s.onload=function(){var p=window.posthog;if(p&&p.init){p.init("${POSTHOG_KEY}",{api_host:"${POSTHOG_API_HOST}",capture_pageview:true,autocapture:true,disable_session_recording:true,respect_dnt:true,opt_out_capturing_by_default:n.globalPrivacyControl===true,loaded:function(ph){var q=window.__bd_ph_q||[];window.__bd_ph_q=[];for(var i=0;i<q.length;i++){try{ph.capture(q[i][0],q[i][1],q[i][2])}catch(e){}}}})}};document.head.appendChild(s);})();`}
     </Script>
   )
 }

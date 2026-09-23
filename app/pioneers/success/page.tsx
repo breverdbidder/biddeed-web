@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
+import { track } from '@/lib/analytics/funnel'
 
 function SuccessInner() {
   const params = useSearchParams()
@@ -29,6 +30,9 @@ function SuccessInner() {
           try {
             ;(globalThis as unknown as { posthog?: { capture?: (e: string, p?: Record<string, unknown>) => void } })
               .posthog?.capture?.('checkout_completed', { product: 'pioneer_pro', plan: 'pro_annual', session_id: sessionId })
+          } catch {}
+          try {
+            track('purchase_completed', { product: 'pioneer_pro', plan: 'pro_annual', currency: 'usd', surface: 'pioneers_success' })
           } catch {}
         }
         setStatus(res.ok ? 'ok' : 'error')
