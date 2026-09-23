@@ -3,6 +3,8 @@ import { resolveBcpaoPhotoUrl } from '@/lib/bcpao'
 import { LIGHT as C } from '@/lib/design-tokens'
 import { getRetryingSupabaseClient } from '@/lib/supabase-retry'
 import { getCallerTierId, tierAtLeast } from '@/lib/tier/server'
+import { lookupZoneStandards } from '@/lib/zone-standards'
+import type { ZoningStandards } from '@/types/auctions'
 
 export const dynamic = 'force-dynamic'
 
@@ -267,22 +269,58 @@ export async function GET(
   }
 
   // Build enriched response — merge fl_parcels fallbacks for null KPIs
-  // PROMISE-6 (issue 20518). /pricing names eight zoning fields for Pro —
-  // setbacks, parking, height, land use, units per acre, FAR, permitted uses,
-  // overlays. Before zw_zoning_standards existed there was no per-property
-  // source for any of them: zw_zoning had 0 rows with setbacks, height,
-  // permitted uses or future land use, and parking, FAR, units-per-acre and
-  // overlays had no column anywhere.
+  // PROMISE-6 (issue 20518) + ZW-P0-003 (#184).
   //
-  // zoning_standards_for_parcel() resolves the parcel's zone code and then the
-  // JURISDICTION standards for that code, which is where dimensional standards
-  // actually live. It returns nulls where nothing has been verified, on
-  // purpose: a fabricated setback is worse than a blank one, because a blank
-  // cannot be relied on by mistake. `standards_verified` says which it is, so
-  // the client can show a labelled estimate beside a blank without ever
-  // dressing an estimate up as a source.
-  let zoningStandards: Record<string, unknown> | null = null
-  if (auction.parcel_id && auction.county) {
+  // Dimensional standards prefer public.zone_standards (joined through
+  // zoning_districts + jurisdictions on zone code + jurisdiction/county) over
+  // regex parseDimensionalStandards. zw_zoning_standards via
+  // zoning_standards_for_parcel remains a secondary path when it has verified
+  // rows; measured empty on 2026-09-23, while zone_standards had ~3,563 rows.
+  //
+  // A blank / "not linked" response is intentional when no row matches: never
+  // dress a regex pattern estimate up as ordinance.
+  let zoningStandards: ZoningStandards | null = null
+
+  const zoneCodeForStandards =
+    (zoning?.zone_code as string | null) ||
+    (parcelData?.zone_code as string | null) ||
+    null
+  const jurisdictionHint =
+    (zoning?.municipality as string | null) ||
+    (parcelData?.municipality as string | null) ||
+    null
+
+  // When fl_parcels lacks municipality/zone, try zoning_assignments (exact parcel_id).
+  let resolvedJurisdictionHint = jurisdictionHint
+  let resolvedZoneCode = zoneCodeForStandards
+  if (auction.parcel_id && (!resolvedJurisdictionHint || !resolvedZoneCode)) {
+    const { data: assignExact, error: assignError } = await supabase
+      .from('zoning_assignments')
+      .select('zone_code, jurisdiction')
+      .eq('parcel_id', auction.parcel_id)
+      .maybeSingle()
+    if (assignError) {
+      console.error('zoning_assignments hint failed', {
+        parcel_id: auction.parcel_id,
+        error: assignError.message,
+      })
+    } else if (assignExact) {
+      resolvedZoneCode = resolvedZoneCode || (assignExact.zone_code as string | null)
+      resolvedJurisdictionHint =
+        resolvedJurisdictionHint || (assignExact.jurisdiction as string | null)
+    }
+  }
+
+  if (resolvedZoneCode && auction.county) {
+    zoningStandards = await lookupZoneStandards(supabase, {
+      zoneCode: resolvedZoneCode,
+      county: auction.county as string,
+      jurisdictionHint: resolvedJurisdictionHint,
+    })
+  }
+
+  // Secondary: researched zw_zoning_standards RPC (only if zone_standards miss).
+  if (!zoningStandards && auction.parcel_id && auction.county) {
     const { data: standards, error: standardsError } = await supabase.rpc('zoning_standards_for_parcel', {
       p_county: auction.county,
       p_parcel_id: auction.parcel_id,
@@ -295,9 +333,19 @@ export async function GET(
       })
     } else if (standards && typeof standards === 'object') {
       const row = standards as Record<string, unknown>
-      // A row with no zone code at all is "we have no zoning for this parcel",
-      // which is different from "we have the code but not the standards".
-      if (row.zoning_code) zoningStandards = row
+      if (row.zoning_code) {
+        const source = row.standards_source
+        zoningStandards = {
+          ...(row as unknown as ZoningStandards),
+          // RPC (ZW-P0-003) prefers zone_standards; honour its standards_source.
+          standards_source:
+            source === 'zone_standards' || source === 'zw_zoning_standards'
+              ? source
+              : row.standards_verified
+                ? 'zone_standards'
+                : 'zw_zoning_standards',
+        }
+      }
     }
   }
 

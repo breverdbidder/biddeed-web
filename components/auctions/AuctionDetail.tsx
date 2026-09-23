@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { formatCountyLabel } from '@/lib/counties'
 import type { AuctionDetail as AuctionDetailType } from '@/types/auctions'
-import { parseDimensionalStandards } from '@/lib/zoning'
+import { hasDbBackedDimensionalStandards } from '@/lib/zone-standards'
 import ZoningDisclaimer from '@/components/zoning/ZoningDisclaimer'
 import { apiUrl } from '@/lib/api'
 
@@ -330,21 +330,14 @@ export default function AuctionDetail({ auctionId }: Props) {
               </div>
             </SectionCard>
 
-            {/* Dimensional Standards — PROMISE-6 (issue 20518).
-                /pricing names eight fields for Pro: setbacks, parking, height,
-                land use, units per acre, FAR, permitted uses, overlays.
-                Verified jurisdiction standards are shown as standards, with the
-                land development code cited. Where none have been researched
-                yet, the zone-code pattern estimate is still offered — it is
-                genuinely useful for orientation — but it is named as an
-                estimate and the unresearched fields are listed as unresearched
-                rather than quietly omitted. A blank cannot be relied on by
-                mistake; a fabricated setback can. */}
+            {/* Dimensional Standards — PROMISE-6 + ZW-P0-003 (#184).
+                Prefer public.zone_standards (API-joined). Never render regex
+                parseDimensionalStandards as ordinance; if no DB row, show
+                Unknown / standards not linked. */}
             {auction.zoning?.zone_code && (() => {
               const std = auction.zoning_standards ?? null
+              const fromDb = hasDbBackedDimensionalStandards(std)
               const verified = Boolean(std?.standards_verified)
-              const dims = parseDimensionalStandards(auction.zoning?.zone_code ?? null, auction.zoning?.future_land_use ?? null)
-              if (!verified && !dims) return null
 
               const fmtFt = (v: number | null | undefined) => (v == null ? null : `${v} ft`)
               const fmtSetbacks = (s: Record<string, unknown> | null | undefined) => {
@@ -357,7 +350,7 @@ export default function AuctionDetail({ auctionId }: Props) {
               const fmtList = (v: unknown[] | null | undefined) =>
                 Array.isArray(v) && v.length ? v.map((x) => String(x)).join(', ') : null
 
-              const missing = verified
+              const missing = fromDb
                 ? ([
                     ['setbacks', fmtSetbacks(std?.setbacks)],
                     ['parking', std?.parking ? 'set' : null],
@@ -374,10 +367,10 @@ export default function AuctionDetail({ auctionId }: Props) {
 
               return (
                 <SectionCard title="Dimensional Standards" icon="📐">
-                  {verified ? (
+                  {fromDb ? (
                     <>
                       <InfoRow label="Setbacks" value={fmtSetbacks(std?.setbacks)} />
-                      <InfoRow label="Max Height" value={fmtFt(std?.max_height_ft) ?? (std?.max_stories ? `${std.max_stories} stories` : null)} />
+                      <InfoRow label="Max Height" value={fmtFt(std?.max_height_ft) ?? (std?.max_stories != null ? `${std.max_stories} stories` : null)} />
                       <InfoRow label="Units / Acre" value={std?.units_per_acre != null ? String(std.units_per_acre) : null} />
                       <InfoRow label="FAR" value={std?.far_max != null ? String(std.far_max) : null} />
                       <InfoRow label="Min Lot Size" value={std?.min_lot_sqft != null ? `${Number(std.min_lot_sqft).toLocaleString('en-US')} sqft` : null} />
@@ -385,22 +378,25 @@ export default function AuctionDetail({ auctionId }: Props) {
                       <InfoRow label="Permitted Uses" value={fmtList(std?.permitted_uses)} />
                       <InfoRow label="Overlays" value={fmtList(std?.overlays)} />
                       <p className="text-[10px] text-muted-foreground dark:text-muted-foreground mt-2">
-                        {std?.jurisdiction ? `${std.jurisdiction} · ` : ''}zone {std?.zoning_code}
+                        {verified ? 'Verified zone standards' : 'Linked zone standards (confirm with municipality)'}
+                        {std?.confidence_score != null ? ` · confidence ${std.confidence_score}` : ''}
+                        {std?.jurisdiction ? ` · ${std.jurisdiction}` : ''}
+                        {std?.zoning_code ? ` · zone ${std.zoning_code}` : ''}
                         {std?.source_citation ? ` · ${std.source_citation}` : ''}
                         {missing.length ? ` · not yet researched: ${missing.join(', ')}` : ''}
                       </p>
                     </>
                   ) : (
                     <>
-                      <InfoRow label="Min Lot Size" value={dims?.minLotSize ?? null} />
-                      <InfoRow label="Max Height" value={dims?.maxHeight ?? null} />
-                      <InfoRow label="Setbacks" value={dims?.setbacks ?? null} />
-                      <InfoRow label="Density" value={dims?.density ?? null} />
+                      <InfoRow label="Setbacks" value="Unknown" />
+                      <InfoRow label="Max Height" value="Unknown" />
+                      <InfoRow label="Units / Acre" value="Unknown" />
+                      <InfoRow label="FAR" value="Unknown" />
                       <p className="text-[10px] text-muted-foreground dark:text-muted-foreground mt-2">
-                        Pattern estimate from the zone code — not this jurisdiction&apos;s adopted standards, which we have
-                        not verified for {std?.jurisdiction || auction.county} zone {auction.zoning.zone_code} yet.
-                        Parking, FAR, permitted uses and overlays are not estimated at all. Verify with the municipality
-                        before you rely on any of it.
+                        Standards not linked for {auction.county} zone {auction.zoning.zone_code}
+                        {auction.zoning.municipality ? ` (${auction.zoning.municipality})` : ''}.
+                        We do not show zone-code pattern estimates as ordinance — verify with the municipality
+                        before you rely on dimensional limits.
                       </p>
                     </>
                   )}
