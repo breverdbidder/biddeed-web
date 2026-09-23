@@ -48,7 +48,15 @@ function maskedPrefix(prefix: string): string {
   return `${prefix}…`
 }
 
+const SESSION_ENDED = 'Your sign-in has ended. Refresh the page and sign in again to manage your key.'
+
+/** A signed-out call is redirected to /sign-in (HTML), so it can look "ok" to fetch. */
+function sessionEnded(response: Response): boolean {
+  return response.redirected || !(response.headers.get('content-type') ?? '').includes('application/json')
+}
+
 async function readError(response: Response, fallback: string): Promise<string> {
+  if (response.status === 401 || sessionEnded(response)) return SESSION_ENDED
   try {
     const body = await response.json()
     return typeof body?.error === 'string' ? body.error : fallback
@@ -122,8 +130,9 @@ function snippets(key: string): Record<SnippetId, { label: string; where: string
     },
     curl: {
       label: 'Test with curl',
-      where: 'Lists the tools your key can call. A 401 means the key is wrong, revoked or expired.',
-      code: `curl -s ${MCP_ENDPOINT} \\\n  -H "Authorization: Bearer ${key}" \\\n  -H "Content-Type: application/json" \\\n  -H "Accept: application/json, text/event-stream" \\\n  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'`,
+      where:
+        'A small call that checks your key: it lists the Florida counties BidDeed.AI currently certifies. A wrong, revoked or expired key comes back as AUTH_ERROR instead.',
+      code: `curl -s ${MCP_ENDPOINT} \\\n  -H "Authorization: Bearer ${key}" \\\n  -H "Content-Type: application/json" \\\n  -H "Accept: application/json, text/event-stream" \\\n  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"list_certified_counties","arguments":{}}}'`,
     },
   }
 }
@@ -143,7 +152,7 @@ export default function DeveloperKeysPanel({ initial, initialError }: { initial:
 
   const refresh = useCallback(async () => {
     const response = await fetch('/api/developer/keys', { cache: 'no-store' })
-    if (!response.ok) throw new Error(await readError(response, 'Could not refresh your keys.'))
+    if (!response.ok || sessionEnded(response)) throw new Error(await readError(response, 'Could not refresh your keys.'))
     setListing((await response.json()) as KeyListing)
   }, [])
 
@@ -157,7 +166,7 @@ export default function DeveloperKeysPanel({ initial, initialError }: { initial:
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ confirm: 'create_key' }),
       })
-      if (!response.ok) {
+      if (!response.ok || sessionEnded(response)) {
         setError(await readError(response, 'Could not create a key. Nothing was changed; try again.'))
         return
       }
@@ -180,7 +189,7 @@ export default function DeveloperKeysPanel({ initial, initialError }: { initial:
       setNotice(null)
       try {
         const response = await fetch(`/api/developer/keys/${encodeURIComponent(key.key_id)}`, { method: 'DELETE' })
-        if (!response.ok) {
+        if (!response.ok || sessionEnded(response)) {
           setError(await readError(response, 'Could not revoke the key. Try again.'))
           return
         }
