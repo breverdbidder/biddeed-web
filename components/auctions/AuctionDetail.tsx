@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic'
 import { formatCountyLabel } from '@/lib/counties'
 import type { AuctionDetail as AuctionDetailType } from '@/types/auctions'
 import { parseDimensionalStandards } from '@/lib/zoning'
+import ZoningDisclaimer from '@/components/zoning/ZoningDisclaimer'
 import { apiUrl } from '@/lib/api'
 
 const AuctionDetailMap = dynamic(() => import('./AuctionDetailMap'), { ssr: false })
@@ -324,6 +325,9 @@ export default function AuctionDetail({ auctionId }: Props) {
                   </p>
                 </div>
               )}
+              <div className="mt-3 pt-3 border-t border-border">
+                <ZoningDisclaimer />
+              </div>
             </SectionCard>
 
             {/* Dimensional Standards — PROMISE-6 (issue 20518).
