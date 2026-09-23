@@ -282,6 +282,21 @@ export default async function AccountPage() {
         )}
       </section>
 
+      <section className={CARD} aria-labelledby="api-heading">
+        <h2 id="api-heading" className="text-lg font-semibold text-card-foreground">
+          API keys
+        </h2>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+          Connect BidDeed.AI to Claude, Cursor or your own agent through the hosted MCP server.
+          Create, replace or revoke your key and copy a working setup.
+        </p>
+        <div className="mt-5">
+          <a href="/account/developers" className={CTA_QUIET}>
+            Manage API keys
+          </a>
+        </div>
+      </section>
+
       {!tierAtLeast(tierId, 'proplus') ? (
         <section className={CARD} aria-labelledby="plan-heading">
           <h2 id="plan-heading" className="text-lg font-semibold text-card-foreground">

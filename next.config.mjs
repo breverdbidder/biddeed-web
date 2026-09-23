@@ -51,6 +51,10 @@ const nextConfig = {
       // it, which is not a thing to undo by hand on a subscriber's machine.
       { source: '/dashboard', destination: '/account', permanent: false },
       { source: '/upgrade', destination: '/subscribe?tier=pro', permanent: false },
+      // PARITY CP-8: the MCP server advertises docs at /docs/mcp (404 until now).
+      // Both land on the self-serve key page, which carries the connection guide.
+      { source: '/docs/mcp', destination: '/account/developers', permanent: false },
+      { source: '/developers', destination: '/account/developers', permanent: false },
     ]
   },
   async headers() {

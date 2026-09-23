@@ -269,7 +269,7 @@ export async function GET(
   }
 
   // Build enriched response — merge fl_parcels fallbacks for null KPIs
-  // PROMISE-6 (issue 20518) + ZW-P0-003 (#184).
+  // PROMISE-6 (issue 20518) + ZW-P0-003 (issue 184).
   //
   // Dimensional standards prefer public.zone_standards (joined through
   // zoning_districts + jurisdictions on zone code + jurisdiction/county) over

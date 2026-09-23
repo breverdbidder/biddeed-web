@@ -330,7 +330,7 @@ export default function AuctionDetail({ auctionId }: Props) {
               </div>
             </SectionCard>
 
-            {/* Dimensional Standards — PROMISE-6 + ZW-P0-003 (#184).
+            {/* Dimensional Standards — PROMISE-6 + ZW-P0-003 (issue 184).
                 Prefer public.zone_standards (API-joined). Never render regex
                 parseDimensionalStandards as ordinance; if no DB row, show
                 Unknown / standards not linked. */}
