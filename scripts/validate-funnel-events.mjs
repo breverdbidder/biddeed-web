@@ -23,7 +23,7 @@ const bannedValues = {
   email: 'buyer@example.com',
   phone: '(321) 555-0100',
   intl_phone: '+1 321 555 0100',
-  report_key: 'bd_live_S9KLXyeH9fV1epdliLz731n1',
+  report_key: 'bd_live_S9KLXyeH9fV1epdliLz731n1', // gitleaks:allow
   jwt: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
   query_url: '/report/abc?key=secret',
   long_text: 'x'.repeat(200),
