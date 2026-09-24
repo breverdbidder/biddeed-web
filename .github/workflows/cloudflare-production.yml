@@ -255,9 +255,11 @@ jobs:
   # ui-audit.yml in cli-anything-biddeed only fires on Worker deploys, so a
   # biddeed-web deploy was never audited; this job runs the same harness against
   # the live apex. The table lands in the run summary + artifact.
-  # continue-on-error until D11 (0 red gates) is met, so a red table records the
-  # truth without painting the deploy itself red; flip it to blocking when the
-  # board reaches D11.
+  # Blocking since 2026-09-23 (PARITY CP-11, approved by Ariel): it ran
+  # continue-on-error until D11 (0 red gates) was met, and D11 is met - the
+  # audit with --fail-on-red passed on every production deploy on 2026-09-23
+  # (runs 35877042958, 35882238730, 35885572577, 35887241700, 35912536046). A
+  # red gate on the live apex now turns the deploy run red.
   #
   # 2026-09-18 (Ariel: "no token"): this job used to sparse-checkout the harness
   # from cli-anything-biddeed, which is PRIVATE, with the default GITHUB_TOKEN --
@@ -270,7 +272,6 @@ jobs:
     if: ${{ always() && needs.deploy-production.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    continue-on-error: true
     steps:
       - name: Checkout the vendored canon harness (scripts/ui-audit)
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.3.0

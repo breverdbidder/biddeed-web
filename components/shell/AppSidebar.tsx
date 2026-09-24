@@ -35,6 +35,7 @@ import { ACCOUNT_LINKS, NAV_ITEMS, type NavItem } from './nav'
 import { formatCount, useAuctionCounts } from './useAuctionCounts'
 import DeedRobotMark from '@/components/deed/DeedRobotMark'
 import { SignOutMenuItem } from './SignOutMenuItem'
+import { OPEN_COMMAND_PALETTE } from './CommandPalette'
 import { useDeedAuth } from '@/lib/deed/deedAuth'
 import { CHAT_HISTORY_CONTAINED, deleteThread, loadThreads, subscribeThreads } from '@/lib/deed/threads'
 import { deleteThreadRemote, listThreads, notifyThreadsChanged, type ThreadSummary } from '@/lib/deed/threadsRemote'
@@ -189,6 +190,22 @@ export default function AppSidebar({ deedOpen, onToggleDeed, authEnabled = false
                     <MessageSquarePlus />
                     <span>New chat</span>
                   </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  tooltip="Search chats and pages (⌘K)"
+                  onClick={() => {
+                    closeOnMobile()
+                    window.dispatchEvent(new Event(OPEN_COMMAND_PALETTE))
+                  }}
+                  aria-keyshortcuts="Meta+K Control+K"
+                >
+                  <Search />
+                  <span>Search</span>
+                  <kbd className="ml-auto rounded border border-sidebar-border px-1.5 text-[11px] font-medium text-muted-foreground group-data-[collapsible=icon]:hidden" aria-hidden>
+                    ⌘K
+                  </kbd>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>

@@ -56,12 +56,34 @@ interface SheetContentProps
 const SheetContent = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Content>,
   SheetContentProps
->(({ side = "right", className, children, ...props }, ref) => (
+>(({ side = "right", className, children, onOpenAutoFocus, onCloseAutoFocus, ...props }, ref) => {
+  // Focus goes back where it came from. Radix returns it to the Dialog
+  // Trigger, and the Skills and Projects panels have none (a / command, a
+  // sidebar hash link or a Deed hand-off opens them), so on close focus was
+  // dropped on <body> and a keyboard user lost their place (PARITY CP-9
+  // keyboard walkthrough, 2026-09-23). The open-autofocus event fires before
+  // Radix moves focus into the panel, so activeElement is still the origin.
+  const returnTo = React.useRef<HTMLElement | null>(null)
+  return (
   <SheetPortal>
     <SheetOverlay />
     <SheetPrimitive.Content
       ref={ref}
       className={cn(sheetVariants({ side }), className)}
+      onOpenAutoFocus={(event) => {
+        const el = document.activeElement
+        returnTo.current = el instanceof HTMLElement && el !== document.body ? el : null
+        onOpenAutoFocus?.(event)
+      }}
+      onCloseAutoFocus={(event) => {
+        onCloseAutoFocus?.(event)
+        if (event.defaultPrevented) return
+        const el = returnTo.current
+        if (el && el.isConnected) {
+          event.preventDefault()
+          el.focus()
+        }
+      }}
       {...props}
     >
       <SheetPrimitive.Close className="absolute right-2 top-2 inline-flex size-9 items-center justify-center rounded-md opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary">
@@ -71,7 +93,8 @@ const SheetContent = React.forwardRef<
       {children}
     </SheetPrimitive.Content>
   </SheetPortal>
-))
+  )
+})
 SheetContent.displayName = SheetPrimitive.Content.displayName
 
 const SheetHeader = ({

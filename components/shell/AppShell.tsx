@@ -7,6 +7,7 @@ import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { DeedAuthProvider } from '@/lib/deed/deedAuth'
 import AppSidebar from './AppSidebar'
 import ChatContainmentGuard from './ChatContainmentGuard'
+import CommandPalette from './CommandPalette'
 import DeedPanel from './DeedPanel'
 import Topbar from './Topbar'
 import StickyDeedCta from './StickyDeedCta'
@@ -107,6 +108,8 @@ export default function AppShell({
     <DeedAuthProvider authEnabled={authEnabled}>
     <SidebarProvider open={sidebarOpen} onOpenChange={onSidebarOpenChange}>
       <ChatContainmentGuard authEnabled={authEnabled} />
+      {/* ⌘K / Ctrl+K from any page in the shell (PARITY CP-9). */}
+      <CommandPalette />
       <AppSidebar deedOpen={deedOpen && !isHome} onToggleDeed={toggleDeed} authEnabled={authEnabled} showDeedToggle={!isHome} />
 
       {/*

@@ -173,7 +173,8 @@ export default function FreeReportPopup({ signedIn }: { signedIn: boolean | unde
         >
           <div className="bg-primary px-6 pb-5 pt-6 text-primary-foreground">
             <p className="text-xs font-bold uppercase tracking-[0.14em] opacity-90">Free · Instant · No card</p>
-            <Dialog.Title className="mt-2 text-2xl font-bold leading-tight">
+            {/* The ! beats globals.css's light-theme navy h1-h3 rule: navy on this blue band measured 2.43:1 (Lighthouse, 2026-09-23). */}
+            <Dialog.Title className="mt-2 text-2xl font-bold leading-tight !text-primary-foreground">
               {done ? 'Your free report is ready.' : 'Read a real SIGNAL$ Property Report, free.'}
             </Dialog.Title>
             <Dialog.Description className="mt-2 text-base leading-6 opacity-95">
