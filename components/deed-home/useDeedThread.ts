@@ -84,8 +84,21 @@ export function useDeedThread(initialId: string | null, opts: { projectId?: stri
   const threadRef = useRef<Thread | null>(null)
   threadRef.current = thread
 
+  // The last ?c= this effect saw. The effect also re-runs when Clerk finishes
+  // loading (auth.loaded / signedIn change), and on a fresh page ?c= is still
+  // empty at that moment: treating that re-run as "New chat" aborted the first
+  // message's stream and wiped the thread whenever it was sent before Clerk
+  // loaded (reproduced on biddeed.ai 2026-09-23: 2 of 3 first messages lost,
+  // POST /api/deed net::ERR_ABORTED, then the empty greeting under ?c=).
+  const lastInitialId = useRef(initialId)
+
   useEffect(() => {
+    const idChanged = lastInitialId.current !== initialId
+    lastInitialId.current = initialId
     if (!initialId) {
+      // Only a real move to "New chat" (?c= dropped) resets; an auth re-run
+      // on a page that never had a ?c= must leave the live thread alone.
+      if (!idChanged) return
       // "New chat": drop the thread and cut any answer still streaming into it.
       abortRef.current?.abort()
       abortRef.current = null

@@ -97,7 +97,7 @@ export default function AppShell({
   // explicit so auth styling remains independent of workspace navigation.
   if (isAuthRoute) {
     return (
-      <main id="main" className="min-h-screen bg-background text-foreground">
+      <main id="main" tabIndex={-1} className="min-h-screen bg-background text-foreground focus:outline-none">
         <ChatContainmentGuard authEnabled={authEnabled} />
         {children}
       </main>
@@ -116,8 +116,12 @@ export default function AppShell({
         SidebarInset renders the <main> landmark. The content wrapper below is a
         plain div on purpose: two nested <main> elements is an accessibility
         error (one landmark per page), and screen readers announced both.
+        tabIndex -1 is the skip link's landing: without it, "Skip to content"
+        left focus on <body> on a hydrated page (PARITY CP-9 keyboard
+        walkthrough, 2026-09-23). Focusable by script and fragment only, never
+        a Tab stop.
       */}
-      <SidebarInset id="main" className="min-w-0 bg-background text-foreground">
+      <SidebarInset id="main" tabIndex={-1} className="min-w-0 bg-background text-foreground focus:outline-none">
         <Topbar deedOpen={deedOpen && !isHome} onToggleDeed={toggleDeed} showDeedToggle={!isHome} />
 
         <div className="flex min-h-0 flex-1">
