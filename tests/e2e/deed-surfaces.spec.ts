@@ -212,6 +212,20 @@ test.describe('Deed Skills, API keys and chat recents, signed in (PARITY CP-6 / 
       })
       await page.goto('/chat', { waitUntil: 'domcontentloaded' })
       await page.getByRole('textbox', { name: /Ask Deed about Florida/ }).fill(question)
+      // What the page does after Send: navigations, full loads, non-200 RSC
+      // fetches and console errors (a first message once vanished with no
+      // /api/deed call at all, leaving ?c= on an empty page).
+      const afterSend: string[] = []
+      page.on('framenavigated', (f) => {
+        if (f === page.mainFrame()) afterSend.push(`nav ${new URL(f.url()).pathname}${new URL(f.url()).search}`)
+      })
+      page.on('load', () => afterSend.push('full-load'))
+      page.on('response', (r) => {
+        if (r.url().includes('_rsc=') && r.status() !== 200) afterSend.push(`rsc ${r.status()}`)
+      })
+      page.on('console', (m) => {
+        if (m.type() === 'error') afterSend.push(`console ${m.text().slice(0, 140)}`)
+      })
       await page.getByRole('button', { name: 'Send message' }).click()
       await expect(page).toHaveURL(/\/chat\?c=[A-Za-z0-9-]+/, { timeout: 30_000 })
       threadId = new URL(page.url()).searchParams.get('c')
@@ -226,7 +240,7 @@ test.describe('Deed Skills, API keys and chat recents, signed in (PARITY CP-6 / 
         .catch(() => false)
       if (!answered) {
         const shown = (await page.locator('#main').innerText().catch(() => '')).replace(/\s+/g, ' ').slice(-700)
-        throw new Error(`No answer within 90 s. /api/deed: [${deedCalls.join(' | ')}]. Page: …${shown}`)
+        throw new Error(`No answer within 90 s. /api/deed: [${deedCalls.join(' | ')}]. After Send: [${afterSend.join(' | ')}]. Page: …${shown}`)
       }
 
       // Saved server-side under this account, not in the browser.
