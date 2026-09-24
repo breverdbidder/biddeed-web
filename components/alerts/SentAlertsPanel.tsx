@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState, type MouseEvent } from 'react'
 import { ALERT_TYPE_LABELS, healthState, type SentAlert, type WatchHealth } from '@/lib/alerts/history'
+import { Skeleton } from '@/components/ui/skeleton'
 
 // PARITY CP-5: what the watches have sent, kept in the account (Supabase) and
 // downloadable from here: every alert as CSV, every current sale date as one
@@ -142,7 +143,17 @@ export default function SentAlertsPanel() {
         </div>
       ) : null}
       {downloadError ? <div role="alert" className="border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">{downloadError}</div> : null}
-      {loading ? <div className="border border-border bg-card p-6 text-sm text-muted-foreground">Loading sent alerts…</div> : null}
+      {loading ? (
+        <div role="status" aria-busy="true" className="divide-y divide-border border border-border bg-card">
+          <span className="sr-only">Loading sent alerts…</span>
+          {[0, 1].map((i) => (
+            <div key={i} aria-hidden="true" className="p-4 sm:p-5">
+              <Skeleton className="h-4 w-2/3" />
+              <Skeleton className="mt-2 h-3 w-1/3" />
+            </div>
+          ))}
+        </div>
+      ) : null}
       {!loading && !error && alerts.length === 0 ? (
         <div className="border border-dashed border-border bg-card p-8 text-sm text-muted-foreground">Nothing sent yet. When a sale you watch changes, the alert we email you is listed here too, with its calendar file.</div>
       ) : null}

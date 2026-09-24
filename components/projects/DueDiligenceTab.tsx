@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { AlertTriangle, Loader2, PlaneTakeoff } from 'lucide-react'
+import { AlertTriangle, PlaneTakeoff } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
 import { apiUrl } from '@/lib/api'
 import { Badge } from '@/components/ui/badge'
 import ComingSoonPanel from './ComingSoonPanel'
@@ -63,16 +64,24 @@ export default function DueDiligenceTab({ detail, detailLoading, access, tierId 
 
   if (!detail) {
     return (
-      <p className="mt-6 text-sm text-muted-foreground">
-        {detailLoading ? 'Loading budget…' : 'Open a budget on the Budget tab first.'}
-      </p>
+      detailLoading ? (
+        <div role="status" aria-busy="true" className="mt-6 space-y-3">
+          <span className="sr-only">Loading budget…</span>
+          <Skeleton className="h-6 w-48" aria-hidden="true" />
+          <Skeleton className="h-32 w-full rounded-lg" aria-hidden="true" />
+        </div>
+      ) : (
+        <p className="mt-6 text-sm text-muted-foreground">Open a budget on the Budget tab first.</p>
+      )
     )
   }
 
   if (loading) {
     return (
-      <div className="mt-6 flex items-center gap-2 text-sm text-muted-foreground">
-        <Loader2 className="size-4 animate-spin" aria-hidden /> Loading the aerial assessment…
+      <div role="status" aria-busy="true" className="mt-6 space-y-3">
+        <span className="sr-only">Loading the aerial assessment…</span>
+        <Skeleton className="h-48 w-full rounded-lg" aria-hidden="true" />
+        <Skeleton className="h-4 w-2/3" aria-hidden="true" />
       </div>
     )
   }

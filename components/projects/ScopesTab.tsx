@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { Copy, Loader2, Plus, Printer } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
 import { apiUrl } from '@/lib/api'
 import type { CmBudgetDetail, CmScopeDetail } from './types'
 
@@ -138,7 +139,15 @@ export default function ScopesTab({ detail, detailLoading, onRefreshDetail }: Pr
   }
 
   if (!detail) {
-    return <p className="mt-6 text-sm text-muted-foreground">{detailLoading ? 'Loading budget…' : 'Open a budget on the Budget tab first.'}</p>
+    return detailLoading ? (
+      <div role="status" aria-busy="true" className="mt-6 space-y-3">
+        <span className="sr-only">Loading budget…</span>
+        <Skeleton className="h-6 w-48" aria-hidden="true" />
+        <Skeleton className="h-32 w-full rounded-lg" aria-hidden="true" />
+      </div>
+    ) : (
+      <p className="mt-6 text-sm text-muted-foreground">Open a budget on the Budget tab first.</p>
+    )
   }
 
   const delta = scopeDetail && scopeDetail.scope.bid_amount != null ? scopeDetail.scope.bid_amount - scopeDetail.budgeted_total : null
@@ -169,8 +178,10 @@ export default function ScopesTab({ detail, detailLoading, onRefreshDetail }: Pr
         </ul>
 
         {scopeLoading && (
-          <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
-            <Loader2 className="size-4 animate-spin" aria-hidden /> Loading scope…
+          <div role="status" aria-busy="true" className="mt-4 space-y-2">
+            <span className="sr-only">Loading scope…</span>
+            <Skeleton className="h-4 w-1/2" aria-hidden="true" />
+            <Skeleton className="h-24 w-full rounded-lg" aria-hidden="true" />
           </div>
         )}
 

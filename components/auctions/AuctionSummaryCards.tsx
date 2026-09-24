@@ -25,11 +25,13 @@ function StatCard({ label, value, sub }: { label: string; value: string | number
 export default function AuctionSummaryCards({ summary, loading }: Props) {
   if (loading || !summary) {
     return (
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-4">
-        {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="bg-card dark:bg-card border border-border dark:border-border rounded-lg p-4 animate-pulse">
-            <div className="h-3 w-16 bg-muted dark:bg-muted rounded mb-2" />
-            <div className="h-8 w-12 bg-muted dark:bg-muted rounded" />
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-4" aria-hidden="true">
+        {/* Five tiles with label, figure and sub-line: the loaded card's exact shape. */}
+        {[1, 2, 3, 4, 5].map((i) => (
+          <div key={i} className="bg-card dark:bg-card border border-border dark:border-border rounded-lg p-4 animate-pulse motion-reduce:animate-none">
+            <div className="h-3 w-20 bg-muted dark:bg-muted rounded" />
+            <div className="mt-2 h-7 w-24 bg-muted dark:bg-muted rounded" />
+            <div className="mt-2 h-3 w-16 bg-muted dark:bg-muted rounded" />
           </div>
         ))}
       </div>

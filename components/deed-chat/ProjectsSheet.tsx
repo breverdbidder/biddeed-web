@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { FolderKanban, LogIn, MessageSquareText, Plus } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
 import Link from 'next/link'
 
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
@@ -168,7 +169,7 @@ export default function ProjectsSheet({ open, onOpenChange, draft, onAskDeed, on
           ) : null}
 
           {!auth.loaded ? (
-            <p className={cn(bodyText, 'text-muted-foreground')}>Loading…</p>
+            <div role="status" aria-busy="true" className="space-y-2"><span className="sr-only">Loading…</span>{[0, 1, 2].map((i) => <div key={i} aria-hidden="true" className="rounded-lg border border-border p-3"><Skeleton className="h-4 w-2/3" /><Skeleton className="mt-2 h-3 w-1/2" /></div>)}</div>
           ) : !signedIn ? (
             <div className="rounded-lg border border-dashed border-border p-4">
               <p className={cn(bodyText, 'font-medium text-foreground')}>Sign in to keep projects with your account.</p>
@@ -247,7 +248,7 @@ export default function ProjectsSheet({ open, onOpenChange, draft, onAskDeed, on
               )}
 
               {projects === null ? (
-                <p className={cn(bodyText, 'text-muted-foreground')}>Loading your projects…</p>
+                <div role="status" aria-busy="true" className="space-y-2"><span className="sr-only">Loading your projects…</span>{[0, 1, 2].map((i) => <div key={i} aria-hidden="true" className="rounded-lg border border-border p-3"><Skeleton className="h-4 w-2/3" /><Skeleton className="mt-2 h-3 w-1/2" /></div>)}</div>
               ) : projects.length === 0 ? (
                 <p className={cn(bodyText, 'text-muted-foreground')}>No projects yet. Start one for the next property you mean to bid on.</p>
               ) : (

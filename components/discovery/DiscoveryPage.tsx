@@ -1,9 +1,11 @@
 'use client'
 
-import { FormEvent, useEffect, useMemo, useState } from 'react'
+import { FormEvent, useMemo, useState } from 'react'
 import { Search, MapPinned, CalendarDays, ShieldCheck, Map } from 'lucide-react'
 import { apiUrl } from '@/lib/api'
 import EmptyState from '@/components/ui/empty-state'
+import { SkeletonInline } from '@/components/ui/skeleton'
+import { formatCount, useAuctionCounts } from '@/components/shell/useAuctionCounts'
 
 type Auction = {
   id: string | number
@@ -20,8 +22,6 @@ type Auction = {
   longitude?: number | null
 }
 
-type Summary = { total?: number; upcoming?: number; counties?: number; counties_upcoming?: number }
-
 function money(value: number | null | undefined) {
   return value == null ? '—' : `$${Number(value).toLocaleString('en-US', { maximumFractionDigits: 0 })}`
 }
@@ -35,23 +35,18 @@ export default function DiscoveryPage() {
   const [county, setCounty] = useState('')
   const [saleType, setSaleType] = useState('')
   const [rows, setRows] = useState<Auction[]>([])
-  const [summary, setSummary] = useState<Summary | null>(null)
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('Search by address, case number, city, ZIP, parcel, or county.')
   const [searched, setSearched] = useState(false)
 
-  useEffect(() => {
-    fetch(apiUrl('/api/auctions/summary'), { cache: 'no-store' })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((json) => setSummary(json ?? null))
-      .catch(() => setSummary(null))
-  }, [])
-
+  // The shell's shared summary request (one per page, see useAuctionCounts).
+  // Loading and failed are different states: a failed request used to read
+  // "Coverage status is loading" for the life of the page.
+  const counts = useAuctionCounts()
   const coverageLabel = useMemo(() => {
-    if (!summary) return 'Coverage status is loading'
-    const counties = summary.counties_upcoming ?? summary.counties ?? 0
-    return counties > 0 ? `${counties} counties with upcoming inventory` : 'Coverage unavailable for this request'
-  }, [summary])
+    const counties = counts.counties ?? 0
+    return counties > 0 ? `${counties} counties with upcoming inventory` : 'Coverage unavailable right now'
+  }, [counts.counties])
 
   async function submit(event: FormEvent) {
     event.preventDefault()
@@ -119,8 +114,8 @@ export default function DiscoveryPage() {
         </form>
 
         <div className="grid gap-4 border-b border-border py-6 sm:grid-cols-3">
-          <div className="flex items-start gap-3"><MapPinned className="mt-0.5 h-5 w-5 text-primary" aria-hidden="true" /><div><p className="text-sm font-bold">Coverage</p><p className="mt-1 text-base text-muted-foreground">{coverageLabel}</p></div></div>
-          <div className="flex items-start gap-3"><CalendarDays className="mt-0.5 h-5 w-5 text-primary" aria-hidden="true" /><div><p className="text-sm font-bold">Upcoming scope</p><p className="mt-1 text-base text-muted-foreground">{summary?.upcoming?.toLocaleString('en-US') ?? '—'} scheduled records</p></div></div>
+          <div className="flex items-start gap-3"><MapPinned className="mt-0.5 h-5 w-5 text-primary" aria-hidden="true" /><div><p className="text-sm font-bold">Coverage</p><p className="mt-1 text-base text-muted-foreground">{counts.loading ? <><SkeletonInline className="h-4 w-56 max-w-full" /><span className="sr-only">Loading coverage</span></> : coverageLabel}</p></div></div>
+          <div className="flex items-start gap-3"><CalendarDays className="mt-0.5 h-5 w-5 text-primary" aria-hidden="true" /><div><p className="text-sm font-bold">Upcoming scope</p><p className="mt-1 text-base text-muted-foreground">{counts.loading ? <><SkeletonInline className="h-4 w-12" /><span className="sr-only">loading</span></> : formatCount(counts.upcoming)} scheduled records</p></div></div>
           <div className="flex items-start gap-3"><ShieldCheck className="mt-0.5 h-5 w-5 text-primary" aria-hidden="true" /><div><p className="text-sm font-bold">Evidence rule</p><p className="mt-1 text-base text-muted-foreground">Every result retains its source link.</p></div></div>
         </div>
 

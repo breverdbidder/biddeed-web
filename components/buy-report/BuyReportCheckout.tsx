@@ -8,6 +8,7 @@ import { apiUrl } from '@/lib/api'
 import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
 import { REPORT_FIELD_RELEASE_POLICY } from '@/lib/report-field-release'
 import { REPORT_SECTIONS } from '@/lib/report-sections'
 import { track } from '@/lib/analytics/funnel'
@@ -81,6 +82,7 @@ export default function BuyReportCheckout() {
   const [countyName, setCountyName] = useState('')
 
   const [auctions, setAuctions] = useState<AuctionOption[] | null>(null)
+  const [auctionsError, setAuctionsError] = useState('')
   const [auctionQuery, setAuctionQuery] = useState('')
 
   const [selected, setSelected] = useState<{
@@ -190,13 +192,24 @@ export default function BuyReportCheckout() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [counties, countySlug])
 
-  // Step 1: counties — skipped entirely on the prefill path.
+  // Step 1: counties — skipped entirely on the prefill path. PARITY CP-1 §2:
+  // an error answer is an error (it used to be stored as the county list and
+  // left a blank card), and it can be retried in place.
+  function loadCounties() {
+    setCountiesError('')
+    setCounties(null)
+    fetch(apiUrl('/buy-report/counties'))
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then((data: unknown) => {
+        if (!Array.isArray(data)) throw new Error('bad counties payload')
+        setCounties(data as CountyOption[])
+      })
+      .catch(() => setCountiesError('Could not load counties.'))
+  }
+
   useEffect(() => {
     if (mcaId) return
-    fetch(apiUrl('/buy-report/counties'))
-      .then((r) => r.json())
-      .then((data: CountyOption[]) => setCounties(data || []))
-      .catch(() => setCountiesError('Could not load counties. Please refresh.'))
+    loadCounties()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mcaId])
 
@@ -204,12 +217,18 @@ export default function BuyReportCheckout() {
     setCountySlug(slug)
     setCountyName(name)
     setAuctions(null)
+    setAuctionsError('')
     setAuctionQuery('')
     setStep('auction')
+    // A failed request is shown as a failure with a retry, not as "calendar
+    // sync in progress" (what an empty list means).
     fetch(apiUrl(`/buy-report/auctions?county=${encodeURIComponent(slug)}`))
-      .then((r) => r.json())
-      .then((data: AuctionOption[]) => setAuctions(data || []))
-      .catch(() => setAuctions([]))
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then((data: unknown) => {
+        if (!Array.isArray(data)) throw new Error('bad auctions payload')
+        setAuctions(data as AuctionOption[])
+      })
+      .catch(() => setAuctionsError('Could not load auctions for this county.'))
   }
 
   function pickAuction(a: AuctionOption) {
@@ -319,7 +338,7 @@ export default function BuyReportCheckout() {
           marketing_consent: consent,
         }),
       })
-      const data = await res.json()
+      const data = await res.json().catch(() => ({}))
       if (res.ok && data.url) {
         track(
           'checkout_started',
@@ -327,12 +346,14 @@ export default function BuyReportCheckout() {
           { beacon: true }
         )
         window.location.href = data.url
+        // Stay in "Redirecting to checkout…" while the browser leaves: the
+        // button must not re-arm (and invite a second session) mid-navigation.
         return
       }
       setError(data.error || 'Something went wrong. Please try again.')
+      setSubmitting(false)
     } catch {
       setError('Network error. Please try again.')
-    } finally {
       setSubmitting(false)
     }
   }
@@ -376,9 +397,17 @@ export default function BuyReportCheckout() {
               </p>
 
               {counties === null && !countiesError ? (
-                <p className="mt-4 text-sm text-muted-foreground">Loading counties…</p>
+                <div role="status" aria-busy="true" className="mt-4">
+                  <span className="sr-only">Loading counties…</span>
+                  <Skeleton className="h-11 w-full" aria-hidden="true" />
+                </div>
               ) : null}
-              {countiesError ? <p className="mt-4 text-base text-destructive">{countiesError}</p> : null}
+              {countiesError ? (
+                <div role="alert" className="mt-4 flex flex-wrap items-center gap-x-3 text-base text-destructive">
+                  <span>{countiesError}</span>
+                  <button type="button" onClick={loadCounties} className="inline-flex min-h-11 items-center font-semibold underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Try again</button>
+                </div>
+              ) : null}
               {counties && counties.length === 0 ? (
                 <p className="mt-4 text-base text-muted-foreground">
                   No counties with upcoming auctions right now — check back soon.
@@ -424,7 +453,23 @@ export default function BuyReportCheckout() {
               <h2 className="mt-3 text-lg font-semibold text-foreground">Pick your auction</h2>
               <p className="mt-1 text-base text-muted-foreground">Upcoming auctions in {countyName}.</p>
 
-              {auctions === null ? <p className="mt-4 text-sm text-muted-foreground">Loading auctions…</p> : null}
+              {auctions === null && !auctionsError ? (
+                <div role="status" aria-busy="true" className="mt-4 flex flex-col gap-2">
+                  <span className="sr-only">Loading auctions…</span>
+                  {[0, 1, 2].map((i) => (
+                    <div key={i} aria-hidden="true" className="rounded-lg border border-input bg-background p-3">
+                      <Skeleton className="h-4 w-2/3" />
+                      <Skeleton className="mt-2 h-3 w-1/2" />
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+              {auctionsError ? (
+                <div role="alert" className="mt-4 flex flex-wrap items-center gap-x-3 text-base text-destructive">
+                  <span>{auctionsError}</span>
+                  <button type="button" onClick={() => loadAuctions(countySlug, countyName)} className="inline-flex min-h-11 items-center font-semibold underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Try again</button>
+                </div>
+              ) : null}
               {auctions && auctions.length === 0 ? (
                 <p className="mt-4 text-base text-muted-foreground">
                   Calendar sync in progress for {countyName || 'this county'}. Check back in 24 hours or{' '}
@@ -500,7 +545,13 @@ export default function BuyReportCheckout() {
                 </div>
               </div>
 
-              {prefillLoading ? <p className="mt-4 text-sm text-muted-foreground">Loading property…</p> : null}
+              {prefillLoading ? (
+                <div role="status" aria-busy="true" className="mt-4">
+                  <span className="sr-only">Loading property…</span>
+                  <Skeleton className="h-4 w-2/3" aria-hidden="true" />
+                  <Skeleton className="mt-2 h-3 w-1/2" aria-hidden="true" />
+                </div>
+              ) : null}
               {prefillError ? <p className="mt-4 text-base text-destructive">{prefillError}</p> : null}
 
               <div className="mt-4 rounded-lg border border-border bg-secondary p-3 text-sm leading-5 text-foreground">
@@ -582,7 +633,7 @@ export default function BuyReportCheckout() {
                     </>
                   )}
                 </Button>
-                {error ? <p className="text-base text-destructive">{error}</p> : null}
+                {error ? <p className="text-base text-destructive" role="alert">{error}</p> : null}
                 {signedOut ? (
                   <p className="mt-1 rounded-lg bg-secondary px-4 py-3 text-sm text-foreground">
                     New to biddeed.ai?{' '}

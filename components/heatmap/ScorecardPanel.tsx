@@ -1,6 +1,7 @@
 'use client'
 
 import { ArrowRight, MapPinned, TrendingUp } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
 import { formatCurrency } from '@/lib/scoring'
 import { trackHeatmapEvent } from '@/lib/analytics/track'
 import type { ScorecardResponse } from '@/lib/heatmap/types'
@@ -35,7 +36,12 @@ function buyReportHref(params: { mcaId: string; county: string }): string {
 export default function ScorecardPanel({ loading, data, error, onJumpToCounty }: Props) {
   if (loading) {
     return (
-      <div className="p-4 text-sm text-muted-foreground">Loading county scorecard…</div>
+      <div className="space-y-2 p-4" role="status" aria-busy="true">
+        <span className="sr-only">Loading county scorecard…</span>
+        <Skeleton className="h-4 w-1/2" aria-hidden="true" />
+        <Skeleton className="h-3 w-3/4" aria-hidden="true" />
+        <Skeleton className="h-3 w-2/3" aria-hidden="true" />
+      </div>
     )
   }
 

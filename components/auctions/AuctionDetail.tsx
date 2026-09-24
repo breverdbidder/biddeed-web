@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { Skeleton } from '@/components/ui/skeleton'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { formatCountyLabel } from '@/lib/counties'
@@ -122,11 +123,27 @@ export default function AuctionDetail({ auctionId }: Props) {
   }, [auctionId])
 
   if (loading) {
+    // PARITY CP-9: the detail page's own shape (title, case line, two columns)
+    // while the auction loads, not a spinner.
     return (
-      <div className="h-full flex items-center justify-center bg-muted dark:bg-background">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-muted-foreground dark:text-muted-foreground text-sm">Loading auction...</p>
+      <div className="h-full overflow-y-auto bg-muted dark:bg-background" aria-busy="true">
+        <div className="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:px-6">
+          <p role="status" className="sr-only">Loading auction…</p>
+          <div aria-hidden="true">
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="mt-4 h-7 w-full max-w-lg" />
+            <Skeleton className="mt-2 h-4 w-64 max-w-full" />
+          </div>
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-5" aria-hidden="true">
+            <div className="space-y-6 lg:col-span-3">
+              <Skeleton className="h-56 w-full rounded-lg" />
+              <Skeleton className="h-40 w-full rounded-lg" />
+            </div>
+            <div className="space-y-6 lg:col-span-2">
+              <Skeleton className="h-48 w-full rounded-lg" />
+              <Skeleton className="h-32 w-full rounded-lg" />
+            </div>
+          </div>
         </div>
       </div>
     )

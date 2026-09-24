@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { SkeletonInline } from '@/components/ui/skeleton'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import listPlugin from '@fullcalendar/list'
@@ -395,9 +396,9 @@ export default function AuctionCalendar({ county, saleType, onSelectDay }: Props
 
         <div className="ml-auto flex flex-wrap items-center gap-3 text-sm">
           {loading && (
-            <span className="flex min-h-11 items-center gap-2 text-sm text-muted-foreground dark:text-muted-foreground">
-              <span className="w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-              Loading counts...
+            <span className="flex min-h-11 items-center text-sm" role="status">
+              <SkeletonInline className="h-4 w-40" />
+              <span className="sr-only">Loading counts…</span>
             </span>
           )}
           {!loading && totals && (

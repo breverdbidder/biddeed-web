@@ -119,16 +119,18 @@ export default function SubscribeCheckout() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       })
-      const data = await res.json()
+      const data = await res.json().catch(() => ({}))
       if (res.ok && data.url) {
         track('checkout_started', { product: 'subscription', plan: tier, interval, surface: 'subscribe' }, { beacon: true })
         window.location.href = data.url
+        // PARITY CP-1 §2: stay in "Redirecting to checkout…" while the browser
+        // leaves; re-arming the button mid-navigation invites a second session.
         return
       }
       setError(data.error || 'Something went wrong. Please try again.')
+      setSubmitting(false)
     } catch {
       setError('Network error. Please try again.')
-    } finally {
       setSubmitting(false)
     }
   }
@@ -181,7 +183,7 @@ export default function SubscribeCheckout() {
           <Button type="submit" disabled={submitting} className="mt-2 min-h-11">
             {submitting ? 'Redirecting to checkout…' : 'Continue to checkout →'}
           </Button>
-          {error ? <p className="text-sm text-destructive">{error}</p> : null}
+          {error ? <p className="text-sm text-destructive" role="alert">{error}</p> : null}
         </form>
 
         <p className="mt-5 text-center text-base text-muted-foreground">

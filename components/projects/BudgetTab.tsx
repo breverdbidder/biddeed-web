@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Loader2, Mic, MicOff, Plus, Search, Trash2 } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
 import { apiUrl } from '@/lib/api'
 import { PROJECTS_DEFAULT_LANG, PROJECTS_VOICE_LANGUAGES } from '@/lib/projects/voice-grammar'
 import { useProjectsVoice } from './useProjectsVoice'
@@ -404,8 +405,10 @@ export default function BudgetTab({
 
       {detailError && <p className="text-sm text-destructive">{detailError}</p>}
       {detailLoading && !detail && (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="size-4 animate-spin" aria-hidden /> Loading budget…
+        <div role="status" aria-busy="true" className="space-y-3">
+          <span className="sr-only">Loading budget…</span>
+          <Skeleton className="h-6 w-48" aria-hidden="true" />
+          <Skeleton className="h-40 w-full rounded-lg" aria-hidden="true" />
         </div>
       )}
 

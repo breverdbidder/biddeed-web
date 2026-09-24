@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { Skeleton } from '@/components/ui/skeleton'
 import {
   ArrowUp,
   Check,
@@ -505,7 +506,11 @@ export default function Composer({
                     Sign in to keep projects — one per property, with its files and this chat.
                   </DropdownMenuLabel>
                 ) : projects === null ? (
-                  <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">Loading…</DropdownMenuLabel>
+                  <div role="status" aria-busy="true" className="space-y-2 px-2 py-2">
+                    <span className="sr-only">Loading your projects…</span>
+                    <Skeleton className="h-3 w-40" aria-hidden="true" />
+                    <Skeleton className="h-3 w-28" aria-hidden="true" />
+                  </div>
                 ) : (
                   <>
                     {projects.length === 0 ? (

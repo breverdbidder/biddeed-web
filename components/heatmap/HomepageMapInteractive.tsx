@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from 'react'
 import { ArrowRight } from 'lucide-react'
+import { SkeletonInline } from '@/components/ui/skeleton'
 import HeatmapMap from './HeatmapMap'
 import AuctionPinCard from '@/components/auctions/AuctionPinCard'
 import { apiUrl } from '@/lib/api'
@@ -85,7 +86,7 @@ export default function HomepageMapInteractive() {
             </>
           ) : (
             <p className="mt-1 text-base text-muted-foreground">
-              {loading ? 'Loading county…' : 'Tap a county to see market direction and live auction count.'}
+              {loading ? <><SkeletonInline className="h-4 w-48" /><span className="sr-only">Loading county…</span></> : 'Tap a county to see market direction and live auction count.'}
             </p>
           )}
         </div>

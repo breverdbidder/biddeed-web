@@ -57,9 +57,8 @@ for (const route of ROUTES) {
     const problems: string[] = []
     const seen = new Set<string>()
     let inMain = 0
-    for (let i = 1; i <= 40; i++) {
-      await page.keyboard.press('Tab')
-      const s = await page.evaluate(() => {
+    const measure = () =>
+      page.evaluate(() => {
         const a = document.activeElement as HTMLElement | null
         if (!a || a === document.body) return { end: true as const }
         const r = a.getBoundingClientRect()
@@ -68,6 +67,15 @@ for (const route of ROUTES) {
         const key = `${a.tagName.toLowerCase()}#${a.id}|${(a.getAttribute('aria-label') || a.textContent || a.getAttribute('name') || '').trim().slice(0, 30)}|${Math.round(r.x)},${Math.round(r.y)}`
         return { end: false as const, key, visible: r.width > 0 && r.height > 0 && cs.visibility !== 'hidden', ring, inMain: !!a.closest('#main'), skip: (a.textContent || '').trim() === 'Skip to content' }
       })
+    for (let i = 1; i <= 40; i++) {
+      await page.keyboard.press('Tab')
+      let s = await measure()
+      // A ring that fades in (a transition on the control) reads as width 0 for
+      // its first frames: look again once before calling it missing.
+      if (!s.end && !s.ring) {
+        await page.waitForTimeout(300)
+        s = await measure()
+      }
       // The end of the page: focus leaves the document (body) or wraps to the top.
       if (s.end || s.skip) break
       if (!s.visible) problems.push(`stop ${i} not visible: ${s.key}`)

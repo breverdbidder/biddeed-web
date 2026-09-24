@@ -8,6 +8,7 @@ import { Separator } from '@/components/ui/separator'
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar'
 import { cn } from '@/lib/utils'
 import { formatCount, useAuctionCounts } from './useAuctionCounts'
+import { SkeletonInline } from '@/components/ui/skeleton'
 import { useTheme } from '@/lib/theme-context'
 import DeedRobotMark from '@/components/deed/DeedRobotMark'
 
@@ -96,7 +97,7 @@ export default function Topbar({ deedOpen, onToggleDeed, showDeedToggle = true }
                   : `${counts.upcoming.toLocaleString('en-US')} upcoming auctions`
               }
             >
-              {counts.loading ? '·' : formatCount(counts.upcoming)}
+              {counts.loading ? <><SkeletonInline className="h-3 w-9" /><span className="sr-only">loading</span></> : formatCount(counts.upcoming)}
             </dd>
           </div>
           <div className="flex items-baseline gap-1.5">
@@ -109,7 +110,7 @@ export default function Topbar({ deedOpen, onToggleDeed, showDeedToggle = true }
                   : `${counts.counties.toLocaleString('en-US')} counties with upcoming inventory`
               }
             >
-              {counts.loading ? '·' : formatCount(counts.counties)}
+              {counts.loading ? <><SkeletonInline className="h-3 w-5" /><span className="sr-only">loading</span></> : formatCount(counts.counties)}
             </dd>
           </div>
         </dl>

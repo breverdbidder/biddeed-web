@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import AuctionSummaryCards from './AuctionSummaryCards'
+import { Skeleton } from '@/components/ui/skeleton'
 import AuctionFilters from './AuctionFilters'
 import AuctionTable from './AuctionTable'
 import AuctionSpreadsheet from './AuctionSpreadsheet'
@@ -246,16 +247,28 @@ export default function AuctionsLayout({
   }
 
   if (loading) {
+    // PARITY CP-9: a skeleton in the shape of the loaded page (heading, the
+    // five figure tiles, the filter row, the view), not a spinner in an empty
+    // band, so nothing jumps when the auctions land.
     return (
-      <div className="flex min-h-[60vh] items-center justify-center bg-muted dark:bg-background">
-        <div className="flex flex-col items-center gap-4">
-          {showHeading ? (
-            <h1 className="sr-only">Auction Intelligence</h1>
-          ) : (
-            <p className="sr-only">Auction Intelligence</p>
-          )}
-          <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-muted-foreground dark:text-muted-foreground text-sm">Loading auctions...</p>
+      <div className="w-full min-w-0 overflow-x-hidden bg-muted dark:bg-background" aria-busy="true">
+        <div className="mx-auto max-w-7xl min-w-0 space-y-6 px-4 py-6 sm:px-6">
+          <div>
+            {showHeading ? (
+              <h1 className="text-xl font-bold text-foreground dark:text-white">Auction Intelligence</h1>
+            ) : (
+              <p className="text-xl font-bold text-foreground dark:text-white">Auction Intelligence</p>
+            )}
+            <Skeleton className="mt-2 h-5 w-full max-w-md" />
+          </div>
+          <AuctionSummaryCards summary={null} loading />
+          <div className="flex flex-wrap items-center gap-3">
+            <Skeleton className="h-11 w-36 md:h-9" />
+            <Skeleton className="h-11 w-32 md:h-9" />
+            <Skeleton className="h-11 w-full max-w-sm sm:ml-auto md:h-9" />
+          </div>
+          <Skeleton className="h-[50vh] w-full rounded-lg lg:h-[60vh]" />
+          <p role="status" className="sr-only">Loading auctions…</p>
         </div>
       </div>
     )

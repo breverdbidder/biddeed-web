@@ -2,6 +2,7 @@
 
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import SentAlertsPanel from '@/components/alerts/SentAlertsPanel'
+import { Skeleton, SkeletonInline } from '@/components/ui/skeleton'
 
 export type AlertWatch = {
   id: string
@@ -160,7 +161,7 @@ export default function AlertDashboard() {
           <p className="mt-2 max-w-2xl text-base leading-6 text-muted-foreground">Create private watches for auctions you are evaluating. Alerts are tied to your account and never expose raw contact details in the dashboard.</p>
         </div>
         <div className="rounded-lg border border-border bg-card px-4 py-3 text-sm text-muted-foreground">
-          <span className="font-semibold text-foreground">{activeCount}</span> active {activeCount === 1 ? 'watch' : 'watches'}
+          {loading ? <><SkeletonInline className="h-4 w-24" /><span className="sr-only">Loading active watches</span></> : <><span className="font-semibold text-foreground">{activeCount}</span> active {activeCount === 1 ? 'watch' : 'watches'}</>}
         </div>
       </header>
 
@@ -189,7 +190,7 @@ export default function AlertDashboard() {
 
         <div className="space-y-4" aria-live="polite">
           <div className="flex items-center justify-between"><h2 className="text-lg font-bold text-foreground">Your watches</h2><button type="button" onClick={() => void loadWatches()} className="inline-flex min-h-11 items-center text-sm font-semibold text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Refresh</button></div>
-          {loading ? <div className="border border-border bg-card p-6 text-sm text-muted-foreground">Loading your private alerts…</div> : null}
+          {loading ? <div role="status" aria-busy="true" className="space-y-3"><span className="sr-only">Loading your private alerts…</span>{[0, 1].map((i) => <div key={i} aria-hidden="true" className="border border-border bg-card p-4 sm:p-5"><Skeleton className="h-4 w-1/2" /><Skeleton className="mt-2 h-3 w-1/3" /><Skeleton className="mt-4 h-6 w-40" /></div>)}</div> : null}
           {!loading && watches.length === 0 ? <div className="border border-dashed border-border bg-card p-8 text-sm text-muted-foreground">No alerts yet. Create your first watch to track a verified auction.</div> : null}
           {!loading && watches.length > 0 ? <ul className="space-y-3">{watches.map((watch) => <li key={watch.id} className="border border-border bg-card p-4 sm:p-5"><div className="flex flex-wrap items-start justify-between gap-3"><div><p className="font-mono text-sm font-bold text-foreground">{watch.case_number}</p><p className="mt-1 text-sm text-muted-foreground">{watch.county} County · {watch.max_bid == null ? 'No bid ceiling' : `$${watch.max_bid.toLocaleString()} ceiling`}</p></div><span className="border border-border px-2 py-1 text-xs font-bold uppercase tracking-wide text-muted-foreground">{watch.status}</span></div><div className="mt-4 flex flex-wrap gap-2">{watch.alert_types.map((type) => <span key={type} className="bg-secondary px-2 py-1 text-xs text-secondary-foreground">{type.replaceAll('_', ' ')}</span>)}</div><div className="mt-4 flex gap-4 text-sm"><button type="button" onClick={() => void updateStatus(watch)} disabled={watch.status === 'cancelled'} className="font-semibold text-primary underline-offset-4 hover:underline disabled:opacity-40">{watch.status === 'active' ? 'Pause' : 'Resume'}</button><button type="button" onClick={() => void cancelWatch(watch)} disabled={watch.status === 'cancelled'} className="font-semibold text-destructive underline-offset-4 hover:underline disabled:opacity-40">Cancel</button></div></li>)}</ul> : null}
         </div>

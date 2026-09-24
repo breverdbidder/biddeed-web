@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { track } from '@/lib/analytics/funnel'
+import { SkeletonInline } from '@/components/ui/skeleton'
 
 type Availability = {
   sold: number
@@ -18,17 +19,24 @@ type Availability = {
 
 export function PioneerCheckout() {
   const [avail, setAvail] = useState<Availability | null>(null)
+  const [availState, setAvailState] = useState<'loading' | 'ready' | 'error'>('loading')
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // PARITY CP-1 §2: the seat count loads with a placeholder, and a failed
+  // count no longer disables the purchase for good — the checkout itself
+  // re-checks the cap on the server (409 when sold out), so the count is
+  // information, not a gate. It can be retried in place.
   const refresh = useCallback(async () => {
+    setAvailState('loading')
     try {
       const res = await fetch('/api/pioneers/availability', { cache: 'no-store' })
       if (!res.ok) throw new Error('Could not load seats')
       setAvail(await res.json())
+      setAvailState('ready')
     } catch {
-      setError('Could not load Pioneer availability')
+      setAvailState('error')
     }
   }, [])
 
@@ -55,6 +63,7 @@ export function PioneerCheckout() {
       if (data.url) {
         track('checkout_started', { product: 'pioneer_pro', plan: 'pro_annual', surface: 'pioneers' }, { beacon: true })
         window.location.href = data.url as string
+        // Stays in "Redirecting to Stripe…" (loading) while the browser leaves.
         return
       }
       setError('No checkout URL returned')
@@ -71,10 +80,19 @@ export function PioneerCheckout() {
     <div className="mx-auto max-w-xl rounded-2xl border border-primary/40 bg-card p-6 shadow-xl">
       <div className="mb-4 flex items-baseline justify-between gap-3">
         <h2 className="text-xl font-semibold text-foreground">Join 100 Pioneers</h2>
-        {avail && (
+        {availState === 'ready' && avail ? (
           <p className="text-base font-medium text-primary">
             {avail.remaining} of {avail.cap} left
           </p>
+        ) : availState === 'loading' ? (
+          <p className="text-base font-medium text-primary" role="status">
+            <SkeletonInline className="h-4 w-24" />
+            <span className="sr-only">Loading seats left</span>
+          </p>
+        ) : (
+          <button type="button" onClick={() => void refresh()} className="inline-flex min-h-11 items-center text-sm font-semibold text-primary underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            Seats left unavailable · Try again
+          </button>
         )}
       </div>
 
@@ -106,7 +124,7 @@ export function PioneerCheckout() {
           </label>
           <button
             type="submit"
-            disabled={loading || !avail}
+            disabled={loading || availState === 'loading'}
             className="min-h-11 w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
           >
             {loading ? 'Redirecting to Stripe…' : 'Continue to Stripe — $990/year Pro'}

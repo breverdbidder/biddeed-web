@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ExternalLink, LogIn, MessageSquareText, Play, Plus, Trash2, Wand2 } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
 import Link from 'next/link'
 
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
@@ -250,7 +251,7 @@ export default function SkillsSheet({ open, onOpenChange, preset, onAskDeed }: P
 
         <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
           {!auth.loaded ? (
-            <p className={cn(bodyText, 'text-muted-foreground')}>Loading…</p>
+            <div role="status" aria-busy="true" className="space-y-2"><span className="sr-only">Loading…</span>{[0, 1, 2].map((i) => <div key={i} aria-hidden="true" className="rounded-lg border border-border p-3"><Skeleton className="h-4 w-2/3" /><Skeleton className="mt-2 h-3 w-1/2" /></div>)}</div>
           ) : !signedIn ? (
             <div className="mb-4 rounded-lg border border-dashed border-border p-4">
               <p className={cn(bodyText, 'font-medium text-foreground')}>Sign in to run skills.</p>

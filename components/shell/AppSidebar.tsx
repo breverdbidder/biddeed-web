@@ -33,6 +33,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { ACCOUNT_LINKS, NAV_ITEMS, type NavItem } from './nav'
 import { formatCount, useAuctionCounts } from './useAuctionCounts'
+import { SkeletonInline } from '@/components/ui/skeleton'
 import DeedRobotMark from '@/components/deed/DeedRobotMark'
 import { SignOutMenuItem } from './SignOutMenuItem'
 import { OPEN_COMMAND_PALETTE } from './CommandPalette'
@@ -356,7 +357,7 @@ export default function AppSidebar({ deedOpen, onToggleDeed, authEnabled = false
                             : `${counts.upcoming.toLocaleString('en-US')} upcoming auctions`
                         }
                       >
-                        {count}
+                        {counts.loading ? <><SkeletonInline className="h-3 w-8" /><span className="sr-only">loading</span></> : count}
                       </SidebarMenuBadge>
                     ) : null}
                   </SidebarMenuItem>

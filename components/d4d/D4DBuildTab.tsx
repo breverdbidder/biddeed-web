@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { Loader2, MapPin } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
 import { FL_COUNTIES, formatCountyLabel } from '@/lib/counties'
 import { apiUrl } from '@/lib/api'
 import EmptyState from '@/components/ui/empty-state'
@@ -163,9 +164,14 @@ export default function D4DBuildTab({ onBuilt }: Props) {
 
         <div className="mt-2 max-h-[520px] overflow-y-auto rounded-lg border border-border">
           {candidatesLoading && (
-            <div className="flex items-center gap-2 p-4 text-sm text-muted-foreground">
-              <Loader2 className="size-4 animate-spin" aria-hidden />
-              Loading lots…
+            <div role="status" aria-busy="true" className="divide-y divide-border">
+              <span className="sr-only">Loading lots…</span>
+              {[0, 1, 2, 3].map((i) => (
+                <div key={i} aria-hidden="true" className="p-3">
+                  <Skeleton className="h-4 w-2/3" />
+                  <Skeleton className="mt-2 h-3 w-1/3" />
+                </div>
+              ))}
             </div>
           )}
           {candidatesError && <p className="p-4 text-sm text-destructive">{candidatesError}</p>}

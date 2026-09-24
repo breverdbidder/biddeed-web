@@ -1,6 +1,7 @@
 'use client'
 
 import type { ReactNode } from 'react'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export type PanelStateKind = 'loading' | 'empty' | 'auth' | 'provider' | 'success' | 'error'
 
@@ -23,8 +24,23 @@ const tone: Record<PanelStateKind, string> = {
 }
 
 export default function PanelState({ kind, title, message, actionLabel, onAction, children }: PanelStateProps) {
+  // PARITY CP-9: loading is a skeleton in the shape of the list it is waiting
+  // for; the words stay for screen readers only.
+  if (kind === 'loading') {
+    return (
+      <div role="status" aria-live="polite" aria-busy="true" className="space-y-2">
+        <span className="sr-only">{title}. {message}</span>
+        {[0, 1].map((i) => (
+          <div key={i} className="border border-border bg-background p-4" aria-hidden="true">
+            <Skeleton className="h-4 w-2/3" />
+            <Skeleton className="mt-2 h-3 w-1/2" />
+          </div>
+        ))}
+      </div>
+    )
+  }
   return (
-    <div className={`border p-4 ${tone[kind]}`} role={kind === 'error' ? 'alert' : kind === 'loading' ? 'status' : undefined} aria-live={kind === 'loading' || kind === 'success' ? 'polite' : undefined}>
+    <div className={`border p-4 ${tone[kind]}`} role={kind === 'error' ? 'alert' : undefined} aria-live={kind === 'success' ? 'polite' : undefined}>
       <p className="text-base font-bold">{title}</p>
       <p className="mt-1 text-base opacity-90">{message}</p>
       {children}
