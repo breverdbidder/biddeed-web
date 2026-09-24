@@ -226,6 +226,22 @@ test.describe('Deed Skills, API keys and chat recents, signed in (PARITY CP-6 / 
       page.on('console', (m) => {
         if (m.type() === 'error') afterSend.push(`console ${m.text().slice(0, 140)}`)
       })
+      const t0 = Date.now()
+      const deedPath = (u: string) => new URL(u).pathname.startsWith('/api/deed')
+      page.on('request', (r) => {
+        if (deedPath(r.url())) afterSend.push(`req ${r.method()} ${new URL(r.url()).pathname} +${Date.now() - t0}ms`)
+      })
+      page.on('requestfailed', (r) => {
+        if (deedPath(r.url())) afterSend.push(`failed ${r.method()} ${new URL(r.url()).pathname} ${r.failure()?.errorText ?? ''} +${Date.now() - t0}ms`)
+      })
+      page.on('response', (r) => {
+        if (deedPath(r.url()) && !/\/api\/deed(\?|$)/.test(r.url())) afterSend.push(`res ${r.request().method()} ${new URL(r.url()).pathname} ${r.status()} +${Date.now() - t0}ms`)
+      })
+      const clerkAtSend = await page.evaluate(() => {
+        const c = (window as unknown as { Clerk?: { loaded?: boolean; user?: unknown } }).Clerk
+        return `clerk loaded=${Boolean(c?.loaded)} user=${Boolean(c?.user)}`
+      })
+      afterSend.push(clerkAtSend)
       await page.getByRole('button', { name: 'Send message' }).click()
       await expect(page).toHaveURL(/\/chat\?c=[A-Za-z0-9-]+/, { timeout: 30_000 })
       threadId = new URL(page.url()).searchParams.get('c')

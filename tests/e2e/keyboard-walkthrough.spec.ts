@@ -31,6 +31,10 @@ test.describe('Keyboard walkthrough (PARITY CP-9)', () => {
     // By label, not role: the textarea becomes a combobox while the / menu is open.
     const box = page.getByLabel(/Ask Deed about Florida/)
     await expect(box).toBeVisible({ timeout: 20_000 })
+    // The composer takes focus once the page is interactive (as Claude.ai's
+    // does). Wait for that, so the walk starts on a hydrated page: keys pressed
+    // before hydration go to server HTML that has no handlers yet.
+    await expect(box).toBeFocused({ timeout: 20_000 })
     // 1. The skip link is the first stop in the tab order, and it works. (The
     //    composer may take focus on load, as Claude.ai's does, so the order is
     //    read from the DOM rather than from wherever focus happens to start.)
