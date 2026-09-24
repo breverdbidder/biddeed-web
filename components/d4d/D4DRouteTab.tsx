@@ -48,7 +48,6 @@ export default function D4DRouteTab({ detail, loading }: { detail: D4DRouteDetai
                 <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 font-mono text-xs text-muted-foreground">
                   {stop.leg_miles != null && <span>+{stop.leg_miles} mi leg</span>}
                   <span>Judgment {formatMoney(stop.judgment_amount)}</span>
-                  {stop.signal_max_bid != null && <span className="text-primary">SIGNAL$ Max Bid {formatMoney(stop.signal_max_bid)}</span>}
                 </div>
               </div>
             </li>

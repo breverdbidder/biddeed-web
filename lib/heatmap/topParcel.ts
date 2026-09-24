@@ -1,4 +1,3 @@
-import { getRecommendation } from '@/lib/scoring'
 import type { TopParcel } from './types'
 
 export interface CandidateAuctionRow {
@@ -12,41 +11,34 @@ export interface CandidateAuctionRow {
   market_value: number | null
 }
 
-const RANK: Record<string, number> = { BID: 0, REVIEW: 1, SKIP: 2, UNKNOWN: 3 }
-
 /**
- * Deterministic "strongest actionable parcel" rule (issue #75, Technical/UX
- * risks — "no fabricated top parcel"): rank by Shapira Formula recommendation
- * (BID beats REVIEW beats SKIP beats UNKNOWN, same engine /radar uses), tie
- * broken by soonest auction_date. Given the same rows, this always returns
- * the same parcel — no randomness, no invented data.
+ * The county's next upcoming auction with a street address: soonest
+ * auction_date, then id, so the same rows always give the same parcel and
+ * nothing is invented (issue #75, "no fabricated top parcel").
+ *
+ * SIGNAL-15 (2026-09-24): this used to rank by the Shapira formula's
+ * BID / REVIEW / SKIP call and print that call on the public map, while the
+ * auction page withholds the same verdict on every tier (report policy v1,
+ * app/api/auctions/[id]/route.ts). Ranking by the withheld call and naming
+ * the winner "strongest actionable" disclosed it anyway, so the pick is now
+ * by date and carries no verdict.
  */
 export function pickTopParcel(rows: CandidateAuctionRow[]): TopParcel | null {
-  if (rows.length === 0) return null
-
-  const scored = rows.map((r) => {
-    const justValue = r.market_value ?? r.assessed_value
-    const score = getRecommendation(justValue, r.opening_bid)
-    return { row: r, score }
-  })
-
-  scored.sort((a, b) => {
-    const rankDiff = RANK[a.score.recommendation] - RANK[b.score.recommendation]
-    if (rankDiff !== 0) return rankDiff
-    const aDate = a.row.auction_date ?? '9999-12-31'
-    const bDate = b.row.auction_date ?? '9999-12-31'
-    return aDate.localeCompare(bDate)
-  })
-
-  const best = scored[0]
+  const withAddress = rows.filter((r) => (r.property_address ?? '').trim() !== '')
+  const pool = withAddress.length > 0 ? withAddress : rows
+  if (pool.length === 0) return null
+  const best = [...pool].sort((a, b) => {
+    const aDate = a.auction_date ?? '9999-12-31'
+    const bDate = b.auction_date ?? '9999-12-31'
+    return aDate.localeCompare(bDate) || a.id.localeCompare(b.id)
+  })[0]
   return {
-    id: best.row.id,
-    property_address: best.row.property_address,
-    auction_date: best.row.auction_date,
-    sale_type: best.row.sale_type,
-    opening_bid: best.row.opening_bid,
-    market_value: best.row.market_value ?? best.row.assessed_value,
-    recommendation: best.score.recommendation,
-    county: best.row.county,
+    id: best.id,
+    property_address: best.property_address,
+    auction_date: best.auction_date,
+    sale_type: best.sale_type,
+    opening_bid: best.opening_bid,
+    market_value: best.market_value ?? best.assessed_value,
+    county: best.county,
   }
 }

@@ -48,7 +48,6 @@ export interface TopParcel {
   sale_type: string | null
   opening_bid: number | null
   market_value: number | null
-  recommendation: string
   county: string
 }
 

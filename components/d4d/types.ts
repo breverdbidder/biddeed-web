@@ -30,7 +30,6 @@ export interface D4DRouteStop {
   opening_bid: number | null
   assessed_value: number | null
   verdict: string | null
-  signal_max_bid: number | null
   field_status: FieldStatus
   field_notes: string | null
   visited_at: string | null

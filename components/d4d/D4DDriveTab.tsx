@@ -88,8 +88,7 @@ export default function D4DDriveTab({ detail, routeId, onStopUpdated }: Props) {
     }
     speak(
       `Stop ${stop.seq}. ${stop.property_address ?? 'address unknown'}. ` +
-        `Judgment ${formatMoney(stop.judgment_amount)}. ` +
-        `SIGNAL dollar max bid ${formatMoney(stop.signal_max_bid)}.`,
+        `Judgment ${formatMoney(stop.judgment_amount)}.`,
       langRef.current
     )
   }, [stops])
@@ -283,7 +282,6 @@ export default function D4DDriveTab({ detail, routeId, onStopUpdated }: Props) {
         <p className="mt-3 text-lg font-semibold text-foreground">{activeStop.property_address ?? `Case ${activeStop.case_number}`}</p>
         <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 font-mono text-sm text-muted-foreground">
           <span>Judgment {formatMoney(activeStop.judgment_amount)}</span>
-          <span className="text-primary">SIGNAL$ Max Bid {formatMoney(activeStop.signal_max_bid)}</span>
         </div>
         {activeStop.field_status !== 'pending' && (
           <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-primary">Marked: {activeStop.field_status}</p>

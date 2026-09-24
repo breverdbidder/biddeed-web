@@ -78,6 +78,9 @@ jobs:
       - name: Validate SIGNAL$ report access (paid or claimed only)
         run: npm run test:signal-report-access
 
+      - name: Validate no withheld SIGNAL$ field is rendered (report policy v1)
+        run: npm run test:withheld-leaks
+
       - name: Validate Cloudflare credentials are present
         shell: bash
         run: |

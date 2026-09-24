@@ -84,7 +84,6 @@ export default function D4DMap({ stops, originLat, originLng, activeStopId }: Pr
         `<div style="font-family:system-ui;font-size:12px;">` +
           `<p style="font-weight:600;margin:0 0 4px 0;">${stop.property_address ?? 'Unknown address'}</p>` +
           (stop.judgment_amount ? `<p style="margin:0 0 2px 0;">Judgment: $${Math.round(stop.judgment_amount).toLocaleString()}</p>` : '') +
-          (stop.signal_max_bid ? `<p style="margin:0;">SIGNAL$ Max Bid: $${Math.round(stop.signal_max_bid).toLocaleString()}</p>` : '') +
           `</div>`
       )
 

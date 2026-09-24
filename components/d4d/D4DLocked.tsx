@@ -9,15 +9,17 @@ const TIER_LABELS: Record<string, string> = {
   enterprise: 'Enterprise',
 }
 
+// SIGNAL-15: no SIGNAL$ Max Bid here. It is withheld on every tier under
+// report policy v1, so the example must not promise one.
 const EXAMPLE_STOPS = [
-  { seq: 1, address: '1113 Brook St, Palm Bay', judgment: '$18,400', maxBid: '$14,200' },
-  { seq: 2, address: '1099 Moonlight Ct, Palm Bay', judgment: '$21,900', maxBid: '$16,850' },
-  { seq: 3, address: '1060 Quail St, Palm Bay', judgment: '$29,700', maxBid: '$22,100' },
+  { seq: 1, address: '1113 Brook St, Palm Bay', judgment: '$18,400', leg: '0.0 mi' },
+  { seq: 2, address: '1099 Moonlight Ct, Palm Bay', judgment: '$21,900', leg: '+0.4 mi' },
+  { seq: 3, address: '1060 Quail St, Palm Bay', judgment: '$29,700', leg: '+0.7 mi' },
 ]
 
 const LOCKED_ITEMS = [
   { icon: Route, title: 'Build a route', body: 'Pick lots off the auction calendar and order them into a drive.' },
-  { icon: MapPinned, title: 'Route map + stop list', body: 'Numbered stops, leg mileage, judgment and SIGNAL$ Max Bid per lot.' },
+  { icon: MapPinned, title: 'Route map + stop list', body: 'Numbered stops, leg mileage and the judgment per lot.' },
   { icon: Mic, title: 'Hands-free drive mode', body: 'Mark vacant, occupied, bid, review or skip by voice as you drive.' },
 ]
 
@@ -53,7 +55,7 @@ export default function D4DLocked({ check }: { check: CapabilityCheck }) {
               </div>
               <div className="flex min-w-0 flex-wrap gap-x-4 gap-y-1 pl-10 font-mono text-xs text-muted-foreground sm:pl-0">
                 <span>Judgment {s.judgment}</span>
-                <span className="text-primary">SIGNAL$ Max Bid {s.maxBid}</span>
+                <span>{s.leg}</span>
               </div>
             </li>
           ))}

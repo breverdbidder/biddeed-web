@@ -93,12 +93,11 @@ export default function ScorecardPanel({ loading, data, error, onJumpToCounty }:
 
       {data.top_parcel ? (
         <div className="rounded-lg border border-primary/40 bg-card p-3">
-          <p className="text-xs font-semibold text-foreground">Strongest actionable parcel</p>
+          <p className="text-xs font-semibold text-foreground">Next auction in this county</p>
           <p className="mt-1 truncate text-sm text-foreground">{data.top_parcel.property_address || 'Address pending'}</p>
           <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 font-mono text-xs text-muted-foreground">
             {data.top_parcel.opening_bid != null && <span>Opening bid {formatCurrency(data.top_parcel.opening_bid)}</span>}
             {data.top_parcel.auction_date && <span>Sale {data.top_parcel.auction_date}</span>}
-            <span className="font-semibold text-primary">{data.top_parcel.recommendation}</span>
           </div>
           <a
             href={buyReportHref({ mcaId: data.top_parcel.id, county: data.county_name })}
