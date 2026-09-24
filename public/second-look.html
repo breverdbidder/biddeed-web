@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BidDeed Second Look</title>
+<meta name="description" content="A 15-minute tap-through check of biddeed.ai. Tap each link, compare, and send your results back on WhatsApp.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Can you give biddeed.ai a second look?">
+<meta property="og:description" content="15 minutes on your phone: tap each link, compare what you see, and send your results back on WhatsApp.">
+<meta property="og:site_name" content="BidDeed.AI">
+<meta name="theme-color" content="#005EB8">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap">
+<style>
+  :root{
+    --bg:#F4F8FC; --surface:#FFFFFF; --tint:#E8F1FB;
+    --ink:#10233A; --body:#2E4257; --muted:#5A6F86;
+    --border:#D7E3F1; --border-strong:#B7CBE2;
+    --brand:#005EB8; --brand-hover:#004A92; --on-brand:#FFFFFF; --navy:#0A2540;
+    --ok:#1E7A45; --ok-bg:#E3F3EA; --off:#9A5B00; --off-bg:#FCEFD9;
+    --code-bg:#EEF3F9;
+    --shadow:0 1px 2px rgba(10,37,64,.06),0 6px 18px rgba(10,37,64,.06);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      color-scheme:dark;
+      --bg:#0B1119; --surface:#111B27; --tint:#15243A;
+      --ink:#EEF3F9; --body:#C7D4E2; --muted:#93A7BD;
+      --border:#223447; --border-strong:#2F455D;
+      --brand:#1A90FF; --brand-hover:#5AAEFF; --on-brand:#06121F; --navy:#CFE0F5;
+      --ok:#4CC98A; --ok-bg:#12291F; --off:#F0B455; --off-bg:#2B2212;
+      --code-bg:#16222F;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 22px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    color-scheme:dark;
+    --bg:#0B1119; --surface:#111B27; --tint:#15243A;
+    --ink:#EEF3F9; --body:#C7D4E2; --muted:#93A7BD;
+    --border:#223447; --border-strong:#2F455D;
+    --brand:#1A90FF; --brand-hover:#5AAEFF; --on-brand:#06121F; --navy:#CFE0F5;
+    --ok:#4CC98A; --ok-bg:#12291F; --off:#F0B455; --off-bg:#2B2212;
+    --code-bg:#16222F;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 22px rgba(0,0,0,.35);
+  }
+
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--body);
+    font-family:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:600px;margin:0 auto;padding-left:16px;padding-right:16px;padding-block:0 48px;}
+
+  /* sticky progress */
+  .bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);
+    padding-block:10px;border-bottom:1px solid var(--border);}
+  .bar-row{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:13px;font-weight:600;color:var(--muted);}
+  .brandmark{color:var(--ink);font-weight:700;letter-spacing:-.01em;}
+  .brandmark span{color:var(--brand);}
+  .meter{height:6px;border-radius:99px;background:var(--tint);overflow:hidden;margin-top:8px;}
+  .meter i{display:block;height:100%;width:0;background:var(--brand);border-radius:99px;transition:width .25s ease;}
+
+  header.intro{padding-block:26px 8px;}
+  .eyebrow{margin:0 0 10px;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--brand);}
+  h1{font-family:"Source Serif 4",Georgia,serif;font-weight:700;color:var(--ink);font-size:clamp(28px,7.5vw,38px);
+    line-height:1.12;margin:0;text-wrap:balance;letter-spacing:-.01em;}
+  .lede{margin:14px 0 0;font-size:17px;color:var(--body);}
+  .how{margin:18px 0 0;padding:14px 16px;background:var(--tint);border-radius:12px;font-size:15px;color:var(--body);}
+  .how b{color:var(--ink);}
+  .how ol{margin:8px 0 0;padding-left:20px;display:grid;gap:4px;}
+  .facts{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 0;padding:0;list-style:none;}
+  .facts li{font-size:13px;font-weight:600;color:var(--navy);background:var(--surface);border:1px solid var(--border);border-radius:99px;padding:5px 11px;}
+
+  h2{font-family:"Source Serif 4",Georgia,serif;font-weight:700;color:var(--ink);font-size:21px;margin:34px 0 12px;text-wrap:balance;}
+  .steps{display:grid;gap:14px;}
+
+  .step{background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);padding:16px;}
+  .step[data-v="ok"]{border-color:color-mix(in srgb,var(--ok) 45%,var(--border));}
+  .step[data-v="off"]{border-color:color-mix(in srgb,var(--off) 55%,var(--border));}
+  .step-top{display:flex;gap:12px;align-items:flex-start;}
+  .num{flex:0 0 auto;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;
+    background:var(--tint);color:var(--brand);font-weight:700;font-size:14px;font-variant-numeric:tabular-nums;}
+  .step[data-v="ok"] .num{background:var(--ok-bg);color:var(--ok);}
+  .step[data-v="off"] .num{background:var(--off-bg);color:var(--off);}
+  .step h3{margin:3px 0 0;font-size:17px;line-height:1.3;color:var(--ink);font-weight:700;}
+  .why{margin:4px 0 0;font-size:14px;color:var(--muted);}
+
+  .open{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;min-height:48px;padding:10px 16px;
+    border-radius:12px;background:var(--brand);color:var(--on-brand);text-decoration:none;font-weight:700;font-size:16px;}
+  .open:hover{background:var(--brand-hover);}
+  .open .url{font-weight:500;opacity:.85;font-size:13px;}
+  .open svg{flex:0 0 auto}
+  .links{display:grid;gap:8px;margin-top:14px;}
+  .links a{display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:48px;padding:10px 14px;border-radius:12px;
+    border:1px solid var(--border-strong);color:var(--brand);text-decoration:none;font-weight:600;font-size:15px;background:var(--surface);}
+  .links a small{color:var(--muted);font-weight:500;font-size:12.5px;white-space:nowrap;}
+  .links a:hover{border-color:var(--brand);}
+
+  .see{margin:14px 0 0;}
+  .see-label{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 6px;}
+  .see ul{margin:0;padding-left:20px;display:grid;gap:5px;font-size:15px;}
+  .try{margin:12px 0 0;font-size:15px;}
+  code,.quote{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13.5px;background:var(--code-bg);
+    border-radius:6px;padding:1px 6px;color:var(--ink);word-break:break-word;}
+  .quote{font-family:inherit;font-size:14.5px;}
+
+  .verdict{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;}
+  .vbtn{min-height:48px;border-radius:12px;border:1.5px solid var(--border-strong);background:var(--surface);color:var(--ink);
+    font:inherit;font-weight:600;font-size:15px;cursor:pointer;padding:8px 10px;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .vbtn .dot{width:10px;height:10px;border-radius:50%;border:2px solid currentColor;}
+  .vbtn.ok[aria-pressed="true"]{background:var(--ok-bg);border-color:var(--ok);color:var(--ok);}
+  .vbtn.ok[aria-pressed="true"] .dot{background:var(--ok);}
+  .vbtn.off[aria-pressed="true"]{background:var(--off-bg);border-color:var(--off);color:var(--off);}
+  .vbtn.off[aria-pressed="true"] .dot{background:var(--off);}
+  .note{margin-top:10px;}
+  .note label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:5px;}
+  textarea,input[type="text"]{width:100%;font:inherit;font-size:16px;color:var(--ink);background:var(--surface);
+    border:1px solid var(--border-strong);border-radius:10px;padding:10px 12px;}
+  textarea{min-height:76px;resize:vertical;}
+
+  /* send */
+  .send{background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);padding:18px 16px;margin-top:14px;}
+  .send p{margin:0 0 12px;font-size:15px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:14px;font-weight:600;color:var(--ink);margin-bottom:6px;}
+  .summary{margin:0 0 14px;padding:12px;background:var(--code-bg);border-radius:10px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:13px;line-height:1.5;color:var(--ink);white-space:pre-wrap;word-break:break-word;max-height:260px;overflow:auto;}
+  .actions{display:grid;gap:10px;}
+  .wa{display:flex;align-items:center;justify-content:center;gap:10px;min-height:52px;border-radius:12px;background:var(--ok);color:#FFFFFF;
+    text-decoration:none;font-weight:700;font-size:16px;}
+  :root[data-theme="dark"] .wa{color:#06121F;}
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .wa{color:#06121F;} }
+  .copy{min-height:48px;border-radius:12px;border:1.5px solid var(--border-strong);background:var(--surface);color:var(--ink);
+    font:inherit;font-weight:600;font-size:15px;cursor:pointer;}
+  .status{min-height:20px;margin:8px 0 0;font-size:14px;color:var(--ok);font-weight:600;}
+  .left{font-size:14px;color:var(--off);font-weight:600;margin:0 0 12px;}
+
+  footer{margin-top:28px;padding-top:16px;border-top:1px solid var(--border);font-size:13px;color:var(--muted);}
+  footer p{margin:0 0 6px;}
+
+  a:focus-visible,button:focus-visible,textarea:focus-visible,input:focus-visible{outline:3px solid var(--brand);outline-offset:2px;}
+  @media (prefers-reduced-motion: reduce){ *{transition:none!important;} }
+
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+  /* Scripts off (e.g. WhatsApp's document preview): every step still reads; the tick UI stays out of the way. */
+  .verdict,.send-live,.meter{display:none;}
+  html.js .verdict{display:grid;}
+  html.js .send-live{display:block;}
+  html.js .meter{display:block;}
+  .nojs-note{display:block;}
+  html.js .nojs-note{display:none;}
+  .nojs-note{margin:0;padding:14px 16px;background:var(--tint);border-radius:12px;font-size:15px;color:var(--body);}
+  .nojs-note b{color:var(--ink);}
+  .nojs-only{display:block;}
+  html.js .nojs-only{display:none;}
+  .js-only{display:none;}
+  html.js .js-only{display:block;}
+  html.js li.js-only{display:list-item;}
+  .how ol.js-only{display:none;}
+  html.js .how ol.js-only{display:grid;}
+  html.js .how ol.nojs-only{display:none;}
+  .report{display:flex;align-items:center;justify-content:center;min-height:48px;margin-top:14px;padding:10px 14px;border-radius:12px;
+    border:1.5px solid var(--off);color:var(--off);background:var(--surface);text-decoration:none;font-weight:600;font-size:15px;}
+  html.js .report{display:none;}
+  .allgood{display:flex;align-items:center;justify-content:center;gap:10px;min-height:52px;margin-top:12px;border-radius:12px;background:var(--ok);color:#FFFFFF;
+    text-decoration:none;font-weight:700;font-size:16px;}
+  :root[data-theme="dark"] .allgood{color:#06121F;}
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .allgood{color:#06121F;} }
+</style>
+</head>
+<body>
+
+<div class="bar" role="status" aria-live="polite">
+  <div class="wrap" style="padding-block:0">
+    <div class="bar-row"><span class="brandmark">BidDeed<span>.AI</span> · Second look</span><span id="progress-text">9 steps · about 15 minutes</span></div>
+    <div class="meter" aria-hidden="true"><i id="progress-fill"></i></div>
+  </div>
+</div>
+
+<main class="wrap">
+  <header class="intro">
+    <p class="eyebrow">15 minutes · on your phone</p>
+    <h1>Can you give biddeed.ai a second look?</h1>
+    <p class="lede">BidDeed.AI finds Florida foreclosure and tax deed auctions and explains each one in plain English. Our AI engineer built the parts you are about to check. Before we say the site works as smoothly as Claude.ai, someone who did not build it has to look with their own eyes. That is you, and thank you.</p>
+    <div class="how">
+      <b>How it works</b>
+      <ol class="js-only">
+        <li>Tap the blue <b>Open</b> button. The page opens in a new tab.</li>
+        <li>Compare it with <b>You should see</b>.</li>
+        <li>Come back and tap <b>Looks right</b> or <b>Something&#39;s off</b>. A short note helps when something&#39;s off.</li>
+        <li>At the end, send your results back on WhatsApp.</li>
+      </ol>
+      <ol class="nojs-only">
+        <li>Tap the blue <b>Open</b> button. The page opens in a new tab.</li>
+        <li>Compare it with <b>You should see</b>.</li>
+        <li>If something&#39;s off, tap <b>Tell Ariel on WhatsApp</b> under that step and add a few words.</li>
+        <li>When you reach the end, tap <b>Everything else looked right</b>.</li>
+      </ol>
+    </div>
+    <ul class="facts" aria-label="Good to know">
+      <li>No account needed</li>
+      <li>Nothing is charged</li>
+      <li class="js-only">Your ticks stay on this phone until you send them</li>
+    </ul>
+  </header>
+
+  <h2 id="sec-0">The website</h2><div class="steps">
+<article class="step" id="step-home" data-id="home" data-num="1" data-title="The home page" aria-labelledby="step-title-home">
+<div class="step-top"><span class="num" aria-hidden="true">1</span><div>
+<h3 id="step-title-home"><span class="sr">Step 1: </span>The home page</h3>
+<p class="why">First impressions: clean, readable, nothing broken.</p></div></div>
+<a class="open" id="open-home" href="https://biddeed.ai/" target="_blank" rel="noopener">Open <span class="url">biddeed.ai</span><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M14 3h7v7h-2V6.4l-9.3 9.3-1.4-1.4L17.6 5H14V3ZM5 5h6v2H5v12h12v-6h2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/></svg></a>
+<div class="see"><p class="see-label">You should see</p><ul><li>A big headline about the best prices in US real estate being set at foreclosure and tax deed auctions.</li><li>A chat box that says <span class="quote">Ask about any Florida auction…</span></li><li>Text you can read without zooming, and no sideways scrolling.</li><li>Tap the dark mode switch at the top. The page should turn dark and stay easy to read.</li></ul></div>
+<a class="report nojs-only" id="report-home" href="https://wa.me/?text=BidDeed.AI%20second%20look%2C%20step%201%20%28The%20home%20page%29%3A%20something%20looks%20off.%20What%20I%20saw%3A%20" target="_blank" rel="noopener">Something&#39;s off? Tell Ariel on WhatsApp</a>
+<div class="verdict" role="group" aria-label="Your verdict for step 1"><button type="button" class="vbtn ok" id="ok-home" aria-pressed="false"><span class="dot" aria-hidden="true"></span>Looks right</button><button type="button" class="vbtn off" id="off-home" aria-pressed="false"><span class="dot" aria-hidden="true"></span>Something&#39;s off</button></div>
+<div class="note" id="note-wrap-home" hidden><label for="note-home">What did you see? (a few words is plenty)</label><textarea id="note-home" placeholder="For example: the page took a minute to load"></textarea></div>
+</article>
+<article class="step" id="step-pricing" data-id="pricing" data-num="2" data-title="Pricing" aria-labelledby="step-title-pricing">
+<div class="step-top"><span class="num" aria-hidden="true">2</span><div>
+<h3 id="step-title-pricing"><span class="sr">Step 2: </span>Pricing</h3>
+<p class="why">Clear plans and buttons that are easy to tap.</p></div></div>
+<a class="open" id="open-pricing" href="https://biddeed.ai/pricing" target="_blank" rel="noopener">Open <span class="url">biddeed.ai/pricing</span><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M14 3h7v7h-2V6.4l-9.3 9.3-1.4-1.4L17.6 5H14V3ZM5 5h6v2H5v12h12v-6h2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/></svg></a>
+<div class="see"><p class="see-label">You should see</p><ul><li>A free plan, then plans at $99, $199 and $399 a month.</li><li>A Monthly / Annual switch. Annual saves 2 months.</li><li>Buttons big enough to tap with your thumb.</li></ul></div>
+<a class="report nojs-only" id="report-pricing" href="https://wa.me/?text=BidDeed.AI%20second%20look%2C%20step%202%20%28Pricing%29%3A%20something%20looks%20off.%20What%20I%20saw%3A%20" target="_blank" rel="noopener">Something&#39;s off? Tell Ariel on WhatsApp</a>
+<div class="verdict" role="group" aria-label="Your verdict for step 2"><button type="button" class="vbtn ok" id="ok-pricing" aria-pressed="false"><span class="dot" aria-hidden="true"></span>Looks right</button><button type="button" class="vbtn off" id="off-pricing" aria-pressed="false"><span class="dot" aria-hidden="true"></span>Something&#39;s off</button></div>
+<div class="note" id="note-wrap-pricing" hidden><label for="note-pricing">What did you see? (a few words is plenty)</label><textarea id="note-pricing" placeholder="For example: the page took a minute to load"></textarea></div>
+</article>
+<article class="step" id="step-radar" data-id="radar" data-num="3" data-title="The auction list and map" aria-labelledby="step-title-radar">
+<div class="step-top"><span class="num" aria-hidden="true">3</span><div>
+<h3 id="step-title-radar"><span class="sr">Step 3: </span>The auction list and map</h3>
+<p class="why">Pages should show a preview while they load, never a blank screen.</p></div></div>
+<a class="open" id="open-radar" href="https://biddeed.ai/radar" target="_blank" rel="noopener">Open <span class="url">biddeed.ai/radar</span><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M14 3h7v7h-2V6.4l-9.3 9.3-1.4-1.4L17.6 5H14V3ZM5 5h6v2H5v12h12v-6h2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/></svg></a>
+<div class="see"><p class="see-label">You should see</p><ul><li>The title <span class="quote">Auction Intelligence</span>.</li><li>While it loads: grey placeholder shapes, not a spinning wheel.</li><li>Then real Florida auctions, with views to switch between: Split, Table, Map and Calendar.</li></ul></div>
+<a class="report nojs-only" id="report-radar" href="https://wa.me/?text=BidDeed.AI%20second%20look%2C%20step%203%20%28The%20auction%20list%20and%20map%29%3A%20something%20looks%20off.%20What%20I%20saw%3A%20" target="_blank" rel="noopener">Something&#39;s off? Tell Ariel on WhatsApp</a>
+<div class="verdict" role="group" aria-label="Your verdict for step 3"><button type="button" class="vbtn ok" id="ok-radar" aria-pressed="false"><span class="dot" aria-hidden="true"></span>Looks right</button><button type="button" class="vbtn off" id="off-radar" aria-pressed="false"><span class="dot" aria-hidden="true"></span>Something&#39;s off</button></div>
+<div class="note" id="note-wrap-radar" hidden><label for="note-radar">What did you see? (a few words is plenty)</label><textarea id="note-radar" placeholder="For example: the page took a minute to load"></textarea></div>
+</article>
+</div>
+<h2 id="sec-1">Deed, the AI assistant</h2><div class="steps">
+<article class="step" id="step-chat" data-id="chat" data-num="4" data-title="Ask Deed a question" aria-labelledby="step-title-chat">
+<div class="step-top"><span class="num" aria-hidden="true">4</span><div>
+<h3 id="step-title-chat"><span class="sr">Step 4: </span>Ask Deed a question</h3>
+<p class="why">The heart of the product: a chat that answers like Claude does.</p></div></div>
+<a class="open" id="open-chat" href="https://biddeed.ai/chat" target="_blank" rel="noopener">Open <span class="url">biddeed.ai/chat</span><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M14 3h7v7h-2V6.4l-9.3 9.3-1.4-1.4L17.6 5H14V3ZM5 5h6v2H5v12h12v-6h2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/></svg></a>
+<p class="try"><b>Try this:</b> Type <span class="quote">What survives a tax deed sale in Florida?</span> and send it.</p>
+<div class="see"><p class="see-label">You should see</p><ul><li>The heading <span class="quote">What are we bidding on?</span></li><li>The answer writes itself out on screen, usually within 30 seconds.</li><li>Now clear the box and type just <code>/</code>. A menu of skills pops up, such as <code>/liens</code> and <code>/comps</code>.</li></ul></div>
+<a class="report nojs-only" id="report-chat" href="https://wa.me/?text=BidDeed.AI%20second%20look%2C%20step%204%20%28Ask%20Deed%20a%20question%29%3A%20something%20looks%20off.%20What%20I%20saw%3A%20" target="_blank" rel="noopener">Something&#39;s off? Tell Ariel on WhatsApp</a>
+<div class="verdict" role="group" aria-label="Your verdict for step 4"><button type="button" class="vbtn ok" id="ok-chat" aria-pressed="false"><span class="dot" aria-hidden="true"></span>Looks right</button><button type="button" class="vbtn off" id="off-chat" aria-pressed="false"><span class="dot" aria-hidden="true"></span>Something&#39;s off</button></div>
+<div class="note" id="note-wrap-chat" hidden><label for="note-chat">What did you see? (a few words is plenty)</label><textarea id="note-chat" placeholder="For example: the page took a minute to load"></textarea></div>
+</article>
+</div>
+<h2 id="sec-2">Buying a report</h2><div class="steps">
+<article class="step" id="step-buy" data-id="buy" data-num="5" data-title="Get to the payment page" aria-labelledby="step-title-buy">
+<div class="step-top"><span class="num" aria-hidden="true">5</span><div>
+<h3 id="step-title-buy"><span class="sr">Step 5: </span>Get to the payment page</h3>
+<p class="why">The path a real customer takes to buy.</p></div></div>
+<a class="open" id="open-buy" href="https://biddeed.ai/buy-report" target="_blank" rel="noopener">Open <span class="url">biddeed.ai/buy-report</span><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M14 3h7v7h-2V6.4l-9.3 9.3-1.4-1.4L17.6 5H14V3ZM5 5h6v2H5v12h12v-6h2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/></svg></a>
+<p class="try"><b>Try this:</b> Pick any county, tap any auction, enter your email, then tap <span class="quote">Get my SIGNAL$ Property Report — $25</span>.</p>
+<div class="see"><p class="see-label">You should see</p><ul><li>The county list loads with upcoming auctions and dates.</li><li>You land on Stripe&#39;s secure payment page for $25.</li><li>You can close it there. Nothing is charged unless you enter a card and pay.</li></ul></div>
+<a class="report nojs-only" id="report-buy" href="https://wa.me/?text=BidDeed.AI%20second%20look%2C%20step%205%20%28Get%20to%20the%20payment%20page%29%3A%20something%20looks%20off.%20What%20I%20saw%3A%20" target="_blank" rel="noopener">Something&#39;s off? Tell Ariel on WhatsApp</a>
+<div class="verdict" role="group" aria-label="Your verdict for step 5"><button type="button" class="vbtn ok" id="ok-buy" aria-pressed="false"><span class="dot" aria-hidden="true"></span>Looks right</button><button type="button" class="vbtn off" id="off-buy" aria-pressed="false"><span class="dot" aria-hidden="true"></span>Something&#39;s off</button></div>
+<div class="note" id="note-wrap-buy" hidden><label for="note-buy">What did you see? (a few words is plenty)</label><textarea id="note-buy" placeholder="For example: the page took a minute to load"></textarea></div>
+</article>
+</div>
+<h2 id="sec-3">Privacy and security</h2><div class="steps">
+<article class="step" id="step-private" data-id="private" data-num="6" data-title="Private data stays locked" aria-labelledby="step-title-private">
+<div class="step-top"><span class="num" aria-hidden="true">6</span><div>
+<h3 id="step-title-private"><span class="sr">Step 6: </span>Private data stays locked</h3>
+<p class="why">Without signing in, nobody can see anyone&#39;s saved auctions.</p></div></div>
+<a class="open" id="open-private" href="https://biddeed.ai/api/watchlist" target="_blank" rel="noopener">Open <span class="url">biddeed.ai/api/watchlist</span><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M14 3h7v7h-2V6.4l-9.3 9.3-1.4-1.4L17.6 5H14V3ZM5 5h6v2H5v12h12v-6h2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/></svg></a>
+<div class="see"><p class="see-label">You should see</p><ul><li>One short line of text: <code>{"error":"Authentication required."}</code></li><li>That is the right answer. It means the door is locked.</li></ul></div>
+<a class="report nojs-only" id="report-private" href="https://wa.me/?text=BidDeed.AI%20second%20look%2C%20step%206%20%28Private%20data%20stays%20locked%29%3A%20something%20looks%20off.%20What%20I%20saw%3A%20" target="_blank" rel="noopener">Something&#39;s off? Tell Ariel on WhatsApp</a>
+<div class="verdict" role="group" aria-label="Your verdict for step 6"><button type="button" class="vbtn ok" id="ok-private" aria-pressed="false"><span class="dot" aria-hidden="true"></span>Looks right</button><button type="button" class="vbtn off" id="off-private" aria-pressed="false"><span class="dot" aria-hidden="true"></span>Something&#39;s off</button></div>
+<div class="note" id="note-wrap-private" hidden><label for="note-private">What did you see? (a few words is plenty)</label><textarea id="note-private" placeholder="For example: the page took a minute to load"></textarea></div>
+</article>
+<article class="step" id="step-grade" data-id="grade" data-num="7" data-title="The security grade" aria-labelledby="step-title-grade">
+<div class="step-top"><span class="num" aria-hidden="true">7</span><div>
+<h3 id="step-title-grade"><span class="sr">Step 7: </span>The security grade</h3>
+<p class="why">An independent site grades how biddeed.ai protects visitors.</p></div></div>
+<a class="open" id="open-grade" href="https://securityheaders.com/?q=biddeed.ai&amp;followRedirects=on" target="_blank" rel="noopener">Open <span class="url">securityheaders.com</span><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M14 3h7v7h-2V6.4l-9.3 9.3-1.4-1.4L17.6 5H14V3ZM5 5h6v2H5v12h12v-6h2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/></svg></a>
+<div class="see"><p class="see-label">You should see</p><ul><li>A grade of <b>A+</b> in a green box.</li><li>If it asks, tap Scan and wait a few seconds.</li></ul></div>
+<a class="report nojs-only" id="report-grade" href="https://wa.me/?text=BidDeed.AI%20second%20look%2C%20step%207%20%28The%20security%20grade%29%3A%20something%20looks%20off.%20What%20I%20saw%3A%20" target="_blank" rel="noopener">Something&#39;s off? Tell Ariel on WhatsApp</a>
+<div class="verdict" role="group" aria-label="Your verdict for step 7"><button type="button" class="vbtn ok" id="ok-grade" aria-pressed="false"><span class="dot" aria-hidden="true"></span>Looks right</button><button type="button" class="vbtn off" id="off-grade" aria-pressed="false"><span class="dot" aria-hidden="true"></span>Something&#39;s off</button></div>
+<div class="note" id="note-wrap-grade" hidden><label for="note-grade">What did you see? (a few words is plenty)</label><textarea id="note-grade" placeholder="For example: the page took a minute to load"></textarea></div>
+</article>
+</div>
+<h2 id="sec-4">For developers</h2><div class="steps">
+<article class="step" id="step-mcp" data-id="mcp" data-num="8" data-title="The connection for AI tools" aria-labelledby="step-title-mcp">
+<div class="step-top"><span class="num" aria-hidden="true">8</span><div>
+<h3 id="step-title-mcp"><span class="sr">Step 8: </span>The connection for AI tools</h3>
+<p class="why">Developers plug BidDeed into Claude and other AI apps through this.</p></div></div>
+<a class="open" id="open-mcp" href="https://mcp.biddeed.ai/health" target="_blank" rel="noopener">Open <span class="url">mcp.biddeed.ai/health</span><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M14 3h7v7h-2V6.4l-9.3 9.3-1.4-1.4L17.6 5H14V3ZM5 5h6v2H5v12h12v-6h2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/></svg></a>
+<div class="see"><p class="see-label">You should see</p><ul><li>A line of text that includes <code>"status":"ok"</code> and <code>"tools":25</code>.</li></ul></div>
+<a class="report nojs-only" id="report-mcp" href="https://wa.me/?text=BidDeed.AI%20second%20look%2C%20step%208%20%28The%20connection%20for%20AI%20tools%29%3A%20something%20looks%20off.%20What%20I%20saw%3A%20" target="_blank" rel="noopener">Something&#39;s off? Tell Ariel on WhatsApp</a>
+<div class="verdict" role="group" aria-label="Your verdict for step 8"><button type="button" class="vbtn ok" id="ok-mcp" aria-pressed="false"><span class="dot" aria-hidden="true"></span>Looks right</button><button type="button" class="vbtn off" id="off-mcp" aria-pressed="false"><span class="dot" aria-hidden="true"></span>Something&#39;s off</button></div>
+<div class="note" id="note-wrap-mcp" hidden><label for="note-mcp">What did you see? (a few words is plenty)</label><textarea id="note-mcp" placeholder="For example: the page took a minute to load"></textarea></div>
+</article>
+</div>
+<h2 id="sec-5">The automated tests</h2><div class="steps">
+<article class="step" id="step-tests" data-id="tests" data-num="9" data-title="Robot test reports" aria-labelledby="step-title-tests">
+<div class="step-top"><span class="num" aria-hidden="true">9</span><div>
+<h3 id="step-title-tests"><span class="sr">Step 9: </span>Robot test reports</h3>
+<p class="why">These run by themselves on every release. Each one should be green.</p></div></div>
+<div class="links"><a id="open-tests-0" href="https://github.com/breverdbidder/biddeed-web/actions/runs/35950360479" target="_blank" rel="noopener"><span>Live site release + design check</span><small>Sep 23, 11:10 PM ET</small></a><a id="open-tests-1" href="https://github.com/breverdbidder/biddeed-web/actions/runs/35950873664" target="_blank" rel="noopener"><span>Signed-in customer tests</span><small>Sep 23, 11:18 PM ET</small></a><a id="open-tests-2" href="https://github.com/breverdbidder/biddeed-web/actions/runs/35345759588" target="_blank" rel="noopener"><span>Two-account privacy test</span><small>Sep 18, 8:38 AM ET</small></a><a id="open-tests-3" href="https://github.com/breverdbidder/biddeed-web/actions/runs/35956028063" target="_blank" rel="noopener"><span>Security scan</span><small>Sep 24, 12:31 AM ET</small></a></div>
+<div class="see"><p class="see-label">You should see</p><ul><li>Each report shows a green check and the word <b>Success</b>.</li><li>GitHub may offer to open its app. Either way is fine.</li></ul></div>
+<a class="report nojs-only" id="report-tests" href="https://wa.me/?text=BidDeed.AI%20second%20look%2C%20step%209%20%28Robot%20test%20reports%29%3A%20something%20looks%20off.%20What%20I%20saw%3A%20" target="_blank" rel="noopener">Something&#39;s off? Tell Ariel on WhatsApp</a>
+<div class="verdict" role="group" aria-label="Your verdict for step 9"><button type="button" class="vbtn ok" id="ok-tests" aria-pressed="false"><span class="dot" aria-hidden="true"></span>Looks right</button><button type="button" class="vbtn off" id="off-tests" aria-pressed="false"><span class="dot" aria-hidden="true"></span>Something&#39;s off</button></div>
+<div class="note" id="note-wrap-tests" hidden><label for="note-tests">What did you see? (a few words is plenty)</label><textarea id="note-tests" placeholder="For example: the page took a minute to load"></textarea></div>
+</article>
+</div>
+
+  <h2 id="send-title">Send your results</h2>
+  <section class="send" aria-labelledby="send-title">
+    <div class="nojs-note"><b>Done?</b> Tap below to tell Ariel the rest looked right. Any note you sent from a step is already with him.
+      <a class="allgood" id="all-good" href="https://wa.me/?text=BidDeed.AI%20second%20look%20%28check%20D15%29%3A%20I%20went%20through%20all%209%20steps.%20Anything%20I%20did%20not%20report%20separately%20looked%20right.%20My%20name%3A%20" target="_blank" rel="noopener">Everything else looked right</a></div>
+    <div class="send-live">
+      <p>Your results are written up below. Add your name, then send them to Ariel.</p>
+      <div class="field">
+        <label for="reviewer-name">Your name</label>
+        <input type="text" id="reviewer-name" autocomplete="name" placeholder="First and last name">
+      </div>
+      <p class="left" id="left-note" hidden></p>
+      <div class="summary" id="summary" tabindex="0" aria-label="Your results"></div>
+      <div class="actions">
+        <a class="wa" id="wa-link" href="https://wa.me/" target="_blank" rel="noopener">
+          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.1 5.1 0 0 0 1.1 2.7 11.6 11.6 0 0 0 4.4 3.9c1.7.7 2.3.8 3.1.6a2.7 2.7 0 0 0 1.8-1.2 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.3-.2-.5-.3Z"/></svg>
+          Send on WhatsApp
+        </a>
+        <button type="button" class="copy" id="copy-btn">Copy results</button>
+      </div>
+      <p class="status" id="copy-status" role="status" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <footer>
+    <p>Every link goes to the live site, biddeed.ai, or to a public test report. Nothing in this guide changes an account or takes a payment.</p>
+    <p>For the record: this is check D15 of our Claude.ai-parity program. The rule is simple: the person who checks a feature can&#39;t be the one who built it.</p>
+    <p>From Ariel Shapira · BidDeed.AI · Satellite Beach, Florida</p>
+  </footer>
+</main>
+
+<script>
+(function(){
+  document.documentElement.classList.add('js');
+  var ALL = Array.prototype.map.call(document.querySelectorAll('.step'), function(el){
+    return { id: el.getAttribute('data-id'), num: +el.getAttribute('data-num'), title: el.getAttribute('data-title') };
+  });
+  var TOTAL = ALL.length;
+  var KEY = 'bd-second-look-v1';
+  var state = { v: {}, n: {}, name: '' };
+  try { var raw = localStorage.getItem(KEY); if (raw) { var p = JSON.parse(raw); if (p && typeof p === 'object') state = { v: p.v || {}, n: p.n || {}, name: p.name || '' }; } } catch (e) {}
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+
+  function paintStep(st){
+    var el = document.getElementById('step-' + st.id);
+    var v = state.v[st.id] || '';
+    if (v) el.setAttribute('data-v', v); else el.removeAttribute('data-v');
+    document.getElementById('ok-' + st.id).setAttribute('aria-pressed', v === 'ok' ? 'true' : 'false');
+    document.getElementById('off-' + st.id).setAttribute('aria-pressed', v === 'off' ? 'true' : 'false');
+    document.getElementById('note-wrap-' + st.id).hidden = v !== 'off';
+  }
+  function etNow(){
+    try { return new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }).format(new Date()) + ' ET'; }
+    catch (e) { return new Date().toString(); }
+  }
+  function summaryText(){
+    var lines = ['BidDeed.AI second look (check D15)', 'Reviewer: ' + ((state.name || '').trim() || '(name not added)'), 'Checked: ' + etNow(), ''];
+    var missing = [];
+    ALL.forEach(function(st){
+      var v = state.v[st.id];
+      if (!v) { missing.push(st.num); return; }
+      var line = st.num + '. ' + st.title + ': ' + (v === 'ok' ? '✅ Looks right' : "⚠️ Something’s off");
+      var note = (state.n[st.id] || '').trim();
+      if (v === 'off' && note) line += ' — ' + note;
+      lines.push(line);
+    });
+    if (missing.length) { lines.push(''); lines.push('Not checked: ' + missing.join(', ')); }
+    return lines.join(String.fromCharCode(10));
+  }
+  function refresh(){
+    var done = ALL.filter(function(st){ return !!state.v[st.id]; }).length;
+    document.getElementById('progress-text').textContent = done + ' of ' + TOTAL + ' checked';
+    document.getElementById('progress-fill').style.width = Math.round(done / TOTAL * 100) + '%';
+    var left = document.getElementById('left-note');
+    if (done < TOTAL) { left.hidden = false; left.textContent = (TOTAL - done) + (TOTAL - done === 1 ? ' step is' : ' steps are') + ' still open. You can send what you have, or finish them first.'; }
+    else { left.hidden = true; }
+    var text = summaryText();
+    document.getElementById('summary').textContent = text;
+    document.getElementById('wa-link').href = 'https://wa.me/?text=' + encodeURIComponent(text);
+  }
+  ALL.forEach(function(st){
+    paintStep(st);
+    var ta = document.getElementById('note-' + st.id);
+    ta.value = state.n[st.id] || '';
+    document.getElementById('ok-' + st.id).addEventListener('click', function(){
+      if (state.v[st.id] === 'ok') delete state.v[st.id]; else state.v[st.id] = 'ok';
+      paintStep(st); save(); refresh();
+    });
+    document.getElementById('off-' + st.id).addEventListener('click', function(){
+      if (state.v[st.id] === 'off') delete state.v[st.id]; else state.v[st.id] = 'off';
+      paintStep(st); save(); refresh();
+      if (state.v[st.id] === 'off') ta.focus();
+    });
+    ta.addEventListener('input', function(){ state.n[st.id] = ta.value; save(); refresh(); });
+  });
+  var nameInput = document.getElementById('reviewer-name');
+  nameInput.value = state.name || '';
+  nameInput.addEventListener('input', function(){ state.name = nameInput.value; save(); refresh(); });
+  var status = document.getElementById('copy-status');
+  document.getElementById('copy-btn').addEventListener('click', function(){
+    var text = summaryText();
+    function selectFallback(){
+      var box = document.getElementById('summary');
+      try { var r = document.createRange(); r.selectNodeContents(box); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); } catch (e) {}
+      status.textContent = 'Your results are selected above. Copy them, then paste into WhatsApp.';
+    }
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function(){ status.textContent = 'Copied. Paste it into your WhatsApp chat with Ariel.'; }, selectFallback);
+      } else { selectFallback(); }
+    } catch (e) { selectFallback(); }
+  });
+  refresh();
+})();
+</script>
+</body>
+</html>
