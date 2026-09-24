@@ -6,6 +6,7 @@ import {
   Camera,
   Image as ImageIcon,
   Mic,
+  MicOff,
   Paperclip,
   Plus,
   ScanLine,
@@ -22,6 +23,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
+import VoiceStrip from '@/components/deed-home/VoiceStrip'
+import { useDeedVoice } from '@/components/deed-home/useDeedVoice'
 import { ACCEPTED, MAX_FILES, captureScreen, formatBytes, toAttachments } from './attachments'
 import SlashMenu, { filterCommands, type SlashCommand } from './SlashMenu'
 import type { DeedAttachment, DeedStatus } from './useDeedChat'
@@ -39,6 +42,12 @@ interface Props {
   onSend: (text: string, attachments: DeedAttachment[]) => void
   onStop: () => void
   onCommand: (command: SlashCommand) => void
+  /**
+   * The panel stays mounted while closed (DeedPanel hides it), so the composer
+   * is told when it is out of view: a voice call must not keep listening and
+   * talking behind a closed panel.
+   */
+  hidden?: boolean
 }
 
 export default function DeedComposer({
@@ -48,6 +57,7 @@ export default function DeedComposer({
   onSend,
   onStop,
   onCommand,
+  hidden = false,
 }: Props) {
   const [value, setValue] = useState('')
   const [files, setFiles] = useState<DeedAttachment[]>([])
@@ -57,6 +67,16 @@ export default function DeedComposer({
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   const cameraRef = useRef<HTMLInputElement>(null)
+  // The same voice session as the /chat composer (lib/deed/voice.ts): our own
+  // WebSocket client, no third-party script, so the existing CSP already
+  // covers it (connect-src wss://api.elevenlabs.io, microphone=(self)).
+  const voice = useDeedVoice()
+  const { stop: stopVoice } = voice
+  const voiceLive = voice.state.active
+
+  useEffect(() => {
+    if (hidden && voiceLive) stopVoice()
+  }, [hidden, voiceLive, stopVoice])
 
   const streaming = status === 'streaming'
   // The menu opens only when '/' is the first character of the box. A slash
@@ -244,6 +264,14 @@ export default function DeedComposer({
           dragging ? 'border-primary' : 'border-input'
         )}
       >
+        <VoiceStrip
+          state={voice.state}
+          onStop={voice.stop}
+          onSubmitGate={voice.submitGate}
+          onCloseGate={voice.closeGate}
+          onDismiss={voice.dismiss}
+        />
+
         {slashOpen ? (
           <SlashMenu
             query={value}
@@ -341,25 +369,20 @@ export default function DeedComposer({
             }}
           />
 
-          {/*
-            Present, and honestly disabled. The voice agent is blocked on two
-            things that are not code: the CSP does not yet allow the ElevenLabs
-            bundle (script-src carries no unpkg.com and no pinned hashes despite
-            a comment in middleware.ts claiming otherwise), and the integration
-            choice — npm SDK vs widget embed — is Ariel's call. A control that
-            says why it cannot run is honest; one that silently does nothing is
-            not, and hiding it would lose the affordance entirely.
-          */}
           <button
             type="button"
-            disabled
-            title="Voice is not connected yet — the ElevenLabs bundle is still blocked by our content security policy."
-            className="inline-flex size-9 cursor-not-allowed items-center justify-center rounded-lg text-muted-foreground"
+            onClick={voice.toggle}
+            aria-pressed={voice.state.active}
+            aria-label={voice.state.active ? 'End the voice session' : 'Start a voice session with Deed'}
+            title={voice.state.active ? 'End the voice session' : 'Voice · 70+ languages'}
+            className={cn(
+              'inline-flex size-9 items-center justify-center rounded-lg outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring',
+              voice.state.active
+                ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+            )}
           >
-            <Mic className="size-4" aria-hidden />
-            <span className="sr-only">
-              Voice input — not connected yet, pending content security policy approval
-            </span>
+            {voice.state.active ? <MicOff className="size-4" aria-hidden /> : <Mic className="size-4" aria-hidden />}
           </button>
 
           <span className="ml-1 hidden text-[11px] text-muted-foreground sm:inline">

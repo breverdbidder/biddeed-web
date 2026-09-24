@@ -181,6 +181,7 @@ export default function DeedPanel({ open, onClose }: Props) {
           onSend={onSend}
           onStop={stop}
           onCommand={onCommand}
+          hidden={!open}
         />
       </aside>
     </>

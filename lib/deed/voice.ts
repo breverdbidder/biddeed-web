@@ -172,16 +172,26 @@ export class DeedVoiceSession {
         this.playing = false
       }
     }
+    // A socket that never reaches "listening" (a firewall that blocks wss, an
+    // expired signed URL, the agent refusing the session) used to be ignored
+    // here, so the strip sat on "Connecting to Deed…" for good. It now ends
+    // the attempt and says so. A socket this session has already let go of
+    // (the customer pressed stop) is not an error.
     ws.onerror = () => {
-      if (!this.active) return
+      if (this.ws !== ws) return
+      const wasActive = this.active
       this.stop()
-      this.cb.onPhase('error', 'Voice connection lost — try text chat below.')
+      this.cb.onPhase(
+        'error',
+        wasActive ? 'Voice connection lost — try text chat below.' : 'Could not connect to voice — try text chat below.'
+      )
     }
     ws.onclose = () => {
-      if (this.active) {
-        this.stop()
-        this.cb.onPhase('idle', '')
-      }
+      if (this.ws !== ws) return
+      const wasActive = this.active
+      this.stop()
+      if (wasActive) this.cb.onPhase('idle', '')
+      else this.cb.onPhase('error', 'Could not connect to voice — try text chat below.')
     }
   }
 
