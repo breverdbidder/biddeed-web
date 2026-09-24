@@ -19,7 +19,8 @@ import { A, B, apiJson, haveCreds, signIn } from './helpers/clerk'
  *   API keys the key page signed in, for an account without an API plan: the
  *            reason and the plans link are shown, and a create is refused
  *   Chat     one real conversation: saved under the account, back after a
- *            reload, found by the sidebar search, reopened, deleted
+ *            reload, found by the sidebar search, reopened, deleted; and a
+ *            PDF attached in the composer, read and quoted in the answer
  *
  * What it writes, it removes: the one skill is deleted through the UI (API
  * delete in `finally` as the backstop), the key create is refused before any
@@ -35,6 +36,28 @@ const SYSTEM = ['lien_survival', 'surplus_check', 'zoning', 'comps', 'repair_est
 const SKILLS = '/api/deed/skills'
 
 type Library = { signed_in: boolean; can_run: boolean; skills: Array<{ id: string | null; slug: string; kind: string; name: string; mine: boolean; enabled: boolean; tools: string[] }> }
+
+/** A one-page PDF with plain Helvetica text: the smallest honest fixture for "Deed reads a PDF". */
+function onePagePdf(lines: string[]): Buffer {
+  const content = 'BT /F1 12 Tf 72 720 Td 16 TL ' + lines.map((l) => `(${l.replace(/[()\\]/g, '')} ) Tj T*`).join(' ') + ' ET'
+  const objs = [
+    '<< /Type /Catalog /Pages 2 0 R >>',
+    '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+    '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>',
+    '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
+    `<< /Length ${content.length} >>\nstream\n${content}\nendstream`,
+  ]
+  let out = '%PDF-1.4\n'
+  const offsets: number[] = []
+  objs.forEach((o, i) => {
+    offsets.push(out.length)
+    out += `${i + 1} 0 obj\n${o}\nendobj\n`
+  })
+  const xref = out.length
+  out += `xref\n0 ${objs.length + 1}\n0000000000 65535 f \n` + offsets.map((o) => `${String(o).padStart(10, '0')} 00000 n \n`).join('')
+  out += `trailer\n<< /Size ${objs.length + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`
+  return Buffer.from(out, 'latin1')
+}
 
 async function library(page: Page): Promise<Library> {
   const r = await apiJson(page, SKILLS)
@@ -239,6 +262,52 @@ test.describe('Deed Skills, API keys and chat recents, signed in (PARITY CP-6 / 
       await expect(recent).toHaveCount(0, { timeout: 15_000 })
       expect((await apiJson(page, `/api/deed/threads/${threadId}`)).status).toBe(404)
       threadId = null
+    } finally {
+      if (threadId) await apiJson(page, `/api/deed/threads/${threadId}`, { method: 'DELETE' }).catch(() => undefined)
+      await ctx.close()
+    }
+  })
+
+  test('chat (CP-2): a PDF attached in the composer is read and cited in the answer', async ({ browser }) => {
+    test.skip(!haveCreds, 'Clerk E2E identities (E2E_USER_A/B_*) are not configured')
+    test.setTimeout(240_000)
+    const digits = String(Date.now()).slice(-6)
+    // A parcel id that exists only inside this PDF: if it is in the answer, Deed read the file.
+    const parcel = `24-36-01-QZ-${digits}.0`
+    const pdf = onePagePdf([
+      'Title search notes - E2E fixture',
+      `Parcel ID: ${parcel}`,
+      'Opening bid: $187,500',
+      'First mortgage: Example Bank, recorded 2019',
+    ])
+    const ctx = await (browser as Browser).newContext()
+    const page = await ctx.newPage()
+    let threadId: string | null = null
+    try {
+      await signIn(page, A.email!, A.password!)
+      const deedCalls: string[] = []
+      page.on('response', (r) => {
+        if (/\/api\/deed(\/upload)?(\?|$)/.test(r.url())) deedCalls.push(`${r.request().method()} ${new URL(r.url()).pathname} ${r.status()}`)
+      })
+      await page.goto('/chat', { waitUntil: 'domcontentloaded' })
+      await page.locator('input[type="file"]').first().setInputFiles({ name: `title-notes-${digits}.pdf`, mimeType: 'application/pdf', buffer: pdf })
+      await expect(page.getByText(`title-notes-${digits}.pdf — ready, Deed will cite it`)).toBeVisible({ timeout: 30_000 })
+
+      await page.getByRole('textbox', { name: /Ask Deed about Florida/ }).fill('What is the parcel ID in the attached PDF? Quote it exactly.')
+      await page.getByRole('button', { name: 'Send message' }).click()
+      await expect(page).toHaveURL(/\/chat\?c=[A-Za-z0-9-]+/, { timeout: 30_000 })
+      threadId = new URL(page.url()).searchParams.get('c')
+      const cited = await page
+        .locator('#main')
+        .getByText(parcel)
+        .first()
+        .waitFor({ state: 'visible', timeout: 120_000 })
+        .then(() => true)
+        .catch(() => false)
+      if (!cited) {
+        const shown = (await page.locator('#main').innerText().catch(() => '')).replace(/\s+/g, ' ').slice(-700)
+        throw new Error(`The answer never quoted ${parcel}. Calls: [${deedCalls.join(' | ')}]. Page: …${shown}`)
+      }
     } finally {
       if (threadId) await apiJson(page, `/api/deed/threads/${threadId}`, { method: 'DELETE' }).catch(() => undefined)
       await ctx.close()
