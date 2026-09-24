@@ -1,6 +1,7 @@
 'use client'
 
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import SentAlertsPanel from '@/components/alerts/SentAlertsPanel'
 
 export type AlertWatch = {
   id: string
@@ -193,6 +194,8 @@ export default function AlertDashboard() {
           {!loading && watches.length > 0 ? <ul className="space-y-3">{watches.map((watch) => <li key={watch.id} className="border border-border bg-card p-4 sm:p-5"><div className="flex flex-wrap items-start justify-between gap-3"><div><p className="font-mono text-sm font-bold text-foreground">{watch.case_number}</p><p className="mt-1 text-sm text-muted-foreground">{watch.county} County · {watch.max_bid == null ? 'No bid ceiling' : `$${watch.max_bid.toLocaleString()} ceiling`}</p></div><span className="border border-border px-2 py-1 text-xs font-bold uppercase tracking-wide text-muted-foreground">{watch.status}</span></div><div className="mt-4 flex flex-wrap gap-2">{watch.alert_types.map((type) => <span key={type} className="bg-secondary px-2 py-1 text-xs text-secondary-foreground">{type.replaceAll('_', ' ')}</span>)}</div><div className="mt-4 flex gap-4 text-sm"><button type="button" onClick={() => void updateStatus(watch)} disabled={watch.status === 'cancelled'} className="font-semibold text-primary underline-offset-4 hover:underline disabled:opacity-40">{watch.status === 'active' ? 'Pause' : 'Resume'}</button><button type="button" onClick={() => void cancelWatch(watch)} disabled={watch.status === 'cancelled'} className="font-semibold text-destructive underline-offset-4 hover:underline disabled:opacity-40">Cancel</button></div></li>)}</ul> : null}
         </div>
       </div>
+
+      <SentAlertsPanel />
     </section>
   )
 }

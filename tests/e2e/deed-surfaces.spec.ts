@@ -18,6 +18,8 @@ import { A, B, apiJson, haveCreds, signIn } from './helpers/clerk'
  *            the upgrade link, shown in the panel) · delete through the panel
  *   API keys the key page signed in, for an account without an API plan: the
  *            reason and the plans link are shown, and a create is refused
+ *   Scheduled the sent-alert history (CP-5): listed on /alerts, CSV and
+ *            calendar downloads, the job status line, owner-only by id
  *   Chat     one real conversation: saved under the account, back after a
  *            reload, found by the sidebar search, reopened, deleted; and a
  *            PDF attached in the composer, read and quoted in the answer
@@ -370,6 +372,83 @@ test.describe('Deed Skills, API keys and chat recents, signed in (PARITY CP-6 / 
       expect(refused.status).toBe(403)
       expect((refused.body as { reason?: string }).reason).toBe('no_plan')
       expect(((await apiJson(page, '/api/developer/keys')).body as { keys: unknown[] }).keys).toEqual([])
+    } finally {
+      await ctx.close()
+    }
+  })
+
+  test('Scheduled (CP-5): sent alerts are listed and download as CSV and a calendar file, for the owner only', async ({ browser, page }) => {
+    // Signed out, the history answers 401 like the rest of /api/alerts.
+    await page.goto('/alerts', { waitUntil: 'domcontentloaded' })
+    expect((await apiJson(page, '/api/alerts/history')).status).toBe(401)
+    test.skip(!haveCreds, 'Clerk E2E identities (E2E_USER_A/B_*) are not configured')
+    test.setTimeout(120_000)
+    const ctx = await (browser as Browser).newContext({ acceptDownloads: true })
+    const pageA = await ctx.newPage()
+    try {
+      await signIn(pageA, A.email!, A.password!)
+      await pageA.goto('/alerts', { waitUntil: 'domcontentloaded' })
+      await expect(pageA).not.toHaveURL(/\/sign-in/)
+
+      type Sent = { id: string; case_number: string; status: string; has_calendar: boolean; delivery_id: string | null }
+      const listing = await apiJson(pageA, '/api/alerts/history')
+      expect(listing.status).toBe(200)
+      const history = listing.body as { alerts: Sent[]; health: { active: boolean; last_status: string | null; last_run_at: string | null } | null }
+      expect(Array.isArray(history.alerts)).toBe(true)
+      // The address an alert went to is never part of what the page loads.
+      expect(JSON.stringify(history)).not.toMatch(/recipient|@resend\.dev|notify_email/)
+      // The job behind the page: on, and its last run succeeded.
+      expect(history.health?.active).toBe(true)
+      expect(history.health?.last_status).toBe('succeeded')
+
+      const csv = await apiJson(pageA, '/api/alerts/history?format=csv')
+      expect(csv.status).toBe(200)
+      expect(csv.headers['content-type']).toContain('text/csv')
+      expect(csv.headers['content-disposition']).toMatch(/^attachment; filename="biddeed-alerts-\d{4}-\d{2}-\d{2}\.csv"$/)
+      const csvText = String((csv.body as { raw?: string }).raw ?? '')
+      const csvLines = csvText.replace(/^\uFEFF/, '').split('\r\n').filter((l) => l !== '')
+      expect(csvLines[0]).toBe('sent_at_et,case_number,county,alert,status,subject,message,delivery_id')
+
+      const ics = await apiJson(pageA, '/api/alerts/history?format=ics')
+      expect(ics.status).toBe(200)
+      expect(ics.headers['content-type']).toContain('text/calendar')
+      const icsText = String((ics.body as { raw?: string }).raw ?? '')
+      expect(icsText.startsWith('BEGIN:VCALENDAR\r\n')).toBe(true)
+      expect(icsText.trimEnd().endsWith('END:VCALENDAR')).toBe(true)
+
+      // Another account's alert is not reachable by id (notification 1 is the
+      // CP-5 proof account's), and an unknown format is refused.
+      expect((await apiJson(pageA, '/api/alerts/history?format=ics&id=1')).status).toBe(404)
+      expect((await apiJson(pageA, '/api/alerts/history?format=xml')).status).toBe(400)
+
+      // The Scheduled page shows the same list and the job's status line.
+      const panel = pageA.getByTestId('sent-alerts')
+      await expect(panel.getByRole('heading', { name: 'Sent alerts' })).toBeVisible({ timeout: 20_000 })
+      await expect(pageA.getByTestId('watch-health')).toHaveAttribute('data-state', 'healthy')
+      if (history.alerts.length === 0) {
+        await expect(panel.getByText(/Nothing sent yet/)).toBeVisible()
+        test.info().annotations.push({ type: 'cp5', description: 'no sent alerts on this account yet: list, CSV header and empty calendar checked' })
+        return
+      }
+      const newest = history.alerts[0]
+      expect(csvLines.length).toBe(history.alerts.length + 1)
+      expect(csvLines[1]).toContain(newest.case_number)
+      await expect(panel.getByRole('listitem').first()).toContainText(newest.case_number)
+      const [csvDownload] = await Promise.all([pageA.waitForEvent('download'), panel.getByRole('link', { name: 'Export CSV' }).click()])
+      expect(csvDownload.suggestedFilename()).toMatch(/^biddeed-alerts-\d{4}-\d{2}-\d{2}\.csv$/)
+      const withCalendar = history.alerts.find((a) => a.has_calendar)
+      if (withCalendar) {
+        expect(icsText).toContain('BEGIN:VEVENT')
+        const [one] = await Promise.all([
+          pageA.waitForEvent('download'),
+          panel.getByRole('link', { name: `Calendar file for ${withCalendar.case_number}` }).first().click(),
+        ])
+        expect(one.suggestedFilename()).toMatch(/^biddeed-alert-\d+\.ics$/)
+      }
+      test.info().annotations.push({
+        type: 'cp5',
+        description: `${history.alerts.length} sent alert(s); newest ${newest.status}, Resend id ${newest.delivery_id ? 'present' : 'absent'}, calendar ${withCalendar ? 'downloaded' : 'none'}`,
+      })
     } finally {
       await ctx.close()
     }
