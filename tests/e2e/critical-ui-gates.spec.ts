@@ -141,9 +141,20 @@ test('protected report preserves the unauthenticated contract', async ({ page })
   expect(response?.status()).toBeLessThan(500)
 })
 
-test('authenticated report renders all eighteen S5 sections when storage state is provided', async ({ page }) => {
-  test.skip(!process.env.PLAYWRIGHT_AUTH_STATE, 'Requires a real Clerk storage state; never weaken auth for a public audit.')
-  await page.context().addCookies([])
-  await page.goto(`${BASE}/report/cad5d07a-b9c7-433d-b365-3165637b7cbe?key=${process.env.SAMPLE_REPORT_KEY ?? ''}`, { waitUntil: 'domcontentloaded' })
-  await expect(page.locator('[data-s5-section], [data-section-number]')).toHaveCount(18)
+// SIGNAL-1: the keyed fixture this used (cad5d07a…) expired and the test only
+// ran with a Clerk storage state, so it never ran. The free sample report is
+// public by design (lib/analytics/funnel.ts SAMPLE_REPORT_PATH): check that it
+// numbers all 18 sections the way the render contract (s5_report_sections) does.
+test('the public sample report numbers all eighteen sections', async ({ page }) => {
+  const response = await page.goto(`${BASE}/report/04a30c35-6cef-486d-8599-ce0eb20dd79c`, { waitUntil: 'domcontentloaded' })
+  expect(response?.status()).toBe(200)
+  const badges = (await page.locator('.sec-badge').allTextContents()).map((t) => t.trim())
+  const covered = new Set<number>()
+  for (const b of badges) {
+    const m = b.match(/^(\d{2})(?:[–-](\d{2}))?$/)
+    if (!m) continue
+    for (let i = Number(m[1]); i <= Number(m[2] ?? m[1]); i++) covered.add(i)
+  }
+  expect([...covered].sort((a, b) => a - b)).toEqual(Array.from({ length: 18 }, (_, i) => i + 1))
+  expect(badges.indexOf('15'), 'the Bid Card is §15').toBeGreaterThan(-1)
 })

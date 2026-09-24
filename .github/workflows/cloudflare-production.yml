@@ -75,6 +75,9 @@ jobs:
       - name: Validate auction-detail paid gate
         run: npm run test:auction-detail-gate
 
+      - name: Validate SIGNAL$ report access (paid or claimed only)
+        run: npm run test:signal-report-access
+
       - name: Validate Cloudflare credentials are present
         shell: bash
         run: |

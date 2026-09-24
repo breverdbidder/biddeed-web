@@ -214,8 +214,11 @@ test.describe('Deed Projects (PARITY CP-4)', () => {
       const report = (detail.body as { report: { sections: string[]; section_count: number; unlocked: boolean; status: string; buy_url: string | null; price_usd: number } }).report
       expect(report.section_count).toBe(18)
       expect(report.sections).toHaveLength(18)
-      expect(report.sections[0]).toBe('Subject property identification')
-      expect(report.sections[17]).toBe('Prediction scorecard and max-bid decision')
+      // Numbered as the report renders them (public.s5_report_sections): §15 is the Bid Card.
+      expect(report.sections[0]).toBe('Subject and auction identification')
+      expect(report.sections[14]).toBe('SIGNAL$ Bid Card: opinion of price')
+      expect(report.sections[15]).toBe('Judgment and encumbrance summary')
+      expect(report.sections[17]).toBe('Auction outcome and prediction scorecard')
       expect(report.unlocked).toBe(false)
       expect(report.status).toBe('none')
       expect(report.buy_url).toBe(`/buy-report?county=brevard&case=${encodeURIComponent(`E2E-${marker}`)}`)

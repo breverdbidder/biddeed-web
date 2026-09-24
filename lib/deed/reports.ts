@@ -4,16 +4,18 @@ import { REPORT_PRICE_USD, REPORT_SECTIONS } from '@/lib/report-sections'
 import { isNotConfigured } from '@/lib/deed/server'
 import { renderTextPdf, type PdfBlock } from '@/lib/deed/pdf'
 import { countyName, latestVersions, type ProjectRow } from '@/lib/deed/projects'
+import { decideReportAccess, sessionsToCheck, type ClaimRow, type PurchaseRow, type QueueRow } from '@/lib/deed/report-access'
 
 /**
  * PARITY CP-4 PR B — the two report surfaces of a project.
  *
  * 1. SIGNAL$ progressive disclosure (S3). The 18 section NAMES are always
- *    shown; their VALUES are locked until the account has bought the report
- *    for this project's sale. The purchase record is report_delivery_queue
- *    (county + case_number + customer_email), the same row the one-time
- *    checkout writes — so "unlocked" is a fact about this account's own
- *    purchase, matched on the Clerk-verified primary email, never a guess.
+ *    shown; their VALUES are locked until the account has the report for
+ *    this project's sale: a PAID one-time purchase (report_delivery_queue
+ *    row delivered, or backed by a non-revoked `purchases` row) or a
+ *    subscriber claim (signal_report_claims), matched on county + case_number
+ *    + the Clerk-verified primary email, never a guess. See
+ *    lib/deed/report-access.ts (SIGNAL-1).
  *
  * 2. Generated project reports. A JSON / CSV / PDF snapshot of the project —
  *    facts, the sale from the auctions SSOT, files, items, what Deed said in
@@ -64,25 +66,58 @@ export async function signalReportAccess(supabase: SupabaseClient, email: string
   base.buy_url = `/buy-report?county=${encodeURIComponent(project.county)}&case=${encodeURIComponent(project.case_number)}`
   if (!email) return { ...base, status: 'unknown', reason: 'No email on this account to match a purchase against.' }
 
-  const { data, error } = await supabase
-    .from('report_delivery_queue')
-    .select('id,status,report_pdf_url,created_at,delivered_at')
-    .ilike('customer_email', escapeLike(email))
-    .ilike('county', project.county)
-    .eq('case_number', project.case_number)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle<{ id: string; status: string; report_pdf_url: string | null; created_at: string; delivered_at: string | null }>()
-  if (error) return { ...base, status: 'unknown', reason: isNotConfigured(error) ? 'Report purchases are not configured on this deployment.' : 'Could not check report purchases right now.' }
-  if (!data) return base
-  const delivered = data.status === 'delivered'
+  // SIGNAL-1: a queue row is written when Stripe Checkout opens, before any
+  // payment, so it is only a candidate. It unlocks when delivered or when a
+  // non-revoked `purchases` row exists for its session; a subscriber claim
+  // unlocks too. The rule lives in lib/deed/report-access.ts.
+  const byEmail = escapeLike(email)
+  const byCounty = escapeLike(project.county)
+  const [queueRes, claimRes] = await Promise.all([
+    supabase
+      .from('report_delivery_queue')
+      .select('id,status,stripe_session_id,report_pdf_url,created_at,delivered_at')
+      .ilike('customer_email', byEmail)
+      .ilike('county', byCounty)
+      .eq('case_number', project.case_number)
+      .order('created_at', { ascending: false })
+      .limit(20),
+    supabase
+      .from('signal_report_claims')
+      .select('id,status,report_pdf_url,created_at,delivered_at')
+      .ilike('email', byEmail)
+      .ilike('county', byCounty)
+      .eq('case_number', project.case_number)
+      .order('created_at', { ascending: false })
+      .limit(5),
+  ])
+  const unavailable = (e: { code?: string }) => ({
+    ...base,
+    status: 'unknown' as const,
+    reason: isNotConfigured(e) ? 'Report purchases are not configured on this deployment.' : 'Could not check report purchases right now.',
+  })
+  if (queueRes.error) return unavailable(queueRes.error)
+  // Claims are a second route to the report; a deployment without the claims
+  // table still answers from purchases alone.
+  if (claimRes.error && !isNotConfigured(claimRes.error)) return unavailable(claimRes.error)
+  const queue = (queueRes.data ?? []) as QueueRow[]
+  const claims = (claimRes.error ? [] : claimRes.data ?? []) as ClaimRow[]
+
+  let purchases: PurchaseRow[] = []
+  const sessions = sessionsToCheck(queue)
+  if (sessions.length > 0) {
+    const { data, error } = await supabase.from('purchases').select('stripe_session_id,revoked_at').in('stripe_session_id', sessions)
+    if (error) return unavailable(error)
+    purchases = (data ?? []) as PurchaseRow[]
+  }
+
+  const decision = decideReportAccess(queue, purchases, claims)
   return {
     ...base,
-    unlocked: true,
-    status: delivered ? 'delivered' : 'pending',
-    purchased_at: data.created_at,
-    delivered_at: data.delivered_at,
-    report_url: delivered && data.report_pdf_url ? data.report_pdf_url : null,
+    unlocked: decision.unlocked,
+    status: decision.status,
+    purchased_at: decision.purchased_at,
+    delivered_at: decision.delivered_at,
+    report_url: decision.report_url,
   }
 }
 

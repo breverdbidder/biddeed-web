@@ -55,7 +55,7 @@ function typingInField(): boolean {
 
 const WHAT_YOU_GET = [
   'Comparable sales and both value bands',
-  'Judgment and encumbrance review',
+  'Judgment and encumbrance summary',
   'The auction outcome, checked after the sale',
 ]
 

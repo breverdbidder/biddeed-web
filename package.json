@@ -21,6 +21,7 @@
     "test:report-release": "node scripts/validate-report-field-release.mjs",
     "test:auction-detail-gate": "node scripts/validate-auction-detail-gate.mjs",
     "test:alert-history": "node --experimental-strip-types scripts/validate-alert-history.mts",
+    "test:signal-report-access": "node --experimental-strip-types scripts/validate-signal-report-access.mts",
     "test:auction-pin-contract": "node scripts/validate-auction-pin-contract.mjs",
     "test:deed-identity-boundary": "node scripts/validate-deed-identity-boundary.mjs",
     "test:funnel-events": "node scripts/validate-funnel-events.mjs",
