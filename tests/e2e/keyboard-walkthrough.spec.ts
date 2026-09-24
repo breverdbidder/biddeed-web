@@ -6,7 +6,7 @@ import { test, expect, type Page } from '@playwright/test'
  * credentials, nothing written: every step is a key press, and each asserts
  * where focus is and what the keyboard opened.
  *
- *   Tab 1          the skip link, and Enter moves focus into <main>
+ *   skip link      first in the tab order; Enter moves focus into <main>
  *   ⌘B / Ctrl+B    collapses and restores the sidebar
  *   /              the skills menu opens as a listbox; arrows move the
  *                  active option; Enter opens the Skills panel on that skill
@@ -92,7 +92,11 @@ test.describe('Keyboard walkthrough (PARITY CP-9)', () => {
       await page.keyboard.press('Control+k')
       await page.keyboard.type('new chat')
       await page.keyboard.press('Enter')
-      await expect(page).toHaveURL(/\/chat$/)
+      // A fresh /chat (the skip link may have left #main on the URL): no thread open.
+      await expect.poll(() => {
+        const u = new URL(page.url())
+        return `${u.pathname}${u.search}`
+      }).toBe('/chat')
     }
   })
 })
