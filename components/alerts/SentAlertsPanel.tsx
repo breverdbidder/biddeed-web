@@ -52,6 +52,9 @@ export default function SentAlertsPanel() {
   const [showAll, setShowAll] = useState(false)
   const [downloading, setDownloading] = useState<string | null>(null)
   const [downloadError, setDownloadError] = useState<string | null>(null)
+  // Signed out, the watches panel above already asks for sign-in: this list
+  // stays out of the way instead of repeating the same error.
+  const [signedOut, setSignedOut] = useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -59,6 +62,8 @@ export default function SentAlertsPanel() {
     try {
       const response = await fetch('/api/alerts/history', { credentials: 'include', cache: 'no-store' })
       const body = await response.json().catch(() => null)
+      setSignedOut(response.status === 401)
+      if (response.status === 401) return
       if (!response.ok) throw new Error(body?.error || 'Unable to load your sent alerts.')
       setAlerts(Array.isArray(body?.alerts) ? body.alerts : [])
       setHealth(body?.health && typeof body.health === 'object' ? body.health : null)
@@ -106,6 +111,8 @@ export default function SentAlertsPanel() {
   const visible = showAll ? alerts : alerts.slice(0, SHOWN)
   const hasCalendar = alerts.some((a) => a.has_calendar)
 
+  if (signedOut) return null
+
   return (
     <section className="space-y-4" aria-labelledby="sent-alerts-title" data-testid="sent-alerts">
       <div className="flex flex-col gap-3 border-t border-border pt-8 sm:flex-row sm:items-end sm:justify-between">
@@ -131,7 +138,7 @@ export default function SentAlertsPanel() {
       {error ? (
         <div role="alert" className="flex flex-wrap items-center justify-between gap-3 border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           <span>{error}</span>
-          <button type="button" onClick={() => void load()} className="font-semibold underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Try again</button>
+          <button type="button" onClick={() => void load()} className="inline-flex min-h-11 items-center font-semibold underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Try again</button>
         </div>
       ) : null}
       {downloadError ? <div role="alert" className="border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">{downloadError}</div> : null}
