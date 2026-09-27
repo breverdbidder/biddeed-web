@@ -49,6 +49,9 @@ export const ALLOWED_PROPS = [
   'digest_opt_in', // boolean, lead_captured only
   'stored', // boolean, lead_captured only - did the lead list accept it
   'county', // county slug (public auction data, not the visitor)
+  'first_county', // first tracked county landing, never the current /radar path
+  'first_source_type', // campaign | organic_search | referral | internal | direct
+  'first_source_detail', // sanitized UTM source or referring hostname, never a full URL
   'sale_type', // 'tax_deed' | 'foreclosure'
 ] as const
 
