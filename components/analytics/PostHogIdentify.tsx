@@ -25,6 +25,7 @@ import { track } from '@/lib/analytics/funnel'
 type PostHogLike = {
   identify?: (id: string, props?: Record<string, unknown>) => void
   reset?: () => void
+  get_property?: (key: string) => unknown
 }
 function ph(): PostHogLike | undefined {
   return (globalThis as unknown as { posthog?: PostHogLike }).posthog
@@ -62,7 +63,18 @@ export default function PostHogIdentify() {
           const flag = `bd_signup_tracked_${userId}`
           if (created && Date.now() - created < 30 * 60 * 1000 && !localStorage.getItem(flag)) {
             localStorage.setItem(flag, '1')
-            track('signup_completed', { method: user?.externalAccounts?.length ? 'oauth' : 'email' })
+            // The Worker county landing and this app share origin and PostHog
+            // persistence. Read first-touch super properties after identify,
+            // when the registration event fires on /radar after Clerk returns.
+            const firstCounty = posthog.get_property?.('bd_first_county')
+            const sourceType = posthog.get_property?.('bd_first_source_type')
+            const sourceDetail = posthog.get_property?.('bd_first_source_detail')
+            track('signup_completed', {
+              method: user?.externalAccounts?.length ? 'oauth' : 'email',
+              first_county: typeof firstCounty === 'string' ? firstCounty : undefined,
+              first_source_type: typeof sourceType === 'string' ? sourceType : undefined,
+              first_source_detail: typeof sourceDetail === 'string' ? sourceDetail : undefined,
+            })
           }
         } catch {}
       } else if (identified.current) {
