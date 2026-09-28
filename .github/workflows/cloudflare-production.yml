@@ -90,6 +90,9 @@ jobs:
       - name: Validate sign-up hand-off (Server Action origins + Signing-you-in screen)
         run: npm run test:auth-handoff
 
+      - name: Validate the free-report popup creates the account (email code / sign-in code)
+        run: npm run test:popup-account
+
       - name: Validate Cloudflare credentials are present
         shell: bash
         run: |

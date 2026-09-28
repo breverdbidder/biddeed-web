@@ -8,6 +8,7 @@ import { ArrowRight, Check, X } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { SAMPLE_REPORT_PATH, track } from '@/lib/analytics/funnel'
+import PopupAccountStep from '@/components/lead/PopupAccountStep'
 
 /**
  * Free-report lead popup (issue #181 scope add, 2026-09-23): a popup with a
@@ -16,6 +17,14 @@ import { SAMPLE_REPORT_PATH, track } from '@/lib/analytics/funnel'
  * Email in, free report out: the keyless public sample SIGNAL$ Property Report
  * opens the moment the email is accepted. The email lands in lead_profiles via
  * POST /api/leads/free-report (source popup_free_report).
+ *
+ * Then the same email becomes a free account in the popup (Ariel, 28 Sep
+ * 2026): a password and the emailed 6-digit code, or Google, or - when the
+ * email already has an account - a sign-in code (PopupAccountStep). Until 28
+ * Sep the popup stopped at the lead: an outside visitor gave his email at
+ * 1:33 PM ET, opened the report, believed he had registered, and had no
+ * account. Where Clerk is not live (accountStep false) the popup keeps the
+ * link to /sign-up instead.
  *
  * Who sees it: signed-out visitors on the entry pages below, once. Signed-in
  * members never do. Dismissed = quiet for 3 days; captured = never again.
@@ -59,7 +68,7 @@ const WHAT_YOU_GET = [
   'The auction outcome, checked after the sale',
 ]
 
-export default function FreeReportPopup({ signedIn }: { signedIn: boolean | undefined }) {
+export default function FreeReportPopup({ signedIn, accountStep = false }: { signedIn: boolean | undefined; accountStep?: boolean }) {
   const pathname = usePathname() || '/'
   const [open, setOpen] = useState(false)
   const [email, setEmail] = useState('')
@@ -202,13 +211,17 @@ export default function FreeReportPopup({ signedIn }: { signedIn: boolean | unde
                 >
                   Open my free report <ArrowRight className="size-4" aria-hidden />
                 </a>
-                <a
-                  href={signupHref}
-                  onClick={() => track('signup_prompt_clicked', { surface: 'free_report_popup' })}
-                  className="inline-flex min-h-11 items-center justify-center text-sm font-semibold text-primary underline-offset-4 hover:underline"
-                >
-                  Create a free account to follow the next auction
-                </a>
+                {accountStep ? (
+                  <PopupAccountStep email={email.trim()} />
+                ) : (
+                  <a
+                    href={signupHref}
+                    onClick={() => track('signup_prompt_clicked', { surface: 'free_report_popup' })}
+                    className="inline-flex min-h-11 items-center justify-center text-sm font-semibold text-primary underline-offset-4 hover:underline"
+                  >
+                    Create a free account to follow the next auction
+                  </a>
+                )}
               </div>
             ) : (
               <>

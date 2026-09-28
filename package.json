@@ -27,6 +27,7 @@
     "test:pin-card-viewer": "node --experimental-strip-types scripts/validate-pin-card-viewer.mts",
     "test:buy-report-offer": "node --experimental-strip-types scripts/validate-buy-report-offer.mts",
     "test:auth-handoff": "node --experimental-strip-types scripts/validate-auth-handoff.mts",
+    "test:popup-account": "node --experimental-strip-types scripts/validate-popup-account.mts",
     "test:deed-identity-boundary": "node scripts/validate-deed-identity-boundary.mjs",
     "test:funnel-events": "node scripts/validate-funnel-events.mjs",
     "test:zone-standards-dims": "node scripts/validate-zone-standards-dims.mjs",
