@@ -12,6 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { REPORT_FIELD_RELEASE_POLICY } from '@/lib/report-field-release'
 import { REPORT_SECTIONS } from '@/lib/report-sections'
 import { track } from '@/lib/analytics/funnel'
+import { countyDisplay, countySlug as toCountySlug, decideOffer, type Offer } from '@/lib/buy-report/offer'
 
 type CountyOption = {
   county_slug: string
@@ -100,6 +101,29 @@ export default function BuyReportCheckout() {
 
   const [prefillLoading, setPrefillLoading] = useState(Boolean(mcaId) || Boolean(caseParam && countyParam))
   const [prefillError, setPrefillError] = useState('')
+  // A deep-linked property the storefront does not sell (lib/buy-report/offer.ts):
+  // the visitor gets the auctions or counties that are on sale, never the email
+  // form for a report the checkout would refuse.
+  const [prefillRejected, setPrefillRejected] = useState(false)
+  const [notice, setNotice] = useState('')
+
+  function steerAway(slug: string, offer: Offer) {
+    if (offer.state === 'sellable' || offer.state === 'unknown') return
+    const name = countyDisplay(slug) || 'this county'
+    setPrefillRejected(true)
+    setCountySlug(slug)
+    setCountyName(name)
+    loadCounties()
+    if (offer.state === 'other_auctions') {
+      setAuctions(offer.rows)
+      setAuctionQuery('')
+      setStep('auction')
+      setNotice(`A SIGNAL$ report is not on sale for that property. These upcoming ${name} auctions are:`)
+    } else {
+      setStep('county')
+      setNotice(`SIGNAL$ reports are not on sale for ${name} County right now. These counties are:`)
+    }
+  }
 
   // Prefill flow — arrived from a property card in chat (?mca_id=&address=&county=&date=).
   useEffect(() => {
@@ -117,18 +141,27 @@ export default function BuyReportCheckout() {
 
     fetch(apiUrl(`/property/${encodeURIComponent(mcaId)}`))
       .then((r) => r.json())
-      .then((d: PropertyLookup) => {
-        if (d && d.case_number) {
-          setSelected((prev) => ({
-            case_number: d.case_number ?? prev.case_number,
-            property_address: d.property_address ?? prev.property_address,
-            auction_date: d.auction_date ?? prev.auction_date,
-            opening_bid: d.opening_bid ?? prev.opening_bid,
-            sale_type: d.sale_type ?? prev.sale_type,
-          }))
-        } else {
+      .then(async (d: PropertyLookup) => {
+        if (!d || !d.case_number) {
           setPrefillError('Could not load this property — the link may be out of date.')
+          return
         }
+        setSelected((prev) => ({
+          case_number: d.case_number ?? prev.case_number,
+          property_address: d.property_address ?? prev.property_address,
+          auction_date: d.auction_date ?? prev.auction_date,
+          opening_bid: d.opening_bid ?? prev.opening_bid,
+          sale_type: d.sale_type ?? prev.sale_type,
+        }))
+        // Offer checkout only for a property the storefront sells; the email
+        // form stays disabled (prefillLoading) until this answers.
+        const slug = toCountySlug(d.county || params.get('county'))
+        const listing = slug
+          ? await fetch(apiUrl(`/buy-report/auctions?county=${encodeURIComponent(slug)}`))
+              .then((r) => (r.ok ? r.json() : null))
+              .catch(() => null)
+          : null
+        steerAway(slug, decideOffer(listing, d.case_number, d.auction_date))
       })
       .catch(() => setPrefillError('Could not load this property — please try again.'))
       .finally(() => setPrefillLoading(false))
@@ -152,13 +185,13 @@ export default function BuyReportCheckout() {
     let cancelled = false
     fetch(apiUrl(`/buy-report/auctions?county=${encodeURIComponent(slug)}`))
       .then((r) => r.json())
-      .then((data: AuctionOption[]) => {
+      .then((data: unknown) => {
         if (cancelled) return
-        const rows = Array.isArray(data) ? data : []
-        const match = rows.find((a) => (a.case_number || '').toLowerCase() === caseParam.toLowerCase())
+        const offer = decideOffer(data, caseParam)
         setCountySlug(slug)
         setCountyName(fallbackName)
-        if (match) {
+        if (offer.state === 'sellable') {
+          const match = offer.row
           setSelected({
             case_number: match.case_number,
             property_address: match.property_address,
@@ -167,9 +200,15 @@ export default function BuyReportCheckout() {
             sale_type: match.sale_type,
           })
           setStep('checkout')
-        } else {
-          setAuctions(rows)
+        } else if (offer.state === 'other_auctions') {
+          setAuctions(offer.rows)
           setStep('auction')
+          setNotice(`A SIGNAL$ report is not on sale for that property. These upcoming ${fallbackName} auctions are:`)
+        } else if (offer.state === 'county_not_sold') {
+          // Was: an empty auction list reading "Calendar sync in progress" for
+          // a county the storefront does not sell at all.
+          setStep('county')
+          setNotice(`SIGNAL$ reports are not on sale for ${fallbackName} County right now. These counties are:`)
         }
       })
       .catch(() => {
@@ -214,6 +253,7 @@ export default function BuyReportCheckout() {
   }, [mcaId])
 
   function loadAuctions(slug: string, name: string) {
+    setNotice('')
     setCountySlug(slug)
     setCountyName(name)
     setAuctions(null)
@@ -232,6 +272,7 @@ export default function BuyReportCheckout() {
   }
 
   function pickAuction(a: AuctionOption) {
+    setNotice('')
     setSelected({
       case_number: a.case_number,
       property_address: a.property_address,
@@ -258,7 +299,7 @@ export default function BuyReportCheckout() {
     )
   }, [auctions, auctionQuery])
 
-  const mcaIdForSubmit = useMemo(() => (mcaId ? mcaId : null), [mcaId])
+  const mcaIdForSubmit = useMemo(() => (mcaId && !prefillRejected ? mcaId : null), [mcaId, prefillRejected])
 
   // PROMISE-4 (issue 20518). Investor, Pro and Pro Plus all print a monthly
   // SIGNAL$ Property Report allowance on /pricing — 10, 30 and 50. Until this
@@ -388,7 +429,13 @@ export default function BuyReportCheckout() {
             ))}
           </div>
 
-          {step === 'county' && !mcaId ? (
+          {notice ? (
+            <p role="status" className="mt-5 rounded-lg border border-border bg-secondary p-3 text-base text-foreground">
+              {notice}
+            </p>
+          ) : null}
+
+          {step === 'county' && (!mcaId || prefillRejected) ? (
             <div className="mt-5">
               <h2 className="text-lg font-semibold text-foreground">Pick your county</h2>
               <p className="mt-1 text-base text-muted-foreground">
@@ -521,7 +568,7 @@ export default function BuyReportCheckout() {
 
           {step === 'checkout' ? (
             <div className="mt-5">
-              {!mcaId ? (
+              {!mcaId || prefillRejected ? (
                 <button
                   type="button"
                   onClick={() => setStep('auction')}

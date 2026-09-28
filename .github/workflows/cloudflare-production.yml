@@ -84,6 +84,9 @@ jobs:
       - name: Validate the pin card re-asks the viewer tier on every open
         run: npm run test:pin-card-viewer
 
+      - name: Validate /buy-report offers checkout only for a property on sale
+        run: npm run test:buy-report-offer
+
       - name: Validate Cloudflare credentials are present
         shell: bash
         run: |
