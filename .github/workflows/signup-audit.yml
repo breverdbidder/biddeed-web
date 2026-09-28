@@ -1,0 +1,70 @@
+name: Sign-up audit (recent accounts, no PII)
+
+# Did a new registrant actually get an account, and did the sign-in land?
+# PostHog cannot answer that for a visitor whose browser sends Do Not Track /
+# Global Privacy Control or blocks analytics (lib/analytics/funnel.ts sends
+# nothing then), so this reads Clerk itself: accounts created in the last
+# N hours, whether the email was verified, and their sessions.
+#
+# This repo is public, so the log carries no email, name or id: each account is
+# shown as "internal test" (an everestcapital8+ address) or "outside", with a
+# webmail domain (gmail.com, ...) or "other domain", plus times in Florida ET.
+# Read-only: GET /v1/users and GET /v1/sessions on the Clerk Backend API.
+on:
+  workflow_dispatch:
+    inputs:
+      hours:
+        description: 'Look back this many hours'
+        required: false
+        default: '6'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Recent Clerk accounts and sessions
+        env:
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+          HOURS: ${{ inputs.hours }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'EOF'
+          const key = process.env.CLERK_SECRET_KEY
+          if (!key) { console.error('CLERK_SECRET_KEY missing'); process.exit(1) }
+          const hours = Math.max(1, Math.min(168, Number(process.env.HOURS) || 6))
+          const since = Date.now() - hours * 3600e3
+          const api = async (p) => {
+            const r = await fetch('https://api.clerk.com/v1' + p, { headers: { Authorization: `Bearer ${key}` } })
+            if (!r.ok) throw new Error(`${p.split('?')[0]} -> ${r.status}`)
+            return r.json()
+          }
+          const et = (ms) => ms ? new Date(ms).toLocaleString('en-US', { timeZone: 'America/New_York', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit' }) + ' ET' : '-'
+          const WEBMAIL = new Set(['gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com', 'icloud.com', 'aol.com', 'live.com', 'me.com', 'msn.com', 'proton.me', 'protonmail.com'])
+          const users = await api('/users?order_by=-created_at&limit=50')
+          const recent = users.filter((u) => u.created_at >= since)
+          const lines = [`## Clerk accounts created in the last ${hours} h (as of ${et(Date.now())})`, '', `${recent.length} account(s).`, '']
+          if (recent.length) {
+            lines.push('| created | who | email domain | email verified by | sessions | first session | last active |', '|---|---|---|---|---|---|---|')
+          }
+          for (const u of recent) {
+            const primary = (u.email_addresses || []).find((e) => e.id === u.primary_email_address_id) || (u.email_addresses || [])[0] || {}
+            const addr = String(primary.email_address || '').toLowerCase()
+            const domain = addr.split('@')[1] || ''
+            const who = /^everestcapital8\+/.test(addr) ? 'internal test' : 'outside'
+            const dom = WEBMAIL.has(domain) ? domain : (domain ? 'other domain' : '-')
+            const ver = primary.verification ? `${primary.verification.status} (${primary.verification.strategy || '-'})` : ((u.external_accounts || []).length ? 'oauth' : '-')
+            const sessions = await api(`/sessions?user_id=${encodeURIComponent(u.id)}&limit=20`)
+            const first = sessions.reduce((m, s) => Math.min(m, s.created_at || Infinity), Infinity)
+            const last = sessions.reduce((m, s) => Math.max(m, s.last_active_at || 0), 0)
+            const statuses = sessions.map((s) => s.status).join(', ') || 'none'
+            lines.push(`| ${et(u.created_at)} | ${who} | ${dom} | ${ver} | ${sessions.length} (${statuses}) | ${first === Infinity ? '-' : et(first)} | ${et(last || u.last_active_at)} |`)
+          }
+          const out = lines.join('\n')
+          console.log(out)
+          if (process.env.GITHUB_STEP_SUMMARY) (await import('node:fs')).appendFileSync(process.env.GITHUB_STEP_SUMMARY, out + '\n')
+          EOF
