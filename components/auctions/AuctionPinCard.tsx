@@ -1,12 +1,13 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Lock } from 'lucide-react'
+import { FolderPlus, Lock } from 'lucide-react'
 
 import { formatCountyLabel } from '@/lib/counties'
 import { apiUrl } from '@/lib/api'
 import { tierAtLeast } from '@/lib/tier/rank'
 import { PLANS } from '@/components/deed-home/LandingSections'
+import { createViewerResolver, type TierAnswer, type ViewerState } from '@/lib/auctions/viewer-state'
 import type { Auction } from '@/types/auctions'
 
 /**
@@ -34,31 +35,24 @@ import type { Auction } from '@/types/auctions'
  * every row.)
  */
 
-type ViewerState = 'anonymous' | 'free_member' | 'investor'
-
 const investorPlan = PLANS.find((p) => p.name === 'Investor')
 const INVESTOR_PRICE_LABEL = investorPlan ? `${investorPlan.price}${investorPlan.per}` : ''
 
-let viewerPromise: Promise<ViewerState> | null = null
-
-/** One fetch per session; fails closed to 'anonymous' (locks shown). */
-function resolveViewer(): Promise<ViewerState> {
-  if (!viewerPromise) {
-    viewerPromise = fetch(apiUrl('/api/viewer/tier'))
-      .then((r) => r.json())
-      .then((j: { tier_id?: string; signed_in?: boolean }) =>
-        tierAtLeast(j.tier_id ?? 'free', 'investor') ? 'investor' : j.signed_in ? 'free_member' : 'anonymous'
-      )
-      .catch(() => 'anonymous' as ViewerState)
-  }
-  return viewerPromise
-}
+/**
+ * Asked again on every card open (lib/auctions/viewer-state.ts says why: an
+ * answer kept for the whole session outlived a visitor's sign-up). Fails
+ * closed to 'anonymous' (locks shown).
+ */
+const viewerResolver = createViewerResolver(
+  () => fetch(apiUrl('/api/viewer/tier'), { cache: 'no-store' }).then((r) => r.json() as Promise<TierAnswer>),
+  (tierId) => tierAtLeast(tierId, 'investor')
+)
 
 function useViewerState(): ViewerState {
-  const [viewer, setViewer] = useState<ViewerState>('anonymous')
+  const [viewer, setViewer] = useState<ViewerState>(() => viewerResolver.last() ?? 'anonymous')
   useEffect(() => {
     let live = true
-    resolveViewer().then((v) => {
+    viewerResolver.resolve().then((v) => {
       if (live) setViewer(v)
     })
     return () => {
@@ -240,9 +234,10 @@ export default function AuctionPinCard({ auction, onClose }: { auction: Auction;
             mechanism every other hook point across the product uses. */}
         <a
           href={`/chat?new_project_county=${encodeURIComponent(auction.county || '')}&case=${encodeURIComponent(auction.case_number || '')}&source=pin_card`}
-          className="mt-4 block text-center text-sm font-semibold text-primary dark:text-primary underline hover:no-underline"
+          className="mt-4 flex min-h-11 items-center justify-center gap-2 text-sm font-semibold text-primary dark:text-primary underline hover:no-underline"
         >
-          📁 New project from this
+          <FolderPlus className="size-4" aria-hidden />
+          New project from this
         </a>
       </div>
     </div>

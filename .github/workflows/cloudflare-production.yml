@@ -81,6 +81,9 @@ jobs:
       - name: Validate no withheld SIGNAL$ field is rendered (report policy v1)
         run: npm run test:withheld-leaks
 
+      - name: Validate the pin card re-asks the viewer tier on every open
+        run: npm run test:pin-card-viewer
+
       - name: Validate Cloudflare credentials are present
         shell: bash
         run: |
