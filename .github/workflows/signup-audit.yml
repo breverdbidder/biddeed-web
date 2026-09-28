@@ -68,6 +68,15 @@ jobs:
             const statuses = sessions.map((s) => s.status).join(', ') || 'none'
             lines.push(`| ${et(u.created_at)} | ${who} | ${dom} | ${ver} | ${sessions.length} (${statuses}) | ${first === Infinity ? '-' : et(first)} | ${et(last || u.last_active_at)} |`)
           }
+          // Everyone who signed in during the window (new or returning accounts).
+          const signedIn = (await api('/users?order_by=-last_sign_in_at&limit=50')).filter((u) => (u.last_sign_in_at || 0) >= since)
+          lines.push('', `### Accounts that signed in during the last ${hours} h: ${signedIn.length}`, '')
+          if (signedIn.length) lines.push('| last sign-in | who | account created |', '|---|---|---|')
+          for (const u of signedIn) {
+            const primary = (u.email_addresses || []).find((e) => e.id === u.primary_email_address_id) || (u.email_addresses || [])[0] || {}
+            const who = /^everestcapital8(\+|@)/.test(String(primary.email_address || '').toLowerCase()) ? 'internal' : 'outside'
+            lines.push(`| ${et(u.last_sign_in_at)} | ${who} | ${et(u.created_at)} |`)
+          }
           // One person, by hash: page through every account and compare. Read from
           // the event payload, not an env var, so the step header never prints it.
           const fs = await import('node:fs')
