@@ -1,4 +1,5 @@
 import { createMDX } from 'fumadocs-mdx/next'
+import { SERVER_ACTION_ALLOWED_ORIGINS } from './config/server-action-origins.mjs'
 /** @type {import('next').NextConfig} */
 const securityHeaders = [
   { key: 'X-Content-Type-Options', value: 'nosniff' },
@@ -33,6 +34,10 @@ const nextConfig = {
   basePath: process.env.NEXT_PUBLIC_BASE_PATH ?? '',
   poweredByHeader: false,
   productionBrowserSourceMaps: false,
+  // Sign-up and sign-in hang without this: see config/server-action-origins.mjs.
+  experimental: {
+    serverActions: { allowedOrigins: SERVER_ACTION_ALLOWED_ORIGINS },
+  },
   // Legacy in-app links. While the app was mounted at basePath '/radar' the
   // workspace lived at /radar/auctions and details at /radar/auctions/:id.
   // Both moved up a level. These redirects are scoped under /radar on purpose:

@@ -2,27 +2,40 @@
 
 import { useAuth } from '@clerk/nextjs'
 import { useEffect } from 'react'
+import { LIGHT as C } from '@/lib/design-tokens'
+import { HANDOFF_POLL_MS, handoffStep, showHandoffOverlay } from '@/lib/auth/handoff'
 
 const RADAR = '/radar'
+const COLORS = { background: C.background, ink: C.ink, muted: C.navy, brand: C.brand }
+
+type ClerkGlobal = { session?: { id?: string } | null }
+
+/** Shows "Signing you in…" and loads the destination as a new document. */
+function leaveFor(to: string) {
+  showHandoffOverlay(document, COLORS)
+  window.location.assign(to)
+}
 
 /**
  * Escorts a just-authenticated visitor off the auth pages.
  *
  * Layer 1 (added in #168): the instant useAuth() reports an active session,
- * hard-navigate to /radar. A document navigation resolves the Clerk session
- * handshake natively — the same path that always recovered a manual reload.
+ * show the "Signing you in…" screen and hard-navigate to /radar. A document
+ * navigation resolves the Clerk session handshake natively — the same path
+ * that always recovered a manual reload.
  *
- * Layer 2 (this change): on production the post-auth transition's RSC flight
- * request 500s in the handshake window (digest 54830976@E80, reproduced on
- * the #166, #167 AND #168 builds) and the dead flight kills the React tree
- * before the session activates client-side — so Layer 1 never gets to run.
- * The fatal error surfaces as a window `unhandledrejection` event carrying
- * the minified-React error 441 message (measured live 2026-09-18), and window-level
- * listeners registered here keep working after the tree dies. On detection,
- * poll the public /api/viewer/tier endpoint: the session DOES establish
- * server-side within seconds-to-a-minute of the crash, and the first
- * signed_in:true answer triggers the same hard navigation to /radar. If the
- * session never lands (genuinely failed sign-in), reload instead — an
+ * Layer 2: if the React tree dies before the session activates client-side,
+ * Layer 1 never runs. That happened on every sign-up until 28 Sep 2026: the
+ * Server Action Clerk awaits before activating a session answered 500 on
+ * biddeed.ai (fixed in config/server-action-origins.mjs), React threw #441,
+ * the page went blank, and this fallback polled every 3 s, so new members
+ * waited 18-48 s on a blank page. The fatal error surfaces as a window
+ * `unhandledrejection` carrying the minified-React error 441 message, and
+ * window-level listeners registered here keep working after the tree dies.
+ * On detection: show the overlay at once (plain DOM, so it renders without
+ * React), then every second check the browser's Clerk client and the public
+ * /api/viewer/tier endpoint, and go to /radar on the first sign of a session.
+ * If none lands in 90 s (a genuinely failed sign-in), reload instead — an
  * anonymous reload simply re-renders the healthy form.
  *
  * /radar is a public route and /api/viewer/tier is a public endpoint; this
@@ -32,37 +45,37 @@ export default function SignedInRedirect({ to = RADAR }: { to?: string }) {
   const { isLoaded, isSignedIn } = useAuth()
 
   useEffect(() => {
-    if (isLoaded && isSignedIn) {
-      window.location.assign(to)
-    }
+    if (isLoaded && isSignedIn) leaveFor(to)
   }, [isLoaded, isSignedIn, to])
 
   useEffect(() => {
-    let timers: ReturnType<typeof setTimeout>[] = []
+    const timers: ReturnType<typeof setTimeout>[] = []
     let done = false
 
     const recover = () => {
       if (done) return
       done = true
+      showHandoffOverlay(document, COLORS)
       const started = Date.now()
-      const poll = async () => {
-        try {
-          const r = await fetch('/api/viewer/tier', { credentials: 'include' })
-          const t = await r.json()
-          if (t && t.signed_in) {
-            window.location.assign(to)
-            return
+      const tick = async () => {
+        const clerk = (window as unknown as { Clerk?: ClerkGlobal }).Clerk
+        const clientSession = Boolean(clerk?.session?.id)
+        let serverSignedIn = false
+        if (!clientSession) {
+          try {
+            const r = await fetch('/api/viewer/tier', { credentials: 'include', cache: 'no-store' })
+            const t = await r.json()
+            serverSignedIn = Boolean(t && t.signed_in)
+          } catch {
+            // endpoint unreachable — ask again on the next tick
           }
-        } catch {
-          // endpoint unreachable — fall through to the next attempt
         }
-        if (Date.now() - started > 90_000) {
-          window.location.reload()
-          return
-        }
-        timers.push(setTimeout(poll, 3_000))
+        const step = handoffStep({ elapsedMs: Date.now() - started, clientSession, serverSignedIn })
+        if (step === 'go') window.location.assign(to)
+        else if (step === 'reload') window.location.reload()
+        else timers.push(setTimeout(tick, HANDOFF_POLL_MS))
       }
-      timers.push(setTimeout(poll, 3_000))
+      void tick()
     }
 
     const onRejection = (e: PromiseRejectionEvent) => {
