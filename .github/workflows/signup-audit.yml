@@ -66,5 +66,7 @@ jobs:
           }
           const out = lines.join('\n')
           console.log(out)
+          // Also as a run annotation, so the result can be read from the checks API.
+          console.log('::notice title=Sign-up audit::' + out.replace(/%/g, '%25').replace(/\r/g, '%0D').replace(/\n/g, '%0A'))
           if (process.env.GITHUB_STEP_SUMMARY) (await import('node:fs')).appendFileSync(process.env.GITHUB_STEP_SUMMARY, out + '\n')
           EOF
