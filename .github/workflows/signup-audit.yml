@@ -17,6 +17,10 @@ on:
         description: 'Look back this many hours'
         required: false
         default: '6'
+      email_sha256:
+        description: 'Optional: SHA-256 (hex) of one lowercased email, to check whether that person has an account. Never the email itself: run inputs are public here.'
+        required: false
+        default: ''
 
 permissions:
   contents: read
@@ -64,9 +68,31 @@ jobs:
             const statuses = sessions.map((s) => s.status).join(', ') || 'none'
             lines.push(`| ${et(u.created_at)} | ${who} | ${dom} | ${ver} | ${sessions.length} (${statuses}) | ${first === Infinity ? '-' : et(first)} | ${et(last || u.last_active_at)} |`)
           }
+          // One person, by hash: page through every account and compare. Read from
+          // the event payload, not an env var, so the step header never prints it.
+          const fs = await import('node:fs')
+          let want = ''
+          try { want = String(JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8')).inputs?.email_sha256 || '').trim().toLowerCase() } catch {}
+          if (/^[0-9a-f]{64}$/.test(want)) {
+            const { createHash } = await import('node:crypto')
+            const sha = (v) => createHash('sha256').update(String(v).trim().toLowerCase()).digest('hex')
+            let hit = null
+            for (let offset = 0; offset < 20000 && !hit; offset += 500) {
+              const page = await api(`/users?order_by=-created_at&limit=500&offset=${offset}`)
+              hit = page.find((u) => (u.email_addresses || []).some((e) => sha(e.email_address) === want)) || null
+              if (page.length < 500) break
+            }
+            lines.push('', `### Account check for email hash ${want.slice(0, 8)}…`, '')
+            if (!hit) lines.push('No account has this email.')
+            else {
+              const sessions = await api(`/sessions?user_id=${encodeURIComponent(hit.id)}&limit=20`)
+              const e = (hit.email_addresses || []).find((x) => sha(x.email_address) === want) || {}
+              lines.push(`Account exists: created ${et(hit.created_at)}, email ${e.verification ? e.verification.status : '-'}, last sign-in ${et(hit.last_sign_in_at)}, sessions ${sessions.length} (${sessions.map((x) => x.status).join(', ') || 'none'}).`)
+            }
+          }
           const out = lines.join('\n')
           console.log(out)
           // Also as a run annotation, so the result can be read from the checks API.
           console.log('::notice title=Sign-up audit::' + out.replace(/%/g, '%25').replace(/\r/g, '%0D').replace(/\n/g, '%0A'))
-          if (process.env.GITHUB_STEP_SUMMARY) (await import('node:fs')).appendFileSync(process.env.GITHUB_STEP_SUMMARY, out + '\n')
+          if (process.env.GITHUB_STEP_SUMMARY) fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, out + '\n')
           EOF
