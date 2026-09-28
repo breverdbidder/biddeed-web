@@ -6,6 +6,7 @@ import { palette } from '@/lib/design-tokens'
 import PostHogIdentify from '@/components/analytics/PostHogIdentify'
 import FreeReportPopup from '@/components/lead/FreeReportPopup'
 import FreeReportPopupAuthGate from '@/components/lead/FreeReportPopupAuthGate'
+import { AUTH_CARD_COPY } from '@/lib/auth/clerk-copy'
 
 // Ported from zonewise-web 2026-08-20 with one deliberate deviation: no
 // `@clerk/themes` import. Clerk's appearance API needs real colour strings (it
@@ -65,18 +66,8 @@ function clerkAppearance(theme: 'light' | 'dark') {
 // instance would mis-title the OTHER property (zonewise shares this pool), so
 // each site overrides the strings locally instead.
 const clerkLocalization = {
-  signIn: {
-    start: {
-      title: 'Sign in to BidDeed.AI',
-      subtitle: 'Welcome back! Please sign in to continue',
-    },
-  },
-  signUp: {
-    start: {
-      title: 'Create your BidDeed.AI account',
-      subtitle: 'One account works across BidDeed.AI and ZoneWise.AI',
-    },
-  },
+  signIn: { start: { ...AUTH_CARD_COPY.signIn } },
+  signUp: { start: { ...AUTH_CARD_COPY.signUp } },
 }
 
 export default function ConditionalClerkProvider({

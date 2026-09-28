@@ -5,6 +5,8 @@ import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { isClerkHostAuthorized } from '@/lib/clerk-host'
 import SignedInRedirect from '@/components/auth/SignedInRedirect'
+import AuthCardFallback from '@/components/auth/AuthCardFallback'
+import { AUTH_CARD_COPY } from '@/lib/auth/clerk-copy'
 import Link from 'next/link'
 import { LIGHT as C } from '@/lib/design-tokens'
 
@@ -58,7 +60,11 @@ export default async function SignUpCatchAllPage() {
         </div>
         {clerkLive && <SignedInRedirect />}
         {clerkLive ? (
-          <SignUp fallbackRedirectUrl="/radar" signInUrl="/sign-in" />
+          <SignUp
+            fallbackRedirectUrl="/radar"
+            signInUrl="/sign-in"
+            fallback={<AuthCardFallback {...AUTH_CARD_COPY.signUp} />}
+          />
         ) : (
           <div style={{ backgroundColor: C.background, border: `1px solid ${C.border}`, borderRadius: '12px', padding: '28px', textAlign: 'center', color: C.ink }}>
             <p style={{ margin: 0, fontWeight: 600 }}>Account creation is not configured on this deployment</p>
