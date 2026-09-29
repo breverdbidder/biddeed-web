@@ -185,8 +185,11 @@ export default function ParcelDesk({ prefill }: { prefill: ParcelPrefill }) {
     [cash]
   )
 
+  // No call until the visitor has typed a number of their own (an ARV or a
+  // rent): a desk opened from a real auction would otherwise print SKIP on
+  // the opening bid alone, which reads as a verdict on that auction.
   const result = useMemo(() => {
-    if (!(inputs.bid > 0)) return null
+    if (!(inputs.bid > 0) || !(inputs.arv > 0 || inputs.rentMonthly > 0)) return null
     const deal = dealFromAuctionLot({
       id: prefill.mcaId ?? 'parcel-desk',
       address: inputs.address || 'Auction lot',
@@ -464,10 +467,12 @@ export default function ParcelDesk({ prefill }: { prefill: ParcelPrefill }) {
             </div>
           ) : (
             <div className="rounded-lg border border-dashed border-border bg-card p-6 text-card-foreground">
-              <p className="text-base font-semibold text-foreground">Enter a bid to start.</p>
+              <p className="text-base font-semibold text-foreground">
+                {inputs.bid > 0 ? 'Add your after-repair value or rent.' : 'Enter a bid to start.'}
+              </p>
               <p className="mt-2 text-base text-muted-foreground">
-                Or load the example to see a filled memo. Rental needs rent and taxes; a flip needs the after-repair value and
-                rehab; BRRRR needs all of them.
+                Parcel gives a call only on numbers you enter. Rental needs rent and taxes; a flip needs the after-repair value
+                and rehab; BRRRR needs all of them. Or load the example to see a filled memo.
               </p>
             </div>
           )}

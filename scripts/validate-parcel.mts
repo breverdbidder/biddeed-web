@@ -131,6 +131,8 @@ t('copy: the call is the visitor’s own, never a SIGNAL$ figure', () => {
   assert.match(desk, /Your numbers say/)
   assert.ok(!/SIGNAL\$ Max Bid/.test(desk))
   assert.ok(!/SIGNAL\$ (verdict|call)\s*[:=]/.test(desk))
+  // no call on an auction's opening bid alone: the visitor's own ARV or rent first
+  assert.match(desk, /if \(!\(inputs\.bid > 0\) \|\| !\(inputs\.arv > 0 \|\| inputs\.rentMonthly > 0\)\) return null/)
   const pin = read('components/auctions/AuctionPinCard.tsx')
   assert.match(pin, /href=\{parcelLink\(/)
 })
