@@ -5,7 +5,7 @@
 // Run: node --experimental-strip-types scripts/validate-buy-report-offer.mts
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
-import { countyDisplay, countySlug, createListingCache, decideOffer, reportLink, type OfferRow } from '../lib/buy-report/offer.ts'
+import { countyDisplay, countySlug, createListingCache, decideOffer, listedFor, reportLink, type OfferRow } from '../lib/buy-report/offer.ts'
 
 const row = (over: Partial<OfferRow>): OfferRow => ({
   case_number: '2026-0341TD', property_address: '1 MAIN ST', auction_date: '2026-10-01', opening_bid: 5000, sale_type: 'tax_deed', ...over,
@@ -81,9 +81,24 @@ t('the report link carries the auction for the page to re-check', () => {
   assert.equal(href, '/buy-report?mca_id=abc-123&county=palm_beach&address=1+MAIN+ST&date=2026-10-14')
 })
 
+t('a card finds its auction by id, else case, else address on the sale date', () => {
+  const rows = [
+    { ...row({ case_number: '2026-0341TD', property_address: '9069 PROSPERITY LAKE DR, JACKSONVILLE, FL- 32244', auction_date: '2026-10-14' }), id: 'mca-1' },
+    row({ case_number: '2026-0343TD', property_address: '13218 HUGUENOT LN, JACKSONVILLE, FL- 32225', auction_date: '2026-10-14' }),
+  ]
+  assert.equal(listedFor(rows, { id: 'mca-1' }), true)
+  assert.equal(listedFor(rows, { id: 'mca-9', case_number: '2026-0341TD' }), false, 'a listing id decides when both sides have one')
+  assert.equal(listedFor(rows, { case_number: '2026-0343td', auction_date: '2026-10-14' }), true)
+  // Anonymous and free viewers: no case number on the card (measured 28 Sep, 10:35 PM ET).
+  assert.equal(listedFor(rows, { property_address: '13218 Huguenot Ln, Jacksonville, FL 32225', auction_date: '2026-10-14T00:00:00' }), true)
+  assert.equal(listedFor(rows, { property_address: '13218 Huguenot Ln, Jacksonville, FL 32225', auction_date: '2026-11-04' }), false)
+  assert.equal(listedFor(rows, { property_address: '1 OTHER ST', auction_date: '2026-10-14' }), false)
+  assert.equal(listedFor(null, { id: 'mca-1' }), false)
+})
+
 t('the pin card shows the report link only for a listed auction', () => {
   const src = readFileSync(new URL('../components/auctions/AuctionPinCard.tsx', import.meta.url), 'utf8')
-  assert.match(src, /decideOffer\(listing, auction\.case_number, auction\.auction_date\)\.state === 'sellable'/)
+  assert.match(src, /setOnSale\(listedFor\(listing, auction\)\)/)
   assert.match(src, /\{reportOnSale \? \(\s*<a\s+href=\{reportLink\(auction\)\}/)
 })
 

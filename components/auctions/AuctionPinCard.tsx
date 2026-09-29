@@ -8,7 +8,7 @@ import { apiUrl } from '@/lib/api'
 import { tierAtLeast } from '@/lib/tier/rank'
 import { PLANS } from '@/components/deed-home/LandingSections'
 import { createViewerResolver, type TierAnswer, type ViewerState } from '@/lib/auctions/viewer-state'
-import { createListingCache, decideOffer, reportLink } from '@/lib/buy-report/offer'
+import { createListingCache, listedFor, reportLink } from '@/lib/buy-report/offer'
 import type { Auction } from '@/types/auctions'
 
 /**
@@ -70,6 +70,8 @@ function useViewerState(): ViewerState {
  * their time (PostHog), and its card offered only the $99/mo Investor plan -
  * no way to buy the one-off report for the property on screen. Shown only
  * for a listed auction, so the link never leads to a report that is not sold.
+ * Matched by id / case / address (listedFor): the case number reaches the card
+ * only for Investor and above.
  */
 const storefrontListing = createListingCache((slug) =>
   fetch(apiUrl(`/buy-report/auctions?county=${encodeURIComponent(slug)}`)).then((r) => (r.ok ? r.json() : null))
@@ -80,14 +82,13 @@ function useReportOnSale(auction: Auction): boolean {
   useEffect(() => {
     let live = true
     setOnSale(false)
-    if (!auction.case_number) return
     storefrontListing(auction.county).then((listing) => {
-      if (live) setOnSale(decideOffer(listing, auction.case_number, auction.auction_date).state === 'sellable')
+      if (live) setOnSale(listedFor(listing, auction))
     })
     return () => {
       live = false
     }
-  }, [auction.id, auction.county, auction.case_number, auction.auction_date])
+  }, [auction])
   return onSale
 }
 

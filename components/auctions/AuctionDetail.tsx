@@ -162,7 +162,10 @@ export default function AuctionDetail({ auctionId }: Props) {
             <a href="/subscribe?tier=investor" className="min-h-11 rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground">
               See paid plans
             </a>
-            <a href="/buy-report" className="min-h-11 rounded-lg border border-border px-5 py-3 text-sm font-semibold text-primary">
+            {/* The copy promises "one keyed report for the selected property": the
+                link carries it, and /buy-report re-checks it is on sale (28 Sep 2026;
+                it used to open the county picker with the property lost). */}
+            <a href={`/buy-report?mca_id=${encodeURIComponent(auctionId)}`} className="min-h-11 rounded-lg border border-border px-5 py-3 text-sm font-semibold text-primary">
               Buy one source-backed report - $25
             </a>
           </div>
@@ -503,7 +506,7 @@ export default function AuctionDetail({ auctionId }: Props) {
                 </p>
                 <div className="flex flex-col gap-2">
                   <a
-                    href="/buy-report"
+                    href={`/buy-report?mca_id=${encodeURIComponent(auction.id)}`}
                     className="block px-4 py-2 rounded-lg text-sm font-semibold bg-primary text-white hover:opacity-90"
                   >
                     Get the full report - $25

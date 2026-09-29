@@ -68,6 +68,35 @@ export function createListingCache(fetchListing: (slug: string) => Promise<unkno
   }
 }
 
+function sameAddress(a: string | null | undefined, b: string | null | undefined): boolean {
+  const norm = (v: string | null | undefined) => (v || '').toUpperCase().replace(/[^A-Z0-9]+/g, ' ').trim()
+  return Boolean(norm(a)) && norm(a) === norm(b)
+}
+
+/**
+ * Whether one auction is in the county listing. The map card knows the
+ * auction's id, address and date for every viewer, but its case number only
+ * for Investor and above (redacted server-side), so the match is by id when
+ * the listing carries one, else by case number, else by address on the same
+ * sale date.
+ */
+export function listedFor(
+  listing: unknown,
+  a: { id?: string | null; case_number?: string | null; property_address?: string | null; auction_date?: string | null }
+): boolean {
+  if (!Array.isArray(listing)) return false
+  const day = (a.auction_date || '').slice(0, 10)
+  return listing.some((r: (OfferRow & { id?: string | null }) | null) => {
+    if (!r || typeof r !== 'object') return false
+    const rDay = (r.auction_date || '').slice(0, 10)
+    if (r.id && a.id) return r.id === a.id
+    if (a.case_number && typeof r.case_number === 'string') {
+      return r.case_number.trim().toLowerCase() === a.case_number.trim().toLowerCase() && (!day || !rDay || rDay === day)
+    }
+    return Boolean(day) && rDay === day && sameAddress(r.property_address, a.property_address)
+  })
+}
+
 /** The /buy-report deep link for one auction (the page re-checks it before checkout). */
 export function reportLink(a: { id: string; county: string | null; property_address?: string | null; auction_date?: string | null }): string {
   const q = new URLSearchParams({ mca_id: a.id, county: countySlug(a.county) })
