@@ -473,6 +473,12 @@ export default function AuctionDetail({ auctionId }: Props) {
                 >
                   Get the source-backed report - $25
                 </a>
+                <a
+                  href="/subscribe?tier=investor"
+                  className="mt-2 block px-4 py-2 rounded-lg border border-border text-center text-sm font-semibold text-primary hover:underline"
+                >
+                  Investor - $99/mo
+                </a>
               </div>
             )}
 
