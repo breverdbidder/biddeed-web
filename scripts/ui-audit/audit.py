@@ -19,7 +19,9 @@ RETIRED = ["before the gavel","know your number"]
 BUZZ = ["comprehensive solution","comprehensive intelligence","next-gen","cutting-edge","streamlined","seamless","revolutionary","industry-leading","best-in-class","leverage","synergy","robust platform"]
 CONTEMPT = ["you're doing it wrong","still using spreadsheets","if you're still","amateur","rookie mistake","too lazy","too dumb"]
 COMPET = ["propertyonion","property onion"]
-BROKEN = ["internal server error","not configured","undefined","nan ","[object object]"]
+BROKEN = ["internal server error","not configured","undefined","[object object]"]
+# Check NaN as a whole value, not inside addresses such as BUCHANNAN DR.
+NAN_VALUE = re.compile(r"(?<![\w])nan(?![\w])", re.I)
 JS_SWEEP = r"""() => {
   function lum(rgb){const [r,g,b]=rgb.map(v=>{v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4)});return 0.2126*r+0.7152*g+0.0722*b}
   function parse(c){const m=c.match(/rgba?\(([^)]+)\)/);if(!m)return null;const a=m[1].split(',').map(parseFloat);return {rgb:a.slice(0,3),a:a.length>3?a[3]:1}}
@@ -63,7 +65,7 @@ async def run(base, routes, out, fail_on_red, skipped=None, skip_why=None):
                 low=(r.get("text","") or "").lower()
                 offpal=[c for c in r.get("colors",{}) if c not in CANON]
                 gates={
-                 "RENDER": status==200 and not any(k in low for k in BROKEN),
+                 "RENDER": status==200 and not any(k in low for k in BROKEN) and not NAN_VALUE.search(low),
                  "PALETTE": len(offpal)==0,
                  "CONTRAST": len(r.get("bad",[]))==0,
                  "COPY": not any(x in low for x in RETIRED+BUZZ+CONTEMPT+COMPET) and low.count("!")<=1 and not re.search(r"\bS5\b", r.get("text","")),
@@ -112,4 +114,3 @@ if __name__=="__main__":
         if missing:
             skipped.add(exp); skip_why[exp]=", ".join(sorted(missing))
     asyncio.run(run(a.base, routes, a.out, a.fail_on_red, skipped, skip_why))
-
