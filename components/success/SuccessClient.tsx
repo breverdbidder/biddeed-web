@@ -12,7 +12,7 @@ const FILES = [
   ['Clear to Bid', 'PDF · the core system, one day per chapter'],
   ['The Action Vault', 'Interactive · where you track each day as you work it'],
   ['County Selection Matrix', 'XLSX · all 67 Florida counties, scored'],
-  ['Maximum Allowable Bid Worksheet', 'XLSX · the Shapira Formula, live'],
+  ['Maximum Allowable Bid Worksheet', 'XLSX · maximum allowable bid math'],
   ['Auction Intelligence', 'PDF · the full reference volume'],
 ]
 

@@ -232,41 +232,12 @@ export async function GET(
   const flLotSize = parcelData ? (parcelData.lnd_sqfoot as number | null) : null
   const flOwnerName = parcelData ? (parcelData.own_name as string | null) : null
 
-  // Shapira Formula scoring.
-  //
-  // just_value, land_value and living_area are NOT columns on
-  // multi_county_auctions - they are three of the phantom fields documented in
-  // types/auctions.ts - so `auction.just_value` was always undefined. Its only
-  // fallback, flJustValue, was always null too, because the fl_parcels select
-  // was failing with a 400 on the non-existent lot_size column. justValue was
-  // therefore falsy on every request, and this block has never once produced a
-  // recommendation: every auction detail page returned UNKNOWN with a null
-  // maxBid. fl_parcels.jv is the real source, so read it directly.
-  const justValue = flJustValue
-  const openingBid = auction.opening_bid as number | null
-  let recommendation: 'BID' | 'REVIEW' | 'SKIP' | 'UNKNOWN' = 'UNKNOWN'
-  let maxBid: number | null = null
-  let bidRatio: number | null = null
-  let recommendationColor = `${C.border}` // gray
-
-  if (justValue && justValue > 0) {
-    maxBid = Math.round((justValue * 0.70) - 10000 - Math.min(25000, justValue * 0.15))
-    if (maxBid < 0) maxBid = 0
-    const compareBid = openingBid || justValue
-    if (compareBid > 0) {
-      bidRatio = Math.round((maxBid / compareBid) * 100)
-      if (bidRatio >= 75) {
-        recommendation = 'BID'
-        recommendationColor = `${C.brand}`
-      } else if (bidRatio >= 60) {
-        recommendation = 'REVIEW'
-        recommendationColor = `${C.navy}`
-      } else {
-        recommendation = 'SKIP'
-        recommendationColor = `${C.border}`
-      }
-    }
-  }
+  // No max bid and no verdict are computed here. The old fixed formula
+  // ((value x 70%) less $10,000 and a 15% reserve, with BID / REVIEW / SKIP by
+  // ratio to the opening bid) is retired (Ariel, 29 Sep 2026). BidDeed's max
+  // bid is the SIGNAL$ Max Bid from the machine-learning model, withheld under
+  // report policy v1 until it passes validation, so these fields stay null /
+  // UNKNOWN on every tier.
 
   // Build enriched response — merge fl_parcels fallbacks for null KPIs
   // PROMISE-6 (issue 20518) + ZW-P0-003 (issue 184).
@@ -361,10 +332,10 @@ export async function GET(
     photo_url: photoUrl,
     bcpao_photo_url: bcpaoPhotoUrl,
     zoning,
-    recommendation,
-    recommendation_color: recommendationColor,
-    max_bid: maxBid,
-    bid_ratio: bidRatio,
+    recommendation: 'UNKNOWN' as 'BID' | 'REVIEW' | 'SKIP' | 'UNKNOWN',
+    recommendation_color: `${C.border}`,
+    max_bid: null as number | null,
+    bid_ratio: null as number | null,
     source_url: auction.source_url,
   }
 

@@ -145,7 +145,6 @@ export type Analysis = {
   profit: number;
   margin: number;
   roi: number;
-  mao: number;
   cashLeft: number;
   cashBack: number;
   fiveYearEquity: number;

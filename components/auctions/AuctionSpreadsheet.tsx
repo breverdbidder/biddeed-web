@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { downloadCSV } from '@/lib/export'
-import { getRecommendation } from '@/lib/scoring'
 import type { Auction } from '@/types/auctions'
 
 interface Props {
@@ -108,13 +107,11 @@ export default function AuctionSpreadsheet({ auctions, loading, onSelectAuction 
               <SortTh field="opening_bid" label="Opening Bid" />
               <th className="px-2 py-1.5 text-left text-[10px] font-semibold text-muted-foreground dark:text-muted-foreground uppercase whitespace-nowrap">Yr Built</th>
               <th className="px-2 py-1.5 text-left text-[10px] font-semibold text-muted-foreground dark:text-muted-foreground uppercase whitespace-nowrap">Sqft</th>
-              <th className="px-2 py-1.5 text-left text-[10px] font-semibold text-muted-foreground dark:text-muted-foreground uppercase whitespace-nowrap">Score</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
             {paged.map((a) => {
               const justValue = a.market_value ?? a.assessed_value ?? null
-              const score = getRecommendation(justValue, a.opening_bid)
               return (
                 <tr
                   key={a.id}
@@ -135,16 +132,6 @@ export default function AuctionSpreadsheet({ auctions, loading, onSelectAuction 
                   <td className="px-2 py-1.5 text-foreground dark:text-foreground whitespace-nowrap tabular">{fmt(a.opening_bid)}</td>
                   <td className="px-2 py-1.5 text-muted-foreground dark:text-muted-foreground whitespace-nowrap tabular">{a.year_built || '--'}</td>
                   <td className="px-2 py-1.5 text-muted-foreground dark:text-muted-foreground whitespace-nowrap tabular">{a.living_area_sqft ? a.living_area_sqft.toLocaleString() : '--'}</td>
-                  <td className="px-2 py-1.5 whitespace-nowrap">
-                    {score.recommendation !== 'UNKNOWN' && (
-                      <span
-                        className="px-1.5 py-0.5 rounded text-[10px] font-bold"
-                        style={{ backgroundColor: score.color, color: score.textColor }}
-                      >
-                        {score.recommendation}
-                      </span>
-                    )}
-                  </td>
                 </tr>
               )
             })}

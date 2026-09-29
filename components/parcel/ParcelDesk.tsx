@@ -9,7 +9,6 @@ import {
   DEFAULT_BUY_BOX,
   analyze,
   dealFromAuctionLot,
-  everestMaxBid,
   memoText,
   money,
   pct,
@@ -29,6 +28,14 @@ import { cn } from '@/lib/utils'
  * browser only: no model vendor, no BidDeed service, no network call. It is
  * NOT the SIGNAL$ figure, which stays withheld under report policy v1; the
  * call is labelled as the visitor's buy-box result every time it is shown.
+ *
+ * No maximum bid is computed here. BidDeed's max bid is the SIGNAL$ Max Bid
+ * from the machine-learning model (formerly the Shapira formula): the chance
+ * a third party buys and the predicted clearing price from prior auction
+ * results, plus, on foreclosures, the plaintiff's history of sale price on
+ * the dollar against the final judgment. It prints only the policy label
+ * until the model passes validation. The old fixed-percentage ceiling is
+ * retired (Ariel, 29 Sep 2026) and must not come back, here or anywhere.
  *
  * Florida courthouse sales settle in full within about a day, so the desk
  * defaults to a cash purchase (100% down). Unticking it applies Parcel's
@@ -151,7 +158,7 @@ function keyStats(strategy: Strat, a: Analysis): { label: string; value: string 
       { label: 'Profit', value: money(a.profit) },
       { label: 'Margin on ARV', value: pct(a.margin) },
       { label: 'Return on cash', value: pct(a.roi) },
-      { label: '70% rule price', value: money(a.mao) },
+      { label: 'Cash in the project', value: money(a.grossCashIn) },
     ]
   }
   if (strategy === 'brrrr') {
@@ -209,8 +216,7 @@ export default function ParcelDesk({ prefill }: { prefill: ParcelPrefill }) {
       deal.riskNotes = deal.riskNotes.filter((n) => !n.startsWith('Insurance is estimated'))
     }
     const analysis = analyze(deal, assumptions, DEFAULT_BUY_BOX)
-    const ceiling = deal.arv > 0 ? everestMaxBid(deal.arv, deal.rehab) : null
-    return { deal, analysis, call: toBidDeedCall(analysis.verdict), ceiling }
+    return { deal, analysis, call: toBidDeedCall(analysis.verdict) }
   }, [inputs, strategy, assumptions, prefill.mcaId, prefill.caseNumber])
 
   useEffect(() => {
@@ -242,7 +248,6 @@ export default function ParcelDesk({ prefill }: { prefill: ParcelPrefill }) {
     ? `/buy-report?${new URLSearchParams({ mca_id: prefill.mcaId, ...(prefill.county ? { county: prefill.county } : {}) }).toString()}`
     : '/buy-report'
   const call = result ? CALL_COPY[result.call] : null
-  const bidVsCeiling = result && result.ceiling !== null ? result.ceiling - inputs.bid : null
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 pb-28 pt-10 sm:px-6 sm:pb-16 lg:px-8">
@@ -397,24 +402,17 @@ export default function ParcelDesk({ prefill }: { prefill: ParcelPrefill }) {
                 ))}
               </div>
 
-              {result.ceiling !== null ? (
-                <div className="mt-4 rounded-md border border-border bg-secondary p-3 text-base text-secondary-foreground">
-                  <p>
-                    <span className="font-semibold">Everest desk ceiling {money(result.ceiling)}</span>: ARV × 70%, less rehab, $10,000
-                    and a reserve of 15% of ARV (at most $25,000).
-                  </p>
-                  {bidVsCeiling !== null ? (
-                    <p className="mt-1 tabular-nums">
-                      Your bid is {money(Math.abs(bidVsCeiling))} {bidVsCeiling >= 0 ? 'under' : 'over'} it.
-                      {bidVsCeiling < 0 && result.call !== 'SKIP'
-                        ? ` Your buy box clears, but the Everest desk would stop at ${money(result.ceiling)}.`
-                        : ''}
-                    </p>
-                  ) : null}
-                </div>
-              ) : (
-                <p className="mt-4 text-base text-muted-foreground">Enter an after-repair value to see the Everest desk ceiling.</p>
-              )}
+              <div className="mt-4 rounded-md border border-border bg-secondary p-3 text-base leading-7 text-secondary-foreground">
+                <p>
+                  <span className="font-semibold">SIGNAL$ Max Bid</span>: Withheld - validation in progress.
+                </p>
+                <p className="mt-1">
+                  BidDeed&apos;s max bid comes from its machine-learning model, not a fixed formula: the chance a third
+                  party buys at the sale and the price it is likely to clear at, learned from prior Florida auction
+                  results. On a foreclosure it adds the plaintiff&apos;s record of what its sales brought, on the dollar,
+                  against the final judgment. It stays withheld until the model passes validation.
+                </p>
+              </div>
 
               <div className="mt-5">
                 <h3 className="text-sm font-semibold text-foreground">Why</h3>

@@ -1,7 +1,7 @@
 # Parcel engine (vendored)
 
 Source: `github.com/breverdbidder/parcel` (MIT, Copyright 2026 Everest Capital USA; see `LICENSE`).
-Vendored 29 Sep 2026 from commit `d8c7ab3` (upstream `main`, "Publish Parcel as a vendor-neutral underwriting desk").
+Vendored 29 Sep 2026 from commit `8bb7431` (upstream `main`, "Retire the formula max bid: no Everest ceiling, no 70% rule").
 
 These seven files are copied verbatim from upstream `src/`: `index.ts`, `types.ts`, `format.ts`,
 `parse-listing.ts`, `samples.ts`, `underwrite.ts`, `biddeed.ts`. Do not edit them here; change

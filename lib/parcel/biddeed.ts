@@ -12,14 +12,16 @@ export function toBidDeedCall(verdict: Verdict): BidDeedCall {
 }
 
 /**
- * Everest desk ceiling used beside Parcel, not inside it.
- * (ARV × 70%) − repairs − $10,000 − min($25,000, 15% × ARV).
- * This is not SIGNAL$ and it does not call any BidDeed service.
+ * Parcel never computes a maximum bid. BidDeed's max bid is the SIGNAL$ Max Bid
+ * from its machine-learning model (formerly the Shapira formula): the chance a
+ * third party buys and the predicted clearing price, learned from prior
+ * auction results, plus, on foreclosures, the plaintiff's history of sale
+ * price on the dollar against the final judgment. It stays withheld until the
+ * model passes validation. The old fixed formula
+ * (ARV x 70%) - repairs - $10,000 - min($25,000, 15% x ARV) is retired
+ * (Ariel, 29 Sep 2026): do not reintroduce it or any other rule-of-thumb
+ * ceiling here.
  */
-export function everestMaxBid(arv: number, repairs: number): number {
-  const reserve = Math.min(25_000, 0.15 * arv);
-  return arv * 0.7 - repairs - 10_000 - reserve;
-}
 
 /** Plain auction row. Field names match what a county calendar already has. */
 export type AuctionLot = {
@@ -92,7 +94,6 @@ export type LotUnderwriting = {
   deal: Deal;
   analysis: Analysis;
   call: BidDeedCall;
-  everestMaxBid: number | null;
 };
 
 export function underwriteLot(
@@ -106,6 +107,5 @@ export function underwriteLot(
     deal,
     analysis,
     call: toBidDeedCall(analysis.verdict),
-    everestMaxBid: deal.arv > 0 ? everestMaxBid(deal.arv, deal.rehab) : null,
   };
 }

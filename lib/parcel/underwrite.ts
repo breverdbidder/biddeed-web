@@ -235,7 +235,6 @@ export function analyze(deal: Deal, assumptions: Assumptions, box: BuyBox): Anal
     deal.listPrice * (a.downPct / 100) + deal.rehab + buyClose + flipInterest + carry;
   const margin = deal.arv > 0 ? (profit / deal.arv) * 100 : 0;
   const roi = flipCash > 0 ? (profit / flipCash) * 100 : 0;
-  const mao = deal.arv * 0.7 - deal.rehab;
 
   const hardInterest = purchaseLoan * (a.hardMoneyPct / 100) * holdYears;
   const brrrrCashIn =
@@ -297,7 +296,7 @@ export function analyze(deal: Deal, assumptions: Assumptions, box: BuyBox): Anal
     if (deal.arv <= 0) {
       verdict = "pass";
       reasons.push("Set an after-repair value. A flip without an ARV is a guess.");
-    } else if (margin >= box.minFlipMargin && deal.listPrice <= mao * 1.05 && profit > 0) {
+    } else if (margin >= box.minFlipMargin && profit > 0) {
       verdict = "buy";
     } else if (margin >= 8 && profit > 0) {
       verdict = "watch";
@@ -307,9 +306,6 @@ export function analyze(deal: Deal, assumptions: Assumptions, box: BuyBox): Anal
     if (deal.listPrice > box.maxPrice && verdict === "buy") verdict = "watch";
     reasons.push(
       `Profit ${money(profit)} after ${pct(a.sellCostPct, 0)} selling costs. Margin is ${pct(margin)} of ARV ${money(deal.arv)}.`,
-    );
-    reasons.push(
-      `The 70% rule says pay about ${money(mao)}. This ask is ${money(deal.listPrice)}.`,
     );
     reasons.push(
       `Cash in the project is about ${money(flipCash)}, so the return on cash is ${pct(roi)}.`,
@@ -554,7 +550,6 @@ export function analyze(deal: Deal, assumptions: Assumptions, box: BuyBox): Anal
     profit,
     margin,
     roi,
-    mao,
     cashLeft,
     cashBack,
     fiveYearEquity,

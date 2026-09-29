@@ -246,15 +246,6 @@ export default function AuctionDetail({ auctionId }: Props) {
               {typeLabel(auction.auction_type)}
             </span>
 
-            {auction.recommendation && auction.recommendation !== 'UNKNOWN' && (
-              <span
-                className="px-2.5 py-1 text-xs font-bold rounded-full text-foreground shrink-0"
-                style={{ backgroundColor: auction.recommendation_color }}
-              >
-                {auction.recommendation}
-              </span>
-            )}
-
             {daysUntilAuction != null && daysUntilAuction >= 0 && (
               <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-secondary text-muted-foreground  shrink-0">
                 {daysUntilAuction === 0 ? 'Today' : daysUntilAuction === 1 ? 'Tomorrow' : `${daysUntilAuction} days`}
@@ -461,63 +452,27 @@ export default function AuctionDetail({ auctionId }: Props) {
               )}
             </div>
 
-            {/* Shapira Formula Scoring */}
-            {auction.recommendation && auction.recommendation !== 'UNKNOWN' && (
-              <div className="bg-card dark:bg-card border border-border dark:border-border rounded-lg p-4">
-                <p className="text-xs text-muted-foreground dark:text-muted-foreground uppercase mb-3">Investment Score</p>
-                <div className="text-center mb-3">
-                  <span
-                    className="inline-block px-4 py-2 rounded-lg text-xl font-bold text-foreground"
-                    style={{ backgroundColor: auction.recommendation_color }}
-                  >
-                    {auction.recommendation}
-                  </span>
-                </div>
-                {auction.max_bid != null && (
-                  <div className="text-center mb-2">
-                    <p className="text-xs text-muted-foreground dark:text-muted-foreground">Max Bid</p>
-                    <p className="text-lg font-bold text-foreground text-foreground">
-                      {formatCurrency(auction.max_bid)}
-                    </p>
-                  </div>
-                )}
-                {auction.bid_ratio != null && (
-                  <div className="text-center mb-3">
-                    <p className="text-xs text-muted-foreground dark:text-muted-foreground">Bid-to-Value Ratio</p>
-                    <p className="text-lg font-bold text-foreground text-foreground">{auction.bid_ratio}%</p>
-                  </div>
-                )}
-                <p className="text-[10px] text-muted-foreground dark:text-muted-foreground text-center mt-2">
-                  Shapira Formula&trade; &middot; (ARV &times; 70%) - Repairs - $10K - MIN($25K, 15% ARV)
-                </p>
-              </div>
-            )}
-
-            {/* Investment Score locked cell - shown when the API stripped the
-                score for a free/anonymous caller (paywall, owner decision
-                2026-09-12). Case/property/zoning above stay visible; only the
-                number we charge for locks. */}
+            {/* SIGNAL$ Max Bid. No max bid or verdict is computed on this page:
+                the old fixed formula ((value x 70%) less repairs, $10K and a
+                15% reserve) is retired (Ariel, 29 Sep 2026). The max bid is the
+                SIGNAL$ machine-learning model's, withheld on every tier under
+                report policy v1 until it passes validation (the API returns
+                null / UNKNOWN and score_locked). */}
             {auction.score_locked && (
-              <div className="bg-card dark:bg-card border border-border dark:border-border rounded-lg p-4 text-center">
-                <p className="text-xs text-muted-foreground dark:text-muted-foreground uppercase mb-3">Investment Score</p>
-                <p className="text-xl font-bold text-foreground mb-1">Locked</p>
-                <p className="text-xs text-muted-foreground dark:text-muted-foreground mb-4">
-                  The verdict, Max Bid, and bid-to-value ratio are on the paid tiers.
+              <div className="bg-card dark:bg-card border border-border dark:border-border rounded-lg p-4">
+                <p className="text-xs text-muted-foreground uppercase mb-2">SIGNAL$ Max Bid</p>
+                <p className="text-base font-semibold text-foreground">Withheld - validation in progress</p>
+                <p className="mt-2 text-base leading-6 text-muted-foreground">
+                  It comes from the SIGNAL$ machine-learning model, not a fixed formula: the chance a third party buys
+                  and the likely clearing price, learned from prior auctions, plus, on a foreclosure, the
+                  plaintiff&apos;s record of sale price on the dollar against the final judgment.
                 </p>
-                <div className="flex flex-col gap-2">
-                  <a
-                    href={`/buy-report?mca_id=${encodeURIComponent(auction.id)}`}
-                    className="block px-4 py-2 rounded-lg text-sm font-semibold bg-primary text-white hover:opacity-90"
-                  >
-                    Get the full report - $25
-                  </a>
-                  <a
-                    href="/subscribe?tier=investor"
-                    className="block px-4 py-2 rounded-lg text-sm font-semibold border border-border dark:border-border text-primary hover:underline"
-                  >
-                    Investor - $99/mo
-                  </a>
-                </div>
+                <a
+                  href={`/buy-report?mca_id=${encodeURIComponent(auction.id)}`}
+                  className="mt-4 block px-4 py-2 rounded-lg text-center text-sm font-semibold bg-primary text-primary-foreground hover:opacity-90"
+                >
+                  Get the source-backed report - $25
+                </a>
               </div>
             )}
 

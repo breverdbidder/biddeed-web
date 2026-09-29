@@ -4,7 +4,6 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import { useTheme } from '@/lib/theme-context'
-import { getRecommendation } from '@/lib/scoring'
 import { ZONING_CATEGORY_COLORS, type ZoningCategory } from '@/lib/zoning'
 import type { Auction } from '@/types/auctions'
 import { pinToAuction, type AuctionPin } from '@/lib/auctions/pin-contract'
@@ -235,7 +234,6 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
     const points = resp?.data || []
     const features = points.map((p) => {
       const justValue = p.market_value ?? p.assessed_value
-      const score = getRecommendation(justValue, p.opening_bid)
       pointLookup.current.set(p.id, p)
       return {
         type: 'Feature' as const,
@@ -251,8 +249,6 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
           just_value: justValue,
           opening_bid: p.opening_bid,
           auction_date: p.auction_date,
-          recommendation: score.recommendation,
-          rec_color: score.color,
           type_code: p.sale_type === 'foreclosure' ? 0 : p.sale_type === 'tax_deed' ? 1 : 2,
         },
       }
@@ -410,16 +406,13 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
       const point = pointLookup.current.get(props.id)
 
       const typeLabel = props.sale_type === 'foreclosure' ? 'Foreclosure' : 'Tax Deed'
-      const recBadge = props.recommendation !== 'UNKNOWN'
-        ? `<span style="display:inline-block;padding:1px 6px;border-radius:4px;font-size:12px;font-weight:700;color:${C.background};background:${props.rec_color}">${props.recommendation}</span>`
-        : ''
 
       new mapboxgl.Popup({ offset: 15, maxWidth: '280px' })
         .setLngLat(coords)
         .setHTML(`
           <div style="font-family:system-ui;font-size:12px;">
             <p style="font-weight:600;margin:0 0 4px 0;">${props.address}</p>
-            <p style="color:${C.navy};margin:0 0 2px 0;">${props.county} — ${typeLabel} ${recBadge}</p>
+            <p style="color:${C.navy};margin:0 0 2px 0;">${props.county} — ${typeLabel}</p>
             ${props.just_value ? `<p style="color:${C.navy};margin:0 0 2px 0;">Value: ${formatCurrency(props.just_value)}</p>` : ''}
             ${props.opening_bid ? `<p style="color:${C.navy};margin:0 0 2px 0;">Opening Bid: ${formatCurrency(props.opening_bid)}</p>` : ''}
             ${props.auction_date ? `<p style="color:${C.navy};margin:0;">Date: ${props.auction_date}</p>` : ''}

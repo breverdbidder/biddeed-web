@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { getRecommendation } from '@/lib/scoring'
 import ZoningBadge from './ZoningBadge'
 import { formatCountyLabel } from '@/lib/counties'
 import EmptyState from '@/components/ui/empty-state'
@@ -107,13 +106,11 @@ export default function AuctionTable({ auctions, loading, onSelectAuction, empty
               <th className="px-3 py-2 text-left text-xs font-medium text-muted-foreground dark:text-muted-foreground uppercase tracking-wider">Plaintiff</th>
               <SortHeader field="assessed_value" label="Just Value" />
               <SortHeader field="auction_date" label="Date" />
-              <th className="px-3 py-2 text-left text-xs font-medium text-muted-foreground dark:text-muted-foreground uppercase tracking-wider">Score</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
             {sorted.map((auction) => {
               const justValue = auction.market_value ?? auction.assessed_value ?? null
-              const score = getRecommendation(justValue, auction.opening_bid)
               return (
                 <tr
                   key={auction.id}
@@ -140,16 +137,6 @@ export default function AuctionTable({ auctions, loading, onSelectAuction, empty
                   <td className="px-3 py-2.5 text-sm text-muted-foreground dark:text-muted-foreground max-w-[160px] truncate">{auction.plaintiff || '—'}</td>
                   <td className="px-3 py-2.5 text-sm text-foreground dark:text-foreground whitespace-nowrap tabular">{formatCurrency(justValue)}</td>
                   <td className="px-3 py-2.5 text-sm text-muted-foreground dark:text-muted-foreground whitespace-nowrap">{formatDate(auction.auction_date)}</td>
-                  <td className="px-3 py-2.5 whitespace-nowrap">
-                    {score.recommendation !== 'UNKNOWN' && (
-                      <span
-                        className="px-1.5 py-0.5 rounded text-[10px] font-bold"
-                        style={{ backgroundColor: score.color, color: score.textColor }}
-                      >
-                        {score.recommendation}
-                      </span>
-                    )}
-                  </td>
                 </tr>
               )
             })}

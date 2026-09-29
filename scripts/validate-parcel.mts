@@ -9,7 +9,12 @@
 // 3. Nothing in Parcel or the desk reaches the network or a model vendor.
 // 4. The /parcel prefill accepts only clean public facts and round-trips the
 //    pin card's link.
-// 5. The call is never presented as a SIGNAL$ figure.
+// 5. The call is never presented as a SIGNAL$ figure, and the SIGNAL$ Max Bid
+//    shows only the policy label.
+// 6. The retired fixed max-bid formula ((ARV x 70%) less repairs, $10,000 and
+//    a 15% reserve, plus the 70% rule and ratio-to-opening-bid verdicts) is
+//    gone from Parcel and the auction surfaces (Ariel, 29 Sep 2026). The max
+//    bid is the SIGNAL$ machine-learning model's, withheld under policy v1.
 import assert from 'node:assert/strict'
 import { readFileSync, readdirSync } from 'node:fs'
 import {
@@ -17,7 +22,6 @@ import {
   DEFAULT_BUY_BOX,
   analyze,
   dealFromAuctionLot,
-  everestMaxBid,
   findSample,
   mortgagePayment,
   toBidDeedCall,
@@ -49,9 +53,14 @@ t('upstream: the three worked files keep their calls', () => {
   assert.equal(toBidDeedCall(indy.verdict), 'REVIEW')
 })
 
-t('upstream: Everest desk ceiling (ARV x 70%) - rehab - 10,000 - min(25,000, 15% ARV)', () => {
-  assert.equal(Math.round(everestMaxBid(160_000, 25_000)), 53_000)
-  assert.equal(Math.round(everestMaxBid(400_000, 50_000)), 400_000 * 0.7 - 50_000 - 10_000 - 25_000)
+t('upstream: a flip passes on margin and profit, with no 70% rule', () => {
+  const lot = { id: 'x', address: 'a', openingBid: 120_000, arv: 200_000, rehab: 20_000, rentMonthly: 0, taxesAnnual: 2_000 }
+  const deal = dealFromAuctionLot(lot)
+  deal.strategy = 'flip'
+  const a = analyze(deal, { ...DEFAULT_ASSUMPTIONS, downPct: 100 }, DEFAULT_BUY_BOX)
+  assert.ok(!('mao' in a), 'no 70%-rule price on the analysis')
+  assert.ok(!a.reasons.some((r) => /70% rule/i.test(r)))
+  if (a.margin >= DEFAULT_BUY_BOX.minFlipMargin && a.profit > 0) assert.equal(a.verdict, 'buy')
 })
 
 t('desk default: a cash purchase has no loan and no debt service', () => {
@@ -129,12 +138,43 @@ t('copy: the call is the visitor’s own, never a SIGNAL$ figure', () => {
   const desk = read('components/parcel/ParcelDesk.tsx')
   assert.match(desk, /It is not a SIGNAL\$ verdict/)
   assert.match(desk, /Your numbers say/)
-  assert.ok(!/SIGNAL\$ Max Bid/.test(desk))
+  assert.match(desk, /SIGNAL\$ Max Bid<\/span>: Withheld - validation in progress\./)
+  assert.equal((desk.match(/SIGNAL\$ Max Bid/g) ?? []).length, 2, 'once in the header comment, once with the policy label')
   assert.ok(!/SIGNAL\$ (verdict|call)\s*[:=]/.test(desk))
   // no call on an auction's opening bid alone: the visitor's own ARV or rent first
   assert.match(desk, /if \(!\(inputs\.bid > 0\) \|\| !\(inputs\.arv > 0 \|\| inputs\.rentMonthly > 0\)\) return null/)
   const pin = read('components/auctions/AuctionPinCard.tsx')
   assert.match(pin, /href=\{parcelLink\(/)
+})
+
+t('the retired max-bid formula is gone from Parcel and the auction surfaces', () => {
+  const files = [
+    ...readdirSync(new URL('../lib/parcel/', import.meta.url)).filter((f) => f.endsWith('.ts')).map((f) => `lib/parcel/${f}`),
+    'components/parcel/ParcelDesk.tsx',
+    'lib/scoring.ts',
+    'app/api/auctions/[id]/route.ts',
+    'components/auctions/AuctionDetail.tsx',
+    'components/auctions/AuctionTable.tsx',
+    'components/auctions/AuctionSpreadsheet.tsx',
+    'components/auctions/AuctionMap.tsx',
+    'components/auctions/AuctionSummaryCards.tsx',
+    'components/success/SuccessClient.tsx',
+  ]
+  const banned = [
+    /\beverestMaxBid\b|\bcalculateMaxBid\b|\bgetRecommendation\b|\bmao\b/,
+    /\*\s*0\.70?(?!\d)/,
+    /Math\.min\(\s*25_?000/,
+    /70% rule/i,
+    /Everest desk ceiling/i,
+    /Shapira Formula/,
+  ]
+  for (const f of files) {
+    const src = read(f)
+    for (const re of banned) assert.ok(!re.test(src), `${f} matches ${re}`)
+  }
+  const api = read('app/api/auctions/[id]/route.ts')
+  assert.match(api, /max_bid: null as number \| null/)
+  assert.match(read('components/auctions/AuctionDetail.tsx'), /Withheld - validation in progress/)
 })
 
 console.log(`${n} passed`)

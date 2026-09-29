@@ -1,10 +1,10 @@
 ---
 title: BID, REVIEW, SKIP and the Max Bid
-description: How BidDeed's machine-learning verdicts work, how to read them without surrendering your judgment, and how a max bid is built.
+description: How BidDeed's machine-learning verdicts and SIGNAL$ Max Bid work, why they are withheld until validated, and how to build your own ceiling.
 tier: free
 ---
 
-Every property on BidDeed carries a machine-learning verdict: **BID**, **REVIEW** or **SKIP**. This page is how to read those — and the number that matters more than all three.
+BidDeed's machine-learning model sorts properties into **BID**, **REVIEW** or **SKIP**. While the model is being validated, the verdict and the SIGNAL$ Max Bid are withheld on every plan and show as "Withheld - validation in progress". This page is how to read them once they are released — and how to build the number that matters more than all three yourself in the meantime.
 
 ## The verdicts, plainly
 
@@ -16,14 +16,16 @@ The verdicts exist because nobody can hand-diligence a statewide docket. The mod
 
 ## The number that decides everything: your max bid
 
-The **SIGNAL$ Max Bid** is the ceiling BidDeed publishes per property — the most you should pay, computed before the sale from the exit backwards. The logic is the same whether the model computes it or you do:
+Your max bid is your ceiling: the most you will pay, set before the sale. Build it from the exit backwards:
 
 1. **Exit value.** What the property realistically sells for (or rents for) after you own it — from comps and condition, not hope.
 2. **Minus costs.** Repairs, holding time, closing and resale costs, taxes, and title-curative work where the deed needs it.
 3. **Minus margin.** Your required profit for the risk and the capital tied up.
 4. **What remains is the ceiling.** Not the opening bid plus a stretch. Not "what it went for last time." The number the exit can pay for.
 
-Two rules make the ceiling real: it is fixed before the auction starts, and it never moves upward during the auction. Auction fever is the market's oldest tax — the max bid is the vaccine. BidDeed publishes its ceiling before each sale and grades itself with an outcome scorecard afterward, which is the discipline in public.
+The **SIGNAL$ Max Bid** is BidDeed's own figure, and it is not a fixed formula or a percentage-of-value rule. It comes from a machine-learning model trained on prior auction results: the chance that a third party buys at the sale, and the price the sale is likely to clear at. On a foreclosure it also weighs the plaintiff's record: what its past sales brought, on the dollar, against the final judgment. Until the model passes validation it stays withheld, so for now the ceiling you bid with is the one you build.
+
+Two rules make the ceiling real: it is fixed before the auction starts, and it never moves upward during the auction. Auction fever is the market's oldest tax — the max bid is the vaccine. Once released, the SIGNAL$ Max Bid is set before each sale and graded with an outcome scorecard afterward, which is the discipline in public.
 
 ## Reading the verdict and the ceiling together
 
@@ -32,7 +34,7 @@ Two rules make the ceiling real: it is fixed before the auction starts, and it n
 - **SKIP:** believe it, or prove it wrong with specific evidence — never with enthusiasm.
 
 <BidDeedCTA href="/buy-report" label="See a full SIGNAL$ report — $25" title="Watch the math happen">
-  The report shows the ceiling built end-to-end on one real property: comps, liens, zoning, costs, margin, max bid.
+  One real property end to end: comps, liens, zoning and costs, with the SIGNAL$ Max Bid shown as Withheld until the model is validated.
 </BidDeedCTA>
 
 <Disclaimer />

@@ -28,7 +28,6 @@ export {
 } from "./underwrite.ts";
 export {
   toBidDeedCall,
-  everestMaxBid,
   dealFromAuctionLot,
   underwriteLot,
 } from "./biddeed.ts";
