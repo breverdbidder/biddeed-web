@@ -5,7 +5,7 @@
 // Run: node --experimental-strip-types scripts/validate-buy-report-offer.mts
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
-import { countyDisplay, countySlug, decideOffer, type OfferRow } from '../lib/buy-report/offer.ts'
+import { countyDisplay, countySlug, createListingCache, decideOffer, reportLink, type OfferRow } from '../lib/buy-report/offer.ts'
 
 const row = (over: Partial<OfferRow>): OfferRow => ({
   case_number: '2026-0341TD', property_address: '1 MAIN ST', auction_date: '2026-10-01', opening_bid: 5000, sale_type: 'tax_deed', ...over,
@@ -54,6 +54,37 @@ t('both deep-link flows in the page go through decideOffer', () => {
   assert.equal((src.match(/decideOffer\(/g) || []).length, 2)
   assert.match(src, /\/buy-report\/auctions\?county=/)
   assert.match(src, /mcaId && !prefillRejected \? mcaId : null/)
+})
+
+// The map pin card offers the $25 report for a listed auction (28 Sep 2026).
+const tA = async (name: string, fn: () => Promise<void>) => { await fn(); n++; console.log(`ok ${n} ${name}`) }
+
+await tA('pin cards share one listing request per county; a failed one is asked again', async () => {
+  const asked: string[] = []
+  let fail = true
+  const listing = createListingCache(async (slug) => {
+    asked.push(slug)
+    if (fail) throw new Error('offline')
+    return [row({ case_number: '2026-0341TD' })]
+  })
+  assert.equal(await listing('Duval'), null)
+  fail = false
+  const [a, b] = await Promise.all([listing('duval'), listing(' Duval ')])
+  assert.equal(a, b)
+  assert.deepEqual(asked, ['duval', 'duval'])
+  assert.equal(decideOffer(a, '2026-0341TD').state, 'sellable')
+  assert.equal(await listing(''), null)
+})
+
+t('the report link carries the auction for the page to re-check', () => {
+  const href = reportLink({ id: 'abc-123', county: 'Palm Beach', property_address: '1 MAIN ST', auction_date: '2026-10-14T00:00:00' })
+  assert.equal(href, '/buy-report?mca_id=abc-123&county=palm_beach&address=1+MAIN+ST&date=2026-10-14')
+})
+
+t('the pin card shows the report link only for a listed auction', () => {
+  const src = readFileSync(new URL('../components/auctions/AuctionPinCard.tsx', import.meta.url), 'utf8')
+  assert.match(src, /decideOffer\(listing, auction\.case_number, auction\.auction_date\)\.state === 'sellable'/)
+  assert.match(src, /\{reportOnSale \? \(\s*<a\s+href=\{reportLink\(auction\)\}/)
 })
 
 console.log(`${n} passed`)

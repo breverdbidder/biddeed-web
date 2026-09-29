@@ -41,6 +41,42 @@ export function countyDisplay(slug: string): string {
 }
 
 /**
+ * One /buy-report/auctions request per county per page, shared by every card
+ * that asks (the map opens many pin cards in one visit). A failed or malformed
+ * answer is not kept, so the next card open asks again, and answers null.
+ */
+export function createListingCache(fetchListing: (slug: string) => Promise<unknown>): (county: string | null | undefined) => Promise<unknown> {
+  const cache = new Map<string, Promise<unknown>>()
+  return (county) => {
+    const slug = countySlug(county)
+    if (!slug) return Promise.resolve(null)
+    let pending = cache.get(slug)
+    if (!pending) {
+      pending = fetchListing(slug).then(
+        (v) => {
+          if (!Array.isArray(v)) cache.delete(slug)
+          return Array.isArray(v) ? v : null
+        },
+        () => {
+          cache.delete(slug)
+          return null
+        }
+      )
+      cache.set(slug, pending)
+    }
+    return pending
+  }
+}
+
+/** The /buy-report deep link for one auction (the page re-checks it before checkout). */
+export function reportLink(a: { id: string; county: string | null; property_address?: string | null; auction_date?: string | null }): string {
+  const q = new URLSearchParams({ mca_id: a.id, county: countySlug(a.county) })
+  if (a.property_address) q.set('address', a.property_address)
+  if (a.auction_date) q.set('date', String(a.auction_date).slice(0, 10))
+  return `/buy-report?${q.toString()}`
+}
+
+/**
  * `listing` is the /buy-report/auctions answer for the property's county, or
  * null when that request failed. A failed request answers 'unknown': the page
  * keeps the checkout it showed before this check, and the server still refuses

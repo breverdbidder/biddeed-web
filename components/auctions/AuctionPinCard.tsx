@@ -1,13 +1,14 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { FolderPlus, Lock } from 'lucide-react'
+import { ArrowRight, FolderPlus, Lock } from 'lucide-react'
 
 import { formatCountyLabel } from '@/lib/counties'
 import { apiUrl } from '@/lib/api'
 import { tierAtLeast } from '@/lib/tier/rank'
 import { PLANS } from '@/components/deed-home/LandingSections'
 import { createViewerResolver, type TierAnswer, type ViewerState } from '@/lib/auctions/viewer-state'
+import { createListingCache, decideOffer, reportLink } from '@/lib/buy-report/offer'
 import type { Auction } from '@/types/auctions'
 
 /**
@@ -62,6 +63,34 @@ function useViewerState(): ViewerState {
   return viewer
 }
 
+/**
+ * Whether the $25 SIGNAL$ report is on sale for this auction: the same county
+ * listing /buy-report checks (tax deeds in the certified counties, clerk
+ * exclusions applied). 28 Sep 2026: the map is where signed-in members spend
+ * their time (PostHog), and its card offered only the $99/mo Investor plan -
+ * no way to buy the one-off report for the property on screen. Shown only
+ * for a listed auction, so the link never leads to a report that is not sold.
+ */
+const storefrontListing = createListingCache((slug) =>
+  fetch(apiUrl(`/buy-report/auctions?county=${encodeURIComponent(slug)}`)).then((r) => (r.ok ? r.json() : null))
+)
+
+function useReportOnSale(auction: Auction): boolean {
+  const [onSale, setOnSale] = useState(false)
+  useEffect(() => {
+    let live = true
+    setOnSale(false)
+    if (!auction.case_number) return
+    storefrontListing(auction.county).then((listing) => {
+      if (live) setOnSale(decideOffer(listing, auction.case_number, auction.auction_date).state === 'sellable')
+    })
+    return () => {
+      live = false
+    }
+  }, [auction.id, auction.county, auction.case_number, auction.auction_date])
+  return onSale
+}
+
 function Field({ label, value, mono }: { label: string; value: string | number | null | undefined; mono?: boolean }) {
   const has = value != null && value !== ''
   return (
@@ -97,6 +126,7 @@ export default function AuctionPinCard({ auction, onClose }: { auction: Auction;
   const isTaxDeed = (auction.sale_type || auction.auction_type) === 'tax_deed'
   const justValue = auction.market_value ?? auction.assessed_value ?? null
   const viewer = useViewerState()
+  const reportOnSale = useReportOnSale(auction)
   const isAnonymous = viewer === 'anonymous'
   const isInvestor = viewer === 'investor'
   // Free-member fields (assessed value, parcel ID) gate on signup; Investor
@@ -217,6 +247,15 @@ export default function AuctionPinCard({ auction, onClose }: { auction: Auction;
             </p>
           </div>
         )}
+
+        {reportOnSale ? (
+          <a
+            href={reportLink(auction)}
+            className="mt-4 flex min-h-11 items-center justify-center gap-2 rounded-lg border border-primary px-3 py-2 text-sm font-semibold text-primary hover:bg-primary/10"
+          >
+            Buy SIGNAL$ report for this auction - $25 <ArrowRight className="size-4" aria-hidden />
+          </a>
+        ) : null}
 
         {viewer !== 'investor' ? (
           <a

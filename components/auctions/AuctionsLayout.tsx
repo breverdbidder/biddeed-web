@@ -297,7 +297,9 @@ export default function AuctionsLayout({
             <p className="text-xl font-bold text-foreground dark:text-white">Auction Intelligence</p>
           )}
           <p className="text-base text-muted-foreground dark:text-muted-foreground mt-1">
-            {headerTotal.toLocaleString()} auctions across {headerCounties} Florida counties
+            {/* "counties", not "Florida counties": the feed includes Bexar County, TX
+                (68 counties on 28 Sep 2026 for Florida's 67), so the old wording was false. */}
+            {headerTotal.toLocaleString()} auctions across {headerCounties} counties
             {summary?.upcoming ? (
               <>
                 {' '}&middot;{' '}
