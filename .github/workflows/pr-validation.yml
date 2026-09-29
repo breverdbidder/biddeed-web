@@ -14,6 +14,8 @@ on:
       - 'wrangler.production.jsonc'
       - 'package.json'
       - 'package-lock.json'
+      - 'scripts/**'
+      - 'tests/e2e/**'
       - '.github/workflows/pr-validation.yml'
       - 'scripts/ui-audit/**'
 
@@ -56,6 +58,26 @@ jobs:
 
       - name: Validate auction-detail paid gate
         run: npm run test:auction-detail-gate
+
+      - name: Validate auction route contracts
+        run: npm run test:auction-route-contract
+
+      - name: Run mocked auction route browser regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx playwright install --with-deps chromium
+          npm run dev -- --hostname 127.0.0.1 --port 3000 > /tmp/auction-route-next.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          ready=0
+          for _ in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:3000/auctions -o /dev/null; then ready=1; break; fi
+            if ! kill -0 "$server_pid" 2>/dev/null; then cat /tmp/auction-route-next.log; exit 1; fi
+            sleep 2
+          done
+          if [ "$ready" -ne 1 ]; then cat /tmp/auction-route-next.log; exit 1; fi
+          E2E_BASE_URL=http://127.0.0.1:3000 npm run test:e2e:auction-route-contract
 
       - name: Build production OpenNext Worker
         run: npx opennextjs-cloudflare build --config wrangler.production.jsonc

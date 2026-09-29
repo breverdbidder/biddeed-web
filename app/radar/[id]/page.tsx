@@ -1,10 +1,9 @@
 import AuctionDetail from '@/components/auctions/AuctionDetail'
 
 /**
- * Auction detail, reachable at /radar/:id.
- *
- * It used to be /auctions/:id, which now collides with the Worker's JSON API
- * at the apex; the whole workspace moved under /radar instead.
+ * Auction detail, linked from the workspace at /radar/:id. The app also has a
+ * /auctions/:id page; bare /auctions is the HTML calendar, and the legacy
+ * /auctions?county=... JSON contract is a separate Cloudflare-router route.
  *
  * force-dynamic for the CSP nonce — a prerendered page can never carry one and
  * renders blank under 'strict-dynamic'. See middleware.ts.

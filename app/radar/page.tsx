@@ -5,10 +5,10 @@ import type { ViewMode } from '@/types/auctions'
 /**
  * The auctions workspace.
  *
- * It lives at /radar, not /auctions. GET /auctions is a JSON API on the
- * Cloudflare Worker; now that basePath is gone, an app route of that name
- * would shadow it at the apex and start returning HTML to every API client.
- * Nothing in this app may claim /auctions.
+ * The full workspace remains at /radar; bare /auctions is a separate HTML
+ * calendar route. The legacy /auctions?county=... JSON contract is still
+ * handled by the Cloudflare router, while this app's modern list API is
+ * /api/auctions. Keep those route contracts distinct.
  *
  * force-dynamic: middleware mints a per-request CSP nonce and Next reads it
  * off the incoming request's content-security-policy header. Prerendered HTML

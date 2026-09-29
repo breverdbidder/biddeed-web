@@ -164,8 +164,8 @@ jobs:
         run: |
           set -euo pipefail
           fail=0
-          # /auctions and /success are deliberately absent from this list — both
-          # belong to the Worker, /success because it is a live Stripe
+          # /auctions is covered by the Cloudflare production-origin smoke suite;
+          # /success is deliberately absent here because it is a live Stripe
           # success_url. /api/deed is POST-only and is exercised by its own step.
           for path in "/" "/radar" "/radar?view=calendar" "/order/success" \
                       "/api/health" "/api/auctions/summary" "/api/auctions/calendar" "/api/csp-report"; do
