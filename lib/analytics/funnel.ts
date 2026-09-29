@@ -30,6 +30,7 @@ export const FUNNEL_EVENTS = [
   'lead_captured',
   'free_report_popup_shown',
   'free_report_popup_dismissed',
+  'parcel_underwritten', // /parcel: the first memo the visitor's numbers produce on a page load
 ] as const
 
 export type FunnelEvent = (typeof FUNNEL_EVENTS)[number]
@@ -50,6 +51,9 @@ export const ALLOWED_PROPS = [
   'stored', // boolean, lead_captured only - did the lead list accept it
   'county', // county slug (public auction data, not the visitor)
   'sale_type', // 'tax_deed' | 'foreclosure'
+  'strategy', // parcel_underwritten only: 'hold' | 'flip' | 'brrrr'
+  'call', // parcel_underwritten only: 'BID' | 'REVIEW' | 'SKIP' (the visitor's own buy-box result)
+  'prefilled', // boolean, parcel_underwritten only - opened from an auction row
 ] as const
 
 type PropValue = string | number | boolean

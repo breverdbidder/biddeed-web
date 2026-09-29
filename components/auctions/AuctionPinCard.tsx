@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { ArrowRight, FolderPlus, Lock } from 'lucide-react'
+import { ArrowRight, Calculator, FolderPlus, Lock } from 'lucide-react'
 
 import { formatCountyLabel } from '@/lib/counties'
 import { apiUrl } from '@/lib/api'
@@ -9,6 +9,7 @@ import { tierAtLeast } from '@/lib/tier/rank'
 import { PLANS } from '@/components/deed-home/LandingSections'
 import { createViewerResolver, type TierAnswer, type ViewerState } from '@/lib/auctions/viewer-state'
 import { createListingCache, listedFor, reportLink } from '@/lib/buy-report/offer'
+import { parcelLink } from '@/lib/parcel-prefill'
 import type { Auction } from '@/types/auctions'
 
 /**
@@ -269,6 +270,18 @@ export default function AuctionPinCard({ auction, onClose }: { auction: Auction;
               : `Unlock with Investor${INVESTOR_PRICE_LABEL ? ' - ' + INVESTOR_PRICE_LABEL : ''}: year built, living area, parties and case details`}
           </a>
         ) : null}
+
+        {/* Parcel (breverdbidder/parcel, 29 Sep 2026): the visitor's own
+            rental / flip / BRRRR underwriting of this lot, opened with the
+            public facts this card already holds for this viewer (the feed
+            redacts the rest server-side). Not a SIGNAL$ figure. */}
+        <a
+          href={parcelLink({ ...auction, sale_type: auction.sale_type || auction.auction_type })}
+          className="mt-4 flex min-h-11 items-center justify-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-semibold text-foreground hover:bg-accent"
+        >
+          <Calculator className="size-4" aria-hidden />
+          Underwrite this lot in Parcel
+        </a>
 
         {/* S2 hook (issue #19847 Pass 3) — same /chat?new_project_county=
             mechanism every other hook point across the product uses. */}

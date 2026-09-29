@@ -93,6 +93,9 @@ jobs:
       - name: Validate the free-report popup creates the account (email code / sign-in code)
         run: npm run test:popup-account
 
+      - name: Validate Parcel (vendored engine math, no network, /parcel prefill, not a SIGNAL$ figure)
+        run: npm run test:parcel
+
       - name: Validate Cloudflare credentials are present
         shell: bash
         run: |
@@ -251,6 +254,9 @@ jobs:
           check "/deal/lee/2026000141" 200
           check "/deal/broward/cace-24-008115" 200
           check "/subscribe" 200
+          # Parcel (29 Sep 2026): the underwriting desk is an app route the
+          # router must proxy; a 404 here means the router lost its /parcel branch.
+          check "/parcel" 200
           # P0-2 (2026-09-11): the homepage sample CTAs died silently when the old
           # sample report key expired. This is the funnel's front door - block the
           # deploy if the canonical public sample pair stops rendering.

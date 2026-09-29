@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react'
-import { Bell, CalendarDays, FileText, FolderKanban, Gavel, GraduationCap, HardHat, MapPinned, Route, Search } from 'lucide-react'
+import { Bell, Calculator, CalendarDays, FileText, FolderKanban, Gavel, GraduationCap, HardHat, MapPinned, Route, Search } from 'lucide-react'
 
 /**
  * Primary navigation.
@@ -54,6 +54,16 @@ export const NAV_ITEMS: NavItem[] = [
     href: '/discover',
     icon: Search,
     description: 'Search auction inventory by county, case or address',
+  },
+  {
+    // Parcel (breverdbidder/parcel, 29 Sep 2026): the visitor's own rental /
+    // flip / BRRRR underwriting of a lot, in the browser. An app route
+    // (app/parcel), proxied by the router's exact '/parcel' branch.
+    key: 'parcel',
+    label: 'Underwrite',
+    href: '/parcel',
+    icon: Calculator,
+    description: 'Parcel: rental, flip or BRRRR math on a lot before you bid',
   },
   {
     key: 'd4d',
