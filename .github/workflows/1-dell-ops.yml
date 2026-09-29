@@ -1,0 +1,131 @@
+name: Dell ops SSH
+
+on:
+  workflow_dispatch:
+    inputs:
+      command:
+        description: 'Shell command to run on the Dell'
+        required: false
+        default: 'hostname && whoami && uptime'
+        type: string
+  workflow_call:
+    inputs:
+      command:
+        description: 'Shell command to run on the Dell'
+        required: false
+        default: 'hostname && whoami && uptime'
+        type: string
+    secrets:
+      DELL_OPS_WARP_CLIENT_ID:
+        required: true
+      DELL_OPS_WARP_CLIENT_SECRET:
+        required: true
+      DELL_OPS_SSH_PRIVATE_KEY:
+        required: true
+      DELL_OPS_WARP_PROFILE_ID:
+        required: true
+      DELL_OPS_SSH_HOST_KEY_SHA256:
+        required: false
+
+permissions: {}
+
+concurrency:
+  group: dell-ops-ssh
+  cancel-in-progress: false
+
+jobs:
+  ssh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      WARP_CLIENT_ID: ${{ secrets.DELL_OPS_WARP_CLIENT_ID }}
+      WARP_CLIENT_SECRET: ${{ secrets.DELL_OPS_WARP_CLIENT_SECRET }}
+      SSH_PRIVATE_KEY: ${{ secrets.DELL_OPS_SSH_PRIVATE_KEY }}
+      EXPECTED_PROFILE_ID: ${{ secrets.DELL_OPS_WARP_PROFILE_ID }}
+      EXPECTED_HOST_KEY: ${{ secrets.DELL_OPS_SSH_HOST_KEY_SHA256 }}
+      REMOTE_COMMAND: ${{ inputs.command }}
+    steps:
+      - name: Check required configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          for field in WARP_CLIENT_ID WARP_CLIENT_SECRET SSH_PRIVATE_KEY EXPECTED_PROFILE_ID; do
+            if [[ -z "${!field}" ]]; then
+              echo "::error::Missing required Dell ops configuration: $field"
+              exit 1
+            fi
+          done
+          if [[ -z "$REMOTE_COMMAND" ]]; then
+            echo '::error::Empty remote command'
+            exit 1
+          fi
+
+      - name: Install Cloudflare One Client
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL https://pkg.cloudflareclient.com/pubkey.gpg |
+            sudo gpg --batch --yes --dearmor -o /usr/share/keyrings/cloudflare-warp-archive-keyring.gpg
+          codename="$(lsb_release -cs)"
+          echo "deb [signed-by=/usr/share/keyrings/cloudflare-warp-archive-keyring.gpg] https://pkg.cloudflareclient.com/ $codename main" |
+            sudo tee /etc/apt/sources.list.d/cloudflare-client.list >/dev/null
+          sudo apt-get update -qq
+          sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq cloudflare-warp openssh-client
+
+      - name: Enroll headless WARP and confirm assigned profile
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Never print the MDM file or its service-token credentials.
+          sudo install -d -m 700 /var/lib/cloudflare-warp
+          sudo install -m 600 /dev/null /var/lib/cloudflare-warp/mdm.xml
+          trap 'sudo rm -f /var/lib/cloudflare-warp/mdm.xml' EXIT
+          printf '<dict>\n<key>auth_client_id</key><string>%s</string>\n<key>auth_client_secret</key><string>%s</string>\n<key>auto_connect</key><integer>1</integer>\n<key>onboarding</key><false/>\n<key>organization</key><string>falling-tooth-4abb</string>\n<key>service_mode</key><string>warp</string>\n</dict>\n' "$WARP_CLIENT_ID" "$WARP_CLIENT_SECRET" |
+            sudo tee /var/lib/cloudflare-warp/mdm.xml >/dev/null
+          sudo systemctl restart warp-svc
+          connected=false
+          for attempt in {1..24}; do
+            if sudo warp-cli --accept-tos status 2>/dev/null | grep -q 'Status update: Connected'; then
+              connected=true
+              break
+            fi
+            sleep 5
+          done
+          if [[ "$connected" != true ]]; then
+            echo '::error::WARP did not connect within two minutes'
+            exit 1
+          fi
+          # Profile matching must be verified before reaching the private IP.
+          applied_profile="$(sudo warp-cli --accept-tos settings | sed -nE 's/^[[:space:]]*Profile ID:[[:space:]]*([^[:space:]]+).*/\1/p' | head -n 1)"
+          if [[ -z "$applied_profile" || "$applied_profile" != "$EXPECTED_PROFILE_ID" ]]; then
+            echo '::error::WARP profile did not match the dedicated Dell ops profile'
+            exit 1
+          fi
+          echo 'WARP connected with the expected Dell ops profile'
+
+      - name: Verify host identity and run command on Dell
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p "$HOME/.ssh"
+          printf '%s\n' "$SSH_PRIVATE_KEY" > "$HOME/.ssh/dell_ops_key"
+          trap 'rm -f "$HOME/.ssh/dell_ops_key"' EXIT
+          ssh-keyscan -T 10 -t ed25519 192.168.1.170 2>/dev/null > "$HOME/.ssh/known_hosts"
+          if [[ ! -s "$HOME/.ssh/known_hosts" ]]; then
+            echo '::error::Dell SSH host key unavailable'
+            exit 1
+          fi
+          fingerprint="$(ssh-keygen -lf "$HOME/.ssh/known_hosts" -E sha256 | awk 'NR==1 {print $2}')"
+          echo "Dell SSH host key fingerprint: $fingerprint"
+          if [[ -n "$EXPECTED_HOST_KEY" && "$fingerprint" != "$EXPECTED_HOST_KEY" ]]; then
+            echo '::error::Dell SSH host key changed; refusing connection'
+            exit 1
+          fi
+          # On run 1 the host key is TOFU. Once the observed fingerprint is saved
+          # as a repo secret, this check pins subsequent runs automatically.
+          ssh -i "$HOME/.ssh/dell_ops_key" -o IdentitiesOnly=yes \
+            -o BatchMode=yes -o ConnectTimeout=15 \
+            -o StrictHostKeyChecking=accept-new \
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            ariel-shapira@192.168.1.170 "$REMOTE_COMMAND"
