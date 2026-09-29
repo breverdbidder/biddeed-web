@@ -7,8 +7,12 @@ name: Sign-up audit (recent accounts, no PII)
 # N hours, whether the email was verified, and their sessions.
 #
 # This repo is public, so the log carries no email, name or id: each account is
-# shown as "internal test" (an everestcapital8+ address) or "outside", with a
-# webmail domain (gmail.com, ...) or "other domain", plus times in Florida ET.
+# shown as "internal test" (an everestcapital8+ address), "internal test (RLS
+# suite)" (the two playwright-rls.yml accounts, E2E_USER_A/B_EMAIL, compared in
+# process and never printed) or "outside", with a webmail domain (gmail.com,
+# ...) or "other domain", plus times in Florida ET. 29 Sep 2026: the RLS suite's
+# two accounts signed in at 10:18-10:19 PM ET on 28 Sep and the audit listed
+# them as "outside".
 # Read-only: GET /v1/users and GET /v1/sessions on the Clerk Backend API.
 on:
   workflow_dispatch:
@@ -33,6 +37,8 @@ jobs:
       - name: Recent Clerk accounts and sessions
         env:
           CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+          E2E_USER_A_EMAIL: ${{ secrets.E2E_USER_A_EMAIL }}
+          E2E_USER_B_EMAIL: ${{ secrets.E2E_USER_B_EMAIL }}
           HOURS: ${{ inputs.hours }}
         shell: bash
         run: |
@@ -48,6 +54,8 @@ jobs:
             return r.json()
           }
           const et = (ms) => ms ? new Date(ms).toLocaleString('en-US', { timeZone: 'America/New_York', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit' }) + ' ET' : '-'
+          const E2E = new Set([process.env.E2E_USER_A_EMAIL, process.env.E2E_USER_B_EMAIL].filter(Boolean).map((v) => v.trim().toLowerCase()))
+          const whoOf = (addr) => /^everestcapital8(\+|@)/.test(addr) ? 'internal test' : E2E.has(addr) ? 'internal test (RLS suite)' : 'outside'
           const WEBMAIL = new Set(['gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com', 'icloud.com', 'aol.com', 'live.com', 'me.com', 'msn.com', 'proton.me', 'protonmail.com'])
           const users = await api('/users?order_by=-created_at&limit=50')
           const recent = users.filter((u) => u.created_at >= since)
@@ -59,7 +67,7 @@ jobs:
             const primary = (u.email_addresses || []).find((e) => e.id === u.primary_email_address_id) || (u.email_addresses || [])[0] || {}
             const addr = String(primary.email_address || '').toLowerCase()
             const domain = addr.split('@')[1] || ''
-            const who = /^everestcapital8\+/.test(addr) ? 'internal test' : 'outside'
+            const who = whoOf(addr)
             const dom = WEBMAIL.has(domain) ? domain : (domain ? 'other domain' : '-')
             const ver = primary.verification ? `${primary.verification.status} (${primary.verification.strategy || '-'})` : ((u.external_accounts || []).length ? 'oauth' : '-')
             const sessions = await api(`/sessions?user_id=${encodeURIComponent(u.id)}&limit=20`)
@@ -74,7 +82,7 @@ jobs:
           if (signedIn.length) lines.push('| last sign-in | who | account created |', '|---|---|---|')
           for (const u of signedIn) {
             const primary = (u.email_addresses || []).find((e) => e.id === u.primary_email_address_id) || (u.email_addresses || [])[0] || {}
-            const who = /^everestcapital8(\+|@)/.test(String(primary.email_address || '').toLowerCase()) ? 'internal' : 'outside'
+            const who = whoOf(String(primary.email_address || '').toLowerCase())
             lines.push(`| ${et(u.last_sign_in_at)} | ${who} | ${et(u.created_at)} |`)
           }
           // One person, by hash: page through every account and compare. Read from
