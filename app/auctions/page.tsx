@@ -27,7 +27,7 @@ export default function AuctionsPage() {
           own heading would be a second h1. /radar has no page-level h1 of its
           own and relies on AuctionsLayout for it, so the heading is opt-out,
           not opt-in. */}
-      <AuctionsLayout showHeading={false} />
+      <AuctionsLayout initialView="calendar" showHeading={false} />
     </div>
   )
 }

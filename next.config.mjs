@@ -28,9 +28,9 @@ const nextConfig = {
   // without a code change. lib/api.ts reads the same variable, because
   // basePath is never applied to raw fetch() - see the comment there.
   //
-  // GET /auctions is a JSON API on the Worker. With basePath gone that
-  // collision is live, so nothing in this app may claim /auctions: the
-  // auctions workspace is a real route at /radar.
+  // Bare /auctions is the app's HTML calendar route. The legacy
+  // /auctions?county=... JSON contract remains separate on the Cloudflare
+  // router; this app's modern list API is /api/auctions.
   basePath: process.env.NEXT_PUBLIC_BASE_PATH ?? '',
   poweredByHeader: false,
   productionBrowserSourceMaps: false,
@@ -41,8 +41,8 @@ const nextConfig = {
   // Legacy in-app links. While the app was mounted at basePath '/radar' the
   // workspace lived at /radar/auctions and details at /radar/auctions/:id.
   // Both moved up a level. These redirects are scoped under /radar on purpose:
-  // the apex /auctions must never be claimed by this app, because the Worker
-  // serves it as a JSON API.
+  // they normalize old workspace URLs without changing the bare /auctions
+  // calendar route or the separate legacy query-string JSON contract.
   async redirects() {
     return [
       { source: '/radar/auctions', destination: '/radar', permanent: true },
