@@ -62,7 +62,7 @@ jobs:
 
       - name: Install Claude Code
         run: |
-          npm install -g @anthropic-ai/claude-code
+          npm install -g @anthropic-ai/claude-code@2.1.287  # pinned: 2.1.287 turned mods on by default; bump deliberately after review
           claude --version
 
       - name: Fetch issue brief (artifact chain - mandates, intent, spec, body, comments)
