@@ -11,8 +11,8 @@ Issue #181. Source of truth in code: `lib/analytics/funnel.ts` (`FUNNEL_EVENTS`,
 | `lead_captured` | Free-report popup accepted an email | `surface`, `digest_opt_in`, `stored` (the lead list accepted the write) |
 | `free_report_popup_shown` | Popup opened | `surface`, `trigger` (`timer` \| `scroll` \| `exit_intent`) |
 | `free_report_popup_dismissed` | Popup closed without submitting | `surface` |
-| `signup_prompt_clicked` | "Create a free account" in the popup or on `/buy-report` | `surface` |
-| `parcel_underwritten` | `/parcel`: the first memo the visitor's own numbers produce on a page load (the call is the visitor's buy-box result, not a SIGNAL$ verdict; the numbers themselves are never sent) | `surface` (`parcel`), `strategy` (`hold` \| `flip` \| `brrrr`), `call` (`BID` \| `REVIEW` \| `SKIP`), `prefilled` (opened from an auction row), `county`, `sale_type` |
+| `signup_prompt_clicked` | "Create a free account" in the popup, on `/buy-report`, or on the `/parcel` sign-up gate (`surface` = `parcel_gate`) | `surface` |
+| `parcel_underwritten` | `/parcel`: the first memo the visitor's own numbers produce on a page load (the call is the visitor's buy-box result, not a SIGNAL$ verdict; the numbers themselves are never sent) | `surface` (`parcel`), `strategy` (`hold` \| `flip` \| `brrrr`), `call` (`BID` \| `REVIEW` \| `SKIP`), `prefilled` (opened from an auction row), `gated` (signed out, so the result waited behind the free sign-up gate), `county`, `sale_type` |
 
 The older `checkout_completed` event (with Stripe `session_id`) still fires next to `purchase_completed` so existing insights keep working.
 
@@ -21,7 +21,7 @@ The older `checkout_completed` event (with Stripe `session_id`) still fires next
 1. `free_report_popup_shown` -> `lead_captured` -> `report_viewed` (sample) -> `signup_completed`
 2. `$pageview /buy-report` -> `checkout_started` (signal_report) -> `purchase_completed`
 3. `$pageview /pricing` -> `checkout_started` (subscription) -> `purchase_completed`
-4. `$pageview /parcel` -> `parcel_underwritten` -> `checkout_started` (signal_report) -> `purchase_completed`
+4. `$pageview /parcel` -> `parcel_underwritten` (`gated`) -> `signup_prompt_clicked` (`parcel_gate`) -> `signup_completed` -> `checkout_started` (signal_report) -> `purchase_completed`
 
 Test traffic: filter out persons whose email ends in `@e2e.biddeed.ai` and internal accounts before reading any of these.
 

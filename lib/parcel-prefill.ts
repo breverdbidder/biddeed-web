@@ -109,3 +109,43 @@ export function parcelLink(a: {
   if (a.assessed_value && a.assessed_value > 0) q.set('assessed', String(Math.round(a.assessed_value)))
   return `/parcel?${q.toString()}`
 }
+
+/**
+ * The /parcel URL for a prefill, carrying only the auction's public facts
+ * (never the visitor's own ARV, rehab, rent, taxes or insurance: those stay
+ * in the browser's local draft). Used as the sign-up / sign-in return path.
+ */
+export function publicParcelHref(p: ParcelPrefill): string {
+  const q = new URLSearchParams()
+  if (p.mcaId) q.set('mca_id', p.mcaId)
+  if (p.county) q.set('county', p.county)
+  if (p.address) q.set('address', p.address)
+  if (p.caseNumber) q.set('case', p.caseNumber)
+  if (p.auctionDate) q.set('date', p.auctionDate)
+  if (p.saleType) q.set('sale_type', p.saleType)
+  if (p.openingBid > 0) q.set('opening_bid', String(p.openingBid))
+  if (p.assessedValue > 0) q.set('assessed', String(p.assessedValue))
+  const s = q.toString()
+  return s ? `/parcel?${s}` : '/parcel'
+}
+
+/**
+ * The only post-auth destinations the sign-in / sign-up pages honour from
+ * `redirect_url` for their own hand-off: the path is always exactly /parcel,
+ * and the query is re-parsed and rebuilt from the clean public prefill, so no
+ * other host, path or parameter can pass through (no open redirect, no
+ * visitor numbers in the URL). Anything else returns null and the pages keep
+ * their default destination.
+ */
+export function safeParcelReturn(value: string | null | undefined): string | null {
+  if (typeof value !== 'string' || value.length > 800) return null
+  let v = value.trim()
+  if (/^https:\/\/biddeed\.ai\//i.test(v)) v = v.slice('https://biddeed.ai'.length)
+  if (v === '/parcel') return '/parcel'
+  if (!v.startsWith('/parcel?')) return null
+  const params: Record<string, string> = {}
+  new URLSearchParams(v.slice('/parcel?'.length)).forEach((val, key) => {
+    if (!(key in params)) params[key] = val
+  })
+  return publicParcelHref(parsePrefill(params))
+}

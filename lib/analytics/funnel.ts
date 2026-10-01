@@ -54,6 +54,7 @@ export const ALLOWED_PROPS = [
   'strategy', // parcel_underwritten only: 'hold' | 'flip' | 'brrrr'
   'call', // parcel_underwritten only: 'BID' | 'REVIEW' | 'SKIP' (the visitor's own buy-box result)
   'prefilled', // boolean, parcel_underwritten only - opened from an auction row
+  'gated', // boolean, parcel_underwritten only - the result waited behind the free sign-up gate
 ] as const
 
 type PropValue = string | number | boolean

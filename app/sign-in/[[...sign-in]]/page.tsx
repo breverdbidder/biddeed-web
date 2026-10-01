@@ -9,8 +9,24 @@ import AuthCardFallback from '@/components/auth/AuthCardFallback'
 import { AUTH_CARD_COPY } from '@/lib/auth/clerk-copy'
 import Link from 'next/link'
 import { LIGHT as C } from '@/lib/design-tokens'
+import { safeParcelReturn } from '@/lib/parcel-prefill'
 
-export default async function SignInCatchAllPage() {
+export default async function SignInCatchAllPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}) {
+  // Parcel's free sign-up gate (Ariel, 1 Oct 2026) sends visitors here with
+  // Clerk's own redirect_url pointing back at the property they were
+  // underwriting. Clerk carries redirect_url through its steps and redirects
+  // there itself; this page's own hand-offs (the signed-in redirect below and
+  // SignedInRedirect) follow it only when safeParcelReturn accepts it: the
+  // path is exactly /parcel and the query is rebuilt from public auction
+  // facts, so no other host, path or value can pass. Anything else keeps the
+  // /radar default.
+  const q = await searchParams
+  const parcelReturn = safeParcelReturn(typeof q.redirect_url === 'string' ? q.redirect_url : null)
+  const destination = parcelReturn ?? '/radar'
   const h = await headers()
   const clerkLive =
     isClerkHostAuthorized(
@@ -44,7 +60,7 @@ export default async function SignInCatchAllPage() {
     } catch {
       userId = null
     }
-    if (userId) redirect('/radar')
+    if (userId) redirect(destination)
   }
 
   return (
@@ -59,11 +75,11 @@ export default async function SignInCatchAllPage() {
             <span style={{ fontSize: '24px', fontWeight: 'bold', color: C.ink }}>BidDeed<span style={{ color: C.brand }}>.AI</span></span>
           </Link>
         </div>
-        {clerkLive && <SignedInRedirect />}
+        {clerkLive && <SignedInRedirect to={destination} />}
         {clerkLive ? (
           <SignIn
-            fallbackRedirectUrl="/radar"
-            signUpUrl="/sign-up"
+            fallbackRedirectUrl={destination}
+            signUpUrl={parcelReturn ? `/sign-up?redirect_url=${encodeURIComponent(parcelReturn)}` : '/sign-up'}
             fallback={<AuthCardFallback {...AUTH_CARD_COPY.signIn} />}
           />
         ) : (

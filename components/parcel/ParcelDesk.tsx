@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Check, CircleCheck, CircleX, Copy, RotateCcw, TriangleAlert } from 'lucide-react'
+import { ArrowRight, Check, CircleCheck, CircleX, Copy, Lock, RotateCcw, TriangleAlert } from 'lucide-react'
 
 import {
   DEFAULT_ASSUMPTIONS,
@@ -16,7 +16,7 @@ import {
   toBidDeedCall,
 } from '@/lib/parcel'
 import type { Analysis, Assumptions, BidDeedCall, Strategy } from '@/lib/parcel'
-import { EMPTY_PREFILL, isAuctionPrefill, type ParcelPrefill } from '@/lib/parcel-prefill'
+import { EMPTY_PREFILL, isAuctionPrefill, publicParcelHref, type ParcelPrefill } from '@/lib/parcel-prefill'
 import { track, SAMPLE_REPORT_PATH } from '@/lib/analytics/funnel'
 import { formatCountyLabel } from '@/lib/counties'
 import { cn } from '@/lib/utils'
@@ -36,6 +36,18 @@ import { cn } from '@/lib/utils'
  * the dollar against the final judgment. It prints only the policy label
  * until the model passes validation. The old fixed-percentage ceiling is
  * retired (Ariel, 29 Sep 2026) and must not come back, here or anywhere.
+ *
+ * Free sign-up gate (Ariel, 1 Oct 2026): the result for the visitor's own
+ * numbers shows only to a signed-in account (any tier, free included; Clerk
+ * accounts carry a verified email). Signed-out visitors get a "create a free
+ * account" card; sign-up / sign-in return to this same property through
+ * Clerk's redirect_url (validated by safeParcelReturn on the auth pages).
+ * The signed-in state comes from the server (/api/viewer/tier), never from
+ * the URL. The typed numbers are kept only in this browser's localStorage
+ * (PARCEL_DRAFT_KEY) so they are still here after the round trip; they are
+ * never sent anywhere. The built-in example stays visible without an account
+ * so a visitor can see what the desk produces. No marketing consent is
+ * implied by signing up.
  *
  * Florida courthouse sales settle in full within about a day, so the desk
  * defaults to a cash purchase (100% down). Unticking it applies Parcel's
@@ -91,6 +103,38 @@ function inputsFrom(p: ParcelPrefill): Inputs {
     rentMonthly: p.rentMonthly,
     taxesAnnual: p.taxesAnnual,
     insuranceAnnual: p.insuranceAnnual,
+  }
+}
+
+const PARCEL_DRAFT_KEY = 'bd_parcel_local_draft_v1'
+const DRAFT_TTL_MS = 24 * 60 * 60 * 1000
+
+type Draft = { v: 1; mcaId: string | null; inputs: Inputs; strategy: Strat; cash: boolean; at: number }
+
+function sameInputs(a: Inputs, b: Inputs): boolean {
+  return (Object.keys(a) as (keyof Inputs)[]).every((k) => a[k] === b[k])
+}
+
+/** The visitor's own numbers, this browser only. Any storage error = no draft. */
+function readDraft(mcaId: string | null): Draft | null {
+  try {
+    const raw = window.localStorage.getItem(PARCEL_DRAFT_KEY)
+    if (!raw) return null
+    const d = JSON.parse(raw) as Draft
+    if (!d || d.v !== 1 || d.mcaId !== mcaId || !d.inputs || Date.now() - Number(d.at) > DRAFT_TTL_MS) return null
+    if (!['hold', 'flip', 'brrrr'].includes(d.strategy)) return null
+    return d
+  } catch {
+    return null
+  }
+}
+
+function writeDraft(d: Draft | null) {
+  try {
+    if (d) window.localStorage.setItem(PARCEL_DRAFT_KEY, JSON.stringify(d))
+    else window.localStorage.removeItem(PARCEL_DRAFT_KEY)
+  } catch {
+    // storage blocked: the desk still works, the numbers just do not persist
   }
 }
 
@@ -183,7 +227,44 @@ export default function ParcelDesk({ prefill }: { prefill: ParcelPrefill }) {
   const [strategy, setStrategy] = useState<Strat>('hold')
   const [cash, setCash] = useState(true)
   const [copied, setCopied] = useState(false)
+  const [viewer, setViewer] = useState<{ loaded: boolean; signedIn: boolean }>({ loaded: false, signedIn: false })
   const tracked = useRef(false)
+  const draftRead = useRef(false)
+
+  // Signed-in state from the server session, never from the URL or storage.
+  // A failed check counts as signed out (the gate shows; nothing leaks).
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/viewer/tier', { credentials: 'include', cache: 'no-store' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((t) => {
+        if (!cancelled) setViewer({ loaded: true, signedIn: Boolean(t && t.signed_in === true) })
+      })
+      .catch(() => {
+        if (!cancelled) setViewer({ loaded: true, signedIn: false })
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  // Bring back the numbers typed before a sign-up round trip (same property,
+  // last 24 hours, this browser only).
+  useEffect(() => {
+    const d = readDraft(prefill.mcaId)
+    draftRead.current = true
+    if (!d) return
+    setInputs(d.inputs)
+    setStrategy(d.strategy)
+    setCash(Boolean(d.cash))
+  }, [prefill.mcaId])
+
+  const isExample = sameInputs(inputs, inputsFrom(EXAMPLE))
+
+  useEffect(() => {
+    if (!draftRead.current || isExample) return
+    writeDraft({ v: 1, mcaId: prefill.mcaId, inputs, strategy, cash, at: Date.now() })
+  }, [inputs, strategy, cash, isExample, prefill.mcaId])
 
   const set = <K extends keyof Inputs>(key: K, value: Inputs[K]) => setInputs((cur) => ({ ...cur, [key]: value }))
 
@@ -219,18 +300,26 @@ export default function ParcelDesk({ prefill }: { prefill: ParcelPrefill }) {
     return { deal, analysis, call: toBidDeedCall(analysis.verdict) }
   }, [inputs, strategy, assumptions, prefill.mcaId, prefill.caseNumber])
 
+  // The result shows to a signed-in account, or for the built-in example.
+  const gated = Boolean(result) && !isExample && !(viewer.loaded && viewer.signedIn)
+
   useEffect(() => {
-    if (!result || tracked.current) return
+    if (!result || tracked.current || (!viewer.loaded && !isExample)) return
     tracked.current = true
     track('parcel_underwritten', {
       surface: 'parcel',
       strategy,
       call: result.call,
       prefilled: fromAuction,
+      gated,
       county: inputs.county || undefined,
       sale_type: prefill.saleType ?? undefined,
     })
-  }, [result, strategy, fromAuction, inputs.county, prefill.saleType])
+  }, [result, strategy, fromAuction, inputs.county, prefill.saleType, viewer.loaded, isExample, gated])
+
+  const returnTo = publicParcelHref(prefill)
+  const signUpHref = `/sign-up?redirect_url=${encodeURIComponent(returnTo)}`
+  const signInHref = `/sign-in?redirect_url=${encodeURIComponent(returnTo)}`
 
   async function copyMemo() {
     if (!result) return
@@ -257,7 +346,8 @@ export default function ParcelDesk({ prefill }: { prefill: ParcelPrefill }) {
       </h1>
       <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground">
         Type your bid, the after-repair value, rehab, rent and taxes. Parcel runs the rental, flip or BRRRR math in
-        your browser and gives your call as BID, REVIEW or SKIP. Nothing you type leaves this page.
+        your browser and gives your call as BID, REVIEW or SKIP, free with an account. Nothing you type leaves this
+        page.
       </p>
 
       {fromAuction ? (
@@ -364,7 +454,10 @@ export default function ParcelDesk({ prefill }: { prefill: ParcelPrefill }) {
             </button>
             <button
               type="button"
-              onClick={() => setInputs(inputsFrom(prefill))}
+              onClick={() => {
+                writeDraft(null)
+                setInputs(inputsFrom(prefill))
+              }}
               className="inline-flex min-h-11 items-center gap-2 rounded-md px-4 text-sm font-medium text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <RotateCcw className="size-4" aria-hidden />
@@ -384,10 +477,51 @@ export default function ParcelDesk({ prefill }: { prefill: ParcelPrefill }) {
         </form>
 
         <section aria-live="polite" aria-label="Your underwriting" className="lg:sticky lg:top-6 lg:self-start">
-          {result && call ? (
+          {result && call && gated ? (
+            <div className="rounded-lg border border-border bg-card p-5 text-card-foreground sm:p-6">
+              {viewer.loaded ? (
+                <>
+                  <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                    <Lock className="size-4" aria-hidden />
+                    Your result is ready
+                  </p>
+                  <h2 className="font-display mt-3 text-balance text-2xl font-medium leading-snug text-foreground">
+                    Create a free account to see it.
+                  </h2>
+                  <p className="mt-2 text-base leading-7 text-muted-foreground">
+                    Free with your email. No card and no purchase. Your numbers stay in this browser and are still here
+                    after you sign up; BidDeed does not receive them.
+                  </p>
+                  <div className="mt-5 flex flex-wrap gap-3">
+                    <a
+                      href={signUpHref}
+                      onClick={() => track('signup_prompt_clicked', { surface: 'parcel_gate' })}
+                      className="inline-flex min-h-11 items-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      Create free account
+                      <ArrowRight className="size-4" aria-hidden />
+                    </a>
+                    <a
+                      href={signInHref}
+                      className="inline-flex min-h-11 items-center rounded-md border border-border px-4 text-sm font-medium text-foreground hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      Sign in
+                    </a>
+                  </div>
+                  <p className="mt-4 text-base leading-6 text-muted-foreground">
+                    Want to see what you get first? Load the example: its full memo shows without an account.
+                  </p>
+                </>
+              ) : (
+                <p className="text-base text-muted-foreground">Checking your account…</p>
+              )}
+            </div>
+          ) : result && call ? (
             <div className="rounded-lg border border-border bg-card p-5 text-card-foreground sm:p-6">
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Your numbers say</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                  {isExample ? 'The example says' : 'Your numbers say'}
+                </p>
                 <span className={cn('inline-flex min-h-9 items-center gap-2 rounded-md border px-3 text-sm font-bold tracking-wide', call.tone)}>
                   <call.Icon className="size-4" aria-hidden />
                   {call.word}

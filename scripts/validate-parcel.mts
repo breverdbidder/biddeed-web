@@ -15,6 +15,10 @@
 //    a 15% reserve, plus the 70% rule and ratio-to-opening-bid verdicts) is
 //    gone from Parcel and the auction surfaces (Ariel, 29 Sep 2026). The max
 //    bid is the SIGNAL$ machine-learning model's, withheld under policy v1.
+// 7. Free sign-up gate (Ariel, 1 Oct 2026): the visitor's result shows only to
+//    a signed-in account (server-side /api/viewer/tier), the example stays
+//    open, the numbers stay in localStorage, and the auth pages return only to
+//    a rebuilt /parcel URL (no open redirect, no visitor numbers in the URL).
 import assert from 'node:assert/strict'
 import { readFileSync, readdirSync } from 'node:fs'
 import {
@@ -27,7 +31,7 @@ import {
   toBidDeedCall,
   underwriteLot,
 } from '../lib/parcel/index.ts'
-import { EMPTY_PREFILL, isAuctionPrefill, parcelLink, parsePrefill } from '../lib/parcel-prefill.ts'
+import { EMPTY_PREFILL, isAuctionPrefill, parcelLink, parsePrefill, publicParcelHref, safeParcelReturn } from '../lib/parcel-prefill.ts'
 
 let n = 0
 const t = (name: string, fn: () => void) => {
@@ -83,7 +87,7 @@ t('desk: every strategy returns a call on an auction lot', () => {
   }
 })
 
-t('no network, no model vendor in the engine or the desk', () => {
+t('no network (beyond the signed-in check), no model vendor in the engine or the desk', () => {
   const files = [
     ...readdirSync(new URL('../lib/parcel/', import.meta.url)).filter((f) => f.endsWith('.ts')).map((f) => `lib/parcel/${f}`),
     'lib/parcel-prefill.ts',
@@ -91,7 +95,9 @@ t('no network, no model vendor in the engine or the desk', () => {
   ]
   assert.equal(files.filter((f) => f.startsWith('lib/parcel/')).length, 7, 'the seven vendored engine files')
   for (const f of files) {
-    const src = read(f)
+    // The desk's one network call is the same-origin signed-in check for the
+    // free sign-up gate; it sends nothing the visitor typed.
+    const src = f === 'components/parcel/ParcelDesk.tsx' ? read(f).replace("fetch('/api/viewer/tier', { credentials: 'include', cache: 'no-store' })", '') : read(f)
     for (const banned of [/\bfetch\s*\(/, /XMLHttpRequest/, /\bimport\s*\(/, /https?:\/\/(?!biddeed\.ai)/, /openai|anthropic|perplexity|grok|langchain/i]) {
       assert.ok(!banned.test(src), `${f} matches ${banned}`)
     }
@@ -175,6 +181,45 @@ t('the retired max-bid formula is gone from Parcel and the auction surfaces', ()
   const api = read('app/api/auctions/[id]/route.ts')
   assert.match(api, /max_bid: null as number \| null/)
   assert.match(read('components/auctions/AuctionDetail.tsx'), /Withheld - validation in progress/)
+})
+
+t('gate: the auth pages return only to a rebuilt /parcel URL', () => {
+  const id = '687890c6-7d63-4a13-b73d-090eb4aa3fb3'
+  assert.equal(safeParcelReturn('/parcel'), '/parcel')
+  assert.equal(safeParcelReturn(`/parcel?mca_id=${id}`), `/parcel?mca_id=${id}`)
+  assert.equal(safeParcelReturn(`https://biddeed.ai/parcel?mca_id=${id}`), `/parcel?mca_id=${id}`)
+  for (const bad of [null, undefined, '', '/radar', '//evil.example/parcel', 'https://evil.example/parcel', '/parcelx', '/parcel/../admin', 'javascript:alert(1)', '/parcel#x', 'x'.repeat(900)]) {
+    assert.equal(safeParcelReturn(bad as string | null), null, String(bad).slice(0, 40))
+  }
+  // visitor numbers and unknown keys never survive into the return URL
+  const back = safeParcelReturn(`/parcel?mca_id=${id}&arv=250000&rehab=40000&rent=1900&redirect=https://evil.example&county=Duval&opening_bid=2584`)!
+  assert.ok(back.startsWith('/parcel?'))
+  const q = new URLSearchParams(back.split('?')[1])
+  assert.deepEqual([...q.keys()].sort(), ['county', 'mca_id', 'opening_bid'])
+  assert.equal(q.get('county'), 'duval')
+  // the pin card link round-trips through the gate unchanged in substance
+  const pin = parcelLink({ id, county: 'Duval', property_address: '9069 PROSPERITY LAKE DR', auction_date: '2026-10-14', opening_bid: 2584.35, sale_type: 'tax_deed' })
+  assert.equal(safeParcelReturn(pin), publicParcelHref(parsePrefill(Object.fromEntries(new URLSearchParams(pin.split('?')[1])))))
+})
+
+t('gate: the result needs a signed-in account; the example stays open', () => {
+  const desk = read('components/parcel/ParcelDesk.tsx')
+  assert.match(desk, /fetch\('\/api\/viewer\/tier'/)
+  assert.match(desk, /const gated = Boolean\(result\) && !isExample && !\(viewer\.loaded && viewer\.signedIn\)/)
+  assert.match(desk, /result && call && gated \?/)
+  assert.match(desk, /Create a free account to see it\./)
+  assert.match(desk, /\/sign-up\?redirect_url=\$\{encodeURIComponent\(returnTo\)\}/)
+  assert.match(desk, /window\.localStorage\.setItem\(PARCEL_DRAFT_KEY/)
+  // the numbers are never sent: the only network call is the viewer check
+  assert.equal((desk.match(/\bfetch\s*\(/g) ?? []).length, 1)
+  for (const page of ['app/sign-in/[[...sign-in]]/page.tsx', 'app/sign-up/[[...sign-up]]/page.tsx']) {
+    const src = read(page)
+    assert.match(src, /safeParcelReturn\(typeof q\.redirect_url === 'string' \? q\.redirect_url : null\)/, page)
+    assert.match(src, /const destination = parcelReturn \?\? '\/radar'/, page)
+    assert.match(src, /<SignedInRedirect to=\{destination\} \/>/, page)
+    assert.match(src, /fallbackRedirectUrl=\{destination\}/, page)
+    assert.ok(!/redirect\('\/radar'\)/.test(src), page)
+  }
 })
 
 console.log(`${n} passed`)
