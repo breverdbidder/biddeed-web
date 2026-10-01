@@ -88,50 +88,17 @@ export function TrustStrip() {
 export function Proof() {
   return (
     <section className="mx-auto max-w-5xl px-4 sm:px-6">
-      <div className="grid gap-8 rounded-3xl border border-border bg-card p-6 sm:p-10 lg:grid-cols-2 lg:items-center">
-        <div>
-          <Eyebrow className="text-base">Published before the sale. Checked after it.</Eyebrow>
-          <H2>Every auction. One number. Published before bidding starts.</H2>
-          <p className="mt-4 max-w-lg text-base leading-7 text-muted-foreground">
-            For a Marion County foreclosure on 20 July 2026, <a href="/maps" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80 -my-2 py-2">biddeed.ai</a> published a maximum bid of $82,000
-            before the sale. The property sold for $73,501. A bidder who held to the ceiling won the lot with
-            room to spare, and the report re-issued itself with the outcome the same day.
-          </p>
-          <p className="mt-4 max-w-lg text-base leading-7 text-muted-foreground">
-            Every <a href="/sign-up" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80 -my-2 py-2">biddeed.ai</a> member - free included - gets the published number before bidding starts. Bidders who are not on <a href="/sign-up" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80 -my-2 py-2">biddeed.ai</a> never see it.
-          </p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <a href={W.sampleReport} className={BTN_QUIET}>
-              Read the full sample report <ArrowRight className="size-4" aria-hidden />
-            </a>
-          </div>
-        </div>
-        {/*
-          Three tiles, one baseline. "Bid limit set" wraps to two lines at
-          the 3-column width while the other labels stay on one, and a tile
-          that centres its own contents then drops its value ~14 px below its
-          neighbours (Ariel, 2026-09-06 15:04 ET: "$82,000 not centered"). The
-          label row is a fixed sm:h-9 box with the text bottom-aligned, so every
-          value starts at the same y whether its label wrapped or not.
-        */}
-        <dl className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
-          <div className="flex items-baseline justify-between gap-3 rounded-2xl border border-border bg-background p-4 sm:flex sm:min-h-[128px] sm:flex-col sm:items-center sm:justify-center sm:text-center">
-            <dt className="text-xs uppercase leading-snug tracking-wide text-muted-foreground sm:flex sm:h-9 sm:items-end sm:justify-center">Bid limit set</dt>
-            <dd className="tabular whitespace-nowrap text-lg font-semibold text-foreground sm:mt-2 sm:text-2xl">$82,000</dd>
-          </div>
-          <div className="flex items-baseline justify-between gap-3 rounded-2xl border border-border bg-background p-4 sm:flex sm:min-h-[128px] sm:flex-col sm:items-center sm:justify-center sm:text-center">
-            <dt className="text-xs uppercase leading-snug tracking-wide text-muted-foreground sm:flex sm:h-9 sm:items-end sm:justify-center">Sale closed at</dt>
-            <dd className="tabular whitespace-nowrap text-lg font-semibold text-primary sm:mt-2 sm:text-2xl">$73,501</dd>
-          </div>
-          <div className="flex items-baseline justify-between gap-3 rounded-2xl border border-border bg-background p-4 sm:flex sm:min-h-[128px] sm:flex-col sm:items-center sm:justify-center sm:text-center">
-            <dt className="text-xs uppercase leading-snug tracking-wide text-muted-foreground sm:flex sm:h-9 sm:items-end sm:justify-center">Outcome</dt>
-            <dd className="whitespace-nowrap text-lg font-semibold text-foreground sm:mt-2 sm:text-2xl">Held</dd>
-          </div>
-        </dl>
-        {/* Caption lives outside the <dl>: a <dl> may only contain dt/dd groups (axe definition-list, WCAG 1.3.1). */}
-        <p className="mt-3 text-base text-muted-foreground">
-          Marion County foreclosure, July 2026. Figures from the published report and the clerk&rsquo;s recorded sale.
+      <div className="rounded-3xl border border-border bg-card p-6 sm:p-10">
+        <Eyebrow className="text-base">County auction listings</Eyebrow>
+        <H2>Upcoming Florida auctions, by county.</H2>
+        <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground">
+          <a href="/maps" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80 -my-2 py-2">biddeed.ai</a> lists upcoming Florida foreclosure and tax deed auctions for the counties it covers. Maximum bid and win probability are withheld until our model passes its accuracy check, so none is shown.
         </p>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <a href={W.sampleReport} className={BTN_QUIET}>
+            Read the full sample report <ArrowRight className="size-4" aria-hidden />
+          </a>
+        </div>
       </div>
     </section>
   )
@@ -428,7 +395,7 @@ export const PLANS: Plan[] = [
     features: [
       '30-day snapshot, every county',
       '3 property previews per county',
-      'The published number on every property',
+      'Auction details on every property',
       'Daily email digest',
       'Ask Deed anything',
       'Academy free level: the full How-to-use-BidDeed track and county playbook basics',
@@ -512,8 +479,7 @@ export function Pricing({ onPrompt }: { onPrompt: (p: string) => void }) {
         <Eyebrow>Plans</Eyebrow>
         <H2>One below-market win pays for years of <a href="/pricing" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80 -my-2 py-2">biddeed.ai</a>.</H2>
         <p className="mt-4 text-base leading-7 text-muted-foreground">
-          Every Florida auction is free to browse, and free members see the published number on every property:
-          2,911 live right now across 60 counties, each with its own <a href="/maps" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80 -my-2 py-2">deal page</a>.
+          Every Florida auction is free to browse, and free members see auction details on every property, with its own <a href="/maps" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80 -my-2 py-2">deal page</a>.
           Investor, Pro, and Pro Plus add the depth: reports, Due Diligence, and video property assessment with
           360° Orbit on the properties you work, as available. Every level includes the Academy lessons written for it.
         </p>
