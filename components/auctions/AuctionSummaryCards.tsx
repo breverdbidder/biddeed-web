@@ -12,12 +12,12 @@ interface Props {
   loading: boolean
 }
 
-function StatCard({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
+function StatCard({ label, value, sub, readableSub = false }: { label: string; value: string | number; sub?: string; readableSub?: boolean }) {
   return (
     <div className="bg-card dark:bg-card border border-border dark:border-border rounded-lg p-4">
       <p className="text-xs text-muted-foreground dark:text-muted-foreground uppercase tracking-wide">{label}</p>
       <p className="text-2xl font-bold text-foreground dark:text-white mt-1">{value}</p>
-      {sub && <p className="text-xs text-muted-foreground dark:text-muted-foreground mt-1">{sub}</p>}
+      {sub && <p className={`${readableSub ? 'text-base' : 'text-xs'} text-muted-foreground dark:text-muted-foreground mt-1`}>{sub}</p>}
     </div>
   )
 }
@@ -71,7 +71,7 @@ export default function AuctionSummaryCards({ summary, loading }: Props) {
       <StatCard label="Upcoming" value={upcoming.toLocaleString()} sub={`${upcomingCounties} counties`} />
       {/* Not "AI Scoring: Live": the SIGNAL$ Max Bid model is withheld under report
           policy v1 until it passes validation (29 Sep 2026). */}
-      <StatCard label="SIGNAL$ Max Bid" value="Withheld" sub="Validation in progress" />
+      <StatCard label="SIGNAL$ Max Bid" value="Withheld" sub="Validation in progress" readableSub />
     </div>
   )
 }
