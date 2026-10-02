@@ -14,6 +14,7 @@ import { countyLabel } from '@/lib/deed/context'
 import type { Thread, ThreadTurn } from '@/lib/deed/threads'
 import { cn } from '@/lib/utils'
 import AuctionCards from './AuctionCards'
+import DeedPlan from './DeedPlan'
 
 /**
  * Markdown via react-markdown. No dangerouslySetInnerHTML here, ever — model
@@ -131,7 +132,7 @@ function AssistantTurn({ turn, streaming }: { turn: ThreadTurn; streaming: strin
         <DeedRobotMark size={22} />
       </div>
       <div className="min-w-0 flex-1 space-y-4">
-        {turn.cards ? <AuctionCards set={turn.cards} /> : null}
+        {turn.plan ? <DeedPlan set={turn.plan} /> : turn.cards ? <AuctionCards set={turn.cards} /> : null}
 
         {turn.error ? (
           <div className="flex items-start gap-2.5 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3">
@@ -173,13 +174,13 @@ function AssistantTurn({ turn, streaming }: { turn: ThreadTurn; streaming: strin
             </span>
             Deed is reading the county records…
           </p>
-        ) : !turn.cards ? (
+        ) : !turn.cards && !turn.plan ? (
           <p className="text-sm italic text-muted-foreground">Stopped before any answer arrived.</p>
         ) : null}
 
         <ActionNote turn={turn} />
 
-        {!live && (turn.content || turn.cards) ? (
+        {!live && (turn.content || turn.cards || turn.plan) ? (
           <div className="flex flex-wrap items-center gap-1 pt-1">
             <CopyButton text={turn.content} />
             <span className="px-2 text-[11px] text-muted-foreground">

@@ -7,6 +7,7 @@ import { contextPreamble, type DeedContext } from '@/lib/deed/context'
 import { useDeedAuth } from '@/lib/deed/deedAuth'
 import { getThread, notifyThreadsChanged, putThread } from '@/lib/deed/threadsRemote'
 import { intentToQuery, parseAuctionIntent, type AuctionIntent } from '@/lib/deed/intent'
+import { wantsDeedPlan, type DeedPlanResult, type PlanSet } from '@/lib/deed/plan'
 import {
   extractAction,
   readDeedStream,
@@ -122,7 +123,8 @@ export function useDeedThread(initialId: string | null, opts: { projectId?: stri
       // been cancelled does not render as biddable.
       if (found) {
         found.turns.forEach((t) => {
-          if (t.cards) void refreshCards(found.id, t.id, t.cards.intent)
+          if (t.plan) void refreshPlan(found.id, t.id, t.plan.query)
+          else if (t.cards) void refreshCards(found.id, t.id, t.cards.intent)
         })
       }
     }
@@ -219,6 +221,26 @@ export function useDeedThread(initialId: string | null, opts: { projectId?: stri
     }
   }
 
+  // Ask Deed: the orchestrator runs the specialist agents server-side
+  // (mcp.biddeed.ai/deed/ask via /api/deed/plan) and the turn renders its
+  // plan. Re-run, never replayed, when a saved thread is reopened: auction
+  // calendars and storefront availability change daily.
+  async function refreshPlan(threadId: string, turnId: string, query: string) {
+    patchTurn(threadId, turnId, { plan: { query, loading: true } })
+    try {
+      const res = await fetch(apiUrl('/api/deed/plan'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query }),
+      })
+      const json = (await res.json().catch(() => ({}))) as DeedPlanResult & { error?: string }
+      if (!res.ok || json.error) throw new Error(json.error || `Deed returned ${res.status}`)
+      patchTurn(threadId, turnId, { plan: { query, loading: false, plan: json } })
+    } catch (err) {
+      patchTurn(threadId, turnId, { plan: { query, loading: false, error: (err as Error).message } })
+    }
+  }
+
   const stop = useCallback(() => {
     abortRef.current?.abort()
     abortRef.current = null
@@ -248,7 +270,12 @@ export function useDeedThread(initialId: string | null, opts: { projectId?: stri
         createdAt: now,
         attachmentLabel: opts.uploadLabel,
       }
-      const intent = parseAuctionIntent(trimmed)
+      // A message with buying criteria ("Brevard Tuesday, ARV over $300K,
+      // 25% margin") is Deed's to orchestrate; a plain browse ("Brevard this
+      // week") keeps the card grid.
+      const planWanted = !opts.uploadId && wantsDeedPlan(trimmed)
+      const intent = planWanted ? null : parseAuctionIntent(trimmed)
+      const plan: PlanSet | undefined = planWanted ? { query: trimmed, loading: true } : undefined
       const cards: CardSet | undefined = intent
         ? { intent, rows: [], total: null, loading: true }
         : undefined
@@ -258,6 +285,7 @@ export function useDeedThread(initialId: string | null, opts: { projectId?: stri
         content: '',
         createdAt: now + 1,
         cards,
+        plan,
         pending: true,
       }
 
@@ -274,6 +302,7 @@ export function useDeedThread(initialId: string | null, opts: { projectId?: stri
       setThread(next)
 
       if (intent) void refreshCards(next.id, assistantTurn.id, intent)
+      if (plan) void refreshPlan(next.id, assistantTurn.id, plan.query)
 
       const wire = trimForWorker([
         ...history,
@@ -281,7 +310,9 @@ export function useDeedThread(initialId: string | null, opts: { projectId?: stri
           role: 'user',
           content: [
             contextPreamble(HOME_CONTEXT, counts),
-            intent
+            plan
+              ? 'The page is ALREADY showing the customer Deed\'s plan for this request: the specialist agents (auction calendar, property record, title search, rehab scope, insurance cost) ran on the matching sales and each property is screened on public figures, with a $25 SIGNAL$ Property Report checkout on every sellable one. You do not see the results, so do not invent addresses or numbers. In under 120 words: say Deed ran those checks, that the screen uses the county just value (not an ARV) and is triage only, and that the SIGNAL$ Property Report adds the value estimate, the SIGNAL$ Max Bid, the lien-survival analysis and the bid verdict.'
+              : intent
               ? `The page is ALREADY showing the customer a card grid of ${intent.label.toLowerCase()} from /api/auctions. Do not retype those rows as a table; add what the cards cannot: what to check before bidding, how the SIGNAL$ Max Bid is reached, and what a SIGNAL$ Property Report adds. Keep it under 180 words.`
               : 'Keep the answer under 220 words, in plain language for a property investor. No developer or database terminology.',
             '',

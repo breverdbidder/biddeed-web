@@ -63,6 +63,7 @@ export async function getThread(id: string): Promise<Thread | null> {
 export async function putThread(thread: Thread): Promise<boolean> {
   try {
     const turns = thread.turns.filter((t) => !t.pending).map((t) => (t.cards ? { ...t, cards: { ...t.cards, rows: [], loading: false } } : t))
+      .map((t) => (t.plan ? { ...t, plan: { query: t.plan.query, loading: false } } : t))
     if (turns.length === 0) return false
     const res = await fetch(apiUrl('/api/deed/threads'), {
       method: 'PUT',

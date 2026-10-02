@@ -1,5 +1,6 @@
 import type { DeedAction } from './protocol'
 import type { AuctionIntent } from './intent'
+import type { PlanSet } from './plan'
 
 /**
  * Conversation history for the home surface, kept in the browser.
@@ -55,6 +56,8 @@ export interface ThreadTurn {
   content: string
   createdAt: number
   cards?: CardSet
+  /** Deed's orchestrated plan (Ask Deed) — re-run from `query` when a saved thread is reopened. */
+  plan?: PlanSet
   action?: DeedAction | null
   error?: string
   /** Set while the Worker is still answering this turn. */
@@ -137,7 +140,8 @@ export function saveThread(thread: Thread): void {
       ...thread,
       turns: thread.turns
         .filter((t) => !t.pending)
-        .map((t) => (t.cards ? { ...t, cards: { ...t.cards, loading: false } } : t)),
+        .map((t) => (t.cards ? { ...t, cards: { ...t.cards, loading: false } } : t))
+        .map((t) => (t.plan ? { ...t, plan: { query: t.plan.query, loading: false } } : t)),
     }
     const next = [clean, ...rest].slice(0, MAX_THREADS)
     localStorage.setItem(KEY, JSON.stringify(next))

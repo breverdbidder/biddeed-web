@@ -50,6 +50,12 @@ function cleanTurn(t: unknown): ThreadTurn | null {
       turn.cards = { intent: cards.intent as NonNullable<ThreadTurn['cards']>['intent'], rows: [], total: null, loading: false }
     }
   }
+  if (x.plan && typeof x.plan === 'object') {
+    // Deed's plan is re-run on reopen (useDeedThread.refreshPlan); keep only
+    // the customer's words, never a stale shortlist or a stale price.
+    const q = (x.plan as { query?: unknown }).query
+    if (typeof q === 'string' && q.trim()) turn.plan = { query: q.slice(0, 2000), loading: false }
+  }
   return turn
 }
 
