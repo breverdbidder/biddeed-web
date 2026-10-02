@@ -10,23 +10,49 @@ permissions: {}
 jobs:
   probe:
     runs-on: [self-hosted, dell-gpu]
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
-      - name: Read-only hardware and tool metadata
+      - name: Metadata and synthetic OCR pilot (existing tools only, no network, no install)
         shell: bash
         run: |
           set -u
-          echo "host: $(hostname)"
-          echo "--- cpu"; lscpu | grep -E 'Model name|^CPU\(s\)|Thread|Flags' | cut -c1-160
-          echo "--- memory"; free -m
-          echo "--- disk"; df -h / "$RUNNER_TEMP" 2>/dev/null
-          echo "--- load"; uptime
-          echo "--- busy runner processes"; pgrep -af 'Runner.Worker' | cut -c1-120 || true
-          echo "--- tools"
-          for t in tesseract ocrmypdf gs qpdf unpaper pngquant jbig2 pdftoppm python3 pip3; do
-            if command -v "$t" >/dev/null 2>&1; then echo "$t: $(command -v $t)"; else echo "$t: not found"; fi
+          w="$RUNNER_TEMP/ocrpilot"; rm -rf "$w"; mkdir -p "$w"; cd "$w"
+          trap 'rm -rf "$w"' EXIT
+          echo "tesseract version:"; tesseract --version 2>&1 | head -3
+          echo "tesseract langs:"; tesseract --list-langs 2>&1 | head -12
+          echo "gs: $(gs --version 2>&1 | head -1)"; echo "pdftoppm: $(pdftoppm -v 2>&1 | head -1)"
+          echo "python3: $(python3 --version 2>&1)"
+          python3 -c 'import pypdfium2; print("pypdfium2 present")' 2>&1 | tail -1
+          echo "imagemagick: $(command -v convert magick | head -1)"
+          cat > truth.txt <<'TXT'
+          Case 2024CA000341 Parcel ID 19-3722-00-0000-0010-0020
+          Opening bid $32,224.92 Assessed value $187,500.00
+          Certificate 2021-4417 Sale date 10/07/2026 Deposit $5,000.00
+          Lien Mortgage Book 8123 Page 456 Recorded 03/14/2019
+          TXT
+          sed -i 's/^ *//' truth.txt
+          { echo '%!PS'; echo '/Courier findfont 13 scalefont setfont'; y=700
+            while IFS= read -r line; do echo "72 $y moveto ($line) show"; y=$((y-24)); done < truth.txt
+            echo showpage; } > doc.ps
+          gs -q -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -sOutputFile=doc.pdf doc.ps
+          echo "synthetic pdf bytes: $(stat -c %s doc.pdf)"
+          for dpi in 300 150 100; do
+            pdftoppm -r $dpi -png -singlefile doc.pdf "p$dpi"
+            s=$(date +%s.%N)
+            OMP_THREAD_LIMIT=1 nice -n 10 tesseract "p$dpi.png" "o$dpi" -l eng >/dev/null 2>&1
+            e=$(date +%s.%N)
+            python3 - "$dpi" "$s" "$e" <<'PY'
+          import sys, difflib, re
+          dpi, s, e = sys.argv[1], float(sys.argv[2]), float(sys.argv[3])
+          truth = open('truth.txt').read().split('\n')
+          got = open('o%s.txt' % dpi).read().split('\n')
+          t = ' '.join(x.strip() for x in truth if x.strip())
+          g = ' '.join(x.strip() for x in got if x.strip())
+          r = difflib.SequenceMatcher(None, t, g).ratio()
+          keys = ['2024CA000341', '19-3722-00-0000-0010-0020', '$32,224.92', '$187,500.00', '2021-4417', '10/07/2026', '$5,000.00', '03/14/2019']
+          hit = [k for k in keys if k in g]
+          print('dpi %s: %.2fs, similarity %.3f, exact key fields %d of %d' % (dpi, e - s, r, len(hit), len(keys)))
+          miss = [k for k in keys if k not in g]
+          if miss: print('  missed or altered: ' + ', '.join(miss))
+          PY
           done
-          echo "--- tesseract"; tesseract --version 2>&1 | head -3 || true
-          tesseract --list-langs 2>&1 | head -20 || true
-          python3 --version 2>&1
-          python3 -c 'import pypdfium2' 2>&1 | tail -1 || true
