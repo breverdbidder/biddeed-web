@@ -50,30 +50,58 @@ export async function POST(req: NextRequest) {
   // retried only when we're sure the request never reached Postgres.
   const supabase = getRetryingSupabaseClient(serviceKey)
 
-  // Subscription checkouts (investor / pro / proplus) are NOT one-time
-  // purchases. confirm_checkout_session() has no mode check: for any paid
-  // session it writes public.purchases and delivers the Clear to Bid files,
-  // which is the wrong product for a subscriber. Access for a subscription is
-  // granted only by the stripe-webhook function, which marks the session row
-  // 'completed'. So report that state truthfully and never run the one-time
-  // fulfilment for a subscription session.
-  const { data: sessionRow, error: sessionErr } = await supabase
-    .from('stripe_checkout_sessions')
-    .select('tier_id,status')
-    .eq('session_id', sessionId)
-    .maybeSingle()
-  if (sessionErr) {
-    return serverError('checkout.confirm.session', sessionErr, 503)
+  // Classify the order from Stripe itself before any one-time fulfilment.
+  // confirm_checkout_session() has no mode/product check: for ANY paid session
+  // it writes public.purchases and delivers the Clear to Bid files. That is the
+  // wrong product for a subscription (investor / pro / proplus) or a report, so
+  // the RPC runs ONLY for a session Stripe says is a plain one-time payment with
+  // no subscription tier and no report mode. Anything else, or anything we
+  // cannot classify, fails closed.
+  let stripeSession: { mode?: string | null; metadata?: Record<string, string> | null; payment_status?: string | null }
+  try {
+    const { getStripe } = await import('@/lib/stripe')
+    stripeSession = await getStripe().checkout.sessions.retrieve(sessionId)
+  } catch (e) {
+    return serverError('checkout.confirm.classify', e, 503)
   }
-  const SUBSCRIPTION_TIERS = ['investor', 'pro', 'proplus']
-  if (sessionRow && SUBSCRIPTION_TIERS.includes(String(sessionRow.tier_id))) {
+  const meta = stripeSession.metadata ?? {}
+
+  if (stripeSession.mode === 'subscription' || meta.tier_id) {
+    // Subscription access is granted only by the stripe-webhook function. Report
+    // active only when the session row is completed AND the customer record
+    // already carries the purchased tier.
+    const { data: row, error: rowErr } = await supabase
+      .from('stripe_checkout_sessions')
+      .select('tier_id,status,customer_id')
+      .eq('session_id', sessionId)
+      .maybeSingle()
+    if (rowErr) return serverError('checkout.confirm.session', rowErr, 503)
+    const tier = String(row?.tier_id ?? meta.tier_id ?? '')
+    let active = false
+    if (row && row.status === 'completed' && row.customer_id && stripeSession.payment_status === 'paid') {
+      const { data: cust, error: custErr } = await supabase
+        .from('mcp_customers')
+        .select('tier_id')
+        .eq('customer_id', row.customer_id)
+        .maybeSingle()
+      if (custErr) return serverError('checkout.confirm.customer', custErr, 503)
+      active = cust?.tier_id === tier
+    }
     return NextResponse.json({
-      status:
-        sessionRow.status === 'completed' ? 'subscription_active' : 'subscription_pending',
-      tier: sessionRow.tier_id,
+      status: active ? 'subscription_active' : 'subscription_pending',
+      tier,
       delivery: null,
       email: null,
       error: null,
+    })
+  }
+
+  if (stripeSession.mode !== 'payment' || meta.mode === 'report') {
+    return NextResponse.json({
+      status: 'error',
+      delivery: null,
+      email: null,
+      error: 'order type is not handled by this page',
     })
   }
 
