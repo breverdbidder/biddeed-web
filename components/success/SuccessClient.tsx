@@ -6,7 +6,14 @@ import { track } from '@/lib/analytics/funnel'
 import { apiUrl } from '@/lib/api'
 import { LIGHT as C } from '@/lib/design-tokens'
 
-type Phase = 'confirming' | 'delivered' | 'pending' | 'unpaid' | 'error'
+type Phase =
+  | 'confirming'
+  | 'delivered'
+  | 'pending'
+  | 'unpaid'
+  | 'error'
+  | 'subscription_active'
+  | 'subscription_pending'
 
 const FILES = [
   ['Clear to Bid', 'PDF · the core system, one day per chapter'],
@@ -20,6 +27,7 @@ export default function SuccessClient() {
   const [phase, setPhase] = useState<Phase>('confirming')
   const [email, setEmail] = useState<string | null>(null)
   const [detail, setDetail] = useState<string | null>(null)
+  const [tier, setTier] = useState<string | null>(null)
 
   useEffect(() => {
     const sessionId = new URLSearchParams(window.location.search).get('session_id')
@@ -46,7 +54,12 @@ export default function SuccessClient() {
       .then((r) => r.json())
       .then((data: Record<string, unknown>) => {
         if (cancelled) return
-        if (data.status === 'ok') {
+        if (data.status === 'subscription_active' || data.status === 'subscription_pending') {
+          // A subscription is never fulfilled by the one-time purchase path, so
+          // this page must not show the one-time file list for it.
+          setTier(typeof data.tier === 'string' ? data.tier : null)
+          setPhase(data.status)
+        } else if (data.status === 'ok') {
           setEmail((data.email as string) ?? null)
           setPhase('delivered')
           // Funnel completion (PARITY D14). Fires only on a confirmed-paid,
@@ -104,10 +117,32 @@ export default function SuccessClient() {
 
         {phase === 'pending' && (
           <>
-            <h1 style={S.h1}>Payment received</h1>
+            <h1 style={S.h1}>We are confirming your order</h1>
             <p style={S.lede}>
-              Your files are being prepared. The delivery email arrives within 15 minutes.
-              Nothing further is needed from you.
+              We could not confirm this order yet. This page does not show access or files
+              until the order is confirmed. If it does not update, reply to any BidDeed.AI
+              email and we will look it up.
+            </p>
+          </>
+        )}
+
+        {phase === 'subscription_active' && (
+          <>
+            <h1 style={S.h1}>Your {tier ?? 'BidDeed.AI'} subscription is active</h1>
+            <p style={S.lede}>
+              Payment confirmed and the plan is recorded on your account. If you cannot see
+              your access, reply to any BidDeed.AI email and we will look it up.
+            </p>
+          </>
+        )}
+
+        {phase === 'subscription_pending' && (
+          <>
+            <h1 style={S.h1}>We are confirming your subscription</h1>
+            <p style={S.lede}>
+              Your checkout is recorded but not yet confirmed as active. This page does not
+              show access until it is confirmed. If it does not update, reply to any
+              BidDeed.AI email and we will look it up.
             </p>
           </>
         )}
@@ -122,7 +157,7 @@ export default function SuccessClient() {
           </>
         )}
 
-        {(phase === 'delivered' || phase === 'pending') && (
+        {phase === 'delivered' && (
           <>
             <div style={S.divider} />
             <div style={S.listLabel}>What you bought</div>

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getRetryingSupabaseClient } from '@/lib/supabase-retry'
 import { serverError } from '@/lib/api-errors'
+import { classifyCheckoutSession, subscriptionState, type StripeSessionLike } from '@/lib/checkout-classify'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -49,6 +50,62 @@ export async function POST(req: NextRequest) {
   // on the default 'connect-only' retry mode (safe for a plain RPC POST):
   // retried only when we're sure the request never reached Postgres.
   const supabase = getRetryingSupabaseClient(serviceKey)
+
+  // Classify the order from Stripe itself before any one-time fulfilment.
+  // confirm_checkout_session() has no product check, so the RPC runs ONLY for a
+  // session that classifyCheckoutSession() accepts as the Clear to Bid one-time
+  // product. Subscriptions never reach it; unknown orders fail closed.
+  let stripeSession: StripeSessionLike
+  try {
+    const { getStripe } = await import('@/lib/stripe')
+    stripeSession = (await getStripe().checkout.sessions.retrieve(sessionId)) as StripeSessionLike
+  } catch (e) {
+    return serverError('checkout.confirm.classify', e as Error, 503)
+  }
+  const kind = classifyCheckoutSession(stripeSession)
+
+  if (kind.kind === 'subscription') {
+    // Access is granted only by the stripe-webhook function; report it active
+    // only when that provisioning is visible on the customer record.
+    const { data: row, error: rowErr } = await supabase
+      .from('stripe_checkout_sessions')
+      .select('tier_id,status,customer_id')
+      .eq('session_id', sessionId)
+      .maybeSingle()
+    if (rowErr) return serverError('checkout.confirm.session', rowErr, 503)
+    let customerTier: string | null = null
+    if (row?.customer_id) {
+      const { data: cust, error: custErr } = await supabase
+        .from('mcp_customers')
+        .select('tier_id')
+        .eq('customer_id', row.customer_id)
+        .maybeSingle()
+      if (custErr) return serverError('checkout.confirm.customer', custErr, 503)
+      customerTier = (cust?.tier_id as string | null) ?? null
+    }
+    return NextResponse.json({
+      status: subscriptionState({
+        paymentStatus: stripeSession.payment_status,
+        rowStatus: row?.status as string | null | undefined,
+        rowCustomerId: row?.customer_id as string | null | undefined,
+        customerTier,
+        tier: kind.tier,
+      }),
+      tier: kind.tier,
+      delivery: null,
+      email: null,
+      error: null,
+    })
+  }
+
+  if (kind.kind === 'refuse') {
+    return NextResponse.json({
+      status: 'error',
+      delivery: null,
+      email: null,
+      error: 'order type is not handled by this page',
+    })
+  }
 
   const { data, error } = await supabase.rpc('confirm_checkout_session', {
     p_session_id: sessionId,
