@@ -73,6 +73,31 @@ jobs:
             sleep 2
           done
           node scripts/academy-runtime-check.mjs "http://127.0.0.1:$port" || { tail -60 "$RUNNER_TEMP/wrangler-dev.log"; exit 1; }
+          # Browser console/network errors on the same Academy pages (existing
+          # Playwright dependency; Chromium is fetched only if not cached).
+          npx playwright install chromium
+          cat > .academy-console-check.mjs <<'JS'
+          import { chromium } from '@playwright/test'
+          import { readFileSync } from 'node:fs'
+          const base = process.argv[2]
+          const pages = [...readFileSync('scripts/academy-runtime-check.mjs', 'utf8').matchAll(/\['(\/academy[^']*)'/g)].map((m) => m[1])
+          const browser = await chromium.launch()
+          let bad = 0
+          for (const p of pages) {
+            const page = await browser.newPage()
+            const errs = []
+            page.on('console', (m) => { if (m.type() === 'error') errs.push('console: ' + m.text().slice(0, 200)) })
+            page.on('pageerror', (e) => errs.push('pageerror: ' + String(e).slice(0, 200)))
+            page.on('response', (r) => { if (r.url().startsWith(base) && r.status() >= 400) errs.push('http ' + r.status() + ' ' + r.url()) })
+            await page.goto(base + p, { waitUntil: 'networkidle' })
+            await page.close()
+            if (errs.length) { bad++; console.error('FAIL ' + p); errs.forEach((e) => console.error('  ' + e)) } else console.log('clean ' + p)
+          }
+          await browser.close()
+          if (bad) process.exit(1)
+          console.log('academy console check passed: ' + pages.length + ' pages')
+          JS
+          node .academy-console-check.mjs "http://127.0.0.1:$port" || { tail -60 "$RUNNER_TEMP/wrangler-dev.log"; exit 1; }
 
   ui-parity-audit:
     needs: production-build
