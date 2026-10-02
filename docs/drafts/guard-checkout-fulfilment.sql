@@ -199,3 +199,102 @@ begin
 exception when others then
   return jsonb_build_object('status','error','error', sqlerrm);
 end $function$;
+
+-- Third writer into public.purchases: the stripe_events inbox path
+-- (drain_stripe_events -> fulfil_stripe_purchase). Same guard: a subscription or
+-- report event is marked processed without creating a Clear to Bid purchase.
+CREATE OR REPLACE FUNCTION public.fulfil_stripe_purchase(p_event_id text)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO 'pg_catalog', 'public', 'biddeed', 'graphql', 'extensions', 'vault', 'cron', 'net', 'http', 'storage', 'auth'
+AS $function$
+declare
+  e record;
+  obj jsonb;
+  v_email text;
+  v_purchase_id uuid;
+  v_created boolean := false;
+begin
+  select * into e from public.stripe_events where event_id = p_event_id;
+  if not found then
+    return jsonb_build_object('status','error','error','unknown event_id');
+  end if;
+  if e.processed_at is not null then
+    return jsonb_build_object('status','already_processed','event_id',p_event_id);
+  end if;
+
+  obj := e.payload->'data'->'object';
+
+  -- GUARD: subscriptions and reports are not the one-time product.
+  if coalesce(obj->>'mode','') = 'subscription'
+     or (obj->'metadata'->>'tier_id') is not null
+     or coalesce(obj->'metadata'->>'mode','') = 'report'
+     or coalesce(obj->'metadata'->>'product','') = 's5_onetime' then
+    update public.stripe_events
+       set processed_at = now(), attempts = attempts + 1,
+           process_error = 'skipped: not the one-time product'
+     where event_id = p_event_id;
+    return jsonb_build_object('status','skipped','reason','not the one-time product');
+  end if;
+
+  -- Stripe puts the buyer's address in different places depending on how the
+  -- session was created; take the first one that is actually populated rather
+  -- than assuming customer_details is always there.
+  v_email := coalesce(
+    obj->'customer_details'->>'email',
+    obj->>'customer_email',
+    obj->>'receipt_email'
+  );
+
+  if v_email is null then
+    update public.stripe_events
+       set attempts = attempts + 1,
+           process_error = 'no email on session'
+     where event_id = p_event_id;
+    return jsonb_build_object('status','error','error','no email on session');
+  end if;
+
+  insert into public.purchases (
+    stripe_session_id, stripe_customer_id, stripe_payment_intent,
+    email, amount_cents, currency, locale, county_hint, fulfilled_at
+  ) values (
+    obj->>'id',
+    obj->>'customer',
+    obj->>'payment_intent',
+    v_email,
+    coalesce((obj->>'amount_total')::integer, 0),
+    lower(coalesce(obj->>'currency','usd')),
+    coalesce(obj->'metadata'->>'locale','en'),
+    obj->'metadata'->>'county',
+    now()
+  )
+  on conflict (stripe_session_id) do nothing
+  returning id into v_purchase_id;
+
+  v_created := v_purchase_id is not null;
+
+  update public.stripe_events
+     set processed_at = now(), attempts = attempts + 1, process_error = null
+   where event_id = p_event_id;
+
+  return jsonb_build_object(
+    'status','ok',
+    'created', v_created,
+    'purchase_id', v_purchase_id,
+    'email', v_email
+  );
+exception when others then
+  update public.stripe_events
+     set attempts = attempts + 1, process_error = sqlerrm
+   where event_id = p_event_id;
+  return jsonb_build_object('status','error','error',sqlerrm);
+end $function$;
+
+-- ROLLBACK PLAN: the "current definitions" are the live bodies read on
+-- 2026-10-02 (this file minus the three GUARD blocks). Before applying, save
+-- pg_get_functiondef() output for the three functions; rolling back is
+-- re-running those saved CREATE OR REPLACE statements. No table or data
+-- change, no new objects.
+-- OPEN: drain_stripe_events and deliver_purchase not yet read against this
+-- draft; the draft has not been run against any database.
