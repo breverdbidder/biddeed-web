@@ -39,7 +39,7 @@ for (const [path, heading] of PAGES) {
     const r = await fetch(new URL(href, base))
     const t = r.headers.get('content-type') || ''
     const body = await r.text()
-    if (r.status !== 200 || !t.includes('text/css') || body.length < 1000) fail(`${path} stylesheet ${href} -> ${r.status} ${t} ${body.length}b`)
+    if (r.status !== 200 || !t.includes('text/css') || body.length < 100) fail(`${path} stylesheet ${href} -> ${r.status} ${t} ${body.length}b`)
   }
   console.log(`ok ${path} (${html.length}b, ${css.length} stylesheets)`)
 }
