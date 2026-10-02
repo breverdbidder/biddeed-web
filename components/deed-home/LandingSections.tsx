@@ -22,6 +22,7 @@ export const W = {
   subscribeProPlus: '/subscribe?tier=proplus',
   counties: '/counties',
   blog: '/blog',
+  answers: '/answers',
   pioneers: '/pioneers',
   terms: '/terms',
   privacy: '/privacy',
@@ -614,6 +615,7 @@ export function Footer() {
   const links = [
     { label: 'All counties', href: W.counties },
     { label: 'Blog', href: W.blog },
+    { label: 'Answers', href: W.answers },
     { label: 'Pioneers', href: W.pioneers },
     { label: 'Terms', href: W.terms },
     { label: 'Privacy', href: W.privacy },
