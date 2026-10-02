@@ -290,6 +290,14 @@ jobs:
             exit 1
           fi
 
+      # Post-deploy Academy check against the live apex: real HTML, lesson
+      # heading, no soft-404/error shell, stylesheets load. The same script
+      # runs on the built Worker at PR time (pr-validation.yml). It cannot
+      # undo the deploy; a red result means roll back to the prior version.
+      - name: Academy runtime check (live biddeed.ai)
+        shell: bash
+        run: node scripts/academy-runtime-check.mjs https://biddeed.ai
+
   # Rendered parity audit after every production deploy (PARITY_PRD.md §3.2).
   # ui-audit.yml in cli-anything-biddeed only fires on Worker deploys, so a
   # biddeed-web deploy was never audited; this job runs the same harness against
