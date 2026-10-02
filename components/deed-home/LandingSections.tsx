@@ -613,6 +613,7 @@ export function Pricing({ onPrompt }: { onPrompt: (p: string) => void }) {
 export function Footer() {
   const links = [
     { label: 'All counties', href: W.counties },
+    { label: 'Answers', href: '/answers' },
     { label: 'Blog', href: W.blog },
     { label: 'Pioneers', href: W.pioneers },
     { label: 'Terms', href: W.terms },
