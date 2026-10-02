@@ -14,9 +14,12 @@ export type StripeSessionLike = {
   metadata?: Record<string, string> | null
 }
 
-/** The only one-time product this page fulfils: Clear to Bid, $25.00 USD.
- *  Grounded in public.purchases (amounts seen: 2500 x3, 99 x1). */
-export const CLEAR_TO_BID_AMOUNT_CENTS = 2500
+/** The one-time product this page may fulfil. A session must carry this
+ *  explicit metadata marker. Amount and currency are NOT product identity: the
+ *  $25 SIGNAL report (metadata.product s5_onetime, handled by the Worker's
+ *  /report-success and the stripe-webhook) has the same price. Sessions without
+ *  the marker are refused, so an unmarked $25 order can never get the five files. */
+export const CLEAR_TO_BID_PRODUCT = 'clear_to_bid'
 
 export type Classification =
   | { kind: 'subscription'; tier: string }
@@ -31,10 +34,10 @@ export function classifyCheckoutSession(s: StripeSessionLike): Classification {
     return { kind: 'subscription', tier }
   }
   if (s.mode !== 'payment') return { kind: 'refuse', reason: 'unsupported mode' }
-  if (meta.mode === 'report') return { kind: 'refuse', reason: 'report session' }
-  if (String(s.currency ?? '').toLowerCase() !== 'usd' || s.amount_total !== CLEAR_TO_BID_AMOUNT_CENTS) {
-    return { kind: 'refuse', reason: 'unrecognized product' }
+  if (meta.mode === 'report' || meta.product === 's5_onetime') {
+    return { kind: 'refuse', reason: 'report session' }
   }
+  if (meta.product !== CLEAR_TO_BID_PRODUCT) return { kind: 'refuse', reason: 'unrecognized product' }
   return { kind: 'one_time' }
 }
 
