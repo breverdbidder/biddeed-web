@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
     const { getStripe } = await import('@/lib/stripe')
     stripeSession = await getStripe().checkout.sessions.retrieve(sessionId)
   } catch (e) {
-    return serverError('checkout.confirm.classify', e, 503)
+    return serverError('checkout.confirm.classify', e as Error, 503)
   }
   const meta = stripeSession.metadata ?? {}
 
