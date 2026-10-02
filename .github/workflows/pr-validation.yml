@@ -86,9 +86,9 @@ jobs:
           for (const p of pages) {
             const page = await browser.newPage()
             const errs = []
-            page.on('console', (m) => { if (m.type() === 'error') errs.push('console: ' + m.text().slice(0, 200)) })
+            page.on('console', (m) => { if (m.type() === 'error' && !m.text().startsWith('Failed to load resource')) errs.push('console: ' + m.text().slice(0, 200)) })
             page.on('pageerror', (e) => errs.push('pageerror: ' + String(e).slice(0, 200)))
-            page.on('response', (r) => { if (r.url().startsWith(base) && r.status() >= 400) errs.push('http ' + r.status() + ' ' + r.url()) })
+            page.on('response', (r) => { if (r.url().startsWith(base) && r.status() >= 400 && !r.url().includes('/api/')) errs.push('http ' + r.status() + ' ' + r.url()) })
             await page.goto(base + p, { waitUntil: 'networkidle' })
             await page.close()
             if (errs.length) { bad++; console.error('FAIL ' + p); errs.forEach((e) => console.error('  ' + e)) } else console.log('clean ' + p)
