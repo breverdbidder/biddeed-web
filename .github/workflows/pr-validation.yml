@@ -60,6 +60,20 @@ jobs:
       - name: Build production OpenNext Worker
         run: npx opennextjs-cloudflare build --config wrangler.production.jsonc
 
+      - name: Academy runtime check (built Worker on local workerd)
+        shell: bash
+        run: |
+          set -euo pipefail
+          port=$((20000 + RANDOM % 20000))
+          npx wrangler dev --config wrangler.production.jsonc --local --port "$port" > "$RUNNER_TEMP/wrangler-dev.log" 2>&1 &
+          pid=$!
+          trap 'kill "$pid" 2>/dev/null || true' EXIT
+          for i in $(seq 1 60); do
+            curl -s -o /dev/null --max-time 5 "http://127.0.0.1:$port/academy" && break
+            sleep 2
+          done
+          node scripts/academy-runtime-check.mjs "http://127.0.0.1:$port" || { tail -60 "$RUNNER_TEMP/wrangler-dev.log"; exit 1; }
+
   ui-parity-audit:
     needs: production-build
     runs-on: [self-hosted, dell-gpu]
