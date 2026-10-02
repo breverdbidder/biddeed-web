@@ -50,6 +50,33 @@ export async function POST(req: NextRequest) {
   // retried only when we're sure the request never reached Postgres.
   const supabase = getRetryingSupabaseClient(serviceKey)
 
+  // Subscription checkouts (investor / pro / proplus) are NOT one-time
+  // purchases. confirm_checkout_session() has no mode check: for any paid
+  // session it writes public.purchases and delivers the Clear to Bid files,
+  // which is the wrong product for a subscriber. Access for a subscription is
+  // granted only by the stripe-webhook function, which marks the session row
+  // 'completed'. So report that state truthfully and never run the one-time
+  // fulfilment for a subscription session.
+  const { data: sessionRow, error: sessionErr } = await supabase
+    .from('stripe_checkout_sessions')
+    .select('tier_id,status')
+    .eq('session_id', sessionId)
+    .maybeSingle()
+  if (sessionErr) {
+    return serverError('checkout.confirm.session', sessionErr, 503)
+  }
+  const SUBSCRIPTION_TIERS = ['investor', 'pro', 'proplus']
+  if (sessionRow && SUBSCRIPTION_TIERS.includes(String(sessionRow.tier_id))) {
+    return NextResponse.json({
+      status:
+        sessionRow.status === 'completed' ? 'subscription_active' : 'subscription_pending',
+      tier: sessionRow.tier_id,
+      delivery: null,
+      email: null,
+      error: null,
+    })
+  }
+
   const { data, error } = await supabase.rpc('confirm_checkout_session', {
     p_session_id: sessionId,
   })
