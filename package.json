@@ -52,7 +52,7 @@
     "@supabase/supabase-js": "2.95.3",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
-    "fumadocs-core": "14.7.7",
+    "fumadocs-core": "15.0.18",
     "fumadocs-mdx": "11.10.1",
     "fumadocs-ui": "14.7.7",
     "lucide-react": "1.32.0",
@@ -79,5 +79,10 @@
     "tailwindcss": "^3.4.14",
     "typescript": "^5.6.3",
     "wrangler": "4.128.0"
+  },
+  "overrides": {
+    "fumadocs-ui": {
+      "fumadocs-core": "$fumadocs-core"
+    }
   }
 }
