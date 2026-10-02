@@ -615,7 +615,9 @@ export function Footer() {
   const links = [
     { label: 'All counties', href: W.counties },
     { label: 'Blog', href: W.blog },
-    { label: 'Answers', href: W.answers },
+    { label: 'How max bid works', href: '/answers/how-the-max-bid-is-calculated' },
+    { label: 'Before you bid', href: '/answers/what-a-property-report-must-answer-before-you-bid' },
+    { label: 'After you win', href: '/answers/what-happens-after-you-win-a-foreclosure-auction' },
     { label: 'Pioneers', href: W.pioneers },
     { label: 'Terms', href: W.terms },
     { label: 'Privacy', href: W.privacy },
