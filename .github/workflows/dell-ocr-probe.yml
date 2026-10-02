@@ -1,0 +1,32 @@
+name: Dell OCR probe (read-only)
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/dell-ocr-probe.yml'
+
+permissions: {}
+
+jobs:
+  probe:
+    runs-on: [self-hosted, dell-gpu]
+    timeout-minutes: 5
+    steps:
+      - name: Read-only hardware and tool metadata
+        shell: bash
+        run: |
+          set -u
+          echo "host: $(hostname)"
+          echo "--- cpu"; lscpu | grep -E 'Model name|^CPU\(s\)|Thread|Flags' | cut -c1-160
+          echo "--- memory"; free -m
+          echo "--- disk"; df -h / "$RUNNER_TEMP" 2>/dev/null
+          echo "--- load"; uptime
+          echo "--- busy runner processes"; pgrep -af 'Runner.Worker' | cut -c1-120 || true
+          echo "--- tools"
+          for t in tesseract ocrmypdf gs qpdf unpaper pngquant jbig2 pdftoppm python3 pip3; do
+            if command -v "$t" >/dev/null 2>&1; then echo "$t: $(command -v $t)"; else echo "$t: not found"; fi
+          done
+          echo "--- tesseract"; tesseract --version 2>&1 | head -3 || true
+          tesseract --list-langs 2>&1 | head -20 || true
+          python3 --version 2>&1
+          python3 -c 'import pypdfium2' 2>&1 | tail -1 || true
