@@ -130,9 +130,8 @@ export default function SuccessClient() {
           <>
             <h1 style={S.h1}>Your {tier ?? 'BidDeed.AI'} subscription is active</h1>
             <p style={S.lede}>
-              Payment confirmed and your plan is recorded. Your account details are sent to the
-              email you used at checkout. If they do not arrive, reply to any BidDeed.AI email
-              and we will look it up.
+              Payment confirmed and the plan is recorded on your account. If you cannot see
+              your access, reply to any BidDeed.AI email and we will look it up.
             </p>
           </>
         )}
