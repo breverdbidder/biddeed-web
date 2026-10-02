@@ -104,10 +104,11 @@ export default function SuccessClient() {
 
         {phase === 'pending' && (
           <>
-            <h1 style={S.h1}>Payment received</h1>
+            <h1 style={S.h1}>We are confirming your order</h1>
             <p style={S.lede}>
-              Your files are being prepared. The delivery email arrives within 15 minutes.
-              Nothing further is needed from you.
+              We could not confirm this order yet. If you completed checkout, your access
+              is being set up and a confirmation email should arrive within 15 minutes.
+              If nothing arrives, reply to any BidDeed.AI email and we will look it up.
             </p>
           </>
         )}
@@ -122,7 +123,7 @@ export default function SuccessClient() {
           </>
         )}
 
-        {(phase === 'delivered' || phase === 'pending') && (
+        {phase === 'delivered' && (
           <>
             <div style={S.divider} />
             <div style={S.listLabel}>What you bought</div>
