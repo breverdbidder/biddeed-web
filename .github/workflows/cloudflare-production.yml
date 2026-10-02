@@ -296,7 +296,14 @@ jobs:
       # undo the deploy; a red result means roll back to the prior version.
       - name: Academy runtime check (live biddeed.ai)
         shell: bash
-        run: node scripts/academy-runtime-check.mjs https://biddeed.ai
+        run: |
+          set -euo pipefail
+          node scripts/academy-runtime-check.mjs https://biddeed.ai
+          # /api/auctions/summary feeds the pages; the local PR check cannot
+          # exercise it (no Supabase env), so verify the real contract here.
+          curl -fsS --max-time 30 https://biddeed.ai/api/auctions/summary -o /tmp/summary.json
+          jq -e '(.total | type == "number" and . > 0) and (.upcoming | type == "number") and (.counties | type == "number" and . > 0) and (.by_county | type == "object" and length > 0) and (.by_status | type == "object")' /tmp/summary.json >/dev/null || { echo "auctions summary contract FAILED" >&2; head -c 500 /tmp/summary.json >&2; exit 1; }
+          echo "auctions summary ok: total=$(jq .total /tmp/summary.json) counties=$(jq .counties /tmp/summary.json)"
 
   # Rendered parity audit after every production deploy (PARITY_PRD.md §3.2).
   # ui-audit.yml in cli-anything-biddeed only fires on Worker deploys, so a
