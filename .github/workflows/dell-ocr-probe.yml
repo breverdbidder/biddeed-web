@@ -22,7 +22,7 @@ jobs:
           echo "tesseract langs:"; tesseract --list-langs 2>&1 | head -12
           echo "gs: $(gs --version 2>&1 | head -1)"; echo "pdftoppm: $(pdftoppm -v 2>&1 | head -1)"
           echo "python3: $(python3 --version 2>&1)"
-          python3 -c 'import pypdfium2; print("pypdfium2 present")' 2>&1 | tail -1
+          python3 -c 'import pypdfium2; print("pypdfium2 present")' 2>&1 | tail -1 || true
           echo "imagemagick: $(command -v convert magick | head -1)"
           cat > truth.txt <<'TXT'
           Case 2024CA000341 Parcel ID 19-3722-00-0000-0010-0020
