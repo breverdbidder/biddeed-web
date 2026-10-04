@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { officialSourceUrl } from '@/lib/auctions/official-source'
 import { getRetryingSupabaseClient } from '@/lib/supabase-retry'
 import { serverError } from '@/lib/api-errors'
 import { redactPinForViewer, type PinViewerClass } from '@/lib/auctions/pin-contract'
@@ -41,6 +42,7 @@ function mapRow(r: Record<string, unknown>) {
   return {
     ...r,
     auction_type: r.auction_type ?? r.sale_type,
+    source_url: officialSourceUrl(r as Parameters<typeof officialSourceUrl>[0]),
     is_vacant_land: r.property_type == null ? null : r.property_type === 'vacant_land',
   }
 }
