@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { officialSourceUrl } from '@/lib/auctions/official-source'
+import { isBrevard } from '@/lib/auctions/county-match'
 import { resolveBcpaoPhotoUrl } from '@/lib/bcpao'
 import { LIGHT as C } from '@/lib/design-tokens'
 import { getRetryingSupabaseClient } from '@/lib/supabase-retry'
@@ -214,7 +215,7 @@ export async function GET(
   // Generate BCPAO photo URL for Brevard if no photo_url exists
   let photoUrl = auction.photo_url
   let bcpaoPhotoUrl: string | null = null
-  if (auction.county === 'Brevard' && auction.parcel_id) {
+  if (isBrevard(auction.county) && auction.parcel_id) {
     bcpaoPhotoUrl = await resolveBcpaoPhotoUrl(auction.parcel_id)
     if (!photoUrl) {
       photoUrl = bcpaoPhotoUrl
