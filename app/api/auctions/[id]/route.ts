@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { officialSourceUrl } from '@/lib/auctions/official-source'
 import { resolveBcpaoPhotoUrl } from '@/lib/bcpao'
 import { LIGHT as C } from '@/lib/design-tokens'
 import { getRetryingSupabaseClient } from '@/lib/supabase-retry'
@@ -336,7 +337,7 @@ export async function GET(
     recommendation_color: `${C.border}`,
     max_bid: null as number | null,
     bid_ratio: null as number | null,
-    source_url: auction.source_url,
+    source_url: officialSourceUrl(auction as Parameters<typeof officialSourceUrl>[0]),
   }
 
   // Unvalidated model fields stay unavailable on every tier. Pro Plus owns
