@@ -5,6 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { formatCountyLabel } from '@/lib/counties'
+import { isBrevard } from '@/lib/auctions/county-match'
 import type { AuctionDetail as AuctionDetailType } from '@/types/auctions'
 import { hasDbBackedDimensionalStandards } from '@/lib/zone-standards'
 import ZoningDisclaimer from '@/components/zoning/ZoningDisclaimer'
@@ -200,7 +201,7 @@ export default function AuctionDetail({ auctionId }: Props) {
     : null
 
   // Build BCPAO property page link for Brevard parcels
-  const bcpaoLink = auction.county === 'Brevard' && auction.parcel_id
+  const bcpaoLink = isBrevard(auction.county) && auction.parcel_id
     ? `https://www.bcpao.us/PropertySearch/#/parcel/${encodeURIComponent(auction.parcel_id)}`
     : null
 
@@ -269,7 +270,7 @@ export default function AuctionDetail({ auctionId }: Props) {
                   className="w-full h-64 object-cover"
                   onError={() => setPhotoError(true)}
                 />
-                {auction.county === 'Brevard' && (
+                {isBrevard(auction.county) && (
                   <p className="text-xs text-muted-foreground dark:text-muted-foreground px-3 py-1.5">
                     Photo: Brevard County Property Appraiser
                   </p>
