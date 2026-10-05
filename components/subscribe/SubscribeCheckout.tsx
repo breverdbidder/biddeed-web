@@ -13,6 +13,8 @@ import { Button } from '@/components/ui/button'
 type Interval = 'monthly' | 'annual'
 type TierSlug = 'investor' | 'pro' | 'proplus'
 
+const PLAY_LAUNCH_PROMO = 'MVP_PLAY_LAUNCH'
+
 const TIER_PLAN: Record<TierSlug, (typeof PLANS)[number]> = {
   investor: PLANS.find((p) => p.name === 'Investor')!,
   pro: PLANS.find((p) => p.name === 'Pro')!,
@@ -64,15 +66,17 @@ function ComingSoon({ tier }: { tier: 'proplus' | 'enterprise' }) {
 }
 
 /**
- * Posts the existing Worker checkout contract unchanged:
+ * Posts the existing Worker checkout contract:
  * {tier, customer_email, interval} -> POST /subscribe/checkout -> {url}.
- * referral_code and visitor_id are optional passthroughs the live page also
- * sends today (ref query param, bd_vid localStorage) — additive, not part of
- * the required contract, and safe to omit if either is absent.
+ * referral_code, visitor_id, and promo are optional passthroughs — additive,
+ * not part of the required contract, and safe to omit if absent.
+ * Promo is metadata for campaign attribution / schedule wiring; the frontend
+ * never invents Stripe secrets or applies discounts itself.
  */
 export default function SubscribeCheckout() {
   const params = useSearchParams()
   const rawTier = params.get('tier')
+  const promo = params.get('promo')
 
   if (rawTier === 'enterprise' || rawTier === 'proplus') {
     return <ComingSoon tier={rawTier} />
@@ -80,7 +84,11 @@ export default function SubscribeCheckout() {
 
   const tier: TierSlug = isTierSlug(rawTier) ? (rawTier as TierSlug) : 'pro'
   const plan = TIER_PLAN[tier]
-  const initialInterval: Interval = params.get('interval') === 'annual' ? 'annual' : 'monthly'
+  const isPlayLaunch = promo === PLAY_LAUNCH_PROMO && tier === 'pro'
+  // Launch offer is monthly ($199 month 1 → 2 free). Annual stays available
+  // on the normal subscribe path without this promo.
+  const initialInterval: Interval =
+    isPlayLaunch ? 'monthly' : params.get('interval') === 'annual' ? 'annual' : 'monthly'
 
   const [interval, setInterval] = useState<Interval>(initialInterval)
   const [email, setEmail] = useState('')
@@ -91,7 +99,7 @@ export default function SubscribeCheckout() {
   const per = interval === 'annual' && plan.annualPer ? plan.annualPer : plan.per
   const refCode = params.get('ref')
 
-  const canAnnual = useMemo(() => Boolean(plan.annualPrice), [plan])
+  const canAnnual = useMemo(() => Boolean(plan.annualPrice) && !isPlayLaunch, [plan, isPlayLaunch])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -108,10 +116,11 @@ export default function SubscribeCheckout() {
     const payload: Record<string, string> = {
       tier,
       customer_email: email.trim(),
-      interval,
+      interval: isPlayLaunch ? 'monthly' : interval,
     }
     if (refCode) payload.referral_code = refCode
     if (visitorId) payload.visitor_id = visitorId
+    if (promo) payload.promo = promo
 
     try {
       const res = await fetch(apiUrl('/subscribe/checkout'), {
@@ -119,18 +128,26 @@ export default function SubscribeCheckout() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       })
-      const data = await res.json().catch(() => ({}))
+      const data = await res.json()
       if (res.ok && data.url) {
-        track('checkout_started', { product: 'subscription', plan: tier, interval, surface: 'subscribe' }, { beacon: true })
+        track(
+          'checkout_started',
+          {
+            product: 'subscription',
+            plan: tier,
+            interval: isPlayLaunch ? 'monthly' : interval,
+            surface: 'subscribe',
+            ...(promo ? { promo } : {}),
+          },
+          { beacon: true }
+        )
         window.location.href = data.url
-        // PARITY CP-1 §2: stay in "Redirecting to checkout…" while the browser
-        // leaves; re-arming the button mid-navigation invites a second session.
         return
       }
       setError(data.error || 'Something went wrong. Please try again.')
-      setSubmitting(false)
     } catch {
       setError('Network error. Please try again.')
+    } finally {
       setSubmitting(false)
     }
   }
@@ -138,17 +155,62 @@ export default function SubscribeCheckout() {
   return (
     <div className="mx-auto flex min-h-[70vh] w-full max-w-lg flex-col justify-center px-4 py-10 sm:px-6">
       <div className="rounded-2xl border border-border bg-card p-6 sm:p-8">
-        <h1 className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">BidDeed.AI {plan.name}</h1>
-        <p className="mt-2 flex items-baseline gap-1">
-          <span className="tabular font-display text-4xl font-medium tracking-tight text-foreground">{price}</span>
-          <span className="text-sm text-muted-foreground">{per}</span>
-        </p>
-        <p className="mt-4 text-base leading-6 text-muted-foreground">
-          Enter your email to continue to secure checkout. You are redirected to Stripe — no card is stored here.
-        </p>
+        {isPlayLaunch ? (
+          <>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+              BidDeed Field · Play launch offer
+            </p>
+            <h1 className="font-display mt-2 text-2xl font-medium tracking-tight text-foreground sm:text-3xl">
+              Pay 1 month. Get 2 free.
+            </h1>
+            <p className="mt-4 text-base leading-6 text-muted-foreground">
+              Pro is $199/mo. For the Field Android soft launch, pay{' '}
+              <span className="font-semibold text-foreground">$199 for month 1</span>
+              ; months 2 and 3 are free; then Pro continues at $199/mo. Cancel anytime.
+              Billing is on biddeed.ai (Stripe) — not a Google Play in-app purchase.
+            </p>
+            <ul className="mt-4 space-y-1.5 text-sm leading-6 text-muted-foreground">
+              <li>
+                Month 1: <span className="font-semibold text-foreground">$199</span> charged today
+              </li>
+              <li>
+                Months 2–3: <span className="font-semibold text-foreground">$0</span>
+              </li>
+              <li>
+                Month 4+: <span className="font-semibold text-foreground">$199/mo</span> until you cancel
+              </li>
+            </ul>
+            <p className="mt-3 flex items-baseline gap-1">
+              <span className="tabular font-display text-4xl font-medium tracking-tight text-foreground">
+                $199
+              </span>
+              <span className="text-sm text-muted-foreground">due today · then 2 months free</span>
+            </p>
+          </>
+        ) : (
+          <>
+            <h1 className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+              BidDeed.AI {plan.name}
+            </h1>
+            <p className="mt-2 flex items-baseline gap-1">
+              <span className="tabular font-display text-4xl font-medium tracking-tight text-foreground">
+                {price}
+              </span>
+              <span className="text-sm text-muted-foreground">{per}</span>
+            </p>
+            <p className="mt-4 text-base leading-6 text-muted-foreground">
+              Enter your email to continue to secure checkout. You are redirected to Stripe — no card is
+              stored here.
+            </p>
+          </>
+        )}
 
         {canAnnual ? (
-          <div role="radiogroup" aria-label="Billing interval" className="mt-6 inline-flex rounded-xl border border-input bg-background p-1">
+          <div
+            role="radiogroup"
+            aria-label="Billing interval"
+            className="mt-6 inline-flex rounded-xl border border-input bg-background p-1"
+          >
             {(['monthly', 'annual'] as const).map((iv) => (
               <button
                 key={iv}
@@ -158,7 +220,9 @@ export default function SubscribeCheckout() {
                 onClick={() => setInterval(iv)}
                 className={cn(
                   'min-h-9 rounded-lg px-4 text-sm font-semibold capitalize transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
-                  interval === iv ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-secondary'
+                  interval === iv
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-foreground hover:bg-secondary'
                 )}
               >
                 {iv === 'annual' ? `Annual — ${plan.annualPrice}/yr` : `Monthly — ${plan.price}/mo`}
@@ -168,6 +232,12 @@ export default function SubscribeCheckout() {
         ) : null}
 
         <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-3">
+          {!isPlayLaunch ? null : (
+            <p className="text-sm leading-6 text-muted-foreground">
+              Enter your email to continue to secure checkout. You are redirected to Stripe — no card is
+              stored here.
+            </p>
+          )}
           <label htmlFor="sub-email" className="text-sm font-medium text-foreground">
             Email
           </label>
@@ -181,17 +251,29 @@ export default function SubscribeCheckout() {
             className="min-h-11"
           />
           <Button type="submit" disabled={submitting} className="mt-2 min-h-11">
-            {submitting ? 'Redirecting to checkout…' : 'Continue to checkout →'}
+            {submitting
+              ? 'Redirecting to checkout…'
+              : isPlayLaunch
+                ? 'Start Pro — Play launch →'
+                : 'Continue to checkout →'}
           </Button>
-          {error ? <p className="text-sm text-destructive" role="alert">{error}</p> : null}
+          {error ? <p className="text-sm text-destructive">{error}</p> : null}
         </form>
 
-        <p className="mt-5 text-center text-base text-muted-foreground">
-          Not ready to pay?{' '}
-          <a href="/free-report" className="font-semibold text-primary underline-offset-4 hover:underline">
-            Try 67 counties free — no card required →
-          </a>
-        </p>
+        {isPlayLaunch ? (
+          <p className="mt-5 text-center text-xs leading-5 text-muted-foreground">
+            Offer code <span className="font-mono font-semibold text-foreground">{PLAY_LAUNCH_PROMO}</span>.
+            Limited to the Play launch window. Not redeemable as cash. Android listing may be Internal
+            testing / invite-only until production rollout.
+          </p>
+        ) : (
+          <p className="mt-5 text-center text-base text-muted-foreground">
+            Not ready to pay?{' '}
+            <a href="/free-report" className="font-semibold text-primary underline-offset-4 hover:underline">
+              Try 67 counties free — no card required →
+            </a>
+          </p>
+        )}
       </div>
     </div>
   )
