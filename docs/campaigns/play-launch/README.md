@@ -1,6 +1,7 @@
 # Play launch campaign pack (`MVP_PLAY_LAUNCH`)
 
 **Status:** APPROVED by Ariel (2026-10-05) — Pay 1 month of Pro ($199), get 2 free.
+**Billing sequence:** two-free-month schedule is **still being verified**. Do **not** change Stripe/billing, merge, or redeploy from this PR.
 
 This folder is the **campaign structure backup** (copy, fulfillment rules, tracking map).  
 Billing code and site banner/checkout already shipped on `main` — this draft PR documents them; it does **not** merge, redeploy, or change Stripe.

@@ -1,6 +1,7 @@
 # Stripe / fulfillment rules — Pay $199 → 2 months free → $199/mo
 
 **Status:** APPROVED by Ariel (2026-10-05) — Pay 1 month of Pro ($199), get 2 free (`MVP_PLAY_LAUNCH`).
+**Verification:** two-free-month billing sequence is **still being verified** (no Stripe/API/Dashboard changes from this docs PR).
 **Do not** change live Stripe coupon/products or redeploy webhook from this docs PR.
 **Do not** merge this PR until a human reviews; draft only.
 
