@@ -1,7 +1,7 @@
 # Stripe / fulfillment rules — Pay $199 → 2 months free → $199/mo
 
 **Status:** APPROVED by Ariel (2026-10-05) — Pay 1 month of Pro ($199), get 2 free (`MVP_PLAY_LAUNCH`).
-**Verification:** two-free-month billing sequence is **still being verified** (no Stripe/API/Dashboard changes from this docs PR).
+**Verification:** Stripe **test mode** schedule verified via test clock ($199, $0, $0, then $199; subscription active). Proof: [Actions run 37353861378](https://github.com/breverdbidder/cli-anything-biddeed/actions/runs/37353861378). **Not yet verified:** deployed webhook fires on a real checkout. No Stripe/API/Dashboard changes from this docs PR.
 **Do not** change live Stripe coupon/products or redeploy webhook from this docs PR.
 **Do not** merge this PR until a human reviews; draft only.
 
