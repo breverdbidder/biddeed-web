@@ -10,6 +10,7 @@ import ChatContainmentGuard from './ChatContainmentGuard'
 import CommandPalette from './CommandPalette'
 import DeedPanel from './DeedPanel'
 import Topbar from './Topbar'
+import PlayLaunchBanner from './PlayLaunchBanner'
 import StickyDeedCta from './StickyDeedCta'
 
 /**
@@ -123,6 +124,7 @@ export default function AppShell({
       */}
       <SidebarInset id="main" tabIndex={-1} className="min-w-0 bg-background text-foreground focus:outline-none">
         <Topbar deedOpen={deedOpen && !isHome} onToggleDeed={toggleDeed} showDeedToggle={!isHome} />
+        <PlayLaunchBanner />
 
         <div className="flex min-h-0 flex-1">
           <div className="min-w-0 flex-1 overflow-x-hidden">{children}</div>
