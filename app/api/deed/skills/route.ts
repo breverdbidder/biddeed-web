@@ -21,15 +21,17 @@ export async function GET() {
   const auth = await requireDeedContext()
   if (!auth.ok) return skillsJson({ signed_in: false, can_run: false, skills: SYSTEM_SKILLS })
   const { userId, supabase } = auth.ctx
-  const [library, tierId] = await Promise.all([
-    supabase.rpc('biddeed_skills_library', { p_clerk_user_id: userId }),
-    getCallerTierId(),
-  ])
-  if (library.error || !Array.isArray(library.data)) {
-    // Before the migration is applied the library still shows the six skills.
-    return skillsJson({ signed_in: true, can_run: false, skills: SYSTEM_SKILLS, unavailable: true })
+  // Skills are a paid feature end to end (Investor and above). A Free account sees the
+  // catalogue only (names and descriptions): never a playbook, a saved skill or a run.
+  if (!tierAtLeast(await getCallerTierId(), 'investor')) {
+    return skillsJson({ signed_in: true, can_run: false, paid: false, skills: SYSTEM_SKILLS, upgrade_url: '/subscribe?tier=investor' })
   }
-  return skillsJson({ signed_in: true, can_run: tierAtLeast(tierId, 'investor'), skills: library.data as SkillSummary[] })
+  const library = await supabase.rpc('biddeed_skills_library', { p_clerk_user_id: userId })
+  if (library.error || !Array.isArray(library.data)) {
+    // Before the migration is applied the library still shows the system skills.
+    return skillsJson({ signed_in: true, can_run: false, paid: true, skills: SYSTEM_SKILLS, unavailable: true })
+  }
+  return skillsJson({ signed_in: true, can_run: true, paid: true, skills: library.data as SkillSummary[] })
 }
 
 export async function POST(request: NextRequest) {
@@ -37,6 +39,9 @@ export async function POST(request: NextRequest) {
   if (!isJson(request)) return skillsJson({ error: 'Send a JSON body.' }, 415)
   const auth = await requireDeedContext()
   if (!auth.ok) return skillsJson({ error: 'Sign in to save a skill.' }, 401)
+  if (!tierAtLeast(await getCallerTierId(), 'investor')) {
+    return skillsJson({ error: 'Skills are included on Investor and above.', code: 'PAID_TIER_REQUIRED', upgrade_url: '/subscribe?tier=investor' }, 402)
+  }
   const { userId, supabase } = auth.ctx
 
   const body = (await request.json().catch(() => null)) as { spec_md?: unknown } | null
