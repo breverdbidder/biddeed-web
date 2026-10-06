@@ -334,7 +334,7 @@ export default function SkillsSheet({ open, onOpenChange, preset, onAskDeed }: P
                 </p>
               ) : null}
               <div className="mt-3 flex flex-wrap gap-2">
-                <button type="submit" disabled={running || !caseNumber.trim()} className={primaryButton}>
+                <button type="submit" disabled={running || !caseNumber.trim() || (loaded && !library.can_run)} className={primaryButton}>
                   <Play className="size-4" aria-hidden />
                   {running ? 'Running…' : 'Run skill'}
                 </button>
