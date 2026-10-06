@@ -34,7 +34,7 @@ export interface SkillSummary {
   pinned: boolean
 }
 
-/** Mirrors the six rows the migration seeds, for the signed-out library and the slash menu. */
+/** Mirrors the system rows in biddeed_skills, for the signed-out library and the slash menu. */
 export const SYSTEM_SKILLS: SkillSummary[] = [
   {
     slug: 'lien_survival',
@@ -77,6 +77,14 @@ export const SYSTEM_SKILLS: SkillSummary[] = [
     description: "The recorded numbers a max bid is built from: plaintiff's max bid, opening bid, judgment and county values.",
     instructions: '',
     tools: ['max_bid'],
+  },
+  {
+    slug: 'due_diligence',
+    name: 'Deal due diligence',
+    description:
+      'Pre-bid due diligence on one auction: lien survival, sale and surplus facts, zoning, comps, repairs and the recorded max-bid inputs, then a walk-away bid worksheet and a GO / PRICE IT / STOP call.',
+    instructions: '',
+    tools: ['lien_survival', 'surplus_check', 'zoning', 'comps', 'repair_estimate', 'max_bid'],
   },
 ].map((s) => ({ ...s, id: null, kind: 'system' as const, version: 1, mine: false, enabled: true, pinned: false }) as SkillSummary)
 
