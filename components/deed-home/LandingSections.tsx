@@ -88,17 +88,17 @@ export function TrustStrip() {
 export function Proof() {
   return (
     <section className="mx-auto max-w-5xl px-4 sm:px-6">
-      <div className="grid gap-8 rounded-3xl border border-border bg-card p-6 sm:p-10 lg:grid-cols-2 lg:items-center">
+      <div className="grid gap-8 rounded-3xl border border-border bg-card p-6 sm:p-10">
         <div>
-          <Eyebrow className="text-base">Published before the sale. Checked after it.</Eyebrow>
-          <H2>Every auction. One number. Published before bidding starts.</H2>
+          <Eyebrow className="text-base">Read before the sale. Checked after it.</Eyebrow>
+          <H2>Every auction. The record, read before bidding starts.</H2>
           <p className="mt-4 max-w-lg text-base leading-7 text-muted-foreground">
-            For a Marion County foreclosure on 20 July 2026, <a href="/maps" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80 -my-2 py-2">biddeed.ai</a> published a maximum bid of $82,000
-            before the sale. The property sold for $73,501. A bidder who held to the ceiling won the lot with
-            room to spare, and the report re-issued itself with the outcome the same day.
+            A SIGNAL$ Property Report lays out the value band, comparable sales, zoning read and red flags
+            before the sale, and re-issues itself with the outcome scorecard after it. The SIGNAL$ Max Bid
+            figure is Withheld until the rebuilt model is validated.
           </p>
           <p className="mt-4 max-w-lg text-base leading-7 text-muted-foreground">
-            Every <a href="/sign-up" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80 -my-2 py-2">biddeed.ai</a> member - free included - gets the published number before bidding starts. Bidders who are not on <a href="/sign-up" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80 -my-2 py-2">biddeed.ai</a> never see it.
+            Every <a href="/sign-up" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80 -my-2 py-2">biddeed.ai</a> member - free included - can ask Deed for the record on any auction. Bidders who are not on <a href="/sign-up" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80 -my-2 py-2">biddeed.ai</a> are bidding without that read.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <a href={W.sampleReport} className={BTN_QUIET}>
@@ -106,32 +106,6 @@ export function Proof() {
             </a>
           </div>
         </div>
-        {/*
-          Three tiles, one baseline. "Bid limit set" wraps to two lines at
-          the 3-column width while the other labels stay on one, and a tile
-          that centres its own contents then drops its value ~14 px below its
-          neighbours (Ariel, 2026-09-06 15:04 ET: "$82,000 not centered"). The
-          label row is a fixed sm:h-9 box with the text bottom-aligned, so every
-          value starts at the same y whether its label wrapped or not.
-        */}
-        <dl className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
-          <div className="flex items-baseline justify-between gap-3 rounded-2xl border border-border bg-background p-4 sm:flex sm:min-h-[128px] sm:flex-col sm:items-center sm:justify-center sm:text-center">
-            <dt className="text-xs uppercase leading-snug tracking-wide text-muted-foreground sm:flex sm:h-9 sm:items-end sm:justify-center">Bid limit set</dt>
-            <dd className="tabular whitespace-nowrap text-lg font-semibold text-foreground sm:mt-2 sm:text-2xl">$82,000</dd>
-          </div>
-          <div className="flex items-baseline justify-between gap-3 rounded-2xl border border-border bg-background p-4 sm:flex sm:min-h-[128px] sm:flex-col sm:items-center sm:justify-center sm:text-center">
-            <dt className="text-xs uppercase leading-snug tracking-wide text-muted-foreground sm:flex sm:h-9 sm:items-end sm:justify-center">Sale closed at</dt>
-            <dd className="tabular whitespace-nowrap text-lg font-semibold text-primary sm:mt-2 sm:text-2xl">$73,501</dd>
-          </div>
-          <div className="flex items-baseline justify-between gap-3 rounded-2xl border border-border bg-background p-4 sm:flex sm:min-h-[128px] sm:flex-col sm:items-center sm:justify-center sm:text-center">
-            <dt className="text-xs uppercase leading-snug tracking-wide text-muted-foreground sm:flex sm:h-9 sm:items-end sm:justify-center">Outcome</dt>
-            <dd className="whitespace-nowrap text-lg font-semibold text-foreground sm:mt-2 sm:text-2xl">Held</dd>
-          </div>
-        </dl>
-        {/* Caption lives outside the <dl>: a <dl> may only contain dt/dd groups (axe definition-list, WCAG 1.3.1). */}
-        <p className="mt-3 text-base text-muted-foreground">
-          Marion County foreclosure, July 2026. Figures from the published report and the clerk&rsquo;s recorded sale.
-        </p>
       </div>
     </section>
   )
@@ -193,8 +167,8 @@ const STEPS = [
   },
   {
     icon: Target,
-    title: 'You get the ceiling',
-    body: 'A maximum bid, the value band behind it, and every flag on the record, so the bid you place is always one you meant to place, online or at the courthouse.',
+    title: 'You get the value band',
+    body: 'The value band, the comparable sales and every flag on the record, so the bid you place is always one you meant to place, online or at the courthouse. The SIGNAL$ Max Bid stays Withheld until the model is validated.',
   },
 ]
 
@@ -203,7 +177,7 @@ export function HowItWorks() {
     <section className="mx-auto max-w-5xl px-4 sm:px-6">
       <div className="max-w-2xl">
         <Eyebrow>How it works</Eyebrow>
-        <H2>Know the number before the auction.</H2>
+        <H2>Know the record before the auction.</H2>
         <p className="mt-4 text-base leading-7 text-muted-foreground">
           What&rsquo;s coming to auction, what to bid, and what the zoning allows &mdash; answered before you bid, in
           every Florida county, for foreclosure and tax deed sales alike.
@@ -446,7 +420,7 @@ export const PLANS: Plan[] = [
       'SIGNAL$ max-bid analysis (figures Withheld until the model is revalidated)',
       '10 SIGNAL$ Property Reports a month',
       'Unlimited property cards',
-      'Plaintiff identity and max-bid intelligence',
+      'Plaintiff identity (max-bid figures Withheld until validated)',
       'Outcome scorecard after each sale',
       '3 skip traces a month · 1 county monitor',
       'Academy investor level: case studies, lien priority and the wipe rule, max-bid math, ML verdict lessons',

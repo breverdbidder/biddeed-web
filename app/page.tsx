@@ -18,7 +18,7 @@ export const dynamic = 'force-dynamic'
 export const metadata: Metadata = {
   title: 'BidDeed.AI — Every Foreclosure. Every Tax Deed. Yours To Win.',
   description:
-    "AI-powered foreclosure and tax deed intelligence for all 67 Florida counties. Ask Deed what's coming, what to bid, and what zoning allows — before you bid.",
+    "AI-powered foreclosure and tax deed intelligence for all 67 Florida counties. Ask Deed what's coming, what the record shows, and what zoning allows — before you bid.",
   alternates: {
     canonical: 'https://biddeed.ai/',
   },
