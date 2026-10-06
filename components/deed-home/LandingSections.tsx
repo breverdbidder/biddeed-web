@@ -138,8 +138,8 @@ export function Founder() {
             managing every property myself. Every one of those lessons is now in the software.
           </p>
           <p className="text-foreground">
-            So you can simply talk to Deed. Ask in your own language, and what&rsquo;s coming to auction, what to
-            bid, and what the zoning allows become crystal clear &mdash; before you raise your hand. For everyone,
+            So you can simply talk to Deed. Ask in your own language, and what&rsquo;s coming to auction, what the
+            record shows, and what the zoning allows become crystal clear &mdash; before you raise your hand. For everyone,
             everywhere, on data that is ours alone.
           </p>
           <p className="text-base text-muted-foreground">
@@ -179,7 +179,7 @@ export function HowItWorks() {
         <Eyebrow>How it works</Eyebrow>
         <H2>Know the record before the auction.</H2>
         <p className="mt-4 text-base leading-7 text-muted-foreground">
-          What&rsquo;s coming to auction, what to bid, and what the zoning allows &mdash; answered before you bid, in
+          What&rsquo;s coming to auction, what the record shows, and what the zoning allows &mdash; answered before you bid, in
           every Florida county, for foreclosure and tax deed sales alike.
         </p>
       </div>
@@ -236,7 +236,7 @@ export function FieldRoutes() {
         <Eyebrow>Drive for Dollars</Eyebrow>
         <H2>Build a route from the lots you actually want to see.</H2>
         <p className="mt-4 text-base leading-7 text-muted-foreground">
-          The report tells you what to bid. Driving the street tells you what the report cannot — whether
+          The report tells you what the record shows. Driving the street tells you what the report cannot — whether
           anyone still lives there, what the roof looks like, and which house nobody has filed on yet.
           Choose your properties off the auction calendar and <a href="/maps" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80 -my-2 py-2">biddeed.ai</a> turns them into a drive.
         </p>
