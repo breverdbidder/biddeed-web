@@ -166,7 +166,7 @@ export default function SubscribeCheckout() {
             <p className="mt-4 text-base leading-6 text-muted-foreground">
               Pro is $199/mo. For the Field Android soft launch, pay{' '}
               <span className="font-semibold text-foreground">$199 for month 1</span>
-              ; months 2 and 3 are free; then Pro continues at $199/mo. Cancel anytime.
+              ; months 2 and 3 are free; then Pro continues at $199/mo until you cancel.
               Billing is on biddeed.ai (Stripe) — not a Google Play in-app purchase.
             </p>
             <ul className="mt-4 space-y-1.5 text-sm leading-6 text-muted-foreground">
