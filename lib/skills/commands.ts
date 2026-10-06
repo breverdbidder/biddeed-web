@@ -1,4 +1,4 @@
-import { Banknote, Gavel, Hammer, Home, Landmark, MapPinned, Wand2 } from 'lucide-react'
+import { Banknote, ClipboardCheck, Gavel, Hammer, Home, Landmark, MapPinned, Wand2 } from 'lucide-react'
 
 import type { SlashCommand } from '@/components/deed/SlashMenu'
 
@@ -8,6 +8,7 @@ import type { SlashCommand } from '@/components/deed/SlashMenu'
  */
 export const SKILL_COMMANDS: SlashCommand[] = [
   { name: 'skills', label: '/skills', hint: 'Open the skills library', icon: Wand2 },
+  { name: 'dd', label: '/dd', hint: 'Deal due diligence: liens, zoning, value and a walk-away bid', icon: ClipboardCheck },
   { name: 'liens', label: '/liens', hint: 'Lien survival: which recorded liens survive the sale', icon: Landmark },
   { name: 'surplus', label: '/surplus', hint: 'Surplus check: sale price against the judgment', icon: Banknote },
   { name: 'zoning', label: '/zoning', hint: 'Zoning district, setbacks, density and ordinance', icon: MapPinned },
@@ -19,6 +20,7 @@ export const SKILL_COMMANDS: SlashCommand[] = [
 /** Slash command name → the skill the panel opens on (null = the library). */
 export const SKILL_COMMAND_TARGET: Record<string, string | null> = {
   skills: null,
+  dd: 'due_diligence',
   liens: 'lien_survival',
   surplus: 'surplus_check',
   zoning: 'zoning',
