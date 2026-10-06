@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server'
 
 import { requireDeedContext } from '@/lib/deed/server'
 import { UUID_RE, isJson, isSameOrigin, skillsJson } from '@/lib/skills/server'
-import { RUN_ERRORS, SKILL_TOOLS, type SkillRun } from '@/lib/skills/shared'
+import { RUN_ERRORS, type SkillRun } from '@/lib/skills/shared'
 import { getCallerTierId, tierAtLeast } from '@/lib/tier/server'
 
 export const dynamic = 'force-dynamic'
@@ -39,8 +39,11 @@ export async function POST(request: NextRequest) {
 
   const body = (await request.json().catch(() => null)) as Record<string, unknown> | null
   const skill = typeof body?.skill === 'string' ? body.skill.trim() : ''
-  const isSystem = (SKILL_TOOLS as string[]).includes(skill)
-  if (!isSystem && !UUID_RE.test(skill)) return skillsJson({ error: RUN_ERRORS.skill_not_found }, 404)
+  // A system skill runs by its slug (the six tool skills and any seeded since, e.g.
+  // due_diligence); a user's own skill by its id. The RPC resolves a slug against
+  // system skills only, so a slug can never reach another account's skill.
+  const isSystemSlug = /^[a-z0-9][a-z0-9_-]{1,40}$/.test(skill)
+  if (!isSystemSlug && !UUID_RE.test(skill)) return skillsJson({ error: RUN_ERRORS.skill_not_found }, 404)
 
   const inputs: Record<string, string> = {}
   if (typeof body?.auction_id === 'string' && UUID_RE.test(body.auction_id)) {
