@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 
 import { requireDeedContext } from '@/lib/deed/server'
 import { UUID_RE, isJson, isSameOrigin, skillsJson } from '@/lib/skills/server'
+import { getCallerTierId, tierAtLeast } from '@/lib/tier/server'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -19,6 +20,9 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
   if (!UUID_RE.test(id)) return skillsJson({ error: 'Skill not found.' }, 404)
   const auth = await requireDeedContext()
   if (!auth.ok) return skillsJson({ error: 'Sign in to change your skills.' }, 401)
+  if (!tierAtLeast(await getCallerTierId(), 'investor')) {
+    return skillsJson({ error: 'Skills are included on Investor and above.', code: 'PAID_TIER_REQUIRED', upgrade_url: '/subscribe?tier=investor' }, 402)
+  }
   const { userId, supabase } = auth.ctx
 
   const body = (await request.json().catch(() => null)) as { enabled?: unknown; pinned?: unknown } | null
@@ -43,6 +47,9 @@ export async function DELETE(request: NextRequest, context: { params: Promise<{ 
   if (!UUID_RE.test(id)) return skillsJson({ error: 'Skill not found.' }, 404)
   const auth = await requireDeedContext()
   if (!auth.ok) return skillsJson({ error: 'Sign in to change your skills.' }, 401)
+  if (!tierAtLeast(await getCallerTierId(), 'investor')) {
+    return skillsJson({ error: 'Skills are included on Investor and above.', code: 'PAID_TIER_REQUIRED', upgrade_url: '/subscribe?tier=investor' }, 402)
+  }
   const { userId, supabase } = auth.ctx
 
   const { data, error } = await supabase.rpc('biddeed_skill_delete', { p_clerk_user_id: userId, p_skill_id: id })
