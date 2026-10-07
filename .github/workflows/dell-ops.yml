@@ -96,7 +96,8 @@ jobs:
             exit 1
           fi
           # Profile matching must be verified before reaching the private IP.
-          applied_profile="$(sudo warp-cli --accept-tos settings | sed -nE 's/^[[:space:]]*Profile ID:[[:space:]]*([^[:space:]]+).*/\1/p' | head -n 1)"
+          applied_profile="$(sudo warp-cli --accept-tos settings | sed -nE 's/^[[:space:]]*(\([^)]*\)[[:space:]]*)?Profile ID:[[:space:]]*([^[:space:]]+)[[:space:]]*$/\2/p')"
+          printf 'Applied WARP profile ID: %s\n' "$applied_profile"
           if [[ -z "$applied_profile" || "$applied_profile" != "$EXPECTED_PROFILE_ID" ]]; then
             echo '::error::WARP profile did not match the dedicated Dell ops profile'
             exit 1
