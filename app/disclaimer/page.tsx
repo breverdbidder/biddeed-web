@@ -26,7 +26,7 @@ export default function DisclaimerPage() {
       <header className="border-b border-border pb-6">
         <a
           href="/"
-          className="inline-flex min-h-11 items-center text-sm font-semibold text-muted-foreground underline-offset-4 hover:text-primary hover:underline"
+          className="inline-flex min-h-11 items-center text-base font-semibold text-muted-foreground underline-offset-4 hover:text-primary hover:underline"
         >
           ← Back to home
         </a>
@@ -36,12 +36,12 @@ export default function DisclaimerPage() {
         >
           Disclaimer
         </h1>
-        <p className="mt-2 text-sm text-muted-foreground">Last updated September 23, 2026</p>
+        <p className="mt-2 text-base text-muted-foreground">Last updated September 23, 2026</p>
       </header>
 
       <div
         role="note"
-        className="rounded-xl border border-border border-l-4 border-l-primary bg-card p-5 text-sm leading-7 text-foreground"
+        className="rounded-xl border border-border border-l-4 border-l-primary bg-card p-5 text-base leading-7 text-foreground"
       >
         <p>
           <strong>Not legal advice.</strong> BidDeed.AI is an information and analytics platform, not a
@@ -108,17 +108,17 @@ export default function DisclaimerPage() {
         </section>
       </div>
 
-      <p className="border-t border-border pt-6 text-sm text-muted-foreground">
+      <p className="border-t border-border pt-6 text-base text-muted-foreground">
         © 2026 BidDeed.AI · Everest Capital USA ·{' '}
-        <a href="/terms" className="font-semibold text-primary underline-offset-4 hover:underline">
+        <a href="/terms" className="inline-flex min-h-11 items-center px-2 font-semibold text-primary underline-offset-4 hover:underline">
           Terms
         </a>{' '}
         ·{' '}
-        <a href="/privacy" className="font-semibold text-primary underline-offset-4 hover:underline">
+        <a href="/privacy" className="inline-flex min-h-11 items-center px-2 font-semibold text-primary underline-offset-4 hover:underline">
           Privacy
         </a>{' '}
         ·{' '}
-        <a href="/support" className="font-semibold text-primary underline-offset-4 hover:underline">
+        <a href="/support" className="inline-flex min-h-11 items-center px-2 font-semibold text-primary underline-offset-4 hover:underline">
           Support
         </a>
       </p>
