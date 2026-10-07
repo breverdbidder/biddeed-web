@@ -151,6 +151,17 @@ jobs:
       - name: Install Chromium audit runtime
         run: pip install --quiet playwright && python -m playwright install --with-deps chromium
 
+      - name: Read pinned production front-router source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: breverdbidder/cli-anything-biddeed
+          ref: 3f1770cd7c4098f9079c771362ce02f0680f6243
+          path: .candidate-front
+          persist-credentials: false
+          sparse-checkout: |
+            src/worker.js
+            wrangler.toml
+
       - name: Run the unchanged eight-gate audit against candidate Worker
         env:
           SAMPLE_REPORT_KEY: ${{ vars.SAMPLE_REPORT_KEY }}
@@ -161,7 +172,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          port=$((20000 + RANDOM % 20000))
+          port=$((20000 + RANDOM % 10000))
+          front_port=$((31000 + RANDOM % 10000))
           # Runtime secrets stay in an ephemeral file, never logs or artifacts.
           umask 077
           trap 'rm -f .dev.vars' EXIT
@@ -176,14 +188,49 @@ jobs:
           PYENV
           npx wrangler dev --config wrangler.production.jsonc --local --port "$port" > "$RUNNER_TEMP/candidate-worker.log" 2>&1 &
           pid=$!
-          trap 'kill "$pid" 2>/dev/null || true; rm -f .dev.vars' EXIT
+          trap 'kill "$pid" ${front_pid:-} 2>/dev/null || true; rm -f .dev.vars; rm -rf .candidate-front' EXIT
           ready=0
           for i in $(seq 1 60); do
             if curl -fsS -o /dev/null --max-time 5 "http://127.0.0.1:$port/"; then ready=1; break; fi
             sleep 2
           done
           test "$ready" = 1 || { echo 'Candidate Worker failed readiness'; exit 1; }
-          python3 scripts/ui-audit/audit.py --base "http://127.0.0.1:$port" --routes scripts/ui-audit/routes.json --out ui-audit.md --fail-on-red
+          export CANDIDATE_NEXT_PORT="$port"
+          python3 - <<'PYFRONT'
+          import os,json,hashlib,pathlib
+          root=pathlib.Path('.candidate-front')
+          source=root/'src/worker.js'
+          raw=source.read_bytes()
+          assert hashlib.sha256(raw).hexdigest() == 'ebce246e55f80b710c32bcee2e1b808927f0491e76d418ca734074331883d44b', 'Front-router source drift'
+          local='http://127.0.0.1:'+os.environ['CANDIDATE_NEXT_PORT']
+          old='const RADAR_ORIGIN = "https://biddeed-web-production.brevardbidderai.workers.dev";'
+          text=raw.decode()
+          assert text.count(old)==1
+          text=text.replace(old,'const RADAR_ORIGIN = '+json.dumps(local)+';')
+          # Deny every mutating external fetch, including passive log writes.
+          # This guard exists only in the ephemeral local verification source.
+          guard="""const originalFetch = globalThis.fetch.bind(globalThis);
+          globalThis.fetch = (input, init) => {
+            const method = String(init?.method || input?.method || 'GET').toUpperCase();
+            if (!['GET','HEAD'].includes(method)) return Promise.resolve(new Response('Read-only candidate verification', {status:403}));
+            return originalFetch(input, init);
+          };
+          """
+          source.write_text(guard+text)
+          (root/'verify.js').write_text("import worker, { RateLimiterCounter } from './src/worker.js';\nexport { RateLimiterCounter };\nexport default { fetch(request, env, ctx) { if (!['GET','HEAD'].includes(request.method)) return new Response('Read-only candidate verification',{status:403}); return worker.fetch(request,env,ctx); } };\n")
+          cfg={'name':'biddeed-front-local-verification','main':'verify.js','compatibility_date':'2024-01-01','durable_objects':{'bindings':[{'name':'RATE_LIMIT_DO','class_name':'RateLimiterCounter'}]},'migrations':[{'tag':'v1-rate-limit-do','new_sqlite_classes':['RateLimiterCounter']}]}
+          (root/'verify.json').write_text(json.dumps(cfg))
+          print('Pinned front-router verified; ephemeral origin and read-only guards only; no production bindings')
+          PYFRONT
+          npx wrangler dev --config .candidate-front/verify.json --local --port "$front_port" > "$RUNNER_TEMP/front-worker.log" 2>&1 &
+          front_pid=$!
+          ready=0
+          for i in $(seq 1 60); do
+            if curl -fsS -o /dev/null --max-time 5 "http://127.0.0.1:$front_port/"; then ready=1; break; fi
+            sleep 2
+          done
+          test "$ready" = 1 || { echo 'Front-router candidate failed readiness'; exit 1; }
+          python3 scripts/ui-audit/audit.py --base "http://127.0.0.1:$front_port" --routes scripts/ui-audit/routes.json --out ui-audit.md --fail-on-red
 
       - name: Upload audit evidence
         if: always()
