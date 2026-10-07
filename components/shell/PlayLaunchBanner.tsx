@@ -58,10 +58,10 @@ export default function PlayLaunchBanner() {
       aria-label="Play launch offer"
       className="relative z-10 flex items-center gap-2 border-b border-primary/20 bg-primary px-3 py-2 text-primary-foreground sm:px-4"
     >
-      <p className="min-w-0 flex-1 text-center text-sm font-medium leading-5">
+      <p className="min-w-0 flex-1 text-center text-base font-medium leading-6">
         <Link
           href={CTA_HREF}
-          className="underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-primary-foreground focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
+          className="inline-flex min-h-9 items-center underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-primary-foreground focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
         >
           Play launch: Pay 1 month of Pro ($199), get 2 free → Subscribe
         </Link>

@@ -60,6 +60,11 @@ async def run(base, routes, out, fail_on_red, skipped=None, skip_why=None):
                     # networkidle from resolving and exhaust the 20-minute workflow timeout. Evidence remains
                     # bounded per route while the sweep still captures rendered DOM, styles, and layout.
                     resp=await pg.goto(base+route, wait_until="domcontentloaded", timeout=30000); status=resp.status
+                    # Be a polite client: back off and retry on 429 instead of hammering the live site.
+                    for wait_s in (8, 16, 30):
+                        if status != 429: break
+                        await pg.wait_for_timeout(wait_s*1000)
+                        resp=await pg.goto(base+route, wait_until="domcontentloaded", timeout=30000); status=resp.status
                     await pg.wait_for_timeout(1000); r=await pg.evaluate(JS_SWEEP)
                 except Exception as e: err=str(e)[:80]
                 low=(r.get("text","") or "").lower()
@@ -87,6 +92,7 @@ async def run(base, routes, out, fail_on_red, skipped=None, skip_why=None):
                 red+=sum(1 for v in gates.values() if not v)
                 rows.append((route,vw,status,gates,len(r.get("bad",[])),offpal[:6],r.get("ld",[]),err+(" COPY:" + ";".join(copy_why) if copy_why else "")+(" L="+str(r.get("layout")) if r.get("layout") and not gates["LAYOUT"] else "")+(" F="+",".join([f for f in r.get("fams",[]) if f not in {"Inter","Inter Fallback","Source Serif 4","Source Serif 4 Fallback","JetBrains Mono","system-ui"}]) if not gates["TYPE"] else "")))
                 await pg.close()
+                await asyncio.sleep(1.5)  # pace requests so the audit never triggers the site rate limit
             await ctx.close()
         await b.close()
     lines=["| Route | VP | HTTP | RENDER | PALETTE | CONTRAST | COPY | SEO | LAYOUT | TYPE | <4.5:1 | off-palette | JSON-LD / notes |","|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
