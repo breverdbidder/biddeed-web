@@ -26,6 +26,7 @@ concurrency:
 
 jobs:
   production-build:
+    environment: cloudflare-staging
     runs-on: [self-hosted, dell-gpu]
     timeout-minutes: 20
     env:
@@ -118,6 +119,7 @@ jobs:
 
   ui-parity-audit:
     needs: production-build
+    environment: cloudflare-staging
     runs-on: [self-hosted, dell-gpu]
     timeout-minutes: 20
     steps:
@@ -152,8 +154,7 @@ jobs:
       - name: Run the unchanged eight-gate audit against candidate Worker
         env:
           SAMPLE_REPORT_KEY: ${{ vars.SAMPLE_REPORT_KEY }}
-          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           CLERK_RUNTIME_ENABLED: 'true'
@@ -166,7 +167,7 @@ jobs:
           trap 'rm -f .dev.vars' EXIT
           python3 - <<'PYENV'
           import json, os
-          keys = ['CLERK_SECRET_KEY', 'SUPABASE_SERVICE_ROLE_KEY', 'NEXT_PUBLIC_SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_ANON_KEY', 'CLERK_RUNTIME_ENABLED']
+          keys = ['NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY', 'NEXT_PUBLIC_SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_ANON_KEY', 'CLERK_RUNTIME_ENABLED']
           with open('.dev.vars', 'w') as f:
               for k in keys:
                   if not os.environ.get(k): raise SystemExit('Missing runtime configuration: ' + k)
