@@ -3,21 +3,21 @@
 import { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
 
-import { onIdle } from '@/lib/perf/idle'
 import { OPEN_COMMAND_PALETTE, isCommandPaletteShortcut } from './commandPaletteEvents'
 
 const CommandPalette = dynamic(() => import('./CommandPalette'), { ssr: false })
 
 /**
- * Mounts the ⌘K command palette after first paint instead of with it
+ * Mounts the ⌘K command palette only when the visitor asks for it
  * (PageSpeed pass, 2026-10-07). The palette is closed on every page load, so
  * its code - Radix Dialog, the place and skill lists, the thread search - was
- * pure first-load weight.
+ * pure first-load weight. Pass 2: it no longer mounts on idle either; measured
+ * live, that idle mount still cost ~100 ms of main thread inside the load
+ * window on a throttled phone.
  *
- * It mounts on whichever comes first: the browser going idle after load, or
- * the visitor actually asking for it (⌘K / Ctrl+K, or the sidebar's Search
- * row). A request that arrives before the mount still opens the palette:
- * it mounts with initialOpen, so the first ⌘K is never swallowed.
+ * The first ⌘K / Ctrl+K, or a click on the sidebar's Search row, mounts it
+ * with initialOpen, so that first request opens the palette (after one small
+ * chunk download) instead of being swallowed.
  */
 export default function LazyCommandPalette() {
   const [mounted, setMounted] = useState(false)
@@ -37,11 +37,9 @@ export default function LazyCommandPalette() {
     }
     window.addEventListener('keydown', onKey)
     window.addEventListener(OPEN_COMMAND_PALETTE, openNow)
-    const cancelIdle = onIdle(() => setMounted(true), 4000)
     return () => {
       window.removeEventListener('keydown', onKey)
       window.removeEventListener(OPEN_COMMAND_PALETTE, openNow)
-      cancelIdle()
     }
   }, [mounted])
 

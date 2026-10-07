@@ -17,8 +17,10 @@ export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'BidDeed.AI — Every Foreclosure. Every Tax Deed. Yours To Win.',
+  // 155-character cap (ui-audit SEO gate; Google truncates around there).
+  // #210's wording, minus the trailing "— before you bid" that took it to 165.
   description:
-    "AI-powered foreclosure and tax deed intelligence for all 67 Florida counties. Ask Deed what's coming, what the record shows, and what zoning allows — before you bid.",
+    "AI-powered foreclosure and tax deed intelligence for all 67 Florida counties. Ask Deed what's coming, what the record shows and what zoning allows.",
   alternates: {
     canonical: 'https://biddeed.ai/',
   },

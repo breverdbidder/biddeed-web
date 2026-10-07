@@ -25,10 +25,14 @@ const inter = Inter({
 // Source Serif 4: the display serif the Claude.ai reference implementations use
 // (open-claude-reference src/index.css) - the closest open-licensed match to the
 // Claude reading experience (PARITY_PRD section 8). Replaces Newsreader, 2026-09-04.
+//
+// Normal style only (PageSpeed pass, 2026-10-07): no headline uses italic
+// display serif, yet the italic file (~51 KB) was preloaded at high priority on
+// every page, competing with the hero headline on slow mobile connections.
 const sourceSerif = Source_Serif_4({
   subsets: ['latin'],
   weight: ['400', '500', '600'],
-  style: ['normal', 'italic'],
+  style: ['normal'],
   display: 'swap',
   variable: '--font-display',
   fallback: ['Iowan Old Style', 'Palatino Linotype', 'Georgia', 'serif'],
