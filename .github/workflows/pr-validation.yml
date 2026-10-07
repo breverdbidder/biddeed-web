@@ -186,6 +186,20 @@ jobs:
                   f.write(k + '=' + json.dumps(os.environ[k]) + '\n')
           os.chmod('.dev.vars', 0o600)
           PYENV
+          # Safety instrumentation only: deny outbound mutations in the Next
+          # isolate too. The same built artifact is otherwise unchanged.
+          python3 - <<'PYNEXT'
+          from pathlib import Path
+          p=Path('.open-next/worker.js')
+          guard="""const candidateOriginalFetch = globalThis.fetch.bind(globalThis);
+          globalThis.fetch = (input, init) => {
+            const method = String(init?.method || input?.method || 'GET').toUpperCase();
+            if (!['GET','HEAD'].includes(method)) return Promise.resolve(new Response('Read-only candidate verification', {status:403}));
+            return candidateOriginalFetch(input, init);
+          };
+          """
+          p.write_text(guard+p.read_text())
+          PYNEXT
           npx wrangler dev --config wrangler.production.jsonc --local --port "$port" > "$RUNNER_TEMP/candidate-worker.log" 2>&1 &
           pid=$!
           trap 'kill "$pid" ${front_pid:-} 2>/dev/null || true; rm -f .dev.vars; rm -rf .candidate-front' EXIT
