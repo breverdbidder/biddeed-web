@@ -1,7 +1,7 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState } from 'react'
-import { useAuth } from '@clerk/nextjs'
+import { createContext, useContext, useState } from 'react'
+import dynamic from 'next/dynamic'
 
 /**
  * The verified-identity signal for Deed's client surfaces (PARITY CP-3).
@@ -15,6 +15,11 @@ import { useAuth } from '@clerk/nextjs'
  *
  * `loaded` is false until Clerk has answered once; the thread hook waits for
  * it so a signed-in reload does not first look like an anonymous one.
+ *
+ * The bridge lives in its own module and is loaded on demand: nothing here
+ * imports @clerk/nextjs, so pages rendered without Clerk (the signed-out
+ * landing page, PageSpeed pass 3) do not download the Clerk SDK through the
+ * composer and the sidebar, which both read this context.
  */
 export interface DeedAuthState {
   enabled: boolean
@@ -31,13 +36,9 @@ export function useDeedAuth(): DeedAuthState {
   return useContext(DeedAuthContext)
 }
 
-function ClerkBridge({ onChange }: { onChange: (s: DeedAuthState) => void }) {
-  const { isLoaded, isSignedIn, userId } = useAuth()
-  useEffect(() => {
-    onChange({ enabled: true, loaded: Boolean(isLoaded), signedIn: Boolean(isSignedIn), userId: userId ?? null })
-  }, [isLoaded, isSignedIn, userId, onChange])
-  return null
-}
+// Renders null, so there is nothing to server-render; ssr:false keeps the
+// Clerk SDK out of the server pass as well.
+const ClerkBridge = dynamic(() => import('./deedAuthClerkBridge'), { ssr: false })
 
 export function DeedAuthProvider({ authEnabled, children }: { authEnabled: boolean; children: React.ReactNode }) {
   const [state, setState] = useState<DeedAuthState>(authEnabled ? { enabled: true, loaded: false, signedIn: false, userId: null } : SIGNED_OUT)

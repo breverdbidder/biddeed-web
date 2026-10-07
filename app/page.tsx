@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import DeedHome from '@/components/deed-home/DeedHome'
+import HomeBelowFold from '@/components/deed-home/HomeBelowFold'
 
 /**
  * force-dynamic. middleware.ts mints a per-request CSP nonce and Next reads it
@@ -79,7 +80,9 @@ export default function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(PERSON_JSON_LD) }}
       />
-      <DeedHome />
+      {/* Below-the-fold marketing renders here, on the server, and DeedHome
+          slots it under the hero (PageSpeed pass 3, 2026-10-07). */}
+      <DeedHome below={<HomeBelowFold />} />
     </>
   )
 }

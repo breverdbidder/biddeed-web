@@ -1,8 +1,8 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import Link from 'next/link'
-import { Show, UserButton } from '@clerk/nextjs'
+import dynamic from 'next/dynamic'
+import Link from '@/components/ui/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { CalendarClock, ChevronsUpDown, FolderKanban, LifeBuoy, MessageSquarePlus, MessagesSquare, Search, Trash2, UserRound, Wand2 } from 'lucide-react'
 
@@ -23,23 +23,61 @@ import {
   SidebarSeparator,
   useSidebar,
 } from '@/components/ui/sidebar'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { ACCOUNT_LINKS, NAV_ITEMS, type NavItem } from './nav'
+import { NAV_ITEMS, type NavItem } from './nav'
 import { formatCount, useAuctionCounts } from './useAuctionCounts'
 import { SkeletonInline } from '@/components/ui/skeleton'
 import DeedRobotMark from '@/components/deed/DeedRobotMark'
-import { SignOutMenuItem } from './SignOutMenuItem'
 import { OPEN_COMMAND_PALETTE } from './commandPaletteEvents'
 import { useDeedAuth } from '@/lib/deed/deedAuth'
 import { CHAT_HISTORY_CONTAINED, deleteThread, loadThreads, subscribeThreads } from '@/lib/deed/threads'
 import { deleteThreadRemote, listThreads, notifyThreadsChanged, type ThreadSummary } from '@/lib/deed/threadsRemote'
+
+// Clerk-aware footer row: only where auth is on, so the signed-out landing
+// page (rendered without Clerk) does not download the SDK through the sidebar.
+const SignedInFooterRow = dynamic(() => import('./SidebarSignedInRow'))
+
+/**
+ * The Account dropdown loads on first use (PageSpeed pass 3, 2026-10-07).
+ * Until then the row is a plain button with the same look; the first press
+ * (pointer, Enter, Space or ArrowDown) mounts the real Radix menu already
+ * open, and hovering or focusing the row starts the download early.
+ */
+const loadAccountMenu = () => import('./AccountMenu')
+
+function AccountMenuButton(props: React.ComponentProps<typeof SidebarMenuButton>) {
+  return (
+    <SidebarMenuButton tooltip="Account" aria-haspopup="menu" aria-expanded={false} {...props}>
+      <UserRound />
+      <span>Account</span>
+      <ChevronsUpDown className="ml-auto size-4 opacity-60" />
+    </SidebarMenuButton>
+  )
+}
+
+const AccountMenu = dynamic(loadAccountMenu, { ssr: false, loading: () => <AccountMenuButton /> })
+
+function LazyAccountMenu({ authEnabled, onNavigate }: { authEnabled: boolean; onNavigate: () => void }) {
+  const [active, setActive] = useState(false)
+  if (active) return <AccountMenu authEnabled={authEnabled} onNavigate={onNavigate} defaultOpen />
+  return (
+    <AccountMenuButton
+      onPointerEnter={() => void loadAccountMenu()}
+      onFocus={() => void loadAccountMenu()}
+      onPointerDown={(e) => {
+        if (e.button === 0 && !e.ctrlKey) {
+          e.preventDefault()
+          setActive(true)
+        }
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
+          e.preventDefault()
+          setActive(true)
+        }
+      }}
+    />
+  )
+}
 
 /** NAV_ITEMS rendered in the Deed group instead of under Workspace. */
 const DEED_GROUP_KEYS = new Set(['projects'])
@@ -436,68 +474,11 @@ export default function AppSidebar({ deedOpen, onToggleDeed, authEnabled = false
       </SidebarContent>
 
       <SidebarFooter>
-        {authEnabled && (
-          <Show when="signed-in">
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <div className="flex items-center gap-2 px-2 py-1.5">
-                  <UserButton appearance={{ elements: { avatarBox: 'size-8' } }} />
-                  <span className="truncate text-xs text-sidebar-foreground">Signed in</span>
-                </div>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </Show>
-        )}
+        {authEnabled ? <SignedInFooterRow /> : null}
         <SidebarSeparator className="mx-0" />
         <SidebarMenu>
           <SidebarMenuItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuButton tooltip="Account">
-                  <UserRound />
-                  <span>Account</span>
-                  <ChevronsUpDown className="ml-auto size-4 opacity-60" />
-                </SidebarMenuButton>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent side="top" align="start" className="w-52">
-                <DropdownMenuLabel>Account</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {authEnabled ? (
-                  <>
-                    <Show when="signed-out">
-                      <DropdownMenuItem asChild>
-                        <Link href="/sign-in" onClick={closeOnMobile}>Sign in</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link href="/sign-up" onClick={closeOnMobile}>Create account</Link>
-                      </DropdownMenuItem>
-                    </Show>
-                    <Show when="signed-in">
-                      <DropdownMenuItem asChild>
-                        <Link href="/dashboard" onClick={closeOnMobile}>Account dashboard</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <SignOutMenuItem onSelect={closeOnMobile} />
-                    </Show>
-                  </>
-                ) : (
-                  <>
-                    <DropdownMenuItem asChild>
-                      <Link href="/sign-in" onClick={closeOnMobile}>Sign in</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/sign-up" onClick={closeOnMobile}>Create account</Link>
-                    </DropdownMenuItem>
-                  </>
-                )}
-                {ACCOUNT_LINKS.map((link) => (
-                  <DropdownMenuItem key={link.href} asChild>
-                    {/* Worker routes — plain anchors, deliberately. */}
-                    <a href={link.href}>{link.label}</a>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <LazyAccountMenu authEnabled={authEnabled} onNavigate={closeOnMobile} />
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

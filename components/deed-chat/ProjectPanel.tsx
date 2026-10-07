@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Check, ChevronDown, ChevronUp, Download, FileDown, FileText, FolderKanban, Link2, Link2Off, Lock, MessageSquarePlus, Paperclip, Pencil, Trash2, X } from 'lucide-react'
-import Link from 'next/link'
+import Link from '@/components/ui/link'
 
 import { countyLabel } from '@/lib/deed/context'
 import {

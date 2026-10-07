@@ -1,41 +1,14 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { Skeleton } from '@/components/ui/skeleton'
-import {
-  ArrowUp,
-  Check,
-  FolderKanban,
-  LogIn,
-  Mic,
-  MicOff,
-  Paperclip,
-  Plus,
-  ScanLine,
-  Search,
-  Sparkles,
-  Square,
-  Wand2,
-  X,
-} from 'lucide-react'
+import dynamic from 'next/dynamic'
+import { ArrowUp, LogIn, Mic, MicOff, Paperclip, Square, X } from 'lucide-react'
 
-import Link from 'next/link'
+import Link from '@/components/ui/link'
 import { usePathname } from 'next/navigation'
 
 import SlashMenu, { filterCommands, type SlashCommand } from '@/components/deed/SlashMenu'
 import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import { apiUrl } from '@/lib/api'
 import { useDeedAuth } from '@/lib/deed/deedAuth'
 import { listProjects, type ProjectSummary } from '@/lib/deed/projectsRemote'
@@ -44,6 +17,17 @@ import { cn } from '@/lib/utils'
 import type { DeedSendOptions } from './useDeedThread'
 import VoiceStrip from './VoiceStrip'
 import { useDeedVoice } from './useDeedVoice'
+import ComposerPlusButton from './ComposerPlusButton'
+
+// The "+" menu (Radix dropdown) loads on first use - see ComposerPlusMenu.
+// Hovering or focusing the button starts the download; the first press
+// mounts the real menu already open. Until it has loaded, the same button
+// stands in, so nothing moves.
+const loadPlusMenu = () => import('./ComposerPlusMenu')
+const ComposerPlusMenu = dynamic(loadPlusMenu, {
+  ssr: false,
+  loading: () => <ComposerPlusButton menuActive={false} aria-haspopup="menu" aria-expanded={false} />,
+})
 
 const MAX_LEN = 4000
 // Matches the Worker's own MAX_UPLOAD_BYTES (src/worker.js) — checked client
@@ -122,6 +106,7 @@ export default function Composer({
   const [slashIndex, setSlashIndex] = useState(0)
   const [pendingUpload, setPendingUpload] = useState<PendingUpload | null>(null)
   const [publicRecords, setPublicRecords] = useState(false)
+  const [plusMenuActive, setPlusMenuActive] = useState(false)
   const [projectId, setProjectId] = useState<string | null>(initialProjectId)
   const [notice, setNotice] = useState<string | null>(null)
   const [signInGate, setSignInGate] = useState<SignInGate | null>(null)
@@ -424,126 +409,60 @@ export default function Composer({
       />
 
       <div className={cn('flex items-center gap-1', hero ? 'px-3 pb-3' : 'px-2 pb-2')}>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              type="button"
-              className={cn(
-                'relative inline-flex size-11 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground'
-              )}
-              aria-label="Add an attachment or research option"
-            >
-              <Plus className="size-[18px]" aria-hidden />
-              {menuActive ? (
-                <span className="absolute right-2 top-2 size-1.5 rounded-full bg-primary" aria-hidden />
-              ) : null}
-              <span className="sr-only">Add an attachment or research option</span>
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" side="top" className="w-72">
-            <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
-              Documents, screenshots, and research
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              className="min-h-11"
-              onSelect={() =>
-                requireIdentity(() => fileRef.current?.click(), 'Sign in to upload documents')
+        {plusMenuActive ? (
+          <ComposerPlusMenu
+            defaultOpen
+            menuActive={menuActive}
+            publicRecords={publicRecords}
+            onPublicRecordsChange={setPublicRecords}
+            onUpload={() => requireIdentity(() => fileRef.current?.click(), 'Sign in to upload documents')}
+            onPasteScreenshot={() =>
+              requireIdentity(() => {
+                setNotice('Paste your screenshot now (Ctrl/Cmd+V) — it will attach to your next message.')
+                ref.current?.focus()
+              }, 'Sign in to attach a screenshot')
+            }
+            onDeepResearch={() =>
+              requireIdentity(
+                () =>
+                  onSend(
+                    "Run deep research on the property we're discussing and tell me what a SIGNAL$ Property Report would cover.",
+                    { projectId }
+                  ),
+                'Sign in to run Deep Research'
+              )
+            }
+            onSkills={onSkill ? () => onSkill(null) : undefined}
+            projectId={projectId}
+            activeProjectName={activeProject?.name ?? null}
+            signedIn={signedIn}
+            projects={projects}
+            onProjectsOpen={() => {
+              if (projects === null) loadProjects()
+            }}
+            onSelectProject={setProjectId}
+          />
+        ) : (
+          <ComposerPlusButton
+            menuActive={menuActive}
+            aria-haspopup="menu"
+            aria-expanded={false}
+            onPointerEnter={() => void loadPlusMenu()}
+            onFocus={() => void loadPlusMenu()}
+            onPointerDown={(e) => {
+              if (e.button === 0 && !e.ctrlKey) {
+                e.preventDefault()
+                setPlusMenuActive(true)
               }
-            >
-              <Paperclip className="mr-2 size-4" aria-hidden />
-              Upload documents
-              <span className="ml-auto text-xs text-muted-foreground">PDF · CSV · DOCX · XLSX · images</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              className="min-h-11"
-              onSelect={() =>
-                requireIdentity(() => {
-                  setNotice('Paste your screenshot now (Ctrl/Cmd+V) — it will attach to your next message.')
-                  ref.current?.focus()
-                }, 'Sign in to attach a screenshot')
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
+                e.preventDefault()
+                setPlusMenuActive(true)
               }
-            >
-              <ScanLine className="mr-2 size-4" aria-hidden />
-              Paste screenshot
-            </DropdownMenuItem>
-            <DropdownMenuCheckboxItem checked={publicRecords} onCheckedChange={(v) => setPublicRecords(Boolean(v))}>
-              <Search className="mr-2 size-4" aria-hidden />
-              Public-records search
-            </DropdownMenuCheckboxItem>
-            <DropdownMenuItem
-              className="min-h-11"
-              onSelect={() =>
-                requireIdentity(
-                  () =>
-                    onSend(
-                      "Run deep research on the property we're discussing and tell me what a SIGNAL$ Property Report would cover.",
-                      { projectId }
-                    ),
-                  'Sign in to run Deep Research'
-                )
-              }
-            >
-              <Sparkles className="mr-2 size-4" aria-hidden />
-              Deep Research → SIGNAL$
-            </DropdownMenuItem>
-            {onSkill ? (
-              <DropdownMenuItem className="min-h-11" onSelect={() => onSkill(null)}>
-                <Wand2 className="mr-2 size-4" aria-hidden />
-                Skills
-              </DropdownMenuItem>
-            ) : null}
-
-            <DropdownMenuSeparator />
-            <DropdownMenuSub onOpenChange={(open) => open && projects === null && loadProjects()}>
-              <DropdownMenuSubTrigger>
-                <FolderKanban className="mr-2 size-4" aria-hidden />
-                {projectId ? `Project: ${activeProject?.name ?? 'scoped'}` : 'Project: none'}
-              </DropdownMenuSubTrigger>
-              <DropdownMenuSubContent className="w-72">
-                {!signedIn ? (
-                  <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
-                    Sign in to keep projects — one per property, with its files and this chat.
-                  </DropdownMenuLabel>
-                ) : projects === null ? (
-                  <div role="status" aria-busy="true" className="space-y-2 px-2 py-2">
-                    <span className="sr-only">Loading your projects…</span>
-                    <Skeleton className="h-3 w-40" aria-hidden="true" />
-                    <Skeleton className="h-3 w-28" aria-hidden="true" />
-                  </div>
-                ) : (
-                  <>
-                    {projects.length === 0 ? (
-                      <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">No projects yet.</DropdownMenuLabel>
-                    ) : null}
-                    {projects.slice(0, 12).map((p) => (
-                      <DropdownMenuItem className="min-h-11" key={p.id} onSelect={() => setProjectId(p.id)}>
-                        {p.id === projectId ? <Check className="mr-2 size-4" aria-hidden /> : <FolderKanban className="mr-2 size-4" aria-hidden />}
-                        <span className="truncate">{p.name}</span>
-                      </DropdownMenuItem>
-                    ))}
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem className="min-h-11" asChild>
-                      <Link href="/chat#projects">
-                        <Plus className="mr-2 size-4" aria-hidden />
-                        New project
-                      </Link>
-                    </DropdownMenuItem>
-                  </>
-                )}
-                {projectId ? (
-                  <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem className="min-h-11" onSelect={() => setProjectId(null)}>
-                      <X className="mr-2 size-4" aria-hidden />
-                      Clear project scope
-                    </DropdownMenuItem>
-                  </>
-                ) : null}
-              </DropdownMenuSubContent>
-            </DropdownMenuSub>
-          </DropdownMenuContent>
-        </DropdownMenu>
+            }}
+          />
+        )}
         <input
           ref={fileRef}
           type="file"

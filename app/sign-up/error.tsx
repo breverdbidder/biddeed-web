@@ -1,6 +1,6 @@
 'use client'
 
-import Link from 'next/link'
+import Link from '@/components/ui/link'
 import { LIGHT as C } from '@/lib/design-tokens'
 
 // Segment boundary for the auth routes. The root boundary (app/error.tsx)

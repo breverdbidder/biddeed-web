@@ -10,20 +10,15 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet"
 import { Skeleton } from "@/components/ui/skeleton"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+
+// Loaded on first use, not with every page (PageSpeed pass 3, 2026-10-07):
+// the phone drawer when it first opens, the icon-rail tooltips when the rail
+// first collapses. Both are closed/hidden on every page load.
+const SidebarSheet = React.lazy(() => import("@/components/ui/sidebar-sheet"))
+const loadSidebarTooltip = () => import("@/components/ui/sidebar-tooltip")
+const SidebarButtonTooltip = React.lazy(loadSidebarTooltip)
+type SidebarTooltipProps = React.ComponentProps<typeof SidebarButtonTooltip>["tooltip"]
 
 // Upstream shadcn persists the expanded/collapsed state in a `sidebar_state`
 // cookie. It is removed here on purpose: this shell renders inside the
@@ -44,6 +39,9 @@ type SidebarContextProps = {
   setOpenMobile: (open: boolean) => void
   isMobile: boolean
   toggleSidebar: () => void
+  /** True once the rail has collapsed on a desktop viewport: from then on the
+   * menu buttons render their (lazily loaded) icon-rail tooltips. */
+  tooltipsReady: boolean
 }
 
 const SidebarContext = React.createContext<SidebarContextProps | null>(null)
@@ -140,6 +138,15 @@ const SidebarProvider = React.forwardRef<
     // This makes it easier to style the sidebar with Tailwind classes.
     const state = open ? "expanded" : "collapsed"
 
+    // Tooltips only ever show on the collapsed desktop rail. Their code loads
+    // the first time the rail collapses and they stay mounted after that, so
+    // later toggles do not remount the menu buttons.
+    const [tooltipsReady, setTooltipsReady] = React.useState(false)
+    React.useEffect(() => {
+      if (tooltipsReady || state !== "collapsed" || isMobile) return
+      void loadSidebarTooltip().then(() => setTooltipsReady(true))
+    }, [tooltipsReady, state, isMobile])
+
     const contextValue = React.useMemo<SidebarContextProps>(
       () => ({
         state,
@@ -149,13 +156,13 @@ const SidebarProvider = React.forwardRef<
         openMobile,
         setOpenMobile,
         toggleSidebar,
+        tooltipsReady,
       }),
-      [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar]
+      [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar, tooltipsReady]
     )
 
     return (
       <SidebarContext.Provider value={contextValue}>
-        <TooltipProvider delayDuration={0}>
           <div
             style={
               {
@@ -173,7 +180,6 @@ const SidebarProvider = React.forwardRef<
           >
             {children}
           </div>
-        </TooltipProvider>
       </SidebarContext.Provider>
     )
   }
@@ -200,6 +206,10 @@ const Sidebar = React.forwardRef<
     ref
   ) => {
     const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
+    const [mobileDrawerUsed, setMobileDrawerUsed] = React.useState(false)
+    React.useEffect(() => {
+      if (openMobile) setMobileDrawerUsed(true)
+    }, [openMobile])
 
     if (collapsible === "none") {
       return (
@@ -217,26 +227,16 @@ const Sidebar = React.forwardRef<
     }
 
     if (isMobile) {
+      // Closed drawer = nothing rendered (as with the Radix Sheet before), and
+      // its code is fetched on the first open. Kept mounted after that so the
+      // close animation and later opens are instant.
+      if (!openMobile && !mobileDrawerUsed) return null
       return (
-        <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
-          <SheetContent
-            data-sidebar="sidebar"
-            data-mobile="true"
-            className="w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
-            style={
-              {
-                "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
-              } as React.CSSProperties
-            }
-            side={side}
-          >
-            <SheetHeader className="sr-only">
-              <SheetTitle>Sidebar</SheetTitle>
-              <SheetDescription>Displays the mobile sidebar.</SheetDescription>
-            </SheetHeader>
-            <div className="flex h-full w-full flex-col">{children}</div>
-          </SheetContent>
-        </Sheet>
+        <React.Suspense fallback={null}>
+          <SidebarSheet open={openMobile} onOpenChange={setOpenMobile} side={side} width={SIDEBAR_WIDTH_MOBILE}>
+            {children}
+          </SidebarSheet>
+        </React.Suspense>
       )
     }
 
@@ -566,7 +566,7 @@ const SidebarMenuButton = React.forwardRef<
   React.ComponentProps<"button"> & {
     asChild?: boolean
     isActive?: boolean
-    tooltip?: string | React.ComponentProps<typeof TooltipContent>
+    tooltip?: string | SidebarTooltipProps
   } & VariantProps<typeof sidebarMenuButtonVariants>
 >(
   (
@@ -582,7 +582,7 @@ const SidebarMenuButton = React.forwardRef<
     ref
   ) => {
     const Comp = asChild ? Slot : "button"
-    const { isMobile, state } = useSidebar()
+    const { isMobile, state, tooltipsReady } = useSidebar()
 
     const button = (
       <Comp
@@ -595,7 +595,9 @@ const SidebarMenuButton = React.forwardRef<
       />
     )
 
-    if (!tooltip) {
+    // No tooltip until the rail has collapsed once (see tooltipsReady): on an
+    // expanded rail or in the phone drawer the tooltip is hidden anyway.
+    if (!tooltip || !tooltipsReady) {
       return button
     }
 
@@ -606,15 +608,11 @@ const SidebarMenuButton = React.forwardRef<
     }
 
     return (
-      <Tooltip>
-        <TooltipTrigger asChild>{button}</TooltipTrigger>
-        <TooltipContent
-          side="right"
-          align="center"
-          hidden={state !== "collapsed" || isMobile}
-          {...tooltip}
-        />
-      </Tooltip>
+      <React.Suspense fallback={button}>
+        <SidebarButtonTooltip tooltip={tooltip} hidden={state !== "collapsed" || isMobile}>
+          {button}
+        </SidebarButtonTooltip>
+      </React.Suspense>
     )
   }
 )

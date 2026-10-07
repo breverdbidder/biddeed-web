@@ -4,10 +4,6 @@ import { useEffect, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { ArrowRight } from 'lucide-react'
 import { trackHeatmapEvent } from '@/lib/analytics/track'
-import acsData from '@/lib/heatmap/data/fl-county-acs-2024.json'
-import type { CountyAcsDataset } from '@/lib/heatmap/types'
-
-const ACS = acsData as unknown as CountyAcsDataset
 
 const HomepageMapInteractive = dynamic(() => import('@/components/heatmap/HomepageMapInteractive'), {
   ssr: false,
@@ -32,8 +28,20 @@ const HomepageMapInteractive = dynamic(() => import('@/components/heatmap/Homepa
  * Total Blocking Time 5,840 ms in PageSpeed Insights (desktop score 64);
  * blocking that one chunk took the same run to 98. The placeholder below
  * holds the exact height, so loading on arrival shifts nothing.
+ *
+ * The census figures arrive as props from the server (HomeBelowFold), so the
+ * 18 KB county dataset is no longer bundled into the landing page's script
+ * just to print three values (PageSpeed pass 3, 2026-10-07).
  */
-export default function HomepageMapModule() {
+export default function HomepageMapModule({
+  countyCount,
+  vintageLabel,
+  sourceTable,
+}: {
+  countyCount: number
+  vintageLabel: string
+  sourceTable: string
+}) {
   const [visible, setVisible] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -70,9 +78,9 @@ export default function HomepageMapModule() {
         </a>
       </div>
       <p className="mt-1.5 text-base text-muted-foreground">
-        Every pin is a live below-market opportunity with its own <a href="/maps" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80 -my-2 py-2">deal page</a>: 2,911 upcoming auctions across {ACS.counties.length} Florida
+        Every pin is a live below-market opportunity with its own <a href="/maps" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80 -my-2 py-2">deal page</a>: 2,911 upcoming auctions across {countyCount} Florida
         counties, over a map of where each county&apos;s market is heading.{' '}
-        <span className="text-muted-foreground/70">{ACS.vintage_label}, {ACS.tables['B25077']}.</span>
+        <span className="text-muted-foreground/70">{vintageLabel}, {sourceTable}.</span>
       </p>
 
       <div className="mt-4">

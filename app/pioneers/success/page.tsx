@@ -1,7 +1,7 @@
 'use client'
 
 import { Suspense, useEffect, useState } from 'react'
-import Link from 'next/link'
+import Link from '@/components/ui/link'
 import { useSearchParams } from 'next/navigation'
 import { track } from '@/lib/analytics/funnel'
 

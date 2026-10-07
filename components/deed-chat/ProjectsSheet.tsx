@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { FolderKanban, LogIn, MessageSquareText, Plus } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
-import Link from 'next/link'
+import Link from '@/components/ui/link'
 
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { FL_COUNTIES } from '@/lib/counties'

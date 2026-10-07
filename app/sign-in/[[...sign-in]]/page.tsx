@@ -7,7 +7,7 @@ import { isClerkHostAuthorized } from '@/lib/clerk-host'
 import SignedInRedirect from '@/components/auth/SignedInRedirect'
 import AuthCardFallback from '@/components/auth/AuthCardFallback'
 import { AUTH_CARD_COPY } from '@/lib/auth/clerk-copy'
-import Link from 'next/link'
+import Link from '@/components/ui/link'
 import { LIGHT as C } from '@/lib/design-tokens'
 import { safeParcelReturn } from '@/lib/parcel-prefill'
 

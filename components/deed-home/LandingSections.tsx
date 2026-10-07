@@ -1,9 +1,7 @@
-'use client'
-
 import { ArrowRight, Check, FileText, MessageSquareText, Search, Target } from 'lucide-react'
 
-import { formatCount, useAuctionCounts } from '@/components/shell/useAuctionCounts'
 import { cn } from '@/lib/utils'
+import PricingPromptButton from './PricingPromptButton'
 
 /**
  * Everything below the conversation on the empty home. Supporting evidence,
@@ -13,6 +11,14 @@ import { cn } from '@/lib/utils'
  * county pages) and stay plain <a> elements on purpose — a <Link> would try to
  * resolve them inside this app's router and paint a client-side 404 over a
  * page that works at the edge.
+ *
+ * Server-rendered (PageSpeed pass 3, 2026-10-07): no 'use client', no hooks,
+ * no handlers. The home page passes these sections to DeedHome as finished
+ * HTML, so their code is not downloaded or run on the visitor's phone. The
+ * two interactive pieces are client islands: TrustStrip (live counts, in the
+ * hero) and PricingPromptButton. Client components that only need PLANS or
+ * the button classes (pricing, checkout, the map gate) still import this
+ * module as before.
  */
 export const W = {
   buyReport: '/buy-report',
@@ -54,32 +60,6 @@ function H2({ children, className }: { children: React.ReactNode; className?: st
     <h2 className={cn('font-display mt-2 text-[1.9rem] font-medium leading-[1.15] tracking-tight text-foreground sm:text-4xl', className)}>
       {children}
     </h2>
-  )
-}
-
-/* ── Live counts ─────────────────────────────────────────────────────────── */
-
-export function TrustStrip() {
-  const c = useAuctionCounts()
-  const items = [
-    { value: formatCount(c.upcoming), label: 'upcoming sales', title: 'Live-scoped upcoming auctions across Florida, from the shared auction summary.' },
-    { value: formatCount(c.counties), label: 'counties with sales', title: 'Counties with at least one upcoming sale on the calendar right now.' },
-    { value: formatCount(c.total), label: 'auction records', title: 'Every foreclosure and tax deed auction record BidDeed.AI has captured to date.' },
-  ]
-  return (
-    <dl className="mx-auto flex max-w-3xl flex-wrap items-center justify-center gap-x-8 gap-y-3 text-center">
-      {/* dt before dd in the DOM (axe definition-list / WCAG 1.3.1); flex-row-reverse keeps the number-first reading order on screen. */}
-      {items.map((it) => (
-        <div key={it.label} className="flex flex-row-reverse items-baseline gap-2" title={it.title}>
-          <dt className="text-sm text-muted-foreground">{it.label}</dt>
-          <dd className={cn('tabular text-lg font-semibold text-foreground', c.loading && 'animate-pulse')}>{it.value}</dd>
-        </div>
-      ))}
-      <div className="flex flex-row-reverse items-baseline gap-2">
-        <dt className="text-sm text-muted-foreground">Florida counties covered</dt>
-        <dd className="text-lg font-semibold text-foreground">67</dd>
-      </div>
-    </dl>
   )
 }
 
@@ -479,7 +459,7 @@ export const PLANS: Plan[] = [
   },
 ]
 
-export function Pricing({ onPrompt }: { onPrompt: (p: string) => void }) {
+export function Pricing() {
   return (
     <section id="pricing" className="mx-auto max-w-6xl px-4 sm:px-6">
       <div className="max-w-2xl">
@@ -534,9 +514,9 @@ export function Pricing({ onPrompt }: { onPrompt: (p: string) => void }) {
                 {p.cta.label}
               </a>
             ) : p.cta.prompt ? (
-              <button type="button" onClick={() => p.cta.prompt && onPrompt(p.cta.prompt)} className={cn(BTN_QUIET, 'mt-6 w-full')}>
+              <PricingPromptButton prompt={p.cta.prompt} className={cn(BTN_QUIET, 'mt-6 w-full')}>
                 {p.cta.label}
-              </button>
+              </PricingPromptButton>
             ) : (
               <span aria-disabled="true" className={cn(BTN_DISABLED, 'mt-6 w-full')}>
                 {p.cta.label}

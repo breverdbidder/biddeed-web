@@ -1,6 +1,7 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
+import { isLeanHomeRequest, LEAN_HOME_REQUEST_HEADER, LEAN_HOME_RESPONSE_HEADER } from '@/lib/perf/lean-home'
 
 // Clerk turns on only when BOTH halves of the credential pair are present.
 //
@@ -520,7 +521,28 @@ function withNonceRequestHeaders(req: NextRequest, nonce: string): Headers {
   for (const [name, value] of Object.entries(buildCspHeaders(nonce))) {
     headers.set(name, value)
   }
+  // Lean home (lib/perf/lean-home.ts): decided here, never trusted from the
+  // client - an incoming copy of the header is always dropped first.
+  headers.delete(LEAN_HOME_REQUEST_HEADER)
+  if (leanHome(req)) headers.set(LEAN_HOME_REQUEST_HEADER, '1')
   return headers
+}
+
+/** The signed-out landing page, rendered without Clerk (lib/perf/lean-home.ts). */
+function leanHome(req: NextRequest): boolean {
+  return isLeanHomeRequest({
+    method: req.method,
+    pathname: req.nextUrl.pathname,
+    search: req.nextUrl.searchParams,
+    headers: req.headers,
+    cookies: req.cookies.getAll(),
+  })
+}
+
+/** Marks a lean-home response so the router Worker may edge-cache it. */
+function markLeanHome(req: NextRequest, response: NextResponse): NextResponse {
+  if (leanHome(req)) response.headers.set(LEAN_HOME_RESPONSE_HEADER, '1')
+  return response
 }
 
 function generateNonce(): string {
@@ -538,7 +560,7 @@ async function passthroughMiddleware(req: NextRequest) {
   const response = NextResponse.next({
     request: { headers: withNonceRequestHeaders(req, nonce) },
   })
-  return applySecurityHeaders(response, nonce)
+  return markLeanHome(req, applySecurityHeaders(response, nonce))
 }
 
 export default CLERK_ENABLED
@@ -561,7 +583,7 @@ export default CLERK_ENABLED
       const response = NextResponse.next({
         request: { headers: withNonceRequestHeaders(req, nonce) },
       })
-      return applySecurityHeaders(response, nonce)
+      return markLeanHome(req, applySecurityHeaders(response, nonce))
     })
   : passthroughMiddleware
 

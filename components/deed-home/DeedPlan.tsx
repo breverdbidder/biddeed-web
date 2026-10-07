@@ -1,6 +1,6 @@
 'use client'
 
-import Link from 'next/link'
+import Link from '@/components/ui/link'
 import { AlertTriangle, ArrowUpRight, CheckCircle2, CircleDashed, FileText, Gavel, Landmark, MinusCircle, ShieldCheck, Sparkles, XCircle } from 'lucide-react'
 
 import type { DeedPlanCandidate, DeedPlanResult, PlanSet } from '@/lib/deed/plan'

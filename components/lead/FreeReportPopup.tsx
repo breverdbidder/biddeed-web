@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import dynamic from 'next/dynamic'
 import { usePathname } from 'next/navigation'
 import * as Dialog from '@radix-ui/react-dialog'
 import { ArrowRight, Check, X } from 'lucide-react'
@@ -8,7 +9,12 @@ import { ArrowRight, Check, X } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { SAMPLE_REPORT_PATH, track } from '@/lib/analytics/funnel'
-import PopupAccountStep from '@/components/lead/PopupAccountStep'
+
+// The inline account step needs Clerk (useClerk). Loaded only when it renders
+// - inside ClerkProvider, after the email step - so a popup mounted without
+// Clerk (the signed-out landing page, PageSpeed pass 3) never pulls the Clerk
+// SDK in with it.
+const PopupAccountStep = dynamic(() => import('@/components/lead/PopupAccountStep'), { ssr: false })
 
 /**
  * Free-report lead popup (issue #181 scope add, 2026-09-23): a popup with a
@@ -78,6 +84,7 @@ export default function FreeReportPopup({ signedIn, accountStep = false }: { sig
   const [error, setError] = useState('')
   const [done, setDone] = useState(false)
   const shown = useRef(false)
+  const initialPath = useRef(pathname)
 
   const show = useCallback(
     (trigger: Trigger) => {
@@ -105,7 +112,11 @@ export default function FreeReportPopup({ signedIn, accountStep = false }: { sig
     }
 
     let timer: ReturnType<typeof setTimeout>
-    const dwell = DWELL_MS[pathname] ?? DEFAULT_DWELL_MS
+    // The dwell counts from page start, not from this component mounting: it
+    // mounts on first interaction or a few seconds after load (PageSpeed pass
+    // 3), and a client-side navigation re-arms it from that point instead.
+    const sinceStart = pathname === initialPath.current ? performance.now() : 0
+    const dwell = Math.max(1000, (DWELL_MS[pathname] ?? DEFAULT_DWELL_MS) - sinceStart)
     const onTimer = () => {
       // Visitor is mid-form (e.g. the $25 checkout email): try again later.
       if (!attempt('timer')) timer = setTimeout(onTimer, 10000)

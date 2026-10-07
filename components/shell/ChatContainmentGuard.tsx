@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
-import { useAuth } from '@clerk/nextjs'
+import { useEffect } from 'react'
+import dynamic from 'next/dynamic'
 
 import { CHAT_HISTORY_CONTAINED, clearThreads } from '@/lib/deed/threads'
 
@@ -12,7 +12,7 @@ import { CHAT_HISTORY_CONTAINED, clearThreads } from '@/lib/deed/threads'
  */
 const LEGACY_IDENTITY_KEYS = ['bd_chat_token', 'bd_chat_email']
 
-function clearLegacyChatData() {
+export function clearLegacyChatData() {
   clearThreads()
   try {
     for (const key of LEGACY_IDENTITY_KEYS) localStorage.removeItem(key)
@@ -35,23 +35,15 @@ function clearLegacyChatData() {
  * Clerk is actually mounted (see ClerkContainmentWatcher below) — a bare
  * useAuth() call throws outside <ClerkProvider>, which ConditionalClerkProvider
  * skips entirely on unauthorized hosts or while auth is staged off.
+ * The watcher is its own module, loaded only when auth is on, so the Clerk
+ * SDK is not downloaded on pages that render without Clerk.
  */
+const ClerkContainmentWatcher = dynamic(() => import('./ClerkContainmentWatcher'), { ssr: false })
+
 export default function ChatContainmentGuard({ authEnabled = false }: { authEnabled?: boolean }) {
   useEffect(() => {
     if (CHAT_HISTORY_CONTAINED) clearLegacyChatData()
   }, [])
 
   return authEnabled ? <ClerkContainmentWatcher /> : null
-}
-
-function ClerkContainmentWatcher() {
-  const { isSignedIn } = useAuth()
-  const prev = useRef(isSignedIn)
-
-  useEffect(() => {
-    if (CHAT_HISTORY_CONTAINED && prev.current !== isSignedIn) clearLegacyChatData()
-    prev.current = isSignedIn
-  }, [isSignedIn])
-
-  return null
 }

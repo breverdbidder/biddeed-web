@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import Link from 'next/link'
+import Link from '@/components/ui/link'
 import { ArrowRight, Check, CircleCheck, CircleX, Copy, Lock, RotateCcw, TriangleAlert } from 'lucide-react'
 
 import {

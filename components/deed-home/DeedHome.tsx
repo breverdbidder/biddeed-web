@@ -8,9 +8,9 @@ import DeedRobotMark from '@/components/deed/DeedRobotMark'
 import { cn } from '@/lib/utils'
 import Composer from './Composer'
 import { DEED_SEEDS } from './deedSeeds'
-import HomepageMapModule from './HomepageMapModule'
-import { FieldRoutes, Footer, Founder, HowItWorks, Pricing, Proof, RehabProjects, TrustStrip } from './LandingSections'
+import { DEED_PROMPT_EVENT } from './deedPromptEvent'
 import PromptStarters from './PromptStarters'
+import TrustStrip from './TrustStrip'
 import { useDeedThread, type DeedSendOptions } from './useDeedThread'
 
 // The thread view carries the markdown stack (react-markdown + remark-gfm +
@@ -32,8 +32,12 @@ const ThreadView = dynamic(() => import('./ThreadView'))
  * /chat (app/chat, PARITY CP-2) is the same conversation without the
  * marketing below the fold — same engine, same composer, same thread store.
  * The Cloudflare Worker in front of this app proxies both paths to it.
+ *
+ * `below` is that marketing: the map module and the evidence sections,
+ * rendered on the server by app/page.tsx (HomeBelowFold) and passed in as
+ * finished HTML, so none of it ships as client code (PageSpeed pass 3).
  */
-export default function DeedHome() {
+export default function DeedHome({ below }: { below?: React.ReactNode }) {
   const router = useRouter()
   const params = useSearchParams()
   const threadId = params.get('c')
@@ -72,6 +76,17 @@ export default function DeedHome() {
     },
     [send]
   )
+
+  // Plan-card "ask Deed" buttons live in the server-rendered sections below
+  // the fold and hand their prompt over as an event (deedPromptEvent.ts).
+  useEffect(() => {
+    const onPrompt = (e: Event) => {
+      const prompt = (e as CustomEvent<string>).detail
+      if (typeof prompt === 'string' && prompt) onSend(prompt)
+    }
+    window.addEventListener(DEED_PROMPT_EVENT, onPrompt)
+    return () => window.removeEventListener(DEED_PROMPT_EVENT, onPrompt)
+  }, [onSend])
 
   const streamingNow = status === 'streaming'
   const inThread = Boolean(thread && thread.turns.length > 0)
@@ -150,23 +165,7 @@ export default function DeedHome() {
         </div>
       </section>
 
-      {/* ── Florida Auction Intelligence Map (issue #75) ─────────────────
-          Below the hero, before the proof/story sections — the hero itself
-          is untouched, no full control stack lives here (Amendment 2). */}
-      <div className="pt-10 sm:pt-14">
-        <HomepageMapModule />
-      </div>
-
-      {/* ── Evidence ──────────────────────────────────────────────────── */}
-      <div className="space-y-20 pb-20 pt-10 sm:space-y-28 sm:pt-14">
-        <Proof />
-        <Founder />
-        <HowItWorks />
-        <FieldRoutes />
-        <RehabProjects />
-        <Pricing onPrompt={(p) => onSend(p)} />
-      </div>
-      <Footer />
+      {below}
     </div>
   )
 }

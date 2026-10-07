@@ -1,82 +1,25 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import { ClerkProvider } from '@clerk/nextjs'
-import { useTheme } from '@/lib/theme-context'
-import { palette } from '@/lib/design-tokens'
-import PostHogIdentify from '@/components/analytics/PostHogIdentify'
-import { useIdleMount } from '@/lib/perf/idle'
-import { AUTH_CARD_COPY } from '@/lib/auth/clerk-copy'
+import { useEngagedMount } from '@/lib/perf/idle'
 
-// Ported from zonewise-web 2026-08-20 with one deliberate deviation: no
-// `@clerk/themes` import. Clerk's appearance API needs real colour strings (it
-// derives hover/focus shades from colorPrimary), so the values come from the JS
-// mirror of the token file (lib/design-tokens.ts); the `elements` overrides use
-// the same Tailwind token classes as the rest of the app.
 const CLERK_KEY = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
 
 // The free-report popup (issue #181) opens after a 12 s dwell, 45% scroll or
 // exit intent - never at first paint - so its code (Radix Dialog, the account
-// step, the email-code flow) loads once the page is idle instead of in the
-// first-load bundle (PageSpeed pass, 2026-10-07). Its own timers start when it
-// mounts, so the dwell now counts from the idle mount, a second or two later.
+// step, the email-code flow) is not in the first-load bundle. Pass 3
+// (2026-10-07): it mounts on the visitor's first interaction, or 5 s after
+// load, instead of at the first idle slot after load - which still put ~17 KiB
+// of script into the page-load window. The dwell still counts from page start
+// (FreeReportPopup uses performance.now()), so a visitor sees no difference.
 const FreeReportPopup = dynamic(() => import('@/components/lead/FreeReportPopup'), { ssr: false })
-const FreeReportPopupAuthGate = dynamic(() => import('@/components/lead/FreeReportPopupAuthGate'), { ssr: false })
 
-function clerkAppearance(theme: 'light' | 'dark') {
-  const c = palette(theme)
-  return {
-    variables: {
-      colorBackground: c.card,
-      colorText: c.ink,
-      colorTextSecondary: c.navy,
-      colorInputBackground: c.background,
-      colorInputText: c.ink,
-      colorPrimary: c.brand,
-      colorDanger: c.brand,
-      colorSuccess: c.brandHover,
-      colorWarning: c.brand,
-      fontFamily: 'Inter, system-ui, sans-serif',
-    },
-    elements: {
-      // min-h-11: Clerk's own inputs/buttons/links render at their stock ~32px
-      // (buttons) / ~32px (inputs) / ~18px (footer link) heights — under the 44px tap-target
-      // floor the rest of the app ships. inline-flex+items-center on the
-      // footer link for the same reason the prose links elsewhere in this
-      // app needed it: a bare line-height bump does not inflate an inline
-      // element's own bounding box.
-      formButtonPrimary: 'min-h-11 bg-primary hover:bg-primary-hover text-primary-foreground font-semibold',
-      card: 'shadow-lg border border-border bg-card',
-      headerTitle: 'text-foreground',
-      headerSubtitle: 'text-base text-muted-foreground',
-      socialButtonsBlockButton: 'min-h-11 border-border text-foreground hover:bg-secondary',
-      formFieldLabel: 'text-foreground',
-      formFieldInput:
-        'min-h-11 bg-background border-border text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary',
-      // P1-9: the password-reveal toggle renders ~26px tall; give the icon
-      // button a 44px box without visually enlarging the glyph.
-      formFieldInputShowPasswordButton: 'min-h-11 min-w-[44px] text-muted-foreground hover:text-foreground',
-      formFieldErrorText: 'text-primary',
-      formFieldSuccessText: 'text-primary',
-      footerActionText: 'text-muted-foreground',
-      footerActionLink: 'inline-flex min-h-11 items-center text-primary hover:text-primary-hover',
-      identityPreviewText: 'text-foreground',
-      identityPreviewEditButton: 'text-primary hover:text-primary-hover',
-      alert: 'border-border bg-secondary text-foreground',
-      alertText: 'text-foreground',
-      userButtonAvatarBox: 'w-7 h-7',
-    },
-  }
-}
-
-// The shared dev instance is named "My Application" in Clerk's dashboard, so
-// the stock <SignIn> card renders "Sign in to My Application". Renaming the
-// instance would mis-title the OTHER property (zonewise shares this pool), so
-// each site overrides the strings locally instead.
-const clerkLocalization = {
-  signIn: { start: { ...AUTH_CARD_COPY.signIn } },
-  signUp: { start: { ...AUTH_CARD_COPY.signUp } },
-}
+// Everything that touches Clerk - ClerkProvider, its appearance, the PostHog
+// identity tie-in and the Clerk-aware popup - lives in ClerkAuthShell and is
+// loaded only on the auth branch below. Without auth (no key pair, an
+// unrecognised host, or the signed-out landing page - see layout.tsx) the
+// Clerk SDK is never downloaded (PageSpeed pass 3, 2026-10-07).
+const ClerkAuthShell = dynamic(() => import('./ClerkAuthShell'))
 
 export default function ConditionalClerkProvider({
   children,
@@ -108,8 +51,7 @@ export default function ConditionalClerkProvider({
    */
   nonce?: string
 }) {
-  const { theme } = useTheme()
-  const popupReady = useIdleMount(3000)
+  const popupReady = useEngagedMount()
 
   // No key -> render children without ClerkProvider. Keeps the app fully
   // functional in passthrough mode and mirrors middleware.ts, where
@@ -124,14 +66,5 @@ export default function ConditionalClerkProvider({
     )
   }
 
-  return (
-    <ClerkProvider appearance={clerkAppearance(theme)} localization={clerkLocalization} nonce={nonce}>
-      {/* Inside the provider so useAuth/useUser resolve; ties the Clerk user to
-          their PostHog identity. Renders null. */}
-      <PostHogIdentify />
-      {children}
-      {/* Free-report lead popup for signed-out visitors only (issue #181). */}
-      {popupReady ? <FreeReportPopupAuthGate /> : null}
-    </ClerkProvider>
-  )
+  return <ClerkAuthShell nonce={nonce}>{children}</ClerkAuthShell>
 }

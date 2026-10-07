@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import Link from 'next/link'
+import Link from '@/components/ui/link'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { AlertTriangle, ArrowUpRight, Copy, Check } from 'lucide-react'

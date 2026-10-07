@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import Link from '@/components/ui/link'
 
 // Same calm visual language as app/error.tsx (G-STATES item 2, #20184) —
 // this is a routine wrong-URL, not a system failure, so no retry logic.

@@ -1,6 +1,6 @@
 'use client'
 
-import Link from 'next/link'
+import Link from '@/components/ui/link'
 import { ArrowUpRight, CalendarDays, Gavel, Landmark } from 'lucide-react'
 
 import { formatCountyLabel } from '@/lib/counties'

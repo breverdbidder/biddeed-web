@@ -8,6 +8,8 @@ import PostHogAnalytics from '@/components/analytics/PostHogAnalytics'
 import FunnelClickTracker from '@/components/analytics/FunnelClickTracker'
 import ConditionalClerkProvider from '@/components/ConditionalClerkProvider'
 import SkipToContent from '@/components/shell/SkipToContent'
+import LeanNavGuard from '@/components/shell/LeanNavGuard'
+import { LEAN_HOME_REQUEST_HEADER } from '@/lib/perf/lean-home'
 import { isClerkHostAuthorized } from '@/lib/clerk-host'
 import { ThemeProvider } from '@/lib/theme-context'
 import { LIGHT as C } from '@/lib/design-tokens'
@@ -127,9 +129,17 @@ export default async function RootLayout({
     h.get('x-biddeed-canonical-host')
   )
   const clerkRuntimeEnabled = process.env.CLERK_RUNTIME_ENABLED === 'true'
+  // Lean home (lib/perf/lean-home.ts, PageSpeed pass 3): middleware marks a
+  // document GET of '/' with no Clerk session. That one render runs with auth
+  // off - the same path as a host without Clerk - so the signed-out landing
+  // page never downloads or boots the Clerk SDK. LeanNavGuard turns every
+  // navigation away from '/' into a full page load, which brings Clerk back
+  // with the normal layout wherever it is needed.
+  const leanHome = h.get(LEAN_HOME_REQUEST_HEADER) === '1'
   const clerkAuthEnabled = clerkRuntimeEnabled &&
     Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && process.env.CLERK_SECRET_KEY) &&
-    clerkHostAuthorized
+    clerkHostAuthorized &&
+    !leanHome
   // Light mode is the BidDeed house-brand default. The ThemeProvider keeps
   // the user toggle available, while this server attribute prevents a dark
   // first paint before hydration.
@@ -141,6 +151,8 @@ export default async function RootLayout({
       style={{ background: 'hsl(var(--background))', color: 'hsl(var(--foreground))' }}
     >
       <body>
+        {/* Lean home only: must render before the shell - see LeanNavGuard. */}
+        {leanHome ? <LeanNavGuard /> : null}
         {/*
           First focusable element in the document (WCAG 2.4.1). Must render
           before the shell so it is the first tab stop on every route, not

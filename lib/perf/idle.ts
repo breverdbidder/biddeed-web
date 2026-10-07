@@ -62,3 +62,54 @@ export function useIdleMount(timeout = 2000): boolean {
   useEffect(() => onIdle(() => setReady(true), timeout), [timeout])
   return ready
 }
+
+const ENGAGE_EVENTS = ['pointerdown', 'keydown', 'touchstart', 'scroll', 'mousemove'] as const
+
+/**
+ * Run `cb` on the visitor's first interaction (pointer, key, touch, scroll or
+ * mouse move), or `fallbackMs` after the load event plus an idle slot,
+ * whichever comes first (PageSpeed pass 3, 2026-10-07). For code that only
+ * matters once someone is actually using the page - the lead popup's dwell /
+ * scroll / exit-intent triggers - so it stays out of the page-load window
+ * entirely instead of running right after it. Returns a cancel function.
+ */
+export function onEngaged(cb: () => void, fallbackMs = 5000): () => void {
+  if (typeof window === 'undefined') return () => {}
+  let done = false
+  let timer: ReturnType<typeof setTimeout> | undefined
+  let cancelIdle: (() => void) | undefined
+
+  const cleanup = () => {
+    for (const name of ENGAGE_EVENTS) window.removeEventListener(name, fire, true)
+    window.removeEventListener('load', arm)
+    if (timer !== undefined) clearTimeout(timer)
+    cancelIdle?.()
+  }
+  function fire() {
+    if (done) return
+    done = true
+    cleanup()
+    cb()
+  }
+  function arm() {
+    timer = setTimeout(() => {
+      cancelIdle = onIdle(fire, 2000)
+    }, fallbackMs)
+  }
+
+  for (const name of ENGAGE_EVENTS) window.addEventListener(name, fire, { capture: true, passive: true })
+  if (document.readyState === 'complete') arm()
+  else window.addEventListener('load', arm, { once: true })
+
+  return () => {
+    done = true
+    cleanup()
+  }
+}
+
+/** True once the visitor has interacted, or `fallbackMs` after load. */
+export function useEngagedMount(fallbackMs = 5000): boolean {
+  const [ready, setReady] = useState(false)
+  useEffect(() => onEngaged(() => setReady(true), fallbackMs), [fallbackMs])
+  return ready
+}
