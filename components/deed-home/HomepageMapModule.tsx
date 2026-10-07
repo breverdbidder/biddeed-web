@@ -23,6 +23,15 @@ const HomepageMapInteractive = dynamic(() => import('@/components/heatmap/Homepa
  * statewide median home value are real ACS figures, not placeholders — with
  * the heavy Mapbox bundle lazy-loaded only once this section scrolls into
  * view, so it never competes with the hero for first paint.
+ *
+ * "Into view" means ON SCREEN, not near it (PageSpeed pass, 2026-10-07). The
+ * observer used to fire 200px early. The hero is one screen tall, so on a
+ * desktop viewport this section starts ~40px below the fold - inside that
+ * 200px margin - and the 485 KiB Mapbox chunk loaded on every page open with
+ * no scroll at all. Measured on the live apex: 4.3 s of main-thread work and
+ * Total Blocking Time 5,840 ms in PageSpeed Insights (desktop score 64);
+ * blocking that one chunk took the same run to 98. The placeholder below
+ * holds the exact height, so loading on arrival shifts nothing.
  */
 export default function HomepageMapModule() {
   const [visible, setVisible] = useState(false)
@@ -40,7 +49,7 @@ export default function HomepageMapModule() {
           trackHeatmapEvent('homepage_map_view', { surface: 'homepage', kpi_layer: 'market_direction' })
         }
       },
-      { rootMargin: '200px' }
+      { rootMargin: '0px', threshold: 0.1 }
     )
     observer.observe(ref.current)
     return () => observer.disconnect()

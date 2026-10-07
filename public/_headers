@@ -1,0 +1,10 @@
+# Cloudflare Workers static-asset headers (OpenNext copies public/ into the
+# asset directory, where Workers applies this file).
+#
+# PageSpeed pass, 2026-10-07: every /_next/static file was served
+# "Cache-Control: public, max-age=0, must-revalidate", so a returning visitor
+# re-validated all ~25 scripts and stylesheets on every page view. These
+# files are content-hashed at build time - a changed file gets a new URL -
+# so they can be cached for a year and never revalidated.
+/_next/static/*
+  Cache-Control: public, max-age=31536000, immutable

@@ -1,14 +1,14 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import dynamic from 'next/dynamic'
 import { usePathname, useRouter } from 'next/navigation'
 
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { DeedAuthProvider } from '@/lib/deed/deedAuth'
 import AppSidebar from './AppSidebar'
 import ChatContainmentGuard from './ChatContainmentGuard'
-import CommandPalette from './CommandPalette'
-import DeedPanel from './DeedPanel'
+import LazyCommandPalette from './LazyCommandPalette'
 import Topbar from './Topbar'
 import PlayLaunchBanner from './PlayLaunchBanner'
 import StickyDeedCta from './StickyDeedCta'
@@ -39,6 +39,12 @@ import StickyDeedCta from './StickyDeedCta'
  * companion to the workspace.
  */
 const SIDEBAR_KEY = 'biddeed.shell.sidebar.v1'
+
+// The Deed side panel (its own composer, thread and markdown renderer) is
+// never mounted on '/' or '/chat'. Imported on demand so those two pages - the
+// landing page above all - do not download it (PageSpeed pass, 2026-10-07).
+// Other routes still server-render it exactly as before.
+const DeedPanel = dynamic(() => import('./DeedPanel'))
 
 export default function AppShell({
   children,
@@ -109,8 +115,9 @@ export default function AppShell({
     <DeedAuthProvider authEnabled={authEnabled}>
     <SidebarProvider open={sidebarOpen} onOpenChange={onSidebarOpenChange}>
       <ChatContainmentGuard authEnabled={authEnabled} />
-      {/* ⌘K / Ctrl+K from any page in the shell (PARITY CP-9). */}
-      <CommandPalette />
+      {/* ⌘K / Ctrl+K from any page in the shell (PARITY CP-9). Mounted after
+          first paint or on first use - see LazyCommandPalette. */}
+      <LazyCommandPalette />
       <AppSidebar deedOpen={deedOpen && !isHome} onToggleDeed={toggleDeed} authEnabled={authEnabled} showDeedToggle={!isHome} />
 
       {/*

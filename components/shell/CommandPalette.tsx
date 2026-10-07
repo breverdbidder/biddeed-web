@@ -11,6 +11,7 @@ import { listThreads, type ThreadSummary } from '@/lib/deed/threadsRemote'
 import { SKILL_COMMANDS, SKILL_COMMAND_TARGET } from '@/lib/skills/commands'
 import { TOOL_NAMES, type SkillTool } from '@/lib/skills/shared'
 import { NAV_ITEMS } from './nav'
+import { OPEN_COMMAND_PALETTE, isCommandPaletteShortcut } from './commandPaletteEvents'
 
 /**
  * ⌘K / Ctrl+K — search your chats and jump anywhere (PARITY CP-9, the C5
@@ -27,7 +28,9 @@ import { NAV_ITEMS } from './nav'
  * Search row (it dispatches OPEN_COMMAND_PALETTE).
  */
 
-export const OPEN_COMMAND_PALETTE = 'biddeed:command-palette'
+// Re-exported for existing importers; the constant lives in its own module so
+// dispatching it does not load this component (see LazyCommandPalette).
+export { OPEN_COMMAND_PALETTE } from './commandPaletteEvents'
 
 type Item = {
   id: string
@@ -72,8 +75,10 @@ function matches(item: Item, q: string): boolean {
     .every((w) => hay.includes(w))
 }
 
-export default function CommandPalette() {
-  const [open, setOpen] = useState(false)
+export default function CommandPalette({ initialOpen = false }: { initialOpen?: boolean } = {}) {
+  // initialOpen: LazyCommandPalette mounts this component on the first ⌘K or
+  // Search-row click, and that first request must open it.
+  const [open, setOpen] = useState(initialOpen)
   const [query, setQuery] = useState('')
   const [active, setActive] = useState(0)
   const [chats, setChats] = useState<ThreadSummary[]>([])
@@ -95,7 +100,7 @@ export default function CommandPalette() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'k') {
+      if (isCommandPaletteShortcut(e)) {
         e.preventDefault()
         remember()
         setOpen((o) => !o)

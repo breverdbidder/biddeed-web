@@ -1,0 +1,66 @@
+name: PageSpeed gate
+
+# Ariel's benchmark: Performance >= 95 on mobile AND desktop, measured with
+# Lighthouse (the engine behind Google PageSpeed Insights) against the live
+# apex after every production deploy.
+#
+# 2026-10-07: PageSpeed Insights scored https://biddeed.ai/ 64 mobile / 64
+# desktop and no CI step measured load speed at all - a 485 KiB map bundle on
+# page open and max-age=0 on every hashed asset shipped with every gate green.
+# This job posts the median of 3 runs per form factor to the run summary.
+#
+# NON-BLOCKING until the bar is first met, the same rollout the ui-audit job
+# used (PARITY CP-11): it reports red/green but does not fail the workflow.
+# Once one run shows both form factors >= 95, set continue-on-error to false
+# so a speed regression turns the run red.
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: 'URL to measure'
+        default: 'https://biddeed.ai/'
+      min:
+        description: 'Minimum Performance score (0-100)'
+        default: '95'
+  workflow_run:
+    workflows: ['Cloudflare OpenNext Production']
+    types: [completed]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pagespeed-gate
+  cancel-in-progress: true
+
+jobs:
+  lighthouse:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    continue-on-error: true
+    steps:
+      - name: Checkout the gate script
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          sparse-checkout: scripts/lighthouse-gate.mjs
+          sparse-checkout-cone-mode: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+
+      - name: Lighthouse, 3 runs per form factor, median
+        run: node scripts/lighthouse-gate.mjs --url "${{ inputs.url || 'https://biddeed.ai/' }}" --runs 3 --min "${{ inputs.min || '95' }}" --out pagespeed.md
+
+      - if: always()
+        name: Summary
+        run: cat pagespeed.md >> "$GITHUB_STEP_SUMMARY" || true
+
+      - if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: pagespeed
+          path: pagespeed.md

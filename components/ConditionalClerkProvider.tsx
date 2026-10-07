@@ -1,11 +1,11 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import { ClerkProvider } from '@clerk/nextjs'
 import { useTheme } from '@/lib/theme-context'
 import { palette } from '@/lib/design-tokens'
 import PostHogIdentify from '@/components/analytics/PostHogIdentify'
-import FreeReportPopup from '@/components/lead/FreeReportPopup'
-import FreeReportPopupAuthGate from '@/components/lead/FreeReportPopupAuthGate'
+import { useIdleMount } from '@/lib/perf/idle'
 import { AUTH_CARD_COPY } from '@/lib/auth/clerk-copy'
 
 // Ported from zonewise-web 2026-08-20 with one deliberate deviation: no
@@ -14,6 +14,14 @@ import { AUTH_CARD_COPY } from '@/lib/auth/clerk-copy'
 // mirror of the token file (lib/design-tokens.ts); the `elements` overrides use
 // the same Tailwind token classes as the rest of the app.
 const CLERK_KEY = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+
+// The free-report popup (issue #181) opens after a 12 s dwell, 45% scroll or
+// exit intent - never at first paint - so its code (Radix Dialog, the account
+// step, the email-code flow) loads once the page is idle instead of in the
+// first-load bundle (PageSpeed pass, 2026-10-07). Its own timers start when it
+// mounts, so the dwell now counts from the idle mount, a second or two later.
+const FreeReportPopup = dynamic(() => import('@/components/lead/FreeReportPopup'), { ssr: false })
+const FreeReportPopupAuthGate = dynamic(() => import('@/components/lead/FreeReportPopupAuthGate'), { ssr: false })
 
 function clerkAppearance(theme: 'light' | 'dark') {
   const c = palette(theme)
@@ -101,6 +109,7 @@ export default function ConditionalClerkProvider({
   nonce?: string
 }) {
   const { theme } = useTheme()
+  const popupReady = useIdleMount(3000)
 
   // No key -> render children without ClerkProvider. Keeps the app fully
   // functional in passthrough mode and mirrors middleware.ts, where
@@ -110,7 +119,7 @@ export default function ConditionalClerkProvider({
     return (
       <>
         {children}
-        <FreeReportPopup signedIn={false} />
+        {popupReady ? <FreeReportPopup signedIn={false} /> : null}
       </>
     )
   }
@@ -122,7 +131,7 @@ export default function ConditionalClerkProvider({
       <PostHogIdentify />
       {children}
       {/* Free-report lead popup for signed-out visitors only (issue #181). */}
-      <FreeReportPopupAuthGate />
+      {popupReady ? <FreeReportPopupAuthGate /> : null}
     </ClerkProvider>
   )
 }

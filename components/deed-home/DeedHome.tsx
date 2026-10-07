@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import dynamic from 'next/dynamic'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 import DeedRobotMark from '@/components/deed/DeedRobotMark'
@@ -10,8 +11,13 @@ import { DEED_SEEDS } from './deedSeeds'
 import HomepageMapModule from './HomepageMapModule'
 import { FieldRoutes, Footer, Founder, HowItWorks, Pricing, Proof, RehabProjects, TrustStrip } from './LandingSections'
 import PromptStarters from './PromptStarters'
-import ThreadView from './ThreadView'
 import { useDeedThread, type DeedSendOptions } from './useDeedThread'
+
+// The thread view carries the markdown stack (react-markdown + remark-gfm +
+// micromark, ~51 KiB compressed) and only renders once a message has been
+// sent. Loaded on demand so the landing page does not ship it to every first
+// visit (PageSpeed pass, 2026-10-07).
+const ThreadView = dynamic(() => import('./ThreadView'))
 
 /**
  * The home page is a conversation.
