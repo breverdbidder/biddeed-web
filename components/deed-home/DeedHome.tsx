@@ -8,7 +8,7 @@ import DeedRobotMark from '@/components/deed/DeedRobotMark'
 import { cn } from '@/lib/utils'
 import Composer from './Composer'
 import { DEED_SEEDS } from './deedSeeds'
-import { DEED_PROMPT_EVENT } from './deedPromptEvent'
+import { DEED_PROMPT_ATTR } from './deedPromptEvent'
 import PromptStarters from './PromptStarters'
 import TrustStrip from './TrustStrip'
 import { useDeedThread, type DeedSendOptions } from './useDeedThread'
@@ -78,14 +78,16 @@ export default function DeedHome({ below }: { below?: React.ReactNode }) {
   )
 
   // Plan-card "ask Deed" buttons live in the server-rendered sections below
-  // the fold and hand their prompt over as an event (deedPromptEvent.ts).
+  // the fold: they carry their prompt in data-deed-prompt and this one
+  // delegated listener sends it.
   useEffect(() => {
-    const onPrompt = (e: Event) => {
-      const prompt = (e as CustomEvent<string>).detail
-      if (typeof prompt === 'string' && prompt) onSend(prompt)
+    const onClick = (e: MouseEvent) => {
+      const btn = (e.target as Element | null)?.closest?.(`[${DEED_PROMPT_ATTR}]`)
+      const prompt = btn?.getAttribute(DEED_PROMPT_ATTR)
+      if (prompt) onSend(prompt)
     }
-    window.addEventListener(DEED_PROMPT_EVENT, onPrompt)
-    return () => window.removeEventListener(DEED_PROMPT_EVENT, onPrompt)
+    document.addEventListener('click', onClick)
+    return () => document.removeEventListener('click', onClick)
   }, [onSend])
 
   const streamingNow = status === 'streaming'

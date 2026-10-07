@@ -10,8 +10,9 @@ const ACS = acsData as unknown as CountyAcsDataset
  * and handed to DeedHome as its `below` slot (PageSpeed pass 3, 2026-10-07).
  * It used to be part of DeedHome's client bundle: ~25 KB of section code plus
  * the 18 KB ACS dataset, downloaded and executed on every phone before the
- * page could respond. Now it arrives as HTML; only the map module (scroll-
- * triggered) and the plan cards' ask-Deed buttons hydrate.
+ * page could respond. Now it arrives as HTML. The map module (scroll-
+ * triggered) is the only client component; the plan cards' ask-Deed buttons
+ * work by delegation (DeedHome).
  */
 export default function HomeBelowFold() {
   return (

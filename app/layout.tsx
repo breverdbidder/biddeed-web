@@ -55,6 +55,19 @@ const ICON =
 // their own `title`/`description` and keep overriding these (Next replaces, not
 // merges, when a page defines the field) — openGraph/twitter are absent from
 // every page-level export today, so this default cascades to all of them.
+// Lean home only. The router Worker serves the signed-out landing page from
+// a 60 s edge cache (cli-anything-biddeed src/worker.js, serveLeanHome), so a
+// visitor can receive HTML rendered by the previous deploy that names a
+// script chunk the new deploy no longer has - the page would then never
+// hydrate. If a /_next/static script fails (error event, or a 4xx/5xx in
+// Resource Timing at load as a backstop), reload once: the Worker drops its
+// cached copy on that 404 and never serves a reload (max-age=0) from cache,
+// so the second load is current. The sessionStorage flag stops a loop and
+// clears itself 10 s after a clean load. A plain inline script, not
+// next/script: beforeInteractive scripts are run by Next's own runtime,
+// which is exactly what fails to load here.
+const CHUNK_SELF_HEAL = `(function(){var K="bd_chunk_reload",bad=false;function heal(){bad=true;try{if(sessionStorage.getItem(K))return;sessionStorage.setItem(K,"1")}catch(_){return}location.reload()}addEventListener("error",function(e){var t=e.target;if(t&&t.tagName==="SCRIPT"&&/\\/_next\\/static\\//.test(t.src||""))heal()},true);addEventListener("load",function(){try{var r=performance.getEntriesByType("resource");for(var i=0;i<r.length;i++){if(/\\/_next\\/static\\//.test(r[i].name)&&r[i].responseStatus>=400){heal();return}}}catch(_){}setTimeout(function(){if(!bad)try{sessionStorage.removeItem(K)}catch(_){}},10000)})})();`
+
 const SITE_URL = 'https://biddeed.ai'
 const DEFAULT_TITLE = 'BidDeed.AI — Auction Intelligence'
 const DEFAULT_DESCRIPTION =
@@ -153,6 +166,7 @@ export default async function RootLayout({
       <body>
         {/* Lean home only: must render before the shell - see LeanNavGuard. */}
         {leanHome ? <LeanNavGuard /> : null}
+        {leanHome ? <script id="bd-chunk-self-heal" nonce={nonce} dangerouslySetInnerHTML={{ __html: CHUNK_SELF_HEAL }} /> : null}
         {/*
           First focusable element in the document (WCAG 2.4.1). Must render
           before the shell so it is the first tab stop on every route, not

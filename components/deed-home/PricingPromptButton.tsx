@@ -1,15 +1,13 @@
-'use client'
-
-import { sendDeedPrompt } from './deedPromptEvent'
+import { DEED_PROMPT_ATTR } from './deedPromptEvent'
 
 /**
  * A plan card's "ask Deed" button. The pricing section is server-rendered
- * (PageSpeed pass 3, 2026-10-07), so this is the one interactive piece of it:
- * it hands the prompt to the composer above via DEED_PROMPT_EVENT.
+ * (PageSpeed pass 3, 2026-10-07), so the button carries its prompt as data
+ * and DeedHome's delegated click listener sends it - no client code here.
  */
 export default function PricingPromptButton({ prompt, className, children }: { prompt: string; className?: string; children: React.ReactNode }) {
   return (
-    <button type="button" onClick={() => sendDeedPrompt(prompt)} className={className}>
+    <button type="button" {...{ [DEED_PROMPT_ATTR]: prompt }} className={className}>
       {children}
     </button>
   )

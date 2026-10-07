@@ -1,10 +1,7 @@
 /**
- * A prompt sent to Deed from outside the home page's React state - the
- * server-rendered landing sections below the composer (PricingPromptButton).
- * DeedHome listens and sends it exactly as if it had been typed.
+ * Plan-card "ask Deed" buttons in the server-rendered landing sections carry
+ * their prompt in this attribute; DeedHome listens for clicks on the document
+ * and sends the prompt exactly as if it had been typed. Delegation keeps
+ * the pricing section free of client code (no 'use client' island).
  */
-export const DEED_PROMPT_EVENT = 'biddeed:deed-prompt'
-
-export function sendDeedPrompt(prompt: string) {
-  window.dispatchEvent(new CustomEvent<string>(DEED_PROMPT_EVENT, { detail: prompt }))
-}
+export const DEED_PROMPT_ATTR = 'data-deed-prompt'

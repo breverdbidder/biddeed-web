@@ -15,10 +15,10 @@ import PricingPromptButton from './PricingPromptButton'
  * Server-rendered (PageSpeed pass 3, 2026-10-07): no 'use client', no hooks,
  * no handlers. The home page passes these sections to DeedHome as finished
  * HTML, so their code is not downloaded or run on the visitor's phone. The
- * two interactive pieces are client islands: TrustStrip (live counts, in the
- * hero) and PricingPromptButton. Client components that only need PLANS or
- * the button classes (pricing, checkout, the map gate) still import this
- * module as before.
+ * live counts are a client island in the hero (TrustStrip), and the plan
+ * cards' ask-Deed buttons (PricingPromptButton) work by delegation from
+ * DeedHome. Client components that only need PLANS or the button classes
+ * (pricing, checkout, the map gate) still import this module as before.
  */
 export const W = {
   buyReport: '/buy-report',
