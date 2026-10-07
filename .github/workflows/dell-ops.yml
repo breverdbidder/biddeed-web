@@ -125,8 +125,9 @@ jobs:
           fi
           # On run 1 the host key is TOFU. Once the observed fingerprint is saved
           # as a repo secret, this check pins subsequent runs automatically.
-          ssh -i "$HOME/.ssh/dell_ops_key" -o IdentitiesOnly=yes \
-            -o BatchMode=yes -o ConnectTimeout=15 \
+          timeout --signal=TERM --kill-after=5s 180s ssh -i "$HOME/.ssh/dell_ops_key" -o IdentitiesOnly=yes \
+            -o BatchMode=yes -o ConnectTimeout=15 -o ConnectionAttempts=1 \
+            -o ServerAliveInterval=10 -o ServerAliveCountMax=2 \
             -o StrictHostKeyChecking=accept-new \
             -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
             ariel-shapira@192.168.1.172 "$REMOTE_COMMAND"
