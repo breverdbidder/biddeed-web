@@ -244,6 +244,23 @@ jobs:
             sleep 2
           done
           test "$ready" = 1 || { echo 'Front-router candidate failed readiness'; exit 1; }
+          # Browser analytics can bypass Worker fetch guards. Deny mutations
+          # at the browser network boundary too without changing any gate.
+          python3 - <<'PYBROWSER'
+          from pathlib import Path
+          p=Path('scripts/ui-audit/audit.py')
+          s=p.read_text()
+          anchor='            for route in routes:'
+          assert s.count(anchor)==1
+          guard="""            async def read_only_browser(route):
+                          if route.request.method.upper() not in ('GET', 'HEAD'):
+                              await route.fulfill(status=403, body='Read-only candidate verification')
+                          else:
+                              await route.continue_()
+                      await ctx.route('**/*', read_only_browser)
+          """
+          p.write_text(s.replace(anchor,guard+anchor))
+          PYBROWSER
           python3 scripts/ui-audit/audit.py --base "http://127.0.0.1:$front_port" --routes scripts/ui-audit/routes.json --out ui-audit.md --fail-on-red
 
       - name: Upload audit evidence
