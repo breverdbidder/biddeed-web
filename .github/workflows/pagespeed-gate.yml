@@ -9,10 +9,11 @@ name: PageSpeed gate
 # page open and max-age=0 on every hashed asset shipped with every gate green.
 # This job posts the median of 3 runs per form factor to the run summary.
 #
-# NON-BLOCKING until the bar is first met, the same rollout the ui-audit job
-# used (PARITY CP-11): it reports red/green but does not fail the workflow.
-# Once one run shows both form factors >= 95, set continue-on-error to false
-# so a speed regression turns the run red.
+# BLOCKING since 2026-10-07: the bar was first met by run 37668395155 (both
+# form factors >= 95, 14:38 ET, after the router started painting the
+# landing page before hydrating it). Until then it was non-blocking, the same
+# rollout the ui-audit job used (PARITY CP-11). A speed regression now turns
+# the run red.
 on:
   workflow_dispatch:
     inputs:
@@ -38,7 +39,7 @@ jobs:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
-    continue-on-error: true
+    continue-on-error: false
     steps:
       - name: Checkout the gate script
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
