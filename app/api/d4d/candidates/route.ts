@@ -1,12 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getRetryingSupabaseClient } from '@/lib/supabase-retry'
 import { requireCapability } from '@/lib/tier/server'
+import type { D4DCandidate } from '@/components/d4d/types'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/
 const CANDIDATE_LIMIT = 500
+
+type CandidateRpcRow = {
+  mca_id: string
+  county: string
+  case_number: string
+  address: string
+  auction_date: string
+  lat: number
+  lng: number
+}
+
+// The RPC uses address/lat/lng; the picker consumes the public candidate contract.
+// Keep unsupported enrichment fields null, rather than inventing values.
+const toCandidate = (row: CandidateRpcRow): D4DCandidate => ({
+  mca_id: row.mca_id,
+  county: row.county,
+  case_number: row.case_number,
+  property_address: row.address,
+  auction_date: row.auction_date,
+  latitude: row.lat,
+  longitude: row.lng,
+  zip: null,
+  judgment_amount: null,
+  opening_bid: null,
+  assessed_value: null,
+  parity_status: null,
+})
 
 // GET /api/d4d/candidates?county=&from=&to= — upcoming lots selectable for a route.
 export async function GET(request: NextRequest) {
@@ -37,5 +65,5 @@ export async function GET(request: NextRequest) {
     p_limit: CANDIDATE_LIMIT,
   })
   if (error) return NextResponse.json({ error: 'Unable to load candidate lots.' }, { status: 502 })
-  return NextResponse.json({ candidates: data ?? [] })
+  return NextResponse.json({ candidates: ((data ?? []) as CandidateRpcRow[]).map(toCandidate) })
 }
