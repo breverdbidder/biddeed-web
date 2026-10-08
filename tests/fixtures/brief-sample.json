@@ -1,0 +1,1009 @@
+{
+ "schema": "investment_brief.v1",
+ "generated_at": "2026-10-08T14:24:30.670Z",
+ "input": {
+  "market": {
+   "county": "brevard",
+   "cities": [
+    "Melbourne",
+    "Cocoa Beach",
+    "Satellite Beach"
+   ]
+  },
+  "window_days": 45,
+  "strategy": "brrr_hold",
+  "gates": {
+   "cap": 0.065,
+   "coc": 0.08,
+   "dscr": 1.15,
+   "flip_margin": 0.12,
+   "max_all_in": null
+  },
+  "capital": {},
+  "audience": {
+   "name": "Sample investor"
+  },
+  "repair_scope": "standard"
+ },
+ "brand": null,
+ "window": {
+  "from": "2026-10-08",
+  "to": "2026-11-22"
+ },
+ "counts": {
+  "on_radar": 20,
+  "confirmed": 18,
+  "excluded": 2
+ },
+ "screen": [
+  {
+   "rank": 1,
+   "case_number": "05-2025-CA-049531-XXCA-BC",
+   "address": "4456 VERMILLION DUNES LN, MELBOURNE, FL- 32904",
+   "auction_date": "2026-10-28",
+   "opening_bid": 9404.13,
+   "verdict": "REVIEW",
+   "max_bid": 108661,
+   "room_to_max_bid": 99256.87,
+   "cap": 0.1706,
+   "coc": null,
+   "dscr": 1.15,
+   "flip_margin": 0.7958
+  },
+  {
+   "rank": 2,
+   "case_number": "05-2026-CA-027714-XXCA-BC",
+   "address": "2691 FLORIDIANE DR, MELBOURNE, FL 32935",
+   "auction_date": "2026-10-28",
+   "opening_bid": 61576.1,
+   "verdict": "REVIEW",
+   "max_bid": 136411,
+   "room_to_max_bid": 74834.9,
+   "cap": 0.1225,
+   "coc": null,
+   "dscr": 1.15,
+   "flip_margin": 0.5917
+  },
+  {
+   "rank": 3,
+   "case_number": "05-2025-CA-041751-XXCA-BC",
+   "address": "2582 KING RICHARD RD, MELBOURNE, FL 32935",
+   "auction_date": "2026-11-04",
+   "opening_bid": 104968,
+   "verdict": "REVIEW",
+   "max_bid": 154842,
+   "room_to_max_bid": 49874,
+   "cap": 0.1002,
+   "coc": null,
+   "dscr": 1.15,
+   "flip_margin": 0.3638
+  },
+  {
+   "rank": 4,
+   "case_number": "05-2026-CA-025075-XXCA-BC",
+   "address": "1405 JOHNSON ST, MELBOURNE, FL 32935",
+   "auction_date": "2026-10-28",
+   "opening_bid": 134353.98,
+   "verdict": "REVIEW",
+   "max_bid": 136304,
+   "room_to_max_bid": 1950.0199999999895,
+   "cap": 0.0771,
+   "coc": 0.0868,
+   "dscr": 1.15,
+   "flip_margin": 0.3508
+  }
+ ],
+ "properties": [
+  {
+   "id": "46b4f3ff-7ac7-4620-973f-dada23b28904",
+   "case_number": "05-2025-CA-049531-XXCA-BC",
+   "address": "4456 VERMILLION DUNES LN, MELBOURNE, FL- 32904",
+   "auction_date": "2026-10-28",
+   "opening_bid": 9404.13,
+   "judgment": 9404.13,
+   "verdict": "REVIEW",
+   "verdict_capped": true,
+   "bid": 9404.13,
+   "score": {
+    "strategy": "brrr_hold",
+    "inputs": {
+     "bid": 9404.13,
+     "rehab": 72772,
+     "closing": 235,
+     "holding": 0,
+     "arv": 403588,
+     "opening_bid": 9404.13
+    },
+    "all_in": 82411,
+    "flip_margin": 0.7958,
+    "flip_net": 296961,
+    "gates": {
+     "flip_margin": {
+      "value": 0.7958,
+      "gate": 0.12,
+      "pass": true
+     },
+     "cap": {
+      "value": 0.1706,
+      "gate": 0.065,
+      "pass": true
+     },
+     "dscr": {
+      "value": 1.15,
+      "gate": 1.15,
+      "pass": true
+     },
+     "coc": {
+      "value": null,
+      "gate": 0.08,
+      "pass": true
+     }
+    },
+    "open_items": [
+     "insurance quote not bound; carried at 0"
+    ],
+    "gross": 22800,
+    "opex": 8737,
+    "noi": 14063,
+    "cap": 0.1706,
+    "refi": {
+     "rate": 0.065,
+     "years": 30,
+     "annual_constant": 0.0758,
+     "loan": 161221,
+     "loan_ltv": 0.3995,
+     "sized_by": "dscr",
+     "debt_service": 12228,
+     "dscr": 1.15
+    },
+    "cash_left_in": -78810,
+    "cash_flow": 1834,
+    "coc": null,
+    "max_bid": 108661,
+    "max_bid_binding": "coc",
+    "verdict": "BID"
+   },
+   "at_max_bid": {
+    "strategy": "brrr_hold",
+    "inputs": {
+     "bid": 108661,
+     "rehab": 72772,
+     "closing": 2717,
+     "holding": 0,
+     "arv": 403588,
+     "opening_bid": 9404.13
+    },
+    "all_in": 184150,
+    "flip_margin": 0.5437,
+    "flip_net": 195223,
+    "gates": {
+     "flip_margin": {
+      "value": 0.5437,
+      "gate": 0.12,
+      "pass": true
+     },
+     "cap": {
+      "value": 0.0764,
+      "gate": 0.065,
+      "pass": true
+     },
+     "dscr": {
+      "value": 1.15,
+      "gate": 1.15,
+      "pass": true
+     },
+     "coc": {
+      "value": 0.08,
+      "gate": 0.08,
+      "pass": false
+     }
+    },
+    "open_items": [
+     "insurance quote not bound; carried at 0"
+    ],
+    "gross": 22800,
+    "opex": 8737,
+    "noi": 14063,
+    "cap": 0.0764,
+    "refi": {
+     "rate": 0.065,
+     "years": 30,
+     "annual_constant": 0.0758,
+     "loan": 161221,
+     "loan_ltv": 0.3995,
+     "sized_by": "dscr",
+     "debt_service": 12228,
+     "dscr": 1.15
+    },
+    "cash_left_in": 22928,
+    "cash_flow": 1834,
+    "coc": 0.08,
+    "max_bid": 108661,
+    "max_bid_binding": "coc",
+    "verdict": "REVIEW"
+   },
+   "room_to_max_bid": 99256.87,
+   "evidence": {
+    "arv": {
+     "value": 403588,
+     "source": "Median $163/sq ft \u00d7 2476 sq ft, from 446 county-recorded sales since 2022 in the same ZIP"
+    },
+    "rehab": {
+     "value": 72772,
+     "source": "Catalog unit costs, standard scope; not an inspection"
+    },
+    "rent": {
+     "monthly": 1900,
+     "source": "FL baseline estimates (HUD API unavailable); 3-bedroom (bedrooms not on record, 3 assumed)",
+     "example": true
+    },
+    "comps": {
+     "table": {
+      "rows": [
+       [
+        "5800 Live Oak Ave, Melbourne",
+        "2024-06",
+        575000,
+        2476,
+        232
+       ],
+       [
+        "729 Danville Cir, West Melbourne",
+        "2024-09",
+        309000,
+        2472,
+        125
+       ],
+       [
+        "1677 Attilburgh Blvd, West Melbourne",
+        "2024-04",
+        400000,
+        2470,
+        162
+       ],
+       [
+        "210 Ladybug Ct, West Melbourne",
+        "2024-04",
+        405000,
+        2468,
+        164
+       ],
+       [
+        "795 Acacia Ave, Melbourne",
+        "2024-03",
+        480000,
+        2468,
+        194
+       ]
+      ],
+      "columns": [
+       "Address",
+       "Sold",
+       "Price",
+       "Living sq ft",
+       "$/sq ft"
+      ]
+     },
+     "note": "Closest 10 by size shown; the median uses every match."
+    },
+    "zoning": {
+     "district": "PUD",
+     "jurisdiction": "Melbourne",
+     "note": "Dimensional standards are on record, but no ordinance section is cited. Confirm with the jurisdiction before relying on them."
+    },
+    "liens": {
+     "instruments": 0,
+     "surviving": 0,
+     "note": "Open item to verify with a title search; not a title opinion."
+    },
+    "surplus": {
+     "status": "scheduled",
+     "sold_for": null
+    },
+    "recorded": {
+     "opening_bid": 9404.13,
+     "judgment": 9404.13,
+     "assessed_value": 348500
+    }
+   },
+   "open_items": [
+    "Title: no recorded instruments indexed for this case; senior liens unknown",
+    "Judgment is under 10% of assessed value: likely a junior or association lien case where a senior mortgage may survive the sale",
+    "insurance quote not bound; carried at 0"
+   ],
+   "example_numbers": [
+    "Rent is a market-rate estimate, not a cited ask",
+    "Insurance is not quoted"
+   ]
+  },
+  {
+   "id": "1b8d1736-ae8e-45b8-a00f-a1edd6726ffc",
+   "case_number": "05-2026-CA-027714-XXCA-BC",
+   "address": "2691 FLORIDIANE DR, MELBOURNE, FL 32935",
+   "auction_date": "2026-10-28",
+   "opening_bid": 61576.1,
+   "judgment": 61576.1,
+   "verdict": "REVIEW",
+   "verdict_capped": true,
+   "bid": 61576.1,
+   "score": {
+    "strategy": "brrr_hold",
+    "inputs": {
+     "bid": 61576.1,
+     "rehab": 63775,
+     "closing": 1539,
+     "holding": 0,
+     "arv": 310772,
+     "opening_bid": 61576.1
+    },
+    "all_in": 126891,
+    "flip_margin": 0.5917,
+    "flip_net": 165235,
+    "gates": {
+     "flip_margin": {
+      "value": 0.5917,
+      "gate": 0.12,
+      "pass": true
+     },
+     "cap": {
+      "value": 0.1225,
+      "gate": 0.065,
+      "pass": true
+     },
+     "dscr": {
+      "value": 1.15,
+      "gate": 1.15,
+      "pass": true
+     },
+     "coc": {
+      "value": null,
+      "gate": 0.08,
+      "pass": true
+     }
+    },
+    "open_items": [
+     "insurance quote not bound; carried at 0"
+    ],
+    "gross": 22800,
+    "opex": 7252,
+    "noi": 15548,
+    "cap": 0.1225,
+    "refi": {
+     "rate": 0.065,
+     "years": 30,
+     "annual_constant": 0.0758,
+     "loan": 178247,
+     "loan_ltv": 0.5736,
+     "sized_by": "dscr",
+     "debt_service": 13520,
+     "dscr": 1.15
+    },
+    "cash_left_in": -51356,
+    "cash_flow": 2028,
+    "coc": null,
+    "max_bid": 136411,
+    "max_bid_binding": "coc",
+    "verdict": "BID"
+   },
+   "at_max_bid": {
+    "strategy": "brrr_hold",
+    "inputs": {
+     "bid": 136411,
+     "rehab": 63775,
+     "closing": 3410,
+     "holding": 0,
+     "arv": 310772,
+     "opening_bid": 61576.1
+    },
+    "all_in": 203596,
+    "flip_margin": 0.3449,
+    "flip_net": 88529,
+    "gates": {
+     "flip_margin": {
+      "value": 0.3449,
+      "gate": 0.12,
+      "pass": true
+     },
+     "cap": {
+      "value": 0.0764,
+      "gate": 0.065,
+      "pass": true
+     },
+     "dscr": {
+      "value": 1.15,
+      "gate": 1.15,
+      "pass": true
+     },
+     "coc": {
+      "value": 0.08,
+      "gate": 0.08,
+      "pass": false
+     }
+    },
+    "open_items": [
+     "insurance quote not bound; carried at 0"
+    ],
+    "gross": 22800,
+    "opex": 7252,
+    "noi": 15548,
+    "cap": 0.0764,
+    "refi": {
+     "rate": 0.065,
+     "years": 30,
+     "annual_constant": 0.0758,
+     "loan": 178247,
+     "loan_ltv": 0.5736,
+     "sized_by": "dscr",
+     "debt_service": 13520,
+     "dscr": 1.15
+    },
+    "cash_left_in": 25349,
+    "cash_flow": 2028,
+    "coc": 0.08,
+    "max_bid": 136411,
+    "max_bid_binding": "coc",
+    "verdict": "REVIEW"
+   },
+   "room_to_max_bid": 74834.9,
+   "evidence": {
+    "arv": {
+     "value": 310772,
+     "source": "Median $154/sq ft \u00d7 2018 sq ft, from 623 county-recorded sales since 2022 in the same ZIP"
+    },
+    "rehab": {
+     "value": 63775,
+     "source": "Catalog unit costs, standard scope; not an inspection"
+    },
+    "rent": {
+     "monthly": 1900,
+     "source": "FL baseline estimates (HUD API unavailable); 3-bedroom (bedrooms not on record, 3 assumed)",
+     "example": true
+    },
+    "comps": {
+     "table": {
+      "rows": [
+       [
+        "1553 Clover Cir, Melbourne",
+        "2025-03",
+        290000,
+        2018,
+        144
+       ],
+       [
+        "3549 Sparrow Ln, Melbourne",
+        "2025-02",
+        280000,
+        2016,
+        139
+       ],
+       [
+        "2014 Buescher Hill St, Melbourne",
+        "2024-07",
+        414400,
+        2021,
+        205
+       ],
+       [
+        "1415 Arnold Dr, Melbourne",
+        "2024-06",
+        269000,
+        2022,
+        133
+       ],
+       [
+        "3005 Clearlake Dr 3, Melbourne",
+        "2025-05",
+        320000,
+        2012,
+        159
+       ]
+      ],
+      "columns": [
+       "Address",
+       "Sold",
+       "Price",
+       "Living sq ft",
+       "$/sq ft"
+      ]
+     },
+     "note": "Closest 10 by size shown; the median uses every match."
+    },
+    "zoning": {
+     "district": "R1A",
+     "jurisdiction": "Melbourne",
+     "note": "Dimensional standards are on record, but no ordinance section is cited. Confirm with the jurisdiction before relying on them."
+    },
+    "liens": {
+     "instruments": 0,
+     "surviving": 0,
+     "note": "Open item to verify with a title search; not a title opinion."
+    },
+    "surplus": {
+     "status": "scheduled",
+     "sold_for": null
+    },
+    "recorded": {
+     "opening_bid": 61576.1,
+     "judgment": 61576.1,
+     "assessed_value": 189720
+    }
+   },
+   "open_items": [
+    "Title: no recorded instruments indexed for this case; senior liens unknown",
+    "insurance quote not bound; carried at 0"
+   ],
+   "example_numbers": [
+    "Rent is a market-rate estimate, not a cited ask",
+    "Insurance is not quoted"
+   ]
+  },
+  {
+   "id": "0a567819-d7c2-4e19-b9a2-4f6f90479b88",
+   "case_number": "05-2025-CA-041751-XXCA-BC",
+   "address": "2582 KING RICHARD RD, MELBOURNE, FL 32935",
+   "auction_date": "2026-11-04",
+   "opening_bid": 104968,
+   "judgment": 104968,
+   "verdict": "REVIEW",
+   "verdict_capped": true,
+   "bid": 104968,
+   "score": {
+    "strategy": "brrr_hold",
+    "inputs": {
+     "bid": 104968,
+     "rehab": 56091,
+     "closing": 2624,
+     "holding": 0,
+     "arv": 257280,
+     "opening_bid": 104968
+    },
+    "all_in": 163683,
+    "flip_margin": 0.3638,
+    "flip_net": 78160,
+    "gates": {
+     "flip_margin": {
+      "value": 0.3638,
+      "gate": 0.12,
+      "pass": true
+     },
+     "cap": {
+      "value": 0.1002,
+      "gate": 0.065,
+      "pass": true
+     },
+     "dscr": {
+      "value": 1.15,
+      "gate": 1.15,
+      "pass": true
+     },
+     "coc": {
+      "value": null,
+      "gate": 0.08,
+      "pass": true
+     }
+    },
+    "open_items": [
+     "insurance quote not bound; carried at 0"
+    ],
+    "gross": 22800,
+    "opex": 6396,
+    "noi": 16404,
+    "cap": 0.1002,
+    "refi": {
+     "rate": 0.065,
+     "years": 30,
+     "annual_constant": 0.0758,
+     "loan": 188059,
+     "loan_ltv": 0.731,
+     "sized_by": "dscr",
+     "debt_service": 14264,
+     "dscr": 1.15
+    },
+    "cash_left_in": -24376,
+    "cash_flow": 2140,
+    "coc": null,
+    "max_bid": 154842,
+    "max_bid_binding": "coc",
+    "verdict": "BID"
+   },
+   "at_max_bid": {
+    "strategy": "brrr_hold",
+    "inputs": {
+     "bid": 154842,
+     "rehab": 56091,
+     "closing": 3871,
+     "holding": 0,
+     "arv": 257280,
+     "opening_bid": 104968
+    },
+    "all_in": 214804,
+    "flip_margin": 0.1651,
+    "flip_net": 27039,
+    "gates": {
+     "flip_margin": {
+      "value": 0.1651,
+      "gate": 0.12,
+      "pass": true
+     },
+     "cap": {
+      "value": 0.0764,
+      "gate": 0.065,
+      "pass": true
+     },
+     "dscr": {
+      "value": 1.15,
+      "gate": 1.15,
+      "pass": true
+     },
+     "coc": {
+      "value": 0.08,
+      "gate": 0.08,
+      "pass": false
+     }
+    },
+    "open_items": [
+     "insurance quote not bound; carried at 0"
+    ],
+    "gross": 22800,
+    "opex": 6396,
+    "noi": 16404,
+    "cap": 0.0764,
+    "refi": {
+     "rate": 0.065,
+     "years": 30,
+     "annual_constant": 0.0758,
+     "loan": 188059,
+     "loan_ltv": 0.731,
+     "sized_by": "dscr",
+     "debt_service": 14264,
+     "dscr": 1.15
+    },
+    "cash_left_in": 26745,
+    "cash_flow": 2140,
+    "coc": 0.08,
+    "max_bid": 154842,
+    "max_bid_binding": "coc",
+    "verdict": "REVIEW"
+   },
+   "room_to_max_bid": 49874,
+   "evidence": {
+    "arv": {
+     "value": 257280,
+     "source": "Median $160/sq ft \u00d7 1608 sq ft, from 525 county-recorded sales since 2022 in the same ZIP"
+    },
+    "rehab": {
+     "value": 56091,
+     "source": "Catalog unit costs, standard scope; not an inspection"
+    },
+    "rent": {
+     "monthly": 1900,
+     "source": "FL baseline estimates (HUD API unavailable); 3-bedroom (bedrooms not on record, 3 assumed)",
+     "example": true
+    },
+    "comps": {
+     "table": {
+      "rows": [
+       [
+        "613 Dianne Dr, Melbourne",
+        "2025-02",
+        150000,
+        1608,
+        93
+       ],
+       [
+        "1705 Sarno Rd, Melbourne",
+        "2025-03",
+        175100,
+        1609,
+        109
+       ],
+       [
+        "4456 Coquina Ridge Dr, Melbourne",
+        "2024-08",
+        190000,
+        1609,
+        118
+       ],
+       [
+        "501 Poinciana Dr, Melbourne",
+        "2024-07",
+        276000,
+        1607,
+        172
+       ],
+       [
+        "1395 Ashwood Dr, Melbourne",
+        "2025-02",
+        294900,
+        1606,
+        184
+       ]
+      ],
+      "columns": [
+       "Address",
+       "Sold",
+       "Price",
+       "Living sq ft",
+       "$/sq ft"
+      ]
+     },
+     "note": "Closest 10 by size shown; the median uses every match."
+    },
+    "zoning": {
+     "district": "R1A",
+     "jurisdiction": "Melbourne",
+     "note": "Dimensional standards are on record, but no ordinance section is cited. Confirm with the jurisdiction before relying on them."
+    },
+    "liens": {
+     "instruments": 0,
+     "surviving": 0,
+     "note": "Open item to verify with a title search; not a title opinion."
+    },
+    "surplus": {
+     "status": "scheduled",
+     "sold_for": null
+    },
+    "recorded": {
+     "opening_bid": 104968,
+     "judgment": 104968,
+     "assessed_value": 190510
+    }
+   },
+   "open_items": [
+    "Title: no recorded instruments indexed for this case; senior liens unknown",
+    "insurance quote not bound; carried at 0"
+   ],
+   "example_numbers": [
+    "Rent is a market-rate estimate, not a cited ask",
+    "Insurance is not quoted"
+   ]
+  },
+  {
+   "id": "ef979ffc-660b-4d53-a5ad-c5f32ada3b38",
+   "case_number": "05-2026-CA-025075-XXCA-BC",
+   "address": "1405 JOHNSON ST, MELBOURNE, FL 32935",
+   "auction_date": "2026-10-28",
+   "opening_bid": 134353.98,
+   "judgment": 134353.98,
+   "verdict": "REVIEW",
+   "verdict_capped": true,
+   "bid": 134353.98,
+   "score": {
+    "strategy": "brrr_hold",
+    "inputs": {
+     "bid": 134353.98,
+     "rehab": 63923,
+     "closing": 3359,
+     "holding": 0,
+     "arv": 310590,
+     "opening_bid": 134353.98
+    },
+    "all_in": 201636,
+    "flip_margin": 0.3508,
+    "flip_net": 90319,
+    "gates": {
+     "flip_margin": {
+      "value": 0.3508,
+      "gate": 0.12,
+      "pass": true
+     },
+     "cap": {
+      "value": 0.0771,
+      "gate": 0.065,
+      "pass": true
+     },
+     "dscr": {
+      "value": 1.15,
+      "gate": 1.15,
+      "pass": true
+     },
+     "coc": {
+      "value": 0.0868,
+      "gate": 0.08,
+      "pass": true
+     }
+    },
+    "open_items": [
+     "insurance quote not bound; carried at 0"
+    ],
+    "gross": 22800,
+    "opex": 7249,
+    "noi": 15551,
+    "cap": 0.0771,
+    "refi": {
+     "rate": 0.065,
+     "years": 30,
+     "annual_constant": 0.0758,
+     "loan": 178280,
+     "loan_ltv": 0.574,
+     "sized_by": "dscr",
+     "debt_service": 13522,
+     "dscr": 1.15
+    },
+    "cash_left_in": 23356,
+    "cash_flow": 2028,
+    "coc": 0.0868,
+    "max_bid": 136304,
+    "max_bid_binding": "coc",
+    "verdict": "BID"
+   },
+   "at_max_bid": {
+    "strategy": "brrr_hold",
+    "inputs": {
+     "bid": 136304,
+     "rehab": 63923,
+     "closing": 3408,
+     "holding": 0,
+     "arv": 310590,
+     "opening_bid": 134353.98
+    },
+    "all_in": 203635,
+    "flip_margin": 0.3444,
+    "flip_net": 88320,
+    "gates": {
+     "flip_margin": {
+      "value": 0.3444,
+      "gate": 0.12,
+      "pass": true
+     },
+     "cap": {
+      "value": 0.0764,
+      "gate": 0.065,
+      "pass": true
+     },
+     "dscr": {
+      "value": 1.15,
+      "gate": 1.15,
+      "pass": true
+     },
+     "coc": {
+      "value": 0.08,
+      "gate": 0.08,
+      "pass": false
+     }
+    },
+    "open_items": [
+     "insurance quote not bound; carried at 0"
+    ],
+    "gross": 22800,
+    "opex": 7249,
+    "noi": 15551,
+    "cap": 0.0764,
+    "refi": {
+     "rate": 0.065,
+     "years": 30,
+     "annual_constant": 0.0758,
+     "loan": 178280,
+     "loan_ltv": 0.574,
+     "sized_by": "dscr",
+     "debt_service": 13522,
+     "dscr": 1.15
+    },
+    "cash_left_in": 25354,
+    "cash_flow": 2028,
+    "coc": 0.08,
+    "max_bid": 136304,
+    "max_bid_binding": "coc",
+    "verdict": "REVIEW"
+   },
+   "room_to_max_bid": 1950.0199999999895,
+   "evidence": {
+    "arv": {
+     "value": 310590,
+     "source": "Median $153/sq ft \u00d7 2030 sq ft, from 624 county-recorded sales since 2022 in the same ZIP"
+    },
+    "rehab": {
+     "value": 63923,
+     "source": "Catalog unit costs, standard scope; not an inspection"
+    },
+    "rent": {
+     "monthly": 1900,
+     "source": "FL baseline estimates (HUD API unavailable); 3-bedroom (bedrooms not on record, 3 assumed)",
+     "example": true
+    },
+    "comps": {
+     "table": {
+      "rows": [
+       [
+        "667 Walnut Dr, Melbourne",
+        "2025-03",
+        290000,
+        2030,
+        143
+       ],
+       [
+        "559 Dijon Dr, Melbourne",
+        "2024-09",
+        180000,
+        2031,
+        89
+       ],
+       [
+        "676 Young St, Melbourne",
+        "2025-04",
+        530000,
+        2028,
+        261
+       ],
+       [
+        "100 Charles Dr, Melbourne",
+        "2025-04",
+        165000,
+        2032,
+        81
+       ],
+       [
+        "2899 Corbusier Dr, Melbourne",
+        "2024-06",
+        345000,
+        2025,
+        170
+       ]
+      ],
+      "columns": [
+       "Address",
+       "Sold",
+       "Price",
+       "Living sq ft",
+       "$/sq ft"
+      ]
+     },
+     "note": "Closest 10 by size shown; the median uses every match."
+    },
+    "zoning": {
+     "district": "R1A",
+     "jurisdiction": "Melbourne",
+     "note": "Dimensional standards are on record, but no ordinance section is cited. Confirm with the jurisdiction before relying on them."
+    },
+    "liens": {
+     "instruments": 0,
+     "surviving": 0,
+     "note": "Open item to verify with a title search; not a title opinion."
+    },
+    "surplus": {
+     "status": "scheduled",
+     "sold_for": null
+    },
+    "recorded": {
+     "opening_bid": 134353.98,
+     "judgment": 134353.98,
+     "assessed_value": 176660
+    }
+   },
+   "open_items": [
+    "Title: no recorded instruments indexed for this case; senior liens unknown",
+    "insurance quote not bound; carried at 0"
+   ],
+   "example_numbers": [
+    "Rent is a market-rate estimate, not a cited ask",
+    "Insurance is not quoted"
+   ]
+  }
+ ],
+ "excluded": [
+  {
+   "case_number": "05-2024-CC-033954-XXCC-BC (0)",
+   "address": "4560 BECK LAKE TRL 4-113A, MELBOURNE, FL- 32901",
+   "auction_date": "2026-10-21",
+   "reason": "Not on the Clerk sale list yet"
+  },
+  {
+   "case_number": "05-2025-CA-048590-XXCA-BC (0)",
+   "address": "1950 ONTARIO CIR N, MELBOURNE, FL- 32935",
+   "auction_date": "2026-11-18",
+   "reason": "Not on the Clerk sale list yet"
+  }
+ ],
+ "disclosures": [
+  "Not an appraisal and not a title opinion.",
+  "Lien and title items are open items to verify with a title search, never insured exceptions.",
+  "Max bid is the price at which your own gates are exactly met, built from recorded facts and your inputs; it is not a model output."
+ ],
+ "sources": [
+  "County Clerk of Court published foreclosure sale list",
+  "County property appraiser sales and parcel records",
+  "County and municipal zoning records",
+  "County official records index",
+  "HUD Fair Market Rents"
+ ]
+}

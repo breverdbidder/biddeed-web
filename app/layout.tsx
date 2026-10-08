@@ -9,6 +9,7 @@ import FunnelClickTracker from '@/components/analytics/FunnelClickTracker'
 import ConditionalClerkProvider from '@/components/ConditionalClerkProvider'
 import SkipToContent from '@/components/shell/SkipToContent'
 import LeanNavGuard from '@/components/shell/LeanNavGuard'
+import { BARE_BRIEF_REQUEST_HEADER } from '@/lib/perf/bare-brief'
 import { LEAN_HOME_REQUEST_HEADER } from '@/lib/perf/lean-home'
 import { isClerkHostAuthorized } from '@/lib/clerk-host'
 import { ThemeProvider } from '@/lib/theme-context'
@@ -122,6 +123,14 @@ export default async function RootLayout({
   // force-dynamic, so reading headers() here changes nothing about rendering.
   const h = await headers()
   const nonce = h.get('x-nonce') ?? undefined
+  // Shared Investment Brief: a standalone document, no shell (lib/perf/bare-brief.ts).
+  if (h.get(BARE_BRIEF_REQUEST_HEADER) === '1') {
+    return (
+      <html lang="en" data-theme="light">
+        <body>{children}</body>
+      </html>
+    )
+  }
   // Clerk activates only on hosts its production instance recognises.
   //
   // MEASURED 2026-08-23 on WebKit and Chromium against production: every page
