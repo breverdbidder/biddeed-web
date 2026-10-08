@@ -64,13 +64,18 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          curl -fsSL https://pkg.cloudflareclient.com/pubkey.gpg |
+          echo "STAGE_CF_KEY_FETCH"
+          curl --connect-timeout 15 --max-time 60 --retry 1 -fsSL https://pkg.cloudflareclient.com/pubkey.gpg |
             sudo gpg --batch --yes --dearmor -o /usr/share/keyrings/cloudflare-warp-archive-keyring.gpg
+          echo "STAGE_CF_APT_SOURCE"
           codename="$(lsb_release -cs)"
           echo "deb [signed-by=/usr/share/keyrings/cloudflare-warp-archive-keyring.gpg] https://pkg.cloudflareclient.com/ $codename main" |
             sudo tee /etc/apt/sources.list.d/cloudflare-client.list >/dev/null
-          sudo apt-get update -qq
-          sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq cloudflare-warp openssh-client
+          echo "STAGE_APT_UPDATE"
+          sudo timeout --kill-after=5s 180s apt-get -o Acquire::https::Timeout=30 -o Acquire::http::Timeout=30 -o Acquire::Retries=1 update
+          echo "STAGE_APT_INSTALL"
+          sudo timeout --kill-after=5s 180s env DEBIAN_FRONTEND=noninteractive apt-get -o Acquire::https::Timeout=30 -o Acquire::http::Timeout=30 -o Acquire::Retries=1 install -y cloudflare-warp openssh-client
+          echo "STAGE_CF_INSTALL_COMPLETE"
 
       - name: Enroll headless WARP and confirm assigned profile
         shell: bash
