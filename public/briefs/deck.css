@@ -1,0 +1,73 @@
+:root{--ink:#0E1A2B;--paper:#F6F4EE;--gold:#B98A2E;--gold2:#D4A94A;--teal:#1F6F78}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;background:#0A1322;color:var(--ink);font-family:'IBM Plex Sans',Arial,sans-serif;line-height:1.45}
+.top{color:#8C97A6;font-size:.85rem;text-align:center;padding:14px 16px;line-height:1.5}
+.top a{color:var(--gold2)}
+#deck{max-width:1100px;margin:0 auto}
+section{display:block!important;padding:28px 20px 32px!important;margin:0 0 14px;position:relative;box-sizing:border-box;width:auto!important;height:auto!important}
+section h1,section h2,section h3,section p,section ul,section ol{margin:0}
+section h1{font-size:clamp(2rem,6vw,3.2rem)!important;line-height:1.1!important;width:auto!important}
+section h2{font-size:clamp(1.5rem,4.6vw,2.4rem)!important;line-height:1.15!important;width:auto!important}
+section h3{font-size:1.1rem!important;line-height:1.25!important}
+section p,section li,section td,section th{font-size:1rem!important;line-height:1.45!important}
+section p[data-big]{font-size:clamp(1.9rem,7vw,3rem)!important;line-height:1.05!important}
+section p[data-mid]{font-size:clamp(1.4rem,5vw,2.1rem)!important;line-height:1.1!important}
+section p[data-eyebrow]{font-size:.8rem!important;letter-spacing:.18em!important}
+section p[data-foot]{font-size:.85rem!important;position:static!important;left:auto!important;bottom:auto!important;width:auto!important;margin-top:18px;padding-top:12px;border-top:1px solid rgba(128,128,128,.3)}
+section div{width:auto!important;min-width:0!important;max-width:100%}
+section div[data-row]{display:flex!important;flex-wrap:wrap;gap:14px!important}
+section div[data-row]>div{flex:1 1 260px!important}
+section div[data-grid]{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(250px,1fr))!important;gap:14px!important}
+section div[data-photos]{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important}
+section div[data-card]{padding:18px 18px 20px!important;box-sizing:border-box}
+section div[data-col]{display:flex!important;flex-direction:column!important;gap:8px!important}
+section .tw table{min-width:0}
+section .stack{display:flex;flex-direction:column;gap:10px}
+section .scard{background:#FFFFFF;border:1px solid #E2DED3;border-radius:10px;padding:14px 16px!important;color:#0E1A2B}
+section .scard p{font-size:.95rem!important;line-height:1.4!important}
+section .scard .st{font-weight:700;font-size:1.05rem!important;margin-bottom:6px;border-bottom:1px solid #E2DED3;padding-bottom:6px}
+section .scard .sr{display:flex;gap:10px;justify-content:space-between;padding:3px 0}
+section .scard .sr span{color:#7A8190;font-size:.8rem!important;letter-spacing:.06em;text-transform:uppercase;flex:0 0 38%}
+section .scard .sr a{color:#1F6F78}
+section .scard .sr .v{flex:1;text-align:right;color:#0E1A2B;font-size:.95rem!important;letter-spacing:0;text-transform:none}
+section .scard .rk{display:inline-block;background:#0E1A2B;color:#D4A94A;border-radius:6px;padding:0 8px;margin-right:6px}
+section iframe{width:100%!important;height:min(72vw,520px)!important;border:1px solid #E2DED3;border-radius:10px;display:block;background:#DCE6EE}
+section img{width:100%!important;height:auto!important;aspect-ratio:16/10;object-fit:cover;border-radius:8px;display:block}
+section ul{padding-left:1.2rem!important}
+section .tw{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:6px 0}
+section table{width:100%!important;min-width:640px;border-collapse:collapse;font-size:.92rem!important}
+section td,section th{padding:8px 10px!important;border-bottom:1px solid #E2DED3;vertical-align:top;text-align:left}
+section th{font-size:.85rem!important}
+section a{text-decoration:underline;word-break:break-word}
+section aside{display:none}
+section>div{margin-bottom:14px}
+section>div:last-of-type{margin-bottom:0}
+@media(max-width:480px){section div[data-photos]{grid-template-columns:1fr 1fr!important}}
+
+/* ---- biddeed-web additions (everything above is the ensuite-deck loader CSS, verbatim) ----
+   The deck's JS turns a table with 4+ columns into a stack of cards under 760px.
+   The brief page renders both server-side and lets the viewport pick, so it needs no script. */
+section .bd-cards{display:none}
+@media(max-width:759px){section .bd-wide{display:none}section .bd-cards{display:flex}}
+section .pill{display:inline-block;border-radius:6px;padding:2px 10px;font-weight:700;font-size:.85rem!important;letter-spacing:.06em;background:#0E1A2B;color:#D4A94A}
+section .pill.bid{background:#1F6F78;color:#fff}
+section .pill.skip{background:#7A8190;color:#fff}
+section .muted{color:#7A8190}
+section .kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:10px 0}
+section .kv div{background:#fff;border:1px solid #E2DED3;border-radius:10px;padding:10px 12px}
+section .kv b{display:block;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:#7A8190;font-weight:600}
+section .kv span{font-size:1.2rem;font-weight:700}
+section .brand-logo{max-height:56px;width:auto!important;aspect-ratio:auto;object-fit:contain;border-radius:0;margin-bottom:10px}
+section .cite{font-size:.85rem!important;color:#5b6472}
+section.light{background:var(--paper)}
+section.dark{background:var(--ink);color:#F6F4EE}
+section.dark .cite,section.dark .muted{color:#aab3c0}
+.top.foot a{color:var(--gold2)}
+
+/* The app's global stylesheet also loads on this route; keep the deck's own colours. */
+html[data-theme] body{background:#0A1322;color:var(--ink)}
+section h1,section h2,section h3,section p,section li,section td,section th{color:inherit}
+section.dark h1,section.dark h2,section.dark p{color:#F6F4EE}
+section.light{color:var(--ink)}
+html[data-theme] #deck section h1,html[data-theme] #deck section h2,html[data-theme] #deck section h3{color:inherit}
+html[data-theme] #deck section.dark h1,html[data-theme] #deck section.dark h2{color:#F6F4EE}

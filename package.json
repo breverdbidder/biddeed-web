@@ -32,7 +32,8 @@
     "test:deed-identity-boundary": "node scripts/validate-deed-identity-boundary.mjs",
     "test:funnel-events": "node scripts/validate-funnel-events.mjs",
     "test:zone-standards-dims": "node scripts/validate-zone-standards-dims.mjs",
-    "test:zone-standards-preference": "node scripts/validate-zone-standards-preference.mjs"
+    "test:zone-standards-preference": "node scripts/validate-zone-standards-preference.mjs",
+    "test:brief-render": "node --experimental-strip-types scripts/validate-brief-render.mts"
   },
   "dependencies": {
     "@assistant-ui/react": "0.15.15",

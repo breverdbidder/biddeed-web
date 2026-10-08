@@ -1,6 +1,7 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
+import { BARE_BRIEF_REQUEST_HEADER, isBareBriefRequest } from '@/lib/perf/bare-brief'
 import { isLeanHomeRequest, LEAN_HOME_REQUEST_HEADER, LEAN_HOME_RESPONSE_HEADER } from '@/lib/perf/lean-home'
 
 // Clerk turns on only when BOTH halves of the credential pair are present.
@@ -90,6 +91,7 @@ const isPublicRoute = createRouteMatcher([
   // not, which breaks the moment Clerk keys are configured.
   '/api/checkout(.*)',
   '/api/pioneers(.*)', // 100 Pioneers funnel — anonymous checkout before account exists
+  '/briefs(.*)', // investment briefs: the unguessable id is the capability; shared with investors who have no account
   '/pioneers(.*)', // 100 Pioneers landing + success pages must be reachable signed-out
   // Pages — public access
   '/',
@@ -525,6 +527,9 @@ function withNonceRequestHeaders(req: NextRequest, nonce: string): Headers {
   // client - an incoming copy of the header is always dropped first.
   headers.delete(LEAN_HOME_REQUEST_HEADER)
   if (leanHome(req)) headers.set(LEAN_HOME_REQUEST_HEADER, '1')
+  // Bare brief (lib/perf/bare-brief.ts): same rule, a shared brief renders without the shell.
+  headers.delete(BARE_BRIEF_REQUEST_HEADER)
+  if (isBareBriefRequest({ method: req.method, pathname: req.nextUrl.pathname, headers: req.headers })) headers.set(BARE_BRIEF_REQUEST_HEADER, '1')
   return headers
 }
 
