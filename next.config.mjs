@@ -1,5 +1,6 @@
 import { createMDX } from 'fumadocs-mdx/next'
 import { SERVER_ACTION_ALLOWED_ORIGINS } from './config/server-action-origins.mjs'
+import { withCompileHints } from './config/compile-hints.mjs'
 /** @type {import('next').NextConfig} */
 const securityHeaders = [
   { key: 'X-Content-Type-Options', value: 'nosniff' },
@@ -38,6 +39,8 @@ const nextConfig = {
   experimental: {
     serverActions: { allowedOrigins: SERVER_ACTION_ALLOWED_ORIGINS },
   },
+  // Eager compilation for the page-load chunks: see config/compile-hints.mjs.
+  webpack: (config, options) => withCompileHints(config, options),
   // Legacy in-app links. While the app was mounted at basePath '/radar' the
   // workspace lived at /radar/auctions and details at /radar/auctions/:id.
   // Both moved up a level. These redirects are scoped under /radar on purpose:
