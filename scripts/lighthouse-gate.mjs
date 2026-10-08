@@ -75,6 +75,21 @@ const METRICS = [
   ['server-response-time', 'Server'],
 ]
 
+// What the browser actually did on this run (observed, not simulated): when
+// it painted, Chrome's version, and how many page scripts had already
+// started downloading by first paint - the landing page is built to load
+// them only after it (router paint-first loader), and Lighthouse counts any
+// that ran earlier as needed for the paint.
+function traceFacts(r) {
+  const m = r.audits?.metrics?.details?.items?.[0] ?? {}
+  const reqs = r.audits?.['network-requests']?.details?.items ?? []
+  const fcp = m.observedFirstContentfulPaint ?? 0
+  const chunks = reqs.filter((q) => /\/_next\/static\/chunks\//.test(q.url) && !/\/webpack-/.test(q.url))
+  const early = chunks.filter((q) => (q.networkRequestTime ?? q.startTime ?? Infinity) < fcp).length
+  const ua = r.environment?.hostUserAgent || r.userAgent || ''
+  return `observed FCP ${Math.round(fcp)} ms, LCP ${Math.round(m.observedLargestContentfulPaint ?? 0)} ms, load ${Math.round(m.observedLoad ?? 0)} ms; chunks requested before first paint ${early}/${chunks.length}; Chrome ${(ua.match(/Chrome\/([\d.]+)/) || [])[1] || '?'}`
+}
+
 function runOnce(formFactor, i) {
   const path = join(dir, `${formFactor}-${i}.json`)
   const args = [
@@ -99,6 +114,7 @@ function runOnce(formFactor, i) {
       // runner reads differently from a red run on a fast one.
       benchmark: Math.round(r.environment?.benchmarkIndex ?? 0),
       serverMs: Math.round(r.audits?.['server-response-time']?.numericValue ?? 0),
+      trace: traceFacts(r),
     }
   } catch (e) {
     console.error(`lighthouse ${formFactor} run ${i + 1} failed: ${e.message}`)
@@ -150,7 +166,7 @@ console.log(lines.join('\n'))
 for (const row of rows) {
   if (row.median === null) continue
   const m = row.median.metrics
-  console.log(`::notice title=PageSpeed ${row.formFactor} ${verdict(row)}::median ${row.median.score} (runs ${row.all.join(', ')}); FCP ${m.FCP}, LCP ${m.LCP}, TBT ${m.TBT}, CLS ${m.CLS}, SI ${m.SI}, server ${m.Server}; CPU benchmark ${row.median.benchmark}; network ${network}`)
+  console.log(`::notice title=PageSpeed ${row.formFactor} ${verdict(row)}::median ${row.median.score} (runs ${row.all.join(', ')}); FCP ${m.FCP}, LCP ${m.LCP}, TBT ${m.TBT}, CLS ${m.CLS}, SI ${m.SI}, server ${m.Server}; CPU benchmark ${row.median.benchmark}; network ${network}; ${row.median.trace}`)
 }
 
 if (couldNotRun) process.exit(2)
