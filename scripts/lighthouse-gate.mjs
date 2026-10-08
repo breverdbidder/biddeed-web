@@ -72,6 +72,9 @@ function runOnce(formFactor, i) {
       score: Math.round(score * 100),
       metrics: Object.fromEntries(METRICS.map(([id, label]) => [label, r.audits?.[id]?.displayValue ?? 'n/a'])),
       warnings: r.runWarnings ?? [],
+      // Host CPU speed: lab TBT scales with it, so a red run on a slow
+      // runner reads differently from a red run on a fast one.
+      benchmark: Math.round(r.environment?.benchmarkIndex ?? 0),
     }
   } catch (e) {
     console.error(`lighthouse ${formFactor} run ${i + 1} failed: ${e.message}`)
@@ -117,6 +120,13 @@ const warnings = rows.flatMap((r) => r.median?.warnings ?? [])
 if (warnings.length) lines.push('Lighthouse warnings:', ...warnings.map((w) => `- ${w}`), '')
 writeFileSync(out, lines.join('\n'))
 console.log(lines.join('\n'))
+// One annotation per form factor, so the scores can be read from the
+// check-run API (zero-HITL monitoring) and not only from the run page.
+for (const row of rows) {
+  if (row.median === null) continue
+  const m = row.median.metrics
+  console.log(`::notice title=PageSpeed ${row.formFactor} ${verdict(row)}::median ${row.median.score} (runs ${row.all.join(', ')}); FCP ${m.FCP}, LCP ${m.LCP}, TBT ${m.TBT}, CLS ${m.CLS}, SI ${m.SI}, server ${m.Server}; CPU benchmark ${row.median.benchmark}`)
+}
 
 if (couldNotRun) process.exit(2)
 process.exit(rows.every((r) => verdict(r) === 'PASS') ? 0 : 1)
