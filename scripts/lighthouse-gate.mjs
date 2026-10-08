@@ -124,12 +124,23 @@ function runOnce(formFactor, i) {
 
 const rows = []
 let couldNotRun = false
+// A run is only counted when the runner's CPU was itself working normally.
+// Run 37831596622 (2026-10-08) scored mobile 67 with TBT 4,090 ms on a run
+// whose CPU benchmark was 745 - a third of this runner's usual 2,500-3,400 -
+// next to a 98 on a normal run, and with one run failing outright the median
+// of the two was the 67. Such runs, and runs that produce no report, are
+// discarded and retried (up to 3 extra attempts per form factor); the count
+// is posted with the result.
+const MIN_BENCHMARK = 1000
 for (const formFactor of ['mobile', 'desktop']) {
   const results = []
-  for (let i = 0; i < runs; i++) {
+  let discarded = 0
+  for (let i = 0; results.length < runs && i < runs + 3; i++) {
     const r = runOnce(formFactor, i)
-    if (r) results.push(r)
-    console.log(`${formFactor} run ${i + 1}/${runs}: ${r ? r.score : 'FAILED'}`)
+    const usable = r && r.benchmark >= MIN_BENCHMARK
+    if (usable) results.push(r)
+    else discarded++
+    console.log(`${formFactor} run ${i + 1}: ${r ? r.score : 'FAILED'}${r && !usable ? ` (discarded: CPU benchmark ${r.benchmark})` : ''}`)
   }
   if (results.length === 0) {
     couldNotRun = true
@@ -138,7 +149,7 @@ for (const formFactor of ['mobile', 'desktop']) {
   }
   results.sort((a, b) => a.score - b.score)
   const median = results[Math.floor((results.length - 1) / 2)]
-  rows.push({ formFactor, median, all: results.map((r) => r.score) })
+  rows.push({ formFactor, median, all: results.map((r) => r.score), discarded })
 }
 
 const verdict = (row) =>
@@ -166,7 +177,7 @@ console.log(lines.join('\n'))
 for (const row of rows) {
   if (row.median === null) continue
   const m = row.median.metrics
-  console.log(`::notice title=PageSpeed ${row.formFactor} ${verdict(row)}::median ${row.median.score} (runs ${row.all.join(', ')}); FCP ${m.FCP}, LCP ${m.LCP}, TBT ${m.TBT}, CLS ${m.CLS}, SI ${m.SI}, server ${m.Server}; CPU benchmark ${row.median.benchmark}; network ${network}; ${row.median.trace}`)
+  console.log(`::notice title=PageSpeed ${row.formFactor} ${verdict(row)}::median ${row.median.score} (runs ${row.all.join(', ')}${row.discarded ? `; ${row.discarded} discarded` : ''}); FCP ${m.FCP}, LCP ${m.LCP}, TBT ${m.TBT}, CLS ${m.CLS}, SI ${m.SI}, server ${m.Server}; CPU benchmark ${row.median.benchmark}; network ${network}; ${row.median.trace}`)
 }
 
 if (couldNotRun) process.exit(2)
