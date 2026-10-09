@@ -39,6 +39,12 @@ interface Props {
    * route carries exactly one.
    */
   showHeading?: boolean
+  /**
+   * True when the URL named a view (?view=...). /radar always passes an
+   * initialView (its default is 'map'), so this is how the layout tells "the
+   * visitor asked for the map" apart from "the map is just the default".
+   */
+  viewRequested?: boolean
 }
 
 export default function AuctionsLayout({
@@ -46,6 +52,7 @@ export default function AuctionsLayout({
   initialCounty,
   initialSaleType,
   showHeading = true,
+  viewRequested = false,
 }: Props = {}) {
   const router = useRouter()
   const pathname = usePathname()
@@ -79,16 +86,6 @@ export default function AuctionsLayout({
   useEffect(() => {
     if (initialView) setViewMode(initialView)
   }, [initialView])
-
-  // No WebGL, no map (lib/map/webgl.ts). When the URL did not ask for a
-  // specific view, open on the full table instead of a split whose map half
-  // can only show a fallback notice: the visitor sees auctions immediately.
-  // Runs after mount, not in the useState initializer, because the server
-  // render cannot probe WebGL and the two would disagree on hydration.
-  useEffect(() => {
-    if (!initialView && !webglAvailable()) setViewMode('table')
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 
   // Same contract for the filters: a navigation to /radar?county=brevard --
   // from Deed, from a link, from the back button -- re-renders this page with
@@ -160,11 +157,22 @@ export default function AuctionsLayout({
 
   useEffect(() => {
     const init = async () => {
+      // No WebGL, no map (lib/map/webgl.ts). When the map (or split) is only
+      // the default and this browser cannot draw it, open on the table so the
+      // visitor sees auctions at once instead of a fallback notice. An explicit
+      // ?view=map is respected. Decided here, after mount, because the server
+      // render cannot probe WebGL, and before the first fetch, because the
+      // table needs the rows the map view skips.
+      let startView = viewMode
+      if (!viewRequested && (startView === 'map' || startView === 'split') && !webglAvailable()) {
+        startView = 'table'
+        setViewMode('table')
+      }
       try {
         // The calendar and map fetch their own data (per-day counts, and
         // filtered coordinate-only pins) and do not read these rows at all.
         await fetchSummary()
-        if (viewMode !== 'calendar' && viewMode !== 'map') await fetchAuctions()
+        if (startView !== 'calendar' && startView !== 'map') await fetchAuctions()
       } catch (err) {
         console.error('Init failed:', err)
         // Surface the real failure. This page used to swallow both fetch

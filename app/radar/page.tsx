@@ -63,6 +63,7 @@ export default async function RadarPage({
   return (
     <AuctionsLayout
       initialView={initialView}
+      viewRequested={VIEWS.includes(view as ViewMode)}
       initialCounty={initialCounty}
       initialSaleType={initialSaleType}
     />
