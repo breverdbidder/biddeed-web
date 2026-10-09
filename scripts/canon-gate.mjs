@@ -25,7 +25,10 @@ const CANON_PRICES = [
   ['Investor', '$99'],
   ['Pro', '$199'],
   ['Pro Plus', '$399'],
+  // Ariel, 2026-10-08 09:58 ET: Broker $199/mo one seat; realtor seats $39 (checked below).
+  ['Broker', '$199'],
 ]
+const BROKER_SEAT_PRICE = '$39'
 
 const BANNED = [
   [/shapira\s+max\s+bid/i, 'retired brand - write "SIGNAL$ Max Bid"'],
@@ -65,8 +68,13 @@ for (const [name, want] of CANON_PRICES) {
   }
 }
 
+if (!new RegExp(`${BROKER_SEAT_PRICE.replace('$', '\\$')} per realtor seat`).test(plans)) {
+  findings.push(`${PLANS_FILE}: the Broker plan must state the realtor seat price (${BROKER_SEAT_PRICE} per realtor seat)`)
+}
+
 // Catch a plan that was added or renamed rather than edited.
 const allowed = new Set(CANON_PRICES.map(([, p]) => p))
+allowed.add(BROKER_SEAT_PRICE)
 const plansBlock = plans.slice(plans.indexOf('const PLANS'))
 for (const m of plansBlock.matchAll(/price:\s*'(\$[\d,]+)'/g)) {
   if (!allowed.has(m[1])) {

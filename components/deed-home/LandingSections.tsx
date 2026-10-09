@@ -445,6 +445,22 @@ export const PLANS: Plan[] = [
     cta: { label: 'Coming soon' },
   },
   {
+    name: 'Broker',
+    price: '$199',
+    per: '/month, one seat',
+    annualPrice: '$1,990',
+    annualPer: '/year',
+    blurb: 'Pro for your brokerage, with investor briefs under your own name.',
+    features: [
+      'Everything in Pro',
+      'White-label investment briefs: your logo, name, license and colours; biddeed.ai only in the data footer',
+      '10 briefs a month, pooled across the brokerage · $25 for each additional brief',
+      'Add realtors as seats at $39 per realtor seat a month ($390 a year), each with their own login and brief history',
+      'You see every seat\'s briefs',
+    ],
+    cta: { label: 'Coming soon' },
+  },
+  {
     name: 'Enterprise',
     price: 'Custom',
     per: '',
