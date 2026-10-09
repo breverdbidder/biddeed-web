@@ -55,3 +55,8 @@ paths = [
   '''^\.gitleaks\.toml$''',
   '''(?i)(^|/)docs/''',
 ]
+# Ask Deed hygiene test (#20664): a dummy value the payload scanner must REJECT.
+# Commit ebfa584 carried it as a literal; later commits build it at runtime.
+regexes = [
+  '''sk_live_abcdefgh12345678''',
+]

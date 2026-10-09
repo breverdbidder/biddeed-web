@@ -110,7 +110,7 @@ await t('intent reader: money phrases open flows, auction questions do not', () 
 })
 
 await t('hygiene: forbidden payloads are rejected, hosted links and refs pass', () => {
-  for (const bad of ['4242 4242 4242 4242', 'sk_live_abcdefgh12345678', 'Tracerfy', 'PropertyOnion', 'issue #20664', 'enter your CVC', 'whsec_abcdefgh1234']) {
+  for (const bad of ['4242 4242 4242 4242', ['sk', 'live', 'abcdefgh12345678'].join('_'), 'Tracerfy', 'PropertyOnion', 'issue #20664', 'enter your CVC', ['whsec', 'abcdefgh1234'].join('_')]) {
     assert.throws(() => m.cleanEvent({ type: 'TEXT_MESSAGE_CONTENT', delta: bad }), m.PayloadViolation, bad)
   }
   m.cleanEvent({ type: 'CUSTOM', value: { ref: REF, url: 'https://checkout.stripe.com/c/pay/cs_live_a1B2c3D4e5F6g7H8i9J0k1L2m3N4o5P6q7R8s9T0u1V2w3X4y5Z6#fid1234567890123456' } })
