@@ -48,7 +48,7 @@ export default function DeedChat() {
   const threadId = wantsNew ? null : params.get('c')
   const projectParam = params.get('project')
   const projectFromUrl = projectParam && PROJECT_ID_RE.test(projectParam) ? projectParam : null
-  const { thread, status, streaming, send, stop } = useDeedThread(threadId, { projectId: projectFromUrl })
+  const { thread, status, streaming, send, stop, confirmOrder } = useDeedThread(threadId, { projectId: projectFromUrl })
   const [seed, setSeed] = useState<string | null>(null)
   const [projectsOpen, setProjectsOpen] = useState(false)
   const [projectDraft, setProjectDraft] = useState<ProjectDraft | null>(null)
@@ -186,7 +186,7 @@ export default function DeedChat() {
         <div className="flex h-[calc(100svh-3.5rem)] min-h-[24rem] flex-col">
           <div className="min-h-0 flex-1 overflow-y-auto">
             {panel}
-            <ThreadView thread={thread} streaming={streaming} />
+            <ThreadView thread={thread} streaming={streaming} onConfirm={confirmOrder} />
           </div>
           <div className="shrink-0 border-t border-border bg-background/85 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur supports-[backdrop-filter]:bg-background/70 sm:px-6">
             <div className="mx-auto w-full max-w-3xl">

@@ -41,7 +41,7 @@ export default function DeedHome({ below }: { below?: React.ReactNode }) {
   const router = useRouter()
   const params = useSearchParams()
   const threadId = params.get('c')
-  const { thread, status, streaming, send, stop } = useDeedThread(threadId)
+  const { thread, status, streaming, send, stop, confirmOrder } = useDeedThread(threadId)
   const [seed, setSeed] = useState<string | null>(null)
 
   // ?deed=<key> deep link: prefill the composer from the fixed seed map
@@ -97,7 +97,7 @@ export default function DeedHome({ below }: { below?: React.ReactNode }) {
     return (
       <div className="flex h-[calc(100svh-3.5rem)] min-h-[24rem] flex-col">
         <div className="min-h-0 flex-1 overflow-y-auto">
-          <ThreadView thread={thread} streaming={streaming} />
+          <ThreadView thread={thread} streaming={streaming} onConfirm={confirmOrder} />
         </div>
         <div className="shrink-0 border-t border-border bg-background/85 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur supports-[backdrop-filter]:bg-background/70 sm:px-6">
           <div className="mx-auto w-full max-w-3xl">

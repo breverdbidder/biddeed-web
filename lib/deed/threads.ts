@@ -1,6 +1,7 @@
 import type { DeedAction } from './protocol'
 import type { AuctionIntent } from './intent'
 import type { PlanSet } from './plan'
+import type { LifecycleState } from './agui-client'
 
 /**
  * Conversation history for the home surface, kept in the browser.
@@ -66,6 +67,8 @@ export interface ThreadTurn {
   attachmentLabel?: string
   /** Project files Deed was given for this (assistant) turn — from the X-Deed-Cited header (CP-4). */
   cited?: string[]
+  /** Ask Deed lifecycle run (issue #20664): tool steps and cards from the AG-UI stream. Never persisted. */
+  lifecycle?: LifecycleState
 }
 
 export interface Thread {

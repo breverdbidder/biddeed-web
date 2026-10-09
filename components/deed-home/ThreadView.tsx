@@ -15,6 +15,7 @@ import type { Thread, ThreadTurn } from '@/lib/deed/threads'
 import { cn } from '@/lib/utils'
 import AuctionCards from './AuctionCards'
 import DeedPlan from './DeedPlan'
+import LifecycleCards from './LifecycleCards'
 
 /**
  * Markdown via react-markdown. No dangerouslySetInnerHTML here, ever — model
@@ -123,7 +124,7 @@ function tidyAnswer(raw: string, live: boolean): { text: string; truncated: bool
   return { text, truncated }
 }
 
-function AssistantTurn({ turn, streaming }: { turn: ThreadTurn; streaming: string }) {
+function AssistantTurn({ turn, streaming, onConfirm }: { turn: ThreadTurn; streaming: string; onConfirm?: (turnId: string, ref: string) => void }) {
   const live = turn.pending
   const { text, truncated } = tidyAnswer(live ? streaming : turn.content, Boolean(live))
   return (
@@ -132,6 +133,7 @@ function AssistantTurn({ turn, streaming }: { turn: ThreadTurn; streaming: strin
         <DeedRobotMark size={22} />
       </div>
       <div className="min-w-0 flex-1 space-y-4">
+        {turn.lifecycle ? <LifecycleCards state={turn.lifecycle} onConfirm={(ref) => onConfirm?.(turn.id, ref)} /> : null}
         {turn.plan ? <DeedPlan set={turn.plan} /> : turn.cards ? <AuctionCards set={turn.cards} /> : null}
 
         {turn.error ? (
@@ -174,13 +176,13 @@ function AssistantTurn({ turn, streaming }: { turn: ThreadTurn; streaming: strin
             </span>
             Deed is reading the county records…
           </p>
-        ) : !turn.cards && !turn.plan ? (
+        ) : !turn.cards && !turn.plan && !turn.lifecycle?.cards.length ? (
           <p className="text-sm italic text-muted-foreground">Stopped before any answer arrived.</p>
         ) : null}
 
         <ActionNote turn={turn} />
 
-        {!live && (turn.content || turn.cards || turn.plan) ? (
+        {!live && (turn.content || turn.cards || turn.plan || turn.lifecycle?.cards.length) ? (
           <div className="flex flex-wrap items-center gap-1 pt-1">
             <CopyButton text={turn.content} />
             <span className="px-2 text-[11px] text-muted-foreground">
@@ -193,7 +195,7 @@ function AssistantTurn({ turn, streaming }: { turn: ThreadTurn; streaming: strin
   )
 }
 
-export default function ThreadView({ thread, streaming }: { thread: Thread; streaming: string }) {
+export default function ThreadView({ thread, streaming, onConfirm }: { thread: Thread; streaming: string; onConfirm?: (turnId: string, ref: string) => void }) {
   const endRef = useRef<HTMLDivElement>(null)
   const lastLen = useRef(0)
 
@@ -223,7 +225,7 @@ export default function ThreadView({ thread, streaming }: { thread: Thread; stre
             </div>
           </div>
         ) : (
-          <AssistantTurn key={turn.id} turn={turn} streaming={streaming} />
+          <AssistantTurn key={turn.id} turn={turn} streaming={streaming} onConfirm={onConfirm} />
         )
       )}
       <div ref={endRef} aria-hidden />

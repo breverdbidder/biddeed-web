@@ -14,9 +14,16 @@ Issue #181. Source of truth in code: `lib/analytics/funnel.ts` (`FUNNEL_EVENTS`,
 | `signup_prompt_clicked` | "Create a free account" in the popup, on `/buy-report`, or on the `/parcel` sign-up gate (`surface` = `parcel_gate`) | `surface` |
 | `parcel_underwritten` | `/parcel`: the first memo the visitor's own numbers produce on a page load (the call is the visitor's buy-box result, not a SIGNAL$ verdict; the numbers themselves are never sent) | `surface` (`parcel`), `strategy` (`hold` \| `flip` \| `brrrr`), `call` (`BID` \| `REVIEW` \| `SKIP`), `prefilled` (opened from an auction row), `gated` (signed out, so the result waited behind the free sign-up gate), `county`, `sale_type` |
 
+| `ask_deed_run_started` | Ask Deed chat: an AG-UI lifecycle run began (RUN_STARTED on the stream) | `channel` (`chat`), `source` (`ask_deed`), `surface` (`chat`) |
+| `ask_deed_quote_shown` | Ask Deed chat: a price card arrived on the stream | `channel`, `source`, `surface`, `plan`, `price_usd` |
+
+`checkout_started` also fires from the Ask Deed stream when the checkout card arrives (`channel` `chat`, `source` `ask_deed`, `surface` `chat`).
+
 The older `checkout_completed` event (with Stripe `session_id`) still fires next to `purchase_completed` so existing insights keep working.
 
 ## Funnels this enables
+
+0. Ask Deed chat (issue #20664): `ask_deed_run_started` -> `ask_deed_quote_shown` -> `checkout_started` (`source` `ask_deed`) -> `purchase_completed`, filtered on `channel` = `chat`
 
 1. `free_report_popup_shown` -> `lead_captured` -> `report_viewed` (sample) -> `signup_completed`
 2. `$pageview /buy-report` -> `checkout_started` (signal_report) -> `purchase_completed`

@@ -7,6 +7,9 @@ import { contextPreamble, type DeedContext } from '@/lib/deed/context'
 import { useDeedAuth } from '@/lib/deed/deedAuth'
 import { getThread, notifyThreadsChanged, putThread } from '@/lib/deed/threadsRemote'
 import { intentToQuery, parseAuctionIntent, type AuctionIntent } from '@/lib/deed/intent'
+import { emptyLifecycle, foldEvent, readAguiStream, type AguiEvent } from '@/lib/deed/agui-client'
+import { readLifecycleIntent } from '@/lib/deed/lifecycle-intent'
+import { track } from '@/lib/analytics/funnel'
 import { wantsDeedPlan, type DeedPlanResult, type PlanSet } from '@/lib/deed/plan'
 import {
   extractAction,
@@ -145,13 +148,15 @@ export function useDeedThread(initialId: string | null, opts: { projectId?: stri
   // of card patches is one write). The sidebar refreshes on the notify.
   useEffect(() => {
     if (!thread || thread.turns.length === 0) return
+    // Lifecycle cards (order read-backs, hosted links) are live state, never stored.
+    const storable: Thread = { ...thread, turns: thread.turns.map(({ lifecycle: _lifecycle, ...t }) => t) }
     if (!signedIn) {
-      saveThread(thread)
+      saveThread(storable)
       return
     }
     if (thread.turns.some((t) => t.pending)) return
     const handle = setTimeout(() => {
-      void putThread(thread).then((ok) => {
+      void putThread(storable).then((ok) => {
         if (ok) notifyThreadsChanged()
       })
     }, 400)
@@ -270,6 +275,28 @@ export function useDeedThread(initialId: string | null, opts: { projectId?: stri
         createdAt: now,
         attachmentLabel: opts.uploadLabel,
       }
+      // A plan / billing request ("how much is Pro", "buy Investor", "cancel my
+      // plan") is a lifecycle run: deterministic, streamed as AG-UI events, and
+      // it can only ever stop at a Confirm card (issue #20664).
+      const lifecycleIntent = !opts.uploadId ? readLifecycleIntent(trimmed) : null
+      if (lifecycleIntent) {
+        const lcTurn: ThreadTurn = { id: newId(), role: 'assistant', content: '', createdAt: now + 1, pending: true, lifecycle: emptyLifecycle() }
+        const lcNext: Thread = { ...base, updatedAt: now, turns: [...base.turns, userTurn, lcTurn], projectId }
+        setThread(lcNext)
+        if (!signedIn) {
+          finish(lcNext.id, lcTurn.id, {
+            content: auth.enabled
+              ? 'Sign in to manage your plan here — I can quote prices, set up an order for you to confirm, and open your billing page. Use the sign-in button in the sidebar, then ask again.'
+              : 'Sign in to manage your plan here.',
+            pending: false,
+            lifecycle: undefined,
+          })
+          return
+        }
+        void runLifecycle(lcNext.id, lcTurn.id, '/api/deed/run', { text: trimmed, thread_id: lcNext.id })
+        return
+      }
+
       // A message with buying criteria ("Brevard Tuesday, ARV over $300K,
       // 25% margin") is Deed's to orchestrate; a plain browse ("Brevard this
       // week") keeps the card grid.
@@ -324,7 +351,7 @@ export function useDeedThread(initialId: string | null, opts: { projectId?: stri
       void run(next.id, assistantTurn.id, wire, intent, { ...opts, projectId })
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [thread, status, counts, defaultProjectId]
+    [thread, status, counts, defaultProjectId, signedIn, auth.enabled]
   )
 
   const patchThreadMeta = useCallback((threadId: string, patch: Partial<Thread>) => {
@@ -397,6 +424,92 @@ export function useDeedThread(initialId: string | null, opts: { projectId?: stri
     }
   }
 
+  function trackLifecycle(e: AguiEvent) {
+    const v = (e.value ?? {}) as Record<string, unknown>
+    if (e.type === 'RUN_STARTED') track('ask_deed_run_started', { channel: 'chat', source: 'ask_deed', surface: 'chat' })
+    else if (e.type === 'CUSTOM' && e.name === 'deed.quote_card')
+      track('ask_deed_quote_shown', { channel: 'chat', source: 'ask_deed', surface: 'chat', plan: v.tier as string | undefined, price_usd: v.amount_usd as number | undefined })
+    else if (e.type === 'CUSTOM' && e.name === 'deed.checkout_card')
+      track(
+        'checkout_started',
+        { channel: 'chat', source: 'ask_deed', surface: 'chat', product: v.product === 'report' ? 'signal_report' : 'subscription', price_usd: v.amount_usd as number | undefined },
+        { beacon: true }
+      )
+  }
+
+  // One AG-UI run into one assistant turn. The same reader serves the lifecycle
+  // route and the confirm route; neither lets a typed or streamed word move money.
+  async function runLifecycle(
+    threadId: string,
+    turnId: string,
+    url: string,
+    payload: Record<string, unknown>,
+    onSettled?: (ok: boolean) => void
+  ) {
+    setStatus('streaming')
+    setStreaming('')
+    const controller = new AbortController()
+    abortRef.current = controller
+    let lc = emptyLifecycle()
+    try {
+      const res = await fetch(apiUrl(url), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        signal: controller.signal,
+      })
+      if (!res.ok || !res.body) {
+        const detail = res.status === 204 ? null : await res.json().then((j: { error?: string }) => j.error).catch(() => null)
+        finish(threadId, turnId, { content: detail || 'I could not start that just now. Nothing was charged.', pending: false, lifecycle: undefined })
+        onSettled?.(false)
+        return
+      }
+      await readAguiStream(res.body, (e) => {
+        lc = foldEvent(lc, e)
+        trackLifecycle(e)
+        setStreaming(lc.text)
+        patchTurn(threadId, turnId, { lifecycle: lc })
+      })
+      finish(threadId, turnId, { content: lc.text, error: lc.error, pending: false, lifecycle: lc })
+      onSettled?.(!lc.error && lc.cards.some((c) => c.kind === 'checkout' || c.kind === 'link'))
+    } catch (err) {
+      const aborted = (err as Error)?.name === 'AbortError'
+      finish(threadId, turnId, { content: lc.text, error: aborted ? undefined : (err as Error).message, pending: false, lifecycle: lc })
+      if (!aborted) setStatus('error')
+      onSettled?.(false)
+    } finally {
+      abortRef.current = null
+    }
+  }
+
+  // The Confirm button. Marks the card, runs the confirm route, and lands the
+  // result (checkout / billing link) as a new assistant turn.
+  const confirmOrder = useCallback(
+    (turnId: string, ref: string) => {
+      const t = threadRef.current
+      if (!t || status === 'streaming') return
+      const setCard = (state: 'working' | 'done' | 'failed') =>
+        setThread((prev) =>
+          prev
+            ? {
+                ...prev,
+                turns: prev.turns.map((x) =>
+                  x.id === turnId && x.lifecycle
+                    ? { ...x, lifecycle: { ...x.lifecycle, cards: x.lifecycle.cards.map((c) => (c.kind === 'confirm' && c.ref === ref ? { ...c, state } : c)) } }
+                    : x
+                ),
+              }
+            : prev
+        )
+      setCard('working')
+      const lcTurn: ThreadTurn = { id: newId(), role: 'assistant', content: '', createdAt: Date.now(), pending: true, lifecycle: emptyLifecycle() }
+      setThread((prev) => (prev ? { ...prev, turns: [...prev.turns, lcTurn] } : prev))
+      void runLifecycle(t.id, lcTurn.id, '/api/deed/confirm', { ref }, (ok) => setCard(ok ? 'done' : 'failed'))
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [status]
+  )
+
   function finish(threadId: string, turnId: string, patch: Partial<ThreadTurn>) {
     setStreaming('')
     setStatus((s) => (s === 'error' ? s : 'idle'))
@@ -410,5 +523,5 @@ export function useDeedThread(initialId: string | null, opts: { projectId?: stri
     setStatus('idle')
   }, [stop])
 
-  return { thread, status, streaming, send, stop, reset }
+  return { thread, status, streaming, send, stop, reset, confirmOrder }
 }

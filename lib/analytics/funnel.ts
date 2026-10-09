@@ -31,6 +31,8 @@ export const FUNNEL_EVENTS = [
   'free_report_popup_shown',
   'free_report_popup_dismissed',
   'parcel_underwritten', // /parcel: the first memo the visitor's numbers produce on a page load
+  'ask_deed_run_started', // Ask Deed chat: one lifecycle run began (issue #20664)
+  'ask_deed_quote_shown', // Ask Deed chat: a price card was shown
 ] as const
 
 export type FunnelEvent = (typeof FUNNEL_EVENTS)[number]
@@ -55,6 +57,8 @@ export const ALLOWED_PROPS = [
   'call', // parcel_underwritten only: 'BID' | 'REVIEW' | 'SKIP' (the visitor's own buy-box result)
   'prefilled', // boolean, parcel_underwritten only - opened from an auction row
   'gated', // boolean, parcel_underwritten only - the result waited behind the free sign-up gate
+  'channel', // Ask Deed events: 'chat' | 'voice'
+  'source', // Ask Deed events: 'ask_deed'
 ] as const
 
 type PropValue = string | number | boolean
