@@ -51,7 +51,13 @@ export async function GET() {
       counties: s.counties ?? 0,
       counties_upcoming: s.counties_upcoming ?? 0,
       by_county: s.by_county ?? {},
-      by_type: s.by_type ?? {},
+      // by_type used to be grouped on the legacy auction_type column, which is
+      // NULL on ~53% of rows, so the public payload reported most auctions as
+      // "unknown" (REA teardown 2026-10-09). sale_type is the populated,
+      // canonical field (foreclosure / tax_deed / tax_resale); by_type now
+      // mirrors it for older clients. The shared SSOT function is left as is:
+      // zonewise.ai reads it too.
+      by_type: s.by_sale_type ?? s.by_type ?? {},
       by_sale_type: s.by_sale_type ?? {},
       // No zoning dimension exists on multi_county_auctions. Returned empty
       // rather than invented, so nothing downstream renders a made-up split.
