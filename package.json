@@ -24,6 +24,7 @@
     "test:signal-report-access": "node --experimental-strip-types scripts/validate-signal-report-access.mts",
     "test:withheld-leaks": "node scripts/validate-withheld-leaks.mjs",
     "test:auction-pin-contract": "node scripts/validate-auction-pin-contract.mjs",
+    "test:radar-resilience": "node scripts/validate-radar-resilience.mjs",
     "test:pin-card-viewer": "node --experimental-strip-types scripts/validate-pin-card-viewer.mts",
     "test:buy-report-offer": "node --experimental-strip-types scripts/validate-buy-report-offer.mts",
     "test:auth-handoff": "node --experimental-strip-types scripts/validate-auth-handoff.mts",

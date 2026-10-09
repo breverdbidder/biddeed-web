@@ -96,6 +96,9 @@ jobs:
       - name: Validate Parcel (vendored engine math, no network, /parcel prefill, not a SIGNAL$ figure)
         run: npm run test:parcel
 
+      - name: Validate radar resilience (no-WebGL guard, calendar font guard, one summary fetch)
+        run: npm run test:radar-resilience
+
       - name: Validate Cloudflare credentials are present
         shell: bash
         run: |

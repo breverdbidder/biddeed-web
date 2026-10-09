@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import mapboxgl from 'mapbox-gl'
+import { NO_WEBGL_MESSAGE, createMapSafely } from '@/lib/map/webgl'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import { apiUrl } from '@/lib/api'
 import { pinToAuction, type AuctionPin } from '@/lib/auctions/pin-contract'
@@ -109,12 +110,17 @@ export default function HeatmapMap({
       return
     }
     mapboxgl.accessToken = MAPBOX_TOKEN
-    mapRef.current = new mapboxgl.Map({
-      container: mapContainer.current,
+    const container = mapContainer.current
+    mapRef.current = createMapSafely(() => new mapboxgl.Map({
+      container,
       style: STREETS_STYLE,
       center: FL_CENTER,
       zoom: compact ? 5.2 : 5.8,
-    })
+    }))
+    if (!mapRef.current) {
+      setMapError(NO_WEBGL_MESSAGE)
+      return
+    }
     mapRef.current.on('load', () => {
       setMapLoaded(true)
       mapRef.current?.addControl(new mapboxgl.NavigationControl(), 'top-right')

@@ -13,6 +13,8 @@ import AuctionPinCard from './AuctionPinCard'
 import { formatCountyLabel } from '@/lib/counties'
 import type { Auction, AuctionSummary, AuctionsResponse, ViewMode } from '@/types/auctions'
 import { apiUrl } from '@/lib/api'
+import { loadSummaryJson } from '@/components/shell/useAuctionCounts'
+import { webglAvailable } from '@/lib/map/webgl'
 
 // FullCalendar and Mapbox both require window — must not render during SSR.
 const AuctionCalendar = dynamic(() => import('./AuctionCalendar'), { ssr: false })
@@ -77,6 +79,16 @@ export default function AuctionsLayout({
   useEffect(() => {
     if (initialView) setViewMode(initialView)
   }, [initialView])
+
+  // No WebGL, no map (lib/map/webgl.ts). When the URL did not ask for a
+  // specific view, open on the full table instead of a split whose map half
+  // can only show a fallback notice: the visitor sees auctions immediately.
+  // Runs after mount, not in the useState initializer, because the server
+  // render cannot probe WebGL and the two would disagree on hydration.
+  useEffect(() => {
+    if (!initialView && !webglAvailable()) setViewMode('table')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Same contract for the filters: a navigation to /radar?county=brevard --
   // from Deed, from a link, from the back button -- re-renders this page with
@@ -183,30 +195,11 @@ export default function AuctionsLayout({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCounty, selectedType, dayFilter, viewMode])
 
-  // Retries a transient upstream failure before surfacing an error. The summary
-  // RPC intermittently 500s on a cold start (observed live 2026-08-20); a single
-  // one dropped the whole workspace into an error state even though the very next
-  // request succeeded. Only 5xx and network faults are retried -- a 4xx is a real
-  // answer and will not fix itself by asking again.
+  // One summary request per page: the nav counters (useAuctionCounts) and this
+  // workspace share the same memoised, retrying fetch. Measured 2026-10-09: the
+  // two used to fire separate identical GETs on every /radar load.
   async function fetchSummary() {
-    let lastErr: unknown = null
-    for (let attempt = 0; attempt < 3; attempt++) {
-      try {
-        const res = await fetch(apiUrl('/api/auctions/summary'))
-        if (res.ok) {
-          setSummary(await res.json())
-          return
-        }
-        const err = new Error(`summary endpoint returned ${res.status}`)
-        if (res.status < 500) throw err
-        lastErr = err
-      } catch (err) {
-        if (err instanceof Error && /returned 4\d\d$/.test(err.message)) throw err
-        lastErr = err
-      }
-      if (attempt < 2) await new Promise((r) => setTimeout(r, 400 * 2 ** attempt))
-    }
-    throw lastErr instanceof Error ? lastErr : new Error('summary endpoint unreachable')
+    setSummary((await loadSummaryJson()) as unknown as AuctionSummary)
   }
 
   async function fetchAuctions() {

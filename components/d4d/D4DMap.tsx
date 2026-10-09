@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import mapboxgl from 'mapbox-gl'
+import { NO_WEBGL_MESSAGE, createMapSafely } from '@/lib/map/webgl'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import { useTheme } from '@/lib/theme-context'
 import { palette } from '@/lib/design-tokens'
@@ -34,12 +35,17 @@ export default function D4DMap({ stops, originLat, originLng, activeStopId }: Pr
       return
     }
     mapboxgl.accessToken = MAPBOX_TOKEN
-    mapRef.current = new mapboxgl.Map({
-      container: containerRef.current,
+    const container = containerRef.current
+    mapRef.current = createMapSafely(() => new mapboxgl.Map({
+      container,
       style: STYLE,
       center: [-81.5, 27.6],
       zoom: 6,
-    })
+    }))
+    if (!mapRef.current) {
+      setMapError(NO_WEBGL_MESSAGE)
+      return
+    }
     mapRef.current.on('load', () => setMapLoaded(true))
     mapRef.current.addControl(new mapboxgl.NavigationControl(), 'top-right')
     return () => {

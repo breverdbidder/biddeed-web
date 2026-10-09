@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import mapboxgl from 'mapbox-gl'
+import { NO_WEBGL_MESSAGE, createMapSafely } from '@/lib/map/webgl'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import { LIGHT as C } from '@/lib/design-tokens'
 
@@ -23,6 +24,7 @@ function pinColor(type: string): string {
 export default function AuctionDetailMap({ lat, lng, label, type }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<any>(null)
+  const [noWebgl, setNoWebgl] = useState(false)
 
   const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ''
 
@@ -32,13 +34,18 @@ export default function AuctionDetailMap({ lat, lng, label, type }: Props) {
 
     mapboxgl.accessToken = MAPBOX_TOKEN
 
-    mapRef.current = new mapboxgl.Map({
-      container: containerRef.current,
+    const container = containerRef.current
+    mapRef.current = createMapSafely(() => new mapboxgl.Map({
+      container,
       style: 'mapbox://styles/mapbox/satellite-streets-v12',
       center: [lng, lat],
       zoom: 15,
       interactive: true,
-    })
+    }))
+    if (!mapRef.current) {
+      setNoWebgl(true)
+      return
+    }
 
     mapRef.current.on('load', () => {
       mapRef.current?.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right')
@@ -64,10 +71,10 @@ export default function AuctionDetailMap({ lat, lng, label, type }: Props) {
     }
   }, [])
 
-  if (!MAPBOX_TOKEN) {
+  if (!MAPBOX_TOKEN || noWebgl) {
     return (
-      <div className="h-64 flex items-center justify-center bg-muted dark:bg-card">
-        <p className="text-xs text-muted-foreground">Map unavailable</p>
+      <div className="h-64 flex items-center justify-center bg-muted dark:bg-card px-4 text-center">
+        <p className="text-xs text-muted-foreground">{noWebgl ? NO_WEBGL_MESSAGE : 'Map unavailable'}</p>
       </div>
     )
   }

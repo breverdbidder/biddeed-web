@@ -37,7 +37,7 @@ export default function PricingTiers({ counts }: { counts?: LiveAuctionCounts })
         One below-market win pays for years of <a href="/maps" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80 -my-2 py-2">biddeed.ai</a>.
       </h1>
       <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground">
-        Every Florida auction is free to browse, and free members see the published number on every property:
+        Every Florida auction is free to browse, and free members see the published number on every property:{' '}
         {live}<a href="/maps" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80 -my-2 py-2">deal page</a>.
         Investor, Pro, and Pro Plus add the depth: reports, Due Diligence, and video property assessment with
         360° Orbit on the properties you work, as available. Every level includes the Academy lessons written for it.

@@ -142,7 +142,10 @@ export default function DeedHome({ below }: { below?: React.ReactNode }) {
             THE BEST PRICES IN US REAL ESTATE ARE SET AT FORECLOSURE AND TAX DEED AUCTIONS.
           </h1>
           <p className="mx-auto mt-5 max-w-xl text-base leading-7 text-muted-foreground sm:text-[17px]">
-            Our data is your unfair advantage at every US county auction.
+            {/* Was "every US county auction" while the feed covers 67 Florida counties
+                plus Bexar County, TX (REA teardown 2026-10-09). The claim now matches
+                coverage and grows with it. */}
+            Our data is your unfair advantage at every county auction we cover.
           </p>
           <p className="mx-auto mt-2 max-w-xl text-base leading-7 text-muted-foreground sm:text-[17px]">
             <a href="/maps" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80 -my-2 py-2">biddeed.ai</a> is the moat for real estate auction intelligence and bidding in the USA. All the rest are wrappers.

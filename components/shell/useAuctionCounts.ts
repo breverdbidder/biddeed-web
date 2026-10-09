@@ -43,35 +43,67 @@ export interface ShellCounts {
  * out from under the other four — the classic bug that turns a dedupe into a
  * flake.
  */
-let summaryPromise: Promise<ShellCounts> | null = null
+let summaryJsonPromise: Promise<Record<string, unknown>> | null = null
 
 function num(v: unknown): number | null {
   return typeof v === 'number' && Number.isFinite(v) ? v : null
 }
 
-function loadSummary(): Promise<ShellCounts> {
-  if (summaryPromise) return summaryPromise
+/**
+ * The raw /api/auctions/summary body, fetched at most once per page.
+ *
+ * MEASURED 2026-10-09 (REA teardown, /radar journey): the dedupe above still
+ * left TWO identical summary GETs per /radar load, because AuctionsLayout ran
+ * its own fetch for the full body (by_county, by_type, cards) next to this
+ * hook's request for the nav counters. Both now share this one promise; the
+ * hook derives its counters from the same body the page renders, so the nav
+ * and the cards can never disagree within a page.
+ *
+ * Retries a transient upstream failure (5xx or network) twice with backoff:
+ * the summary RPC intermittently 500s on a cold start (observed 2026-08-20).
+ * A 4xx is a real answer and is not retried. On final failure the memo is
+ * cleared so a later mount can try again instead of caching the failure for
+ * the life of the page.
+ */
+export function loadSummaryJson(): Promise<Record<string, unknown>> {
+  if (summaryJsonPromise) return summaryJsonPromise
 
-  summaryPromise = fetch(apiUrl('/api/auctions/summary'))
-    .then((res) => {
-      if (!res.ok) throw new Error(`summary endpoint returned ${res.status}`)
-      return res.json()
-    })
-    .then((json: Record<string, unknown>) => ({
+  summaryJsonPromise = (async () => {
+    let lastErr: unknown = null
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const res = await fetch(apiUrl('/api/auctions/summary'))
+        if (res.ok) return (await res.json()) as Record<string, unknown>
+        const err = new Error(`summary endpoint returned ${res.status}`)
+        if (res.status < 500) throw err
+        lastErr = err
+      } catch (err) {
+        if (err instanceof Error && /returned 4\d\d$/.test(err.message)) throw err
+        lastErr = err
+      }
+      if (attempt < 2) await new Promise((r) => setTimeout(r, 400 * 2 ** attempt))
+    }
+    throw lastErr instanceof Error ? lastErr : new Error('summary endpoint unreachable')
+  })().catch((err) => {
+    summaryJsonPromise = null
+    throw err
+  })
+
+  return summaryJsonPromise
+}
+
+function loadSummary(): Promise<ShellCounts> {
+  return loadSummaryJson()
+    .then((json) => ({
       upcoming: num(json.upcoming),
       counties: num(json.counties_upcoming) ?? num(json.counties),
       total: num(json.total),
       loading: false,
     }))
     .catch(() => {
-      // Let the next mount retry rather than caching a failure for the life of
-      // the page: a transient 502 should not permanently em-dash the nav.
-      summaryPromise = null
       // Every value null: the nav shows em-dashes rather than lying.
       return { upcoming: null, counties: null, total: null, loading: false }
     })
-
-  return summaryPromise
 }
 
 export function useAuctionCounts(): ShellCounts {

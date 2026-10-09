@@ -8,6 +8,7 @@ import { ZONING_CATEGORY_COLORS, type ZoningCategory } from '@/lib/zoning'
 import type { Auction } from '@/types/auctions'
 import { pinToAuction, type AuctionPin } from '@/lib/auctions/pin-contract'
 import { apiUrl } from '@/lib/api'
+import { NO_WEBGL_MESSAGE, createMapSafely } from '@/lib/map/webgl'
 import { LIGHT as C } from '@/lib/design-tokens'
 
 /**
@@ -191,12 +192,17 @@ export default function AuctionMap({ county, saleType, dayFilter, onSelectAuctio
 
     mapboxgl.accessToken = MAPBOX_TOKEN
 
-    mapRef.current = new mapboxgl.Map({
-      container: mapContainer.current,
+    const container = mapContainer.current
+    mapRef.current = createMapSafely(() => new mapboxgl.Map({
+      container,
       style: isSatellite ? SATELLITE_STYLE : STREETS_STYLE,
       center: [-81.5, 27.6],
       zoom: 6,
-    })
+    }))
+    if (!mapRef.current) {
+      setMapError(NO_WEBGL_MESSAGE)
+      return
+    }
 
     mapRef.current.on('load', () => {
       setMapLoaded(true)

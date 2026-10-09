@@ -1,6 +1,7 @@
 import { ArrowRight, Check, FileText, MessageSquareText, Search, Target } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
+import LiveCountsPhrase from './LiveCountsPhrase'
 import PricingPromptButton from './PricingPromptButton'
 
 /**
@@ -466,8 +467,8 @@ export function Pricing() {
         <Eyebrow>Plans</Eyebrow>
         <H2>One below-market win pays for years of <a href="/pricing" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80 -my-2 py-2">biddeed.ai</a>.</H2>
         <p className="mt-4 text-base leading-7 text-muted-foreground">
-          Every Florida auction is free to browse, and free members see the published number on every property:
-          2,911 live right now across 60 counties, each with its own <a href="/maps" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80 -my-2 py-2">deal page</a>.
+          Every Florida auction is free to browse, and free members see the published number on every property:{' '}
+          <LiveCountsPhrase />each with its own <a href="/maps" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80 -my-2 py-2">deal page</a>.
           Investor, Pro, and Pro Plus add the depth: reports, Due Diligence, and video property assessment with
           360° Orbit on the properties you work, as available. Every level includes the Academy lessons written for it.
         </p>

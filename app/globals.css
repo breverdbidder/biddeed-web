@@ -254,12 +254,10 @@ th[data-numeric] { font-variant-numeric: tabular-nums; font-feature-settings: "t
    browser refuses that font and logs one console entry on the calendar view.
    `data:` is deliberately NOT added to font-src for one decorative glyph set.
 
-   These rules make the refusal harmless: every fc-icon renders a real
-   character in the page font instead of tofu. Chromium still emits the
-   refusal (it parses the data: @font-face when the stylesheet is injected,
-   whether or not an element uses it); removing the request entirely means
-   patching the vendored FullCalendar CSS, which is a build-level change and
-   is not in this phase.
+   lib/fullcalendar-no-icon-font.ts drops that @font-face rule before
+   FullCalendar can insert it, so the browser never requests the font and the
+   CSP refusal no longer fires. These rules remain as the belt to that brace:
+   every fc-icon renders a real character in the page font instead of tofu.
    ───────────────────────────────────────────────────────────────────────── */
 /* FullCalendar sets font-family:fcicons!important and injects its stylesheet
    at runtime, after this file, so the override has to be !important too. */

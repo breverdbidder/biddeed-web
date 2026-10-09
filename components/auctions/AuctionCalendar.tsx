@@ -2,6 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { SkeletonInline } from '@/components/ui/skeleton'
+// Must stay above the FullCalendar imports: it has to run before
+// @fullcalendar/core injects its stylesheet. See the module header.
+import '@/lib/fullcalendar-no-icon-font'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import listPlugin from '@fullcalendar/list'
